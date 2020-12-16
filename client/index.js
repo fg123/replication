@@ -78,15 +78,19 @@ function StartGame(modules) {
 
         Object.keys(gameObjects).forEach((k) => {
             const obj = gameObjects[k];
+            if (!wasm._IsObjectAlive(obj.id)) {
+                delete gameObjects[k];
+                return;
+            }
             if (gameObjectLookup[obj.t] !== undefined) {
                 obj.p.x = wasm._GetObjectX(obj.id);
                 obj.p.y = wasm._GetObjectY(obj.id);
-                gameObjectLookup[obj.t].draw(context, resourceManager, obj);
+                gameObjectLookup[obj.t].draw(context, resourceManager, obj, gameObjects);
             }
             else {
                 console.error('Invalid object class', obj.t);
             }
-            wasm._TickGame(currentTime);
+            // Local Simulation
             // if (obj.c) {
             //     for (let i = 0; i < obj.c.length; i++) {
             //         const collider = obj.c[i];
@@ -102,12 +106,20 @@ function StartGame(modules) {
             //         }
             //     }
             // }
-            
-            // Local Simulation
-            // obj.p.x += obj.v.x * (deltaTime / 1000.0);
-            // obj.p.y += obj.v.y * (deltaTime / 1000.0);
+        });
+        Object.keys(gameObjects).forEach((k) => {
+            const obj = gameObjects[k];
+            if (gameObjectLookup[obj.t] !== undefined) {
+                if (gameObjectLookup[obj.t].postDraw) {
+                    gameObjectLookup[obj.t].postDraw(context, resourceManager, obj, gameObjects);
+                }
+            }
+            else {
+                console.error('Invalid object class', obj.t);
+            }
         });
         lastTime = currentTime;
+        wasm._TickGame(currentTime);
         requestAnimationFrame(tick);
     }
 
@@ -131,4 +143,18 @@ function StartGame(modules) {
             key: e.key
         }));
     });
+
+    let lastMouseMoveSend = Date.now();
+    window.addEventListener('mousemove', e => {
+        // Rate limit this!!
+        const current = Date.now();
+        if (current - lastMouseMoveSend > 30) {
+            lastMouseMoveSend = current;
+            webSocket.send(JSON.stringify({
+                event: "mousemove",
+                x: e.pageX,
+                y: e.pageY
+            }));
+        }
+    })
 }

@@ -5,13 +5,12 @@
 #include <thread>
 #include <mutex>
 
-
 #include "uWebSocket/App.h"
 
 static bool gameRunning = true;
 
 static const int TickRate = 128;
-static const int ReplicateRate = 30;
+static const int ReplicateRate = 15;
 
 void GameLoop(Timer& gameTimer) {
     while (gameRunning) {
@@ -45,12 +44,15 @@ int main() {
             std::cout << "Connection Opened" << std::endl;
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
             data->ws = ws;
-            data->playerObject = game.AddPlayer(data);
+            game.AddPlayer(data);
         },
         .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
             std::cout << message << std::endl;
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
-
+            if (!data->playerObject) {
+                // Next tick hasn't been scheduled yet
+                return;
+            }
             json obj = json::parse(message);
             if (obj["event"] == "keyup") {
                 //std::cout << "KEYUP " << obj["key"] << std::endl;
@@ -63,6 +65,11 @@ int main() {
                 std::string key = obj["key"];
                 std::scoped_lock lock(data->playerObject->socketDataMutex);
                 data->playerObject->keyboardState.insert(key);
+            }
+            else if (obj["event"] == "mousemove") {
+                std::scoped_lock lock(data->playerObject->socketDataMutex);
+                data->playerObject->mousePosition.x = obj["x"];
+                data->playerObject->mousePosition.y = obj["y"];
             }
         },
         .drain = [](auto */*ws*/) {

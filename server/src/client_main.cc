@@ -16,6 +16,12 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
+    bool IsObjectAlive(ObjectID objectId) {
+        Object* obj = game.GetObject(objectId);
+        return obj != nullptr;
+    }
+
+    EMSCRIPTEN_KEEPALIVE
     double GetObjectX(ObjectID objectId) {
         Object* obj = game.GetObject(objectId);
         return obj->GetPosition().x;

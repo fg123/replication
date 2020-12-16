@@ -23,10 +23,16 @@ struct PlayerSocketData {
 
 class Game {
     ObjectID nextId;
+
+    std::mutex queuedCallsMutex;
+    std::vector<std::function<void()>> queuedCalls;
+
     std::unordered_map<ObjectID, Object*> gameObjects;
     
     std::unordered_set<PlayerSocketData*> players;
     std::mutex playersSetMutex;
+
+    std::unordered_set<Object*> deadObjects;
 
 public:
     Game();
@@ -47,11 +53,22 @@ public:
     void AddObject(Object* obj);
     void DestroyObject(Object* obj);
 
-    Object* GetObject(ObjectID id) { return gameObjects[id]; }
+    Object* GetObject(ObjectID id) {
+        if (gameObjects.find(id) != gameObjects.end())
+            return gameObjects[id];
+        else return nullptr;
+    }
+    
     ObjectID RequestId(Object* obj);
+    
+    void QueueNextTick(const std::function <void()>& func) {
+        queuedCallsMutex.lock();
+        queuedCalls.push_back(func);
+        queuedCallsMutex.unlock();
+    }
 
     // Communicate with Sockets (everything here must be locked)
-    PlayerObject* AddPlayer(PlayerSocketData* data);
+    void AddPlayer(PlayerSocketData* data);
     void RemovePlayer(PlayerSocketData* data);
 };
 

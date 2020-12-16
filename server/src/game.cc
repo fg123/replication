@@ -24,6 +24,12 @@ Game::~Game() {
 }
 
 void Game::Tick(Time time) {
+    queuedCallsMutex.lock();
+    for (auto& call : queuedCalls) {
+        call();
+    }
+    queuedCalls.clear();
+    queuedCallsMutex.unlock();
     for (auto& object : gameObjects) {
         object.second->Tick(time);
     }
@@ -42,6 +48,16 @@ void Game::Replicate(Time time) {
         }
     }
 
+    for (auto& object : deadObjects) {
+        json obj;
+        obj["id"] = object->GetId();
+        obj["dead"] = true;
+        serialized.emplace(object, obj.dump());
+        delete object;
+    }
+
+    deadObjects.clear();
+
     for (auto& player : players) {
         for (auto& object : serialized) {
             player->ws->send(object.second, uWS::OpCode::TEXT);
@@ -53,6 +69,13 @@ void Game::Replicate(Time time) {
 #ifdef BUILD_CLIENT
 void Game::ProcessReplication(json& object) {
     ObjectID id = object["id"];
+    if (object.contains("dead")) {
+        // Kill
+        if (gameObjects.find(id) != gameObjects.end()) {
+            DestroyObject(gameObjects[id]);
+            return;
+        }
+    }
     if (gameObjects.find(id) == gameObjects.end()) {
         Object* obj = new Object(*this);
         obj->SetId(id);
@@ -81,23 +104,36 @@ void Game::AddObject(Object* obj) {
 
 void Game::DestroyObject(Object* obj) {
     gameObjects.erase(obj->GetId());
+    obj->OnDeath();
+#ifdef BUILD_SERVER
+    deadObjects.insert(obj);
+#endif
+#ifdef BUILD_CLIENT
+    // Client doesn't need to further replicate 
     delete obj;
+#endif
 }
 
 ObjectID Game::RequestId(Object* obj) {
     return nextId++;
 }
 
-PlayerObject* Game::AddPlayer(PlayerSocketData* data) {
+void Game::AddPlayer(PlayerSocketData* data) {
     std::scoped_lock<std::mutex> lock(playersSetMutex);
     players.insert(data);
-    PlayerObject* playerObject = new PlayerObject(*this, Vector2(100, 100));
-    AddObject(playerObject);
-    return playerObject;
+
+    QueueNextTick([&]() {
+        PlayerObject* playerObject = new PlayerObject(*this, Vector2(100, 100));
+        AddObject(playerObject);
+        data->playerObject = playerObject;
+    });
 }
 
 void Game::RemovePlayer(PlayerSocketData* data) {
     std::scoped_lock<std::mutex> lock(playersSetMutex);
     players.erase(data);
-    DestroyObject(data->playerObject);
+
+    QueueNextTick([&]() {
+        DestroyObject(data->playerObject);
+    });
 }

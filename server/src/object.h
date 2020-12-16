@@ -37,6 +37,9 @@ public:
 
     Time DeltaTime(Time currentTime);
     virtual void Tick(Time time);
+
+    virtual void OnDeath() {}
+
     void ResolveCollision(const CollisionResult& result);
 
     CollisionResult CollidesWith(Object* other);
