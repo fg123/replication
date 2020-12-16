@@ -45,6 +45,8 @@ struct Vector2 : Replicable {
     inline Vector2 & operator /= (double v) { x /= v; y /= v; return *this; }
 
     virtual void Serialize(json& obj) override;
+    
+    virtual void ProcessReplication(json& obj) override;
 
     void Normalize();
     double Length() const { return std::sqrt(std::pow(x, 2) + std::pow(y, 2)); }

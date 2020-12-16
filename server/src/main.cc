@@ -10,6 +10,9 @@
 
 static bool gameRunning = true;
 
+static const int TickRate = 128;
+static const int ReplicateRate = 30;
+
 void GameLoop(Timer& gameTimer) {
     while (gameRunning) {
         gameTimer.Tick();
@@ -18,7 +21,13 @@ void GameLoop(Timer& gameTimer) {
 
 int main() {
     Timer gameTimer;
-    Game game { gameTimer };
+    Game game;
+    gameTimer.ScheduleInterval(std::bind(&Game::Tick, &game, std::placeholders::_1),
+            1000.0 / TickRate);
+#ifdef BUILD_SERVER
+    gameTimer.ScheduleInterval(std::bind(&Game::Replicate, &game, std::placeholders::_1),
+        1000.0 / ReplicateRate);
+#endif
 
     std::thread s { GameLoop, std::ref(gameTimer) };
     

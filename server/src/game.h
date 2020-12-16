@@ -3,7 +3,10 @@
 
 #include "object.h"
 #include "timer.h"
+
+#ifdef BUILD_SERVER
 #include "uWebSocket/App.h"
+#endif
 
 #include <unordered_map>
 #include <unordered_set>
@@ -12,12 +15,13 @@
 class PlayerObject;
 
 struct PlayerSocketData {
+#ifdef BUILD_SERVER
     uWS::WebSocket<false, true>* ws;
+#endif
     PlayerObject* playerObject;
 };
 
 class Game {
-Timer& gameTimer;
     ObjectID nextId;
     std::unordered_map<ObjectID, Object*> gameObjects;
     
@@ -25,19 +29,25 @@ Timer& gameTimer;
     std::mutex playersSetMutex;
 
 public:
-    Game(Timer& gameTimer);
+    Game();
     ~Game();
 
     // Simulate a tick of physics, not everyone ticks every frame
     void Tick(Time time);
 
+
+#ifdef BUILD_SERVER
     // Replicate objects that have changed to clients
     void Replicate(Time time);
-
-    void IsColliding(Object* obj, std::vector<CollisionResult>& results);
+#endif
+#ifdef BUILD_CLIENT
+    void ProcessReplication(json& incObject);
+#endif
+    void HandleCollisions(Object* obj);
     void AddObject(Object* obj);
     void DestroyObject(Object* obj);
 
+    Object* GetObject(ObjectID id) { return gameObjects[id]; }
     ObjectID RequestId(Object* obj);
 
     // Communicate with Sockets (everything here must be locked)

@@ -37,15 +37,22 @@ public:
 
     Time DeltaTime(Time currentTime);
     virtual void Tick(Time time);
+    void ResolveCollision(const CollisionResult& result);
 
     CollisionResult CollidesWith(Object* other);
     void AddCollider(Collider* col) { colliders.push_back(col); }
     ObjectID GetId() const { return id; }
 
+#ifdef BUILD_CLIENT
+    // Very dangerous, only client side replication uses
+    void SetId(ObjectID newId) { id = newId; }
+#endif
+    void ProcessReplication(json& object) override;
+
     bool IsDirty() const { return isDirty; }
     void SetDirty(bool dirty) { isDirty = dirty; }
 
-    virtual const char* GetClass() = 0;
+    virtual const char* GetClass() { return "Object"; }
     virtual void Serialize(json& obj) override;
 
     const Vector2& GetPosition() const { return position; }

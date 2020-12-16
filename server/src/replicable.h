@@ -9,6 +9,7 @@ class Replicable {
 public:
     virtual ~Replicable() {}
     virtual void Serialize(json& obj) = 0;
+    virtual void ProcessReplication(json& obj) = 0;
 };
 
 #endif

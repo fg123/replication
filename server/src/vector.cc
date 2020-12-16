@@ -13,3 +13,8 @@ void Vector2::Normalize() {
     x /= norm;
     y /= norm;
 }
+
+void Vector2::ProcessReplication(json& obj) {
+    x = obj["x"];
+    y = obj["y"];
+}

@@ -59,20 +59,31 @@ CollisionResult RectangleCollider::CollidesWith(Collider* other) {
         double w2 = otherRect->size.x;
         double h1 = size.y;
         double h2 = otherRect->size.y;
-        bool leftCollide = (x1 < x2 + w2 && x1 > x2);
-        bool rightCollide = (x1 + w1 > x2 && x1 + w1 < x2 + w2);
-        bool topCollide = (y1 < y2 + h2 && y1 > y2);
-        bool bottomCollide = (y1 + h1 > y2 && y1 + h1 < y2 + h2);
+        
+        bool leftCollide = (x1 < x2 + w2);
+        bool rightCollide = (x1 + w1 > x2);
+        bool topCollide = (y1 < y2 + h2);
+        bool bottomCollide = (y1 + h1 > y2);
+
+        Vector2 myCenter (x1 + w1 / 2.0f, y1 + h1 / 2.0f);
+        Vector2 otherCenter (x2 + w2 / 2.0f, y2 + h2 / 2.0f);
+
+        bool biasX = myCenter.x < otherCenter.x;
+        bool biasY = myCenter.y < otherCenter.y;
         
         CollisionResult r;
-        r.isColliding = (leftCollide || rightCollide) && (topCollide || bottomCollide);
+        r.isColliding = (leftCollide && rightCollide) && (topCollide && bottomCollide);
         if (r.isColliding) {
-            if (leftCollide ^ rightCollide) {
-                // If both we don't adjust
-                r.collisionDifference.x = leftCollide ? x2 + w2 - x1 : x1 + w1 - x2;
+            
+            r.collisionDifference.x = !biasX ? -(x2 + w2 - x1) : x1 + w1 - x2;
+            r.collisionDifference.y = !biasY ? -(y2 + h2 - y1) : y1 + h1 - y2;
+        
+            double diff = std::abs(r.collisionDifference.x) - std::abs(r.collisionDifference.y);
+            if (diff > 0.01) {
+                r.collisionDifference.x = 0;
             }
-            if (topCollide ^ bottomCollide) {
-                r.collisionDifference.y = topCollide ? y2 + h2 - y1 : y1 + h1 - y2;
+            else if (diff < -0.01) {
+                r.collisionDifference.y = 0;
             }
         }
         return r;

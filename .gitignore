@@ -1,5 +1,6 @@
 // C++ Object Files
 *.o
+*.wo
 
 // C++ Build File
 server/bin

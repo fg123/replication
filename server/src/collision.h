@@ -12,7 +12,7 @@ struct CollisionResult {
     Object* collidedWith;
 };
 
-struct Collider {
+struct Collider : Replicable {
     // Attached to a game object with position offset
     Object* owner;
     Vector2 position;
@@ -21,7 +21,6 @@ public:
     virtual ~Collider() { }
     virtual int GetType() = 0;
     virtual CollisionResult CollidesWith(Collider* other) = 0;
-    virtual void Serialize(json& obj) = 0;
     Vector2 GetPosition();
 };
 
@@ -34,6 +33,9 @@ struct RectangleCollider : public Collider {
     virtual void Serialize(json& obj) override {
         size.Serialize(obj["size"]);
     }
+    virtual void ProcessReplication(json& obj) override {
+        size.ProcessReplication(obj["size"]);
+    }
 };
 
 struct CircleCollider : public Collider {
@@ -44,6 +46,9 @@ struct CircleCollider : public Collider {
     CollisionResult CollidesWith(Collider* other) override;
     virtual void Serialize(json& obj) override {
         obj["radius"] = radius;
+    }
+    virtual void ProcessReplication(json& obj) override {
+        radius = obj["radius"];
     }
 };
 

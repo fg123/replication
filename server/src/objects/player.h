@@ -1,46 +1,25 @@
 #ifndef PLAYER_OBJECT_H
 #define PLAYER_OBJECT_H
 
-#include "circle.h"
+#include "object.h"
 #include "vector.h"
-#include "game.h"
 
 #include <mutex>
+#include <unordered_set>
 
-class PlayerObject : public CircleObject {
+class Game;
+class PlayerObject : public Object {
+    int health = 100;
 
 public:
     std::mutex socketDataMutex;
     std::unordered_set<std::string> keyboardState;
 
-    PlayerObject(Game& game, Vector2 position) :
-        CircleObject(game, position, 20.0) {
-            SetTag(Tag::PLAYER);
-        }
+    PlayerObject(Game& game, Vector2 position);
 
-    virtual void Tick(Time time) override {
-        std::scoped_lock lock(socketDataMutex);
-        Vector2 velocity = GetVelocity();
-        if (keyboardState.find("a") != keyboardState.end()) {
-            velocity.x = -300;
-        }
-        if (keyboardState.find("d") != keyboardState.end()) {
-            velocity.x = 300;
-        }
-        if (keyboardState.find("w") != keyboardState.end()) {
-            // Can only jump if touching ground
-            if (IsGrounded()) {
-                velocity.y = -1000;
-            }
-        }
-        // if (keyboardState.find("s") != keyboardState.end()) {
-        //     velocity.y = 300;
-        // }
-        SetVelocity(velocity);
-        CircleObject::Tick(time);
-    }
-
+    virtual void Tick(Time time) override;
     virtual const char* GetClass() override { return "Marine"; }
+    virtual void Serialize(json& obj) override;
 };
 
 #endif

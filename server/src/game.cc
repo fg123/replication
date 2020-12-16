@@ -6,16 +6,7 @@
 #include "objects/player.h"
 #include "json/json.hpp"
 
-static const int TickRate = 128;
-static const int ReplicateRate = 30;
-
-Game::Game(Timer& gameTimer) : gameTimer(gameTimer), nextId(0) {
-    gameTimer.ScheduleInterval(std::bind(&Game::Tick, this, std::placeholders::_1),
-        1000.0 / TickRate);
-    
-    gameTimer.ScheduleInterval(std::bind(&Game::Replicate, this, std::placeholders::_1),
-        1000.0 / ReplicateRate);
-    
+Game::Game() : nextId(0) {    
     auto* floor = new RectangleObject(*this, Vector2{100, 500}, Vector2{500, 100});
     floor->SetIsStatic(true);
     floor->SetTag(Tag::GROUND);
@@ -38,6 +29,7 @@ void Game::Tick(Time time) {
     }
 }
 
+#ifdef BUILD_SERVER
 void Game::Replicate(Time time) {
     std::unordered_map<Object*, std::string> serialized;
 
@@ -56,15 +48,29 @@ void Game::Replicate(Time time) {
         }
     }
 }
+#endif
 
-void Game::IsColliding(Object* obj, std::vector<CollisionResult>& results) {
+#ifdef BUILD_CLIENT
+void Game::ProcessReplication(json& object) {
+    ObjectID id = object["id"];
+    if (gameObjects.find(id) == gameObjects.end()) {
+        Object* obj = new Object(*this);
+        obj->SetId(id);
+        AddObject(obj);
+    }
+    Object* obj = GetObject(id);
+    obj->ProcessReplication(object);
+}
+#endif
+
+void Game::HandleCollisions(Object* obj) {
     for (auto& object : gameObjects) {
         if (obj != object.second) {
             CollisionResult r = obj->CollidesWith(object.second);
             if (r.isColliding) {
                 r.collidedWith = object.second;
+                obj->ResolveCollision(r);
             }
-            results.push_back(r);
         }
     }
 }
