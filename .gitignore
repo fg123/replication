@@ -1,0 +1,8 @@
+// C++ Object Files
+*.o
+
+// C++ Build File
+server/bin
+
+// JS
+node_modules/
