@@ -10,7 +10,7 @@
 static bool gameRunning = true;
 
 static const int TickRate = 128;
-static const int ReplicateRate = 15;
+static const int ReplicateRate = 20;
 
 void GameLoop(Timer& gameTimer) {
     while (gameRunning) {
@@ -54,22 +54,36 @@ int main() {
                 return;
             }
             json obj = json::parse(message);
-            if (obj["event"] == "keyup") {
+            if (obj["event"] == "ku") {
                 //std::cout << "KEYUP " << obj["key"] << std::endl;
                 std::string key = obj["key"];
                 std::scoped_lock lock(data->playerObject->socketDataMutex);
                 data->playerObject->keyboardState.erase(key);
             }
-            else if (obj["event"] == "keydown") {
+            else if (obj["event"] == "kd") {
                 //std::cout << "KEYDOWN " << obj["key"] << std::endl;
                 std::string key = obj["key"];
                 std::scoped_lock lock(data->playerObject->socketDataMutex);
                 data->playerObject->keyboardState.insert(key);
             }
-            else if (obj["event"] == "mousemove") {
+            else if (obj["event"] == "mm") {
                 std::scoped_lock lock(data->playerObject->socketDataMutex);
                 data->playerObject->mousePosition.x = obj["x"];
                 data->playerObject->mousePosition.y = obj["y"];
+            }
+            else if (obj["event"] == "md") {
+                int button = obj["button"];
+                std::scoped_lock lock(data->playerObject->socketDataMutex);\
+                if (button >= 0 && button < 5) {
+                    data->playerObject->mouseState[button] = true;
+                }
+            }
+            else if (obj["event"] == "mu") {
+                int button = obj["button"];
+                std::scoped_lock lock(data->playerObject->socketDataMutex);
+                if (button >= 0 && button < 5) {
+                    data->playerObject->mouseState[button] = false;
+                }
             }
         },
         .drain = [](auto */*ws*/) {

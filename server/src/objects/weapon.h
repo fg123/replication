@@ -9,6 +9,9 @@ class PlayerObject;
 
 class WeaponObject : public Object {
     PlayerObject* attachedTo = nullptr;
+
+    double fireRate = 3;
+    Time nextFireTime = 0;
 public:
     WeaponObject(Game& game, Vector2 position);
     virtual const char* GetClass() override { return "M4A1"; }
@@ -16,6 +19,7 @@ public:
     void AttachToPlayer(PlayerObject* player);
     void Detach();
 
+    void Fire(Time time);
     virtual void Tick(Time time) override;
     virtual void Serialize(json& obj) override;
     

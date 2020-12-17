@@ -21,6 +21,7 @@ class PlayerObject : public Object {
 public:
     std::mutex socketDataMutex;
     std::unordered_set<std::string> keyboardState;
+    bool mouseState[5];
     Vector2 mousePosition;
 
     PlayerObject(Game& game, Vector2 position);
@@ -31,9 +32,13 @@ public:
     virtual const char* GetClass() override { return "Marine"; }
     virtual void Serialize(json& obj) override;
     virtual void OnCollide(CollisionResult& result) override;
-
+    
     void PickupWeapon(WeaponObject* weapon);
     void DropWeapon();
+
+    void DealDamage(int damage);
+
+    Vector2 GetAimDirection() const;
 };
 
 #endif

@@ -15,6 +15,8 @@ Game::Game() : nextId(0) {
     AddObject(new RectangleObject(*this, Vector2{200, 100}, Vector2{50, 50}));
     // AddObject(new RectangleObject(*this, Vector2{300, 200}, Vector2{50, 50}));
     // AddObject(new RectangleObject(*this, Vector2{400, 200}, Vector2{50, 50}));
+
+    
 }
 
 Game::~Game() {
@@ -31,8 +33,15 @@ void Game::Tick(Time time) {
     }
     queuedCalls.clear();
     queuedCallsMutex.unlock();
+    std::unordered_set<Object*> killPlaned;
     for (auto& object : gameObjects) {
         object.second->Tick(time);
+        if (object.second->GetPosition().y > killPlaneY) {
+            killPlaned.insert(object.second);
+        }
+    }
+    for (auto& object : killPlaned) {
+        DestroyObject(object);
     }
 }
 
@@ -76,6 +85,7 @@ void Game::ProcessReplication(json& object) {
             DestroyObject(gameObjects[id]);
             return;
         }
+        return;
     }
     if (gameObjects.find(id) == gameObjects.end()) {
         Object* obj = new Object(*this);

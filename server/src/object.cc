@@ -35,7 +35,7 @@ void Object::Tick(Time time) {
     // Apply Physics
     double timeFactor = delta / 1000.0;
 
-    if (!isStatic && GetColliderCount() > 0) {
+    if (!isStatic && GetColliderCount() > 0 && !IsTagged(Tag::NO_GRAVITY)) {
         velocity.y += GRAVITY * timeFactor;
     }
 

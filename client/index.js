@@ -129,7 +129,7 @@ function StartGame(modules) {
     window.addEventListener('keydown', e => {
         if (e.repeat) { return; }
         webSocket.send(JSON.stringify({
-            event: "keydown",
+            event: "kd",
             key: e.key
         }));
     });
@@ -142,7 +142,7 @@ function StartGame(modules) {
     // });
     window.addEventListener('keyup', e => {
         webSocket.send(JSON.stringify({
-            event: "keyup",
+            event: "ku",
             key: e.key
         }));
     });
@@ -154,10 +154,24 @@ function StartGame(modules) {
         if (current - lastMouseMoveSend > 30) {
             lastMouseMoveSend = current;
             webSocket.send(JSON.stringify({
-                event: "mousemove",
+                event: "mm",
                 x: e.pageX,
                 y: e.pageY
             }));
         }
+    });
+
+    window.addEventListener('mousedown', e => {
+        webSocket.send(JSON.stringify({
+            event: "md",
+            button: e.which
+        }));
+    });
+
+    window.addEventListener('mouseup', e => {
+        webSocket.send(JSON.stringify({
+            event: "mu",
+            button: e.which
+        }));
     })
 }

@@ -36,6 +36,8 @@ class Game {
 
     Time gameTime;
 
+    double killPlaneY = 2000;
+    
 public:
     Game();
     ~Game();
@@ -55,7 +57,7 @@ public:
     void AddObject(Object* obj);
     void DestroyObject(Object* obj);
     Time GetGameTime() const { return gameTime; }
-    
+
     Object* GetObject(ObjectID id) {
         if (gameObjects.find(id) != gameObjects.end())
             return gameObjects[id];

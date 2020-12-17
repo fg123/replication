@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+static const int LEFT_MOUSE_BUTTON = 1;
+
 PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
     SetTag(Tag::PLAYER);
     SetPosition(position);
@@ -26,6 +28,10 @@ void PlayerObject::OnDeath() {
 
 PlayerObject::~PlayerObject() {
     DropWeapon();
+}
+
+Vector2 PlayerObject::GetAimDirection() const {
+    return Vector2(std::cos(aimAngle), std::sin(aimAngle));
 }
 
 void PlayerObject::PickupWeapon(WeaponObject* weapon) {
@@ -52,6 +58,11 @@ void PlayerObject::Tick(Time time)  {
         }
         // velocity.y = -300;
     }
+    if (mouseState[LEFT_MOUSE_BUTTON]) {
+        if (currentWeapon) {
+            currentWeapon->Fire(time);
+        }
+    }
     // if (keyboardState.find("s") != keyboardState.end()) {
     //     velocity.y = 300;
     // }
@@ -77,10 +88,7 @@ void PlayerObject::DropWeapon()  {
     if (currentWeapon) {
         // Throw Weapon
         currentWeapon->Detach();
-        Vector2 throwVelocity (
-            std::cos(aimAngle), std::sin(aimAngle)
-        );
-        currentWeapon->SetVelocity(throwVelocity * 500.0);
+        currentWeapon->SetVelocity(GetAimDirection() * 500.0);
         currentWeapon = nullptr;
         canPickupTime = game.GetGameTime() + 500;
     }
@@ -93,4 +101,11 @@ void PlayerObject::OnCollide(CollisionResult& result) {
         }
     }
     Object::OnCollide(result);
+}
+
+void PlayerObject::DealDamage(int damage) {
+    health -= damage;
+    if (health < 0) {
+        health = 100;
+    }
 }

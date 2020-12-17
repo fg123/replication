@@ -29,6 +29,14 @@ module.exports = {
             context.fill();
         }
     },
+    "BulletObject": {
+        draw (context, resourceManager, obj, objects) {
+            context.fillStyle = "black";
+            context.beginPath();
+            context.arc(obj.p.x, obj.p.y, 3, 0, 2 * Math.PI);
+            context.fill();
+        }
+    },
     "M4A1": {
         draw (context, resourceManager, obj, objects) {
             let isFlip = false;

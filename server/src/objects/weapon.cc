@@ -1,5 +1,7 @@
 #include "weapon.h"
 #include "player.h"
+#include "bullet.h"
+#include "game.h"
 
 #include <exception>
 
@@ -46,4 +48,16 @@ void WeaponObject::Serialize(json& obj) {
     else {
         obj["attach"] = nullptr;
     }
+}
+
+void WeaponObject::Fire(Time time) {
+    if (time < nextFireTime) {
+        return;
+    }
+    nextFireTime = time + (1000.0 / fireRate);
+
+    BulletObject* bullet = new BulletObject(game);
+    bullet->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 30);
+    bullet->SetVelocity(attachedTo->GetAimDirection() * 1000.0);
+    game.AddObject(bullet);
 }

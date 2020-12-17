@@ -13,7 +13,8 @@ class Game;
 enum class Tag : uint64_t {
     PLAYER = 0b001,
     GROUND = 0b010,
-    WEAPON = 0b100
+    WEAPON = 0b100,
+    NO_GRAVITY = 0b1000
 };
 
 class Object : Replicable {
