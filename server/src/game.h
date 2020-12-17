@@ -34,6 +34,8 @@ class Game {
 
     std::unordered_set<Object*> deadObjects;
 
+    Time gameTime;
+
 public:
     Game();
     ~Game();
@@ -52,13 +54,14 @@ public:
     void HandleCollisions(Object* obj);
     void AddObject(Object* obj);
     void DestroyObject(Object* obj);
-
+    Time GetGameTime() const { return gameTime; }
+    
     Object* GetObject(ObjectID id) {
         if (gameObjects.find(id) != gameObjects.end())
             return gameObjects[id];
         else return nullptr;
     }
-    
+
     ObjectID RequestId(Object* obj);
     
     void QueueNextTick(const std::function <void()>& func) {

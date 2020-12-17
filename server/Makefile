@@ -21,7 +21,7 @@ server: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) -o bin/$(EXE)_server
 
 client: $(CLIENT_OBJ)
-	em++ -O2 $(LDFLAGS) $^ $(LDLIBS) -s MODULARIZE -s EXPORTED_RUNTIME_METHODS=['ccall'] -s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8'] -o bin/$(EXE)_client.js
+	em++ -O2 $(LDFLAGS) $^ $(LDLIBS) -g -s MODULARIZE -s EXPORTED_RUNTIME_METHODS=['ccall'] -s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8'] -o bin/$(EXE)_client.js
 	cp bin/$(EXE)_client.wasm ../client/dist/
 	cp bin/$(EXE)_client.js ../client/
 

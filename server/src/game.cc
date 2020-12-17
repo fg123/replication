@@ -24,6 +24,7 @@ Game::~Game() {
 }
 
 void Game::Tick(Time time) {
+    gameTime = time;
     queuedCallsMutex.lock();
     for (auto& call : queuedCalls) {
         call();
@@ -87,15 +88,22 @@ void Game::ProcessReplication(json& object) {
 #endif
 
 void Game::HandleCollisions(Object* obj) {
+    Vector2 collisionResolution;
     for (auto& object : gameObjects) {
-        if (obj != object.second) {
-            CollisionResult r = obj->CollidesWith(object.second);
-            if (r.isColliding) {
-                r.collidedWith = object.second;
-                obj->ResolveCollision(r);
+        if (obj == object.second) continue;
+        
+        CollisionResult r = obj->CollidesWith(object.second);
+        if (r.isColliding) {
+            r.collidedWith = object.second;
+            // Check for Collision Exclusion
+            if (!(obj->IsCollideExcluded(object.second->GetTags()) ||
+                object.second->IsCollideExcluded(obj->GetTags()))) {
+                collisionResolution += r.collisionDifference;
             }
+            obj->OnCollide(r);
         }
     }
+    obj->ResolveCollision(collisionResolution);
 }
 
 void Game::AddObject(Object* obj) {

@@ -6,6 +6,8 @@
 WeaponObject::WeaponObject(Game& game, Vector2 position) : Object(game) {
     SetPosition(position);
     // No Colliders
+    collideExclusion |= (uint64_t)Tag::PLAYER;
+    SetTag(Tag::WEAPON);
 }
 
 void WeaponObject::AttachToPlayer(PlayerObject* player) {
@@ -17,22 +19,23 @@ void WeaponObject::AttachToPlayer(PlayerObject* player) {
     }
     attachedTo = player;
     if (attachedTo) {
-        SetIsStatic(true);
+        colliders.clear();
     }
 }
 
 void WeaponObject::Detach() {
     attachedTo = nullptr;
-    SetIsStatic(false);
+    SetVelocity(Vector2::Zero);
+    AddCollider(new RectangleCollider(this, Vector2(-3, -10), Vector2(74, 24)));
 }
 
 void WeaponObject::Tick(Time time) {
+    Object::Tick(time);
     if (attachedTo) {
         // Attached!
         SetPosition(attachedTo->GetPosition());
         SetVelocity(attachedTo->GetVelocity());
     }
-    Object::Tick(time);
 }
 
 void WeaponObject::Serialize(json& obj) {

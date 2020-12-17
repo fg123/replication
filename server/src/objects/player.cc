@@ -2,9 +2,14 @@
 #include "collision.h"
 #include "game.h"
 
+#include <iostream>
+
 PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
     SetTag(Tag::PLAYER);
     SetPosition(position);
+
+    airFriction.x = 0.9;
+
     AddCollider(new CircleCollider(this, Vector2(0, -15), 10.0));
     AddCollider(new RectangleCollider(this, Vector2(-15, -5), Vector2(30, 33)));
 
@@ -32,10 +37,13 @@ void PlayerObject::Tick(Time time)  {
     std::scoped_lock lock(socketDataMutex);
     Vector2 velocity = GetVelocity();
     if (keyboardState.find("a") != keyboardState.end()) {
-        velocity.x = -300;
+        velocity.x = -200;
     }
     if (keyboardState.find("d") != keyboardState.end()) {
-        velocity.x = 300;
+        velocity.x = 200;
+    }
+    if (keyboardState.find("g") != keyboardState.end()) {
+        DropWeapon();
     }
     if (keyboardState.find("w") != keyboardState.end()) {
         // Can only jump if touching ground
@@ -63,4 +71,26 @@ void PlayerObject::Serialize(json& obj) {
     else {
         obj["w"] = nullptr;
     }
+}
+
+void PlayerObject::DropWeapon()  {
+    if (currentWeapon) {
+        // Throw Weapon
+        currentWeapon->Detach();
+        Vector2 throwVelocity (
+            std::cos(aimAngle), std::sin(aimAngle)
+        );
+        currentWeapon->SetVelocity(throwVelocity * 500.0);
+        currentWeapon = nullptr;
+        canPickupTime = game.GetGameTime() + 500;
+    }
+}
+
+void PlayerObject::OnCollide(CollisionResult& result) {
+    if (!currentWeapon && result.collidedWith->IsTagged(Tag::WEAPON)) {
+        if (game.GetGameTime() > canPickupTime) {
+            PickupWeapon(static_cast<WeaponObject*>(result.collidedWith));
+        }
+    }
+    Object::OnCollide(result);
 }

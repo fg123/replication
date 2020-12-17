@@ -4,7 +4,6 @@
 #include "json/json.hpp"
 
 static const double GRAVITY = 3000;
-static const double AIR_FRICTION = 0.90;
 
 Time Object::DeltaTime(Time currentTime) {
     if (lastTickTime == 0) {
@@ -16,7 +15,7 @@ Time Object::DeltaTime(Time currentTime) {
     return delta;
 }
 
-Object::Object(Game& game) : game(game) {
+Object::Object(Game& game) : game(game), airFriction(0.97, 1) {
     id = game.RequestId(this);
 }
 
@@ -36,12 +35,11 @@ void Object::Tick(Time time) {
     // Apply Physics
     double timeFactor = delta / 1000.0;
 
-    if (!isStatic) {
+    if (!isStatic && GetColliderCount() > 0) {
         velocity.y += GRAVITY * timeFactor;
     }
 
-    velocity.x *= AIR_FRICTION;
-    //velocity.y *= AIR_FRICTION;
+    velocity *= airFriction;
 
     Vector2 positionDelta = velocity * timeFactor;
     position += positionDelta;
@@ -50,36 +48,42 @@ void Object::Tick(Time time) {
     game.HandleCollisions(this);        
 }
 
-void Object::ResolveCollision(const CollisionResult& result) {
-    if (result.collidedWith->IsTagged(Tag::GROUND)) {
-        isGrounded = true;
-    }
+void Object::ResolveCollision(const Vector2& difference) {
     // TODO: this collision difference really should be negated
-    position -= result.collisionDifference;
+    position -= difference;
     // We had to adjust the collision in a certain direction.
     // If the velocity does not match the direction of resolution, do nothing
     // If it does, we need to clamp it to zero.
     // This is kinda wonky and unintuitive because you decided to do -=
     //   collisionDifference, changing it around requires changing the 
     //   calculations for collisionDifference in the collision subroutines
-    if (SameSign(result.collisionDifference.x, velocity.x)) {
+    if (SameSign(difference.x, velocity.x)) {
         velocity.x = 0;
     }
-    if (SameSign(result.collisionDifference.y, velocity.y)) {
+    if (SameSign(difference.y, velocity.y)) {
         velocity.y = 0;
     }
 }
 
+void Object::OnCollide(CollisionResult& result) {
+    if (result.collidedWith->IsTagged(Tag::GROUND)) {
+        isGrounded = true;
+    }
+}
+
 CollisionResult Object::CollidesWith(Object* other) {
+    // Add up all the collisions
+    CollisionResult finalResult;
     for (auto& collider: colliders) {
         for (auto& colliderOther: other->colliders) {
             CollisionResult r = collider->CollidesWith(colliderOther);
             if (r.isColliding) {
-                return r;
+                finalResult.isColliding = true;
+                finalResult.collisionDifference += r.collisionDifference;
             }
         }
     }
-    return CollisionResult();
+    return finalResult;
 }
 
 void Object::Serialize(json& obj) {
@@ -89,7 +93,8 @@ void Object::Serialize(json& obj) {
     velocity.Serialize(obj["v"]);
     obj["s"] = isStatic;
 
-    obj["tags"] = tags;
+    obj["ta"] = tags;
+    obj["ce"] = collideExclusion;
 
     for (auto& collider : colliders) {
         json colliderObj;
@@ -104,7 +109,12 @@ void Object::ProcessReplication(json& object) {
     SetPosition(Vector2(object["p"]["x"], object["p"]["y"]));
     SetVelocity(Vector2(object["v"]["x"], object["v"]["y"]));
     SetIsStatic(object["s"]);
+    tags = object["ta"];
+    collideExclusion = object["ce"];
 
+    if (colliders.size() != object["c"].size()) {
+        colliders.clear();
+    }
     if (colliders.empty()) {
         // Make some
         for (json& colliderInfo : object["c"]) {

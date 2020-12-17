@@ -25,11 +25,6 @@ Client().then((instance) => {
             });
         });
     };
-
-    const heapString = ToHeapString(instance, "Hello");
-    console.log(instance._HandleReplicate(heapString)); // direct calling works
-    instance._free(heapString);
-
 }).catch(error => console.error(error));
 
 
@@ -68,13 +63,21 @@ function StartGame(modules) {
     };
     
     let lastTime = Date.now();
-        
+
+    const backgroundGradient = context.createLinearGradient(0, 0, 0, height);
+    backgroundGradient.addColorStop(0, "#cbc4d3");
+    backgroundGradient.addColorStop(0.5, "#d8c39b");
+    backgroundGradient.addColorStop(1, "#b49862");
+    
     tick();
 
     function tick() {
         const currentTime = Date.now();
         const deltaTime = currentTime - lastTime;
-        context.clearRect(0, 0, width, height);
+        
+        // Create Gradient
+        context.fillStyle = backgroundGradient;
+        context.fillRect(0, 0, width, height);
 
         Object.keys(gameObjects).forEach((k) => {
             const obj = gameObjects[k];
@@ -91,21 +94,21 @@ function StartGame(modules) {
                 console.error('Invalid object class', obj.t);
             }
             // Local Simulation
-            // if (obj.c) {
-            //     for (let i = 0; i < obj.c.length; i++) {
-            //         const collider = obj.c[i];
-            //         context.strokeStyle = "black";
-            //         context.lineWidth = 2;
-            //         if (collider.t === 0) {
-            //             context.strokeRect(collider.p.x, collider.p.y, collider.size.x, collider.size.y);
-            //         }
-            //         else if (collider.t === 1) {
-            //             context.beginPath();
-            //             context.arc(collider.p.x, collider.p.y, collider.radius, 0, 2 * Math.PI);
-            //             context.stroke();
-            //         }
-            //     }
-            // }
+            if (obj.c) {
+                for (let i = 0; i < obj.c.length; i++) {
+                    const collider = obj.c[i];
+                    context.strokeStyle = "black";
+                    context.lineWidth = 2;
+                    if (collider.t === 0) {
+                        context.strokeRect(obj.p.x + collider.p.x, obj.p.y + collider.p.y, collider.size.x, collider.size.y);
+                    }
+                    else if (collider.t === 1) {
+                        context.beginPath();
+                        context.arc(obj.p.x + collider.p.x, obj.p.y + collider.p.y, collider.radius, 0, 2 * Math.PI);
+                        context.stroke();
+                    }
+                }
+            }
         });
         Object.keys(gameObjects).forEach((k) => {
             const obj = gameObjects[k];

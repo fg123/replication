@@ -11,25 +11,29 @@ using ObjectID = uint64_t;
 class Game;
 
 enum class Tag : uint64_t {
-    PLAYER = 0b01,
-    GROUND = 0b10
+    PLAYER = 0b001,
+    GROUND = 0b010,
+    WEAPON = 0b100
 };
 
 class Object : Replicable {
+protected:
+    Game& game;
     // All are measured in the same units, velocity is in position units
     //   per second
     Vector2 position;
     Vector2 velocity;
+    Vector2 airFriction;
 
-    std::vector<Collider*> colliders;
-    Game& game;
     ObjectID id;
     bool isDirty = false;
     bool isStatic = false;
     bool isGrounded = false;
     Time lastTickTime = 0;
 
+    std::vector<Collider*> colliders;
     uint64_t tags;
+    uint64_t collideExclusion = 0;
 
 public:
     Object(Game& game);
@@ -40,7 +44,9 @@ public:
 
     virtual void OnDeath() {}
 
-    void ResolveCollision(const CollisionResult& result);
+    void ResolveCollision(const Vector2& difference);
+
+    size_t GetColliderCount() const { return colliders.size(); }
 
     CollisionResult CollidesWith(Object* other);
     void AddCollider(Collider* col) { colliders.push_back(col); }
@@ -66,10 +72,14 @@ public:
 
     void SetIsStatic(bool isStatic) { this->isStatic = isStatic; }
 
+    uint64_t IsCollideExcluded(uint64_t tags) { return collideExclusion & tags; }
+    uint64_t GetTags() const { return tags; };
     void SetTag(Tag tag) { tags |= (uint64_t)tag; }
     void RemoveTag(Tag tag) { tags &= ~(uint64_t)tag; }
     bool IsTagged(Tag tag) const { return tags & (uint64_t)tag; }
     bool IsGrounded() const { return isGrounded; }
+
+    virtual void OnCollide(CollisionResult& result);
 };
 
 #endif

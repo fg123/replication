@@ -15,10 +15,10 @@ public:
 
     void AttachToPlayer(PlayerObject* player);
     void Detach();
-    
-    virtual void Tick(Time time) override;
 
+    virtual void Tick(Time time) override;
     virtual void Serialize(json& obj) override;
+    
 };
 
 #endif
