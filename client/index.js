@@ -15,7 +15,8 @@ console.log('Loading Game WASM');
 Client().then((instance) => {
     console.log(instance);
     console.log('Loading Web Socket');
-    const webSocket = new WebSocket('ws://' + location.hostname + ':8080/connect');
+    const protocol = Constants.isProduction ? 'wss' : 'ws';
+    const webSocket = new WebSocket(protocol + '://' + location.hostname + ':8080/connect');
     webSocket.onopen = function (event) {
         console.log('Loading Resource Manager');
         const resourceManager = new ResourceManager(() => {
@@ -118,7 +119,7 @@ function StartGame(modules) {
             else {
                 console.error('Invalid object class', obj.t);
             }
-            if (obj.c && Constants.isProduction) {
+            if (obj.c && !Constants.isProduction) {
                 for (let i = 0; i < obj.c.length; i++) {
                     const collider = obj.c[i];
                     context.strokeStyle = "purple";
