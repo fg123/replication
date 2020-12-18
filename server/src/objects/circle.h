@@ -22,6 +22,11 @@ public:
         Object::Serialize(obj);
         obj["radius"] = radius;
     }
+
+    virtual void ProcessReplication(json& obj) override {
+        Object::ProcessReplication(obj);
+        radius = obj["radius"];
+    }
 };
 
 CLASS_REGISTER(CircleObject);

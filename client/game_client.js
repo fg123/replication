@@ -5078,6 +5078,10 @@ var asm = createWasm();
 
 var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__wasm_call_ctors");
 
+var _fflush = Module["_fflush"] = createExportWrapper("fflush");
+
+var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
+
 var _TickGame = Module["_TickGame"] = createExportWrapper("TickGame");
 
 var _IsObjectAlive = Module["_IsObjectAlive"] = createExportWrapper("IsObjectAlive");
@@ -5092,9 +5096,9 @@ var _HandleReplicate = Module["_HandleReplicate"] = createExportWrapper("HandleR
 
 var _HandleLocalInput = Module["_HandleLocalInput"] = createExportWrapper("HandleLocalInput");
 
-var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
+var _free = Module["_free"] = createExportWrapper("free");
 
-var _fflush = Module["_fflush"] = createExportWrapper("fflush");
+var _malloc = Module["_malloc"] = createExportWrapper("malloc");
 
 var stackSave = Module["stackSave"] = createExportWrapper("stackSave");
 
@@ -5120,10 +5124,6 @@ var _emscripten_stack_get_end = Module["_emscripten_stack_get_end"] = function()
 
 var _setThrew = Module["_setThrew"] = createExportWrapper("setThrew");
 
-var _free = Module["_free"] = createExportWrapper("free");
-
-var _malloc = Module["_malloc"] = createExportWrapper("malloc");
-
 var _sbrk = Module["_sbrk"] = createExportWrapper("sbrk");
 
 var _emscripten_get_sbrk_ptr = Module["_emscripten_get_sbrk_ptr"] = createExportWrapper("emscripten_get_sbrk_ptr");
@@ -5140,7 +5140,7 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 30584;
+var _game = Module["_game"] = 30776;
 
 if (!Object.getOwnPropertyDescriptor(Module, "intArrayFromString")) Module["intArrayFromString"] = function() {
  abort("'intArrayFromString' was not exported. add it to EXTRA_EXPORTED_RUNTIME_METHODS (see the FAQ)");

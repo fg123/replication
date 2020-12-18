@@ -21,6 +21,11 @@ public:
         Object::Serialize(obj);
         size.Serialize(obj["size"]);
     }
+
+    virtual void ProcessReplication(json& obj) override {
+        Object::ProcessReplication(obj);
+        size.ProcessReplication(obj["size"]);
+    }
 };
 
 CLASS_REGISTER(RectangleObject);

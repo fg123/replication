@@ -1,6 +1,7 @@
 const gameObjectLookup = require('./game-objects');
 const ResourceManager = require('./resource-manager');
 const Client = require('./game_client');
+const { createMap } = require('./map');
 
 function ToHeapString(wasm, str) {
     const length = wasm.lengthBytesUTF8(str) + 1;
@@ -17,11 +18,14 @@ Client().then((instance) => {
     webSocket.onopen = function (event) {
         console.log('Loading Resource Manager');
         const resourceManager = new ResourceManager(() => {
-            console.log('Starting Game');
-            StartGame({
-                webSocket,
-                wasm: instance,
-                resourceManager
+            createMap("data/maps/map1.json", resourceManager, (mapImage) => {
+                console.log('Starting Game');
+                StartGame({
+                    webSocket,
+                    wasm: instance,
+                    resourceManager,
+                    mapImage
+                });
             });
         });
     };
@@ -51,7 +55,7 @@ let localPlayerObjectId = undefined;
 
 // Main Game Start (after everything has started)
 function StartGame(modules) {
-    const { wasm, webSocket, resourceManager } = modules;
+    const { wasm, webSocket, resourceManager, mapImage } = modules;
     const gameObjects = {};
 
     webSocket.onmessage = function (ev) {
@@ -95,6 +99,7 @@ function StartGame(modules) {
         context.fillStyle = backgroundGradient;
         context.fillRect(0, 0, width, height);
 
+        context.drawImage(mapImage, 0, 0);
         Object.keys(gameObjects).forEach((k) => {
             const obj = gameObjects[k];
             if (!wasm._IsObjectAlive(obj.id)) {

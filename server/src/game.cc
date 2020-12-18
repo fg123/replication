@@ -1,20 +1,39 @@
 #include "game.h"
 #include <iostream>
+#include <fstream>
 
 #include "objects/rectangle.h"
 #include "objects/circle.h"
 #include "objects/player.h"
 #include "json/json.hpp"
 
-Game::Game() : nextId(0) {    
-    auto* floor = new RectangleObject(*this, Vector2{100, 500}, Vector2{500, 100});
-    floor->SetIsStatic(true);
-    floor->SetTag(Tag::GROUND);
-    AddObject(floor);
+static const double TILE_SIZE = 48;
 
-    AddObject(new RectangleObject(*this, Vector2{200, 100}, Vector2{50, 50}));
-    // AddObject(new RectangleObject(*this, Vector2{300, 200}, Vector2{50, 50}));
-    // AddObject(new RectangleObject(*this, Vector2{400, 200}, Vector2{50, 50}));
+Game::Game() : nextId(0) {    
+   
+}
+
+Game::Game(std::string mapPath) : Game() {
+    std::ifstream mapFile(mapPath);
+    json obj;
+    mapFile >> obj;
+
+    // Create collision for tiles in the map
+    json& tiles = obj["tiles"];
+    for (json& tile : tiles) {
+        if (tile.contains("collision") && tile["collision"]) {
+            double startX = (double)tile["start"]["x"] * TILE_SIZE;
+            double startY = (double)tile["start"]["y"] * TILE_SIZE;
+            double endX = (double)tile["end"]["x"] * TILE_SIZE;
+            double endY = (double)tile["end"]["y"] * TILE_SIZE;
+            RectangleObject* floor = new RectangleObject(*this, Vector2{
+                startX, startY
+            }, Vector2{endX - startX, endY - startY});
+            floor->SetIsStatic(true);
+            floor->SetTag(Tag::GROUND);
+            AddObject(floor);
+        }
+    }
 }
 
 Game::~Game() {
@@ -89,6 +108,7 @@ void Game::ProcessReplication(json& object) {
         return;
     }
     if (gameObjects.find(id) == gameObjects.end()) {
+        std::cout << "Got new object " << object["t"] << std::endl;
         Object* obj = GetClassLookup()[object["t"]](*this);
         obj->SetId(id);
         gameObjects[id] = obj;
@@ -138,8 +158,7 @@ void Game::AddObject(Object* obj) {
     gameObjects[newId] = obj;
 }
 
-void Game::DestroyObject(ObjectID objectId) {
-    std::cout << "Destroying Object " << objectId << std::endl;
+void Game::DestroyObject(ObjectID objectId) {    
     if (gameObjects.find(objectId) == gameObjects.end()) {
         return;
     }

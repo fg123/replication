@@ -41,6 +41,7 @@ class Game {
 
 public:
     Game();
+    Game(std::string mapPath);
     ~Game();
 
     // Simulate a tick of physics, not everyone ticks every frame

@@ -22,7 +22,7 @@ module.exports = class ResourceManager {
         deferArr.push(new Promise((resolve, reject) => {
             location[key] = new Image();
             location[key].onload = () => {
-                console.log('Resource loaded: ' + url);
+                console.log('Resource loaded: ' + key);
                 if (options.flipDirection) {
                     const image = location[key];
                     const c = document.createElement('canvas');

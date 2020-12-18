@@ -10,7 +10,7 @@
 static bool gameRunning = true;
 
 static const int TickRate = 128;
-static const int ReplicateRate = 10;
+static const int ReplicateRate = 30;
 
 void GameLoop(Timer& gameTimer) {
     while (gameRunning) {
@@ -20,7 +20,7 @@ void GameLoop(Timer& gameTimer) {
 
 int main() {
     Timer gameTimer;
-    Game game;
+    Game game { "../data/maps/map1.json" };
     gameTimer.ScheduleInterval(std::bind(&Game::Tick, &game, std::placeholders::_1),
             1000.0 / TickRate);
 #ifdef BUILD_SERVER
