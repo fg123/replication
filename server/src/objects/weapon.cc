@@ -64,8 +64,8 @@ void WeaponObject::Fire(Time time) {
     nextFireTime = time + (1000.0 / fireRate);
 #ifdef BUILD_SERVER
     BulletObject* bullet = new BulletObject(game);
-    bullet->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 30);
-    bullet->SetVelocity(attachedTo->GetAimDirection() * 1000.0);
+    bullet->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 50);
+    bullet->SetVelocity(attachedTo->GetAimDirection() * 2000.0);
     game.AddObject(bullet);
 #endif
 }

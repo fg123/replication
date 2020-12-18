@@ -24,8 +24,8 @@ Game::Game(std::string mapPath) : Game() {
         if (tile.contains("collision") && tile["collision"]) {
             double startX = (double)tile["start"]["x"] * TILE_SIZE;
             double startY = (double)tile["start"]["y"] * TILE_SIZE;
-            double endX = (double)tile["end"]["x"] * TILE_SIZE;
-            double endY = (double)tile["end"]["y"] * TILE_SIZE;
+            double endX = ((double)tile["end"]["x"] + 1) * TILE_SIZE;
+            double endY = ((double)tile["end"]["y"] + 1) * TILE_SIZE;
             RectangleObject* floor = new RectangleObject(*this, Vector2{
                 startX, startY
             }, Vector2{endX - startX, endY - startY});
@@ -46,15 +46,19 @@ void Game::Tick(Time time) {
     gameTime = time;
     queuedCallsMutex.lock();
     for (auto& call : queuedCalls) {
-        call();
+        call(*this);
     }
     queuedCalls.clear();
     queuedCallsMutex.unlock();
     std::unordered_set<Object*> killPlaned;
     for (auto& object : gameObjects) {
         object.second->Tick(time);
-        if (object.second->GetPosition().y > killPlaneY) {
+        if (!object.second->IsStatic() &&
+            !IsPointInRect(Vector2::Zero, killPlaneSize,
+                object.second->GetPosition())) {
             // TODO: Deal damage instead of insta kill
+            // You're out of the range 
+           killPlaned.insert(object.second);
         }
     }
     for (auto& object : killPlaned) {
@@ -177,7 +181,7 @@ void Game::AddPlayer(PlayerSocketData* data, PlayerObject* playerObject, ObjectI
     std::scoped_lock<std::mutex> lock(playersSetMutex);
     players.insert(data);
 
-    QueueNextTick([playerObject, reservedId, this]() {
+    QueueNextTick([playerObject, reservedId, this](Game& game) {
         // Already reserved one to tell the client, so we override it.
         AddObject(playerObject);
         ChangeId(playerObject->GetId(), reservedId);
@@ -190,7 +194,7 @@ void Game::RemovePlayer(PlayerSocketData* data) {
 
     PlayerObject* playerObject = data->playerObject;
     std::cout << "Removing player " << playerObject << std::endl;
-    QueueNextTick([playerObject, this]() {
+    QueueNextTick([playerObject, this](Game& game) {
         DestroyObject(playerObject->GetId());
     });
 }

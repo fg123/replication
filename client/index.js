@@ -1,6 +1,7 @@
+const Constants = require('./constants');
 const gameObjectLookup = require('./game-objects');
 const ResourceManager = require('./resource-manager');
-const Client = require('./game_client');
+const Client = require(Constants.isProduction ? './game_client_prod' : './game_client');
 const { createMap } = require('./map');
 
 function ToHeapString(wasm, str) {
@@ -14,7 +15,7 @@ console.log('Loading Game WASM');
 Client().then((instance) => {
     console.log(instance);
     console.log('Loading Web Socket');
-    const webSocket = new WebSocket('ws://localhost:8080/connect');
+    const webSocket = new WebSocket('ws://' + location.hostname + ':8080/connect');
     webSocket.onopen = function (event) {
         console.log('Loading Resource Manager');
         const resourceManager = new ResourceManager(() => {
@@ -117,11 +118,10 @@ function StartGame(modules) {
             else {
                 console.error('Invalid object class', obj.t);
             }
-            // Local Simulation
-            if (obj.c) {
+            if (obj.c && Constants.isProduction) {
                 for (let i = 0; i < obj.c.length; i++) {
                     const collider = obj.c[i];
-                    context.strokeStyle = "black";
+                    context.strokeStyle = "purple";
                     context.lineWidth = 2;
                     if (collider.t === 0) {
                         context.strokeRect(obj.p.x + collider.p.x, obj.p.y + collider.p.y, collider.size.x, collider.size.y);

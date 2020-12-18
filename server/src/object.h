@@ -91,6 +91,7 @@ public:
     void SetPosition(const Vector2& in) { position = in; }
     void SetVelocity(const Vector2& in) { velocity = in; }
 
+    bool IsStatic() const { return isStatic; }
     void SetIsStatic(bool isStatic) { this->isStatic = isStatic; }
 
     uint64_t IsCollideExcluded(uint64_t tags) { return collideExclusion & tags; }

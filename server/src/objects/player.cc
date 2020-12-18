@@ -56,7 +56,7 @@ void PlayerObject::Tick(Time time)  {
     if (keyboardState.find("w") != keyboardState.end()) {
         // Can only jump if touching ground
         if (IsGrounded()) {
-            velocity.y = -1000;
+            velocity.y = -600;
         }
         // velocity.y = -300;
     }

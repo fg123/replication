@@ -4,6 +4,7 @@
 #include "object.h"
 
 class BulletObject : public Object {
+    bool dead = false;
 public:
     CLASS_CREATE(BulletObject)
     BulletObject(Game& game);

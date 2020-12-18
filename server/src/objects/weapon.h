@@ -10,7 +10,7 @@ class PlayerObject;
 class WeaponObject : public Object {
     PlayerObject* attachedTo = nullptr;
 
-    double fireRate = 3;
+    double fireRate = 10;
     Time nextFireTime = 0;
 public:
     CLASS_CREATE(WeaponObject)

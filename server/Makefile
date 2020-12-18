@@ -6,30 +6,39 @@ CLIENT_SRC = $(SRC) src/client_main.cc
 SERVER_OBJ = $(SERVER_SRC:%.cc=%.o)
 # Use .wo for webassembly
 CLIENT_OBJ = $(CLIENT_SRC:%.cc=%.wo)
-HEADERS = $(shell find src/ -name "*.h")
+HEADERS = $(shell find src/ -name "*.h") Makefile
 USOCKET = $(SRC_DIR)/uWebSocket/uSocket
 
-CPPFLAGS += -std=c++17
-CFLAGS += -g -Wall -I $(SRC_DIR) -I $(USOCKET)/src 
+CPPFLAGS = -std=c++17
+CFLAGS = -Wall -I $(SRC_DIR) -I $(USOCKET)/src 
 LDLIBS = -L/usr/lib
+SERVER_DEBUG = -g 
+SERVER_PROD = -O2
 SERVER_LDLIBS = $(LDLIBS) -L$(USOCKET) -lz -l:uSockets.a -lpthread
-WASM_FLAGS = -g4 -s ASSERTIONS=2 -s SAFE_HEAP=1 -s STACK_OVERFLOW_CHECK=1 \
-	-s MODULARIZE -s EXPORTED_RUNTIME_METHODS=['ccall'] \
+WASM_DEBUG = -g3 -s ASSERTIONS=2 -s SAFE_HEAP=1 -s STACK_OVERFLOW_CHECK=1 
+WASM_FLAGS = -s MODULARIZE \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
-	--source-map-base http://localhost:8000/ \
 	-s ALLOW_MEMORY_GROWTH=1
 
 all: server client
 
 server: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
-	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) -g -o bin/$(EXE)_server
+	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_DEBUG) -o bin/$(EXE)_server
+
+server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a
+	mkdir -p bin
+	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o bin/$(EXE)_server_prod
 
 client: $(CLIENT_OBJ)
-	em++ -O2 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) -o bin/$(EXE)_client.js
+	em++ -O2 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) -o bin/$(EXE)_client.js
 	cp bin/$(EXE)_client.wasm ../client/dist/
 	cp bin/$(EXE)_client.js ../client/
-	cp bin/$(EXE)_client.wasm.map ../client/dist/
+
+client_prod: $(CLIENT_OBJ)
+	em++ -O2 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) -o bin/$(EXE)_client_prod.js
+	cp bin/$(EXE)_client_prod.wasm ../client/dist/
+	cp bin/$(EXE)_client_prod.js ../client/
 
 %.o: %.cc $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -DBUILD_SERVER -c $< -o $@

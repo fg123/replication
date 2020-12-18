@@ -26,7 +26,7 @@ class Game {
     std::atomic<ObjectID> nextId;
 
     std::mutex queuedCallsMutex;
-    std::vector<std::function<void()>> queuedCalls;
+    std::vector<std::function<void(Game& game)>> queuedCalls;
 
     std::unordered_map<ObjectID, Object*> gameObjects;
     
@@ -37,7 +37,7 @@ class Game {
 
     Time gameTime;
 
-    double killPlaneY = 2000;
+    Vector2 killPlaneSize = Vector2 {3000, 2000};
 
 public:
     Game();
@@ -75,7 +75,7 @@ public:
     
     void ChangeId(ObjectID oldId, ObjectID newId);
 
-    void QueueNextTick(const std::function <void()>& func) {
+    void QueueNextTick(const std::function <void(Game& game)>& func) {
         queuedCallsMutex.lock();
         queuedCalls.push_back(func);
         queuedCallsMutex.unlock();

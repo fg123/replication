@@ -17,8 +17,8 @@ function drawImage(context, img, x, y, width = -1, height = -1, angle = 0) {
 module.exports = {
     "RectangleObject": {
         draw (context, resourceManager, obj, objects) {
-            context.fillStyle = "red";
-            context.fillRect(obj.p.x, obj.p.y, obj.size.x, obj.size.y);
+            // context.fillStyle = "red";
+            // context.fillRect(obj.p.x, obj.p.y, obj.size.x, obj.size.y);
         }
     },
     "CircleObject": {

@@ -18,9 +18,14 @@ void GameLoop(Timer& gameTimer) {
     }
 }
 
-int main() {
+int main(int argc, char** argv) {
+    std::string mapPath = "../data/maps/map1.json";
+    if (argc == 2) {
+        mapPath = argv[1];
+    }
     Timer gameTimer;
-    Game game { "../data/maps/map1.json" };
+    std::cout << "Loading Map " << mapPath << std::endl;
+    Game game { mapPath };
     gameTimer.ScheduleInterval(std::bind(&Game::Tick, &game, std::placeholders::_1),
             1000.0 / TickRate);
 #ifdef BUILD_SERVER
@@ -30,9 +35,7 @@ int main() {
 
     std::thread s { GameLoop, std::ref(gameTimer) };
     
-    uWS::App().get("/hello", [](auto *res, auto *req) {
-        res->end("Hello World!");
-    }).ws<PlayerSocketData>("/connect", {
+    uWS::App().ws<PlayerSocketData>("/connect", {
         .compression = uWS::SHARED_COMPRESSOR,
         .maxPayloadLength = 16 * 1024,
         .idleTimeout = 10,

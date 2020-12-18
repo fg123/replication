@@ -11,11 +11,11 @@ CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollide
     Vector2 rectPosition = rect->GetPosition();
     Vector2 circPosition = circle->GetPosition();
 
-    if (IsPointInRect(rectPosition, rect->size, circPosition)) {
-        // Uh Oh Spaghettioh probably just return something that spits the ball out
-        // Don't collide for now
-        return CollisionResult();
-    }
+    // if (IsPointInRect(rectPosition, rect->size, circPosition)) {
+    //     // Uh Oh Spaghettioh probably just return something that spits the ball out
+    //     // Don't collide for now
+    //     return CollisionResult();
+    // }
 
     Vector2 rectHalf (rect->size.x / 2.0f, rect->size.y / 2.0f);
     Vector2 rectCenter (

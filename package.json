@@ -7,8 +7,9 @@
     "watch-client": "nodemon --watch client client/serve.js",
     "build-prod": "webpack --config webpack.prod.js",
     "start-client": "node client/serve.js",
+    "start-server": "./server/bin/game_server_prod ./data/maps/map1.json",
     "dev": "concurrently --kill-others 'npm:watch-client' 'npm:build-dev'",
-    "prod": "NODE_ENV=production npm run build-prod && NODE_ENV=production npm run start-client"
+    "prod": "NODE_ENV=production npm run build-prod && NODE_ENV=production concurrently --kill-others 'npm:start-client' 'npm:start-server'"
   },
   "repository": {
     "type": "git",
@@ -45,10 +46,10 @@
     "vm-browserify": "^1.1.2",
     "webpack": "^5.10.3",
     "webpack-cli": "^4.2.0",
-    "webpack-merge": "^5.7.2"
+    "webpack-merge": "^5.7.2",
+    "concurrently": "^5.3.0"
   },
   "devDependencies": {
-    "concurrently": "^5.3.0",
     "nodemon": "^2.0.6"
   }
 }
