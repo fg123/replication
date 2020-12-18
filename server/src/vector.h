@@ -3,9 +3,13 @@
 
 #include <cmath>
 #include <ostream>
-#include <algorithm>
 
 #include "replicable.h"
+
+template<class T>
+constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
+    return (v < lo) ? lo : (hi < v) ? hi : v;
+}
 
 struct Vector2 : Replicable {
     double x;
@@ -51,7 +55,7 @@ struct Vector2 : Replicable {
     void Normalize();
     double Length() const { return std::sqrt(std::pow(x, 2) + std::pow(y, 2)); }
     inline Vector2 Clamp(const Vector2& min, const Vector2& max) const {
-        return Vector2(std::clamp(x, min.x, max.x), std::clamp(y, min.y, max.y));
+        return Vector2(clamp(x, min.x, max.x), clamp(y, min.y, max.y));
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Vector2& v);
