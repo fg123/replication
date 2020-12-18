@@ -35,7 +35,9 @@ int main(int argc, char** argv) {
 
     std::thread s { GameLoop, std::ref(gameTimer) };
     
-    uWS::App().ws<PlayerSocketData>("/connect", {
+    uWS::App().get("/*", [](auto *res, auto */*req*/) {
+	    res->end("ok");
+	}).ws<PlayerSocketData>("/connect", {
         .compression = uWS::SHARED_COMPRESSOR,
         .maxPayloadLength = 16 * 1024,
         .idleTimeout = 10,
