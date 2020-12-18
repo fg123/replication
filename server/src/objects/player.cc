@@ -6,11 +6,13 @@
 
 static const int LEFT_MOUSE_BUTTON = 1;
 
-PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
+PlayerObject::PlayerObject(Game& game) : Object(game) {
+    airFriction.x = 0.9;
+}
+
+PlayerObject::PlayerObject(Game& game, Vector2 position) : PlayerObject(game) {
     SetTag(Tag::PLAYER);
     SetPosition(position);
-
-    airFriction.x = 0.9;
 
     AddCollider(new CircleCollider(this, Vector2(0, -15), 10.0));
     AddCollider(new RectangleCollider(this, Vector2(-15, -5), Vector2(30, 33)));
@@ -79,8 +81,17 @@ void PlayerObject::Serialize(json& obj) {
     if (currentWeapon) {
         obj["w"] = currentWeapon->GetId();
     }
+}
+
+void PlayerObject::ProcessReplication(json& obj) {
+    Object::ProcessReplication(obj);
+    health = obj["h"];
+    aimAngle = obj["aa"];
+    if (obj.contains("w")) {
+        currentWeapon = game.GetObject<WeaponObject>(obj["w"]);
+    }
     else {
-        obj["w"] = nullptr;
+        currentWeapon = nullptr;
     }
 }
 
@@ -107,5 +118,37 @@ void PlayerObject::DealDamage(int damage) {
     health -= damage;
     if (health < 0) {
         health = 100;
+    }
+}
+
+void PlayerObject::ProcessInputData(json& obj) {
+    if (obj["event"] == "ku") {
+        std::string key = obj["key"];
+        std::scoped_lock lock(socketDataMutex);
+        keyboardState.erase(key);
+    }
+    else if (obj["event"] == "kd") {
+        std::string key = obj["key"];
+        std::scoped_lock lock(socketDataMutex);
+        keyboardState.insert(key);
+    }
+    else if (obj["event"] == "mm") {
+        std::scoped_lock lock(socketDataMutex);
+        mousePosition.x = obj["x"];
+        mousePosition.y = obj["y"];
+    }
+    else if (obj["event"] == "md") {
+        int button = obj["button"];
+        std::scoped_lock lock(socketDataMutex);
+        if (button >= 0 && button < 5) {
+            mouseState[button] = true;
+        }
+    }
+    else if (obj["event"] == "mu") {
+        int button = obj["button"];
+        std::scoped_lock lock(socketDataMutex);
+        if (button >= 0 && button < 5) {
+            mouseState[button] = false;
+        }
     }
 }

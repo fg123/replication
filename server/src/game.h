@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <mutex>
+#include <atomic>
 
 class PlayerObject;
 
@@ -22,7 +23,7 @@ struct PlayerSocketData {
 };
 
 class Game {
-    ObjectID nextId;
+    std::atomic<ObjectID> nextId;
 
     std::mutex queuedCallsMutex;
     std::vector<std::function<void()>> queuedCalls;
@@ -37,7 +38,7 @@ class Game {
     Time gameTime;
 
     double killPlaneY = 2000;
-    
+
 public:
     Game();
     ~Game();
@@ -55,17 +56,24 @@ public:
 #endif
     void HandleCollisions(Object* obj);
     void AddObject(Object* obj);
-    void DestroyObject(Object* obj);
+    void DestroyObject(ObjectID objectId);
     Time GetGameTime() const { return gameTime; }
 
-    Object* GetObject(ObjectID id) {
+    Object* GetObjectImpl(ObjectID id) {
         if (gameObjects.find(id) != gameObjects.end())
             return gameObjects[id];
         else return nullptr;
     }
 
-    ObjectID RequestId(Object* obj);
+    template<class T = Object>
+    T* GetObject(ObjectID id) {
+        return static_cast<T*>(GetObjectImpl(id));
+    }
+
+    ObjectID RequestId();
     
+    void ChangeId(ObjectID oldId, ObjectID newId);
+
     void QueueNextTick(const std::function <void()>& func) {
         queuedCallsMutex.lock();
         queuedCalls.push_back(func);
@@ -73,8 +81,10 @@ public:
     }
 
     // Communicate with Sockets (everything here must be locked)
-    void AddPlayer(PlayerSocketData* data);
+#ifdef BUILD_SERVER
+    void AddPlayer(PlayerSocketData* data, PlayerObject* playerObject, ObjectID reservedId);
     void RemovePlayer(PlayerSocketData* data);
+#endif
 };
 
 #endif

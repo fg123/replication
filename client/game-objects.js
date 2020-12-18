@@ -37,11 +37,11 @@ module.exports = {
             context.fill();
         }
     },
-    "M4A1": {
+    "WeaponObject": {
         draw (context, resourceManager, obj, objects) {
             let isFlip = false;
             let angle = 0;
-            const playerAttach = objects[obj.attach];
+            const playerAttach = objects[obj.attach];            
             if (playerAttach) {
                 isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
                 if (isFlip) {
@@ -53,7 +53,7 @@ module.exports = {
             drawImage(context, image, obj.p.x, obj.p.y, (image.width / 3), (image.height / 3), angle);
         }
     },
-    "Marine": {
+    "PlayerObject": {
         draw (context, resourceManager, obj, objects) {
             const image = obj.v.x < 0 ? resourceManager.get('marine.png-FLIPPED') : resourceManager.get('marine.png');
             drawImage(context, image, obj.p.x, obj.p.y, (image.width / 2), (image.height / 2));

@@ -5,10 +5,11 @@
 
 class BulletObject : public Object {
 public:
+    CLASS_CREATE(BulletObject)
     BulletObject(Game& game);
 
-    const char* GetClass() override { return "BulletObject"; }
     virtual void OnCollide(CollisionResult& result) override;
 };
 
+CLASS_REGISTER(BulletObject);
 #endif

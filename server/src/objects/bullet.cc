@@ -19,7 +19,7 @@ void BulletObject::OnCollide(CollisionResult& result) {
     if (result.collidedWith->IsTagged(Tag::PLAYER)) {
         static_cast<PlayerObject*>(result.collidedWith)->DealDamage(11);
     }
-    game.QueueNextTick([&]() {
-        game.DestroyObject(this);
+    game.QueueNextTick([this]() {
+        game.DestroyObject(GetId());
     });
 }

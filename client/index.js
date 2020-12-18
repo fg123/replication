@@ -47,21 +47,37 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 
+let localPlayerObjectId = undefined;
+
 // Main Game Start (after everything has started)
 function StartGame(modules) {
     const { wasm, webSocket, resourceManager } = modules;
     const gameObjects = {};
 
     webSocket.onmessage = function (ev) {
-        const heapString = ToHeapString(wasm, ev.data);
-        wasm._HandleReplicate(heapString);
-        wasm._free(heapString);
-    
         const obj = JSON.parse(ev.data);
-        gameObjects[obj.id] = obj;
-        // console.log(obj);
+        if (obj["playerLocalObjectId"]) {
+            localPlayerObjectId = obj["playerLocalObjectId"];
+        }
+        else {
+            const heapString = ToHeapString(wasm, ev.data);
+            wasm._HandleReplicate(heapString);
+            wasm._free(heapString);
+            gameObjects[obj.id] = obj;
+        }
     };
-    
+
+    function sendInputPacket(input) {
+        const inputStr = JSON.stringify(input);
+        webSocket.send(inputStr);
+        if (localPlayerObjectId !== undefined) {
+            // Serve Inputs into Local
+            const heapString = ToHeapString(wasm, inputStr);
+            wasm._HandleLocalInput(localPlayerObjectId, heapString);
+            wasm._free(heapString);
+        }
+    }
+
     let lastTime = Date.now();
 
     const backgroundGradient = context.createLinearGradient(0, 0, 0, height);
@@ -86,9 +102,12 @@ function StartGame(modules) {
                 return;
             }
             if (gameObjectLookup[obj.t] !== undefined) {
-                obj.p.x = wasm._GetObjectX(obj.id);
-                obj.p.y = wasm._GetObjectY(obj.id);
-                gameObjectLookup[obj.t].draw(context, resourceManager, obj, gameObjects);
+                const serializedString = wasm._GetObjectSerialized(obj.id);
+                const jsonString = wasm.UTF8ToString(serializedString);
+                const serializedObject = JSON.parse(jsonString);
+                wasm._free(serializedString);
+                gameObjects[k] = serializedObject;
+                gameObjectLookup[obj.t].draw(context, resourceManager, serializedObject, gameObjects);
             }
             else {
                 console.error('Invalid object class', obj.t);
@@ -128,23 +147,17 @@ function StartGame(modules) {
 
     window.addEventListener('keydown', e => {
         if (e.repeat) { return; }
-        webSocket.send(JSON.stringify({
+        sendInputPacket({
             event: "kd",
             key: e.key
-        }));
+        });
     });
 
-    // window.addEventListener('mousedown', e => {
-    //     webSocket.send(JSON.stringify({
-    //         event: "mousedown",
-    //         key: e
-    //     }));
-    // });
     window.addEventListener('keyup', e => {
-        webSocket.send(JSON.stringify({
+        sendInputPacket({
             event: "ku",
             key: e.key
-        }));
+        });
     });
 
     let lastMouseMoveSend = Date.now();
@@ -153,25 +166,25 @@ function StartGame(modules) {
         const current = Date.now();
         if (current - lastMouseMoveSend > 30) {
             lastMouseMoveSend = current;
-            webSocket.send(JSON.stringify({
+            sendInputPacket({
                 event: "mm",
                 x: e.pageX,
                 y: e.pageY
-            }));
+            });
         }
     });
 
     window.addEventListener('mousedown', e => {
-        webSocket.send(JSON.stringify({
+        sendInputPacket({
             event: "md",
             button: e.which
-        }));
+        });
     });
 
     window.addEventListener('mouseup', e => {
-        webSocket.send(JSON.stringify({
+        sendInputPacket({
             event: "mu",
             button: e.which
-        }));
+        });
     })
 }

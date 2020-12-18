@@ -5,7 +5,7 @@
 
 #include <exception>
 
-WeaponObject::WeaponObject(Game& game, Vector2 position) : Object(game) {
+WeaponObject::WeaponObject(Game& game, Vector2 position) : WeaponObject(game) {
     SetPosition(position);
     // No Colliders
     collideExclusion |= (uint64_t)Tag::PLAYER;
@@ -45,8 +45,15 @@ void WeaponObject::Serialize(json& obj) {
     if (attachedTo) {
         obj["attach"] = attachedTo->GetId();
     }
+}
+
+void WeaponObject::ProcessReplication(json& obj) {
+    Object::ProcessReplication(obj);
+    if (obj.contains("attach")) {
+        attachedTo = game.GetObject<PlayerObject>(obj["attach"]);
+    }
     else {
-        obj["attach"] = nullptr;
+        attachedTo = nullptr;
     }
 }
 
@@ -55,9 +62,10 @@ void WeaponObject::Fire(Time time) {
         return;
     }
     nextFireTime = time + (1000.0 / fireRate);
-
+#ifdef BUILD_SERVER
     BulletObject* bullet = new BulletObject(game);
     bullet->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 30);
     bullet->SetVelocity(attachedTo->GetAimDirection() * 1000.0);
     game.AddObject(bullet);
+#endif
 }

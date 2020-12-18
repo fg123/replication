@@ -7,14 +7,15 @@
 class RectangleObject : public Object {
     Vector2 size;
 public:
-    RectangleObject(Game& game, Vector2 position, Vector2 size) :
-        Object(game), size(size) {
-        SetPosition(position);
+    CLASS_CREATE(RectangleObject)
 
+    RectangleObject(Game& game) : Object(game) {}
+    RectangleObject(Game& game, Vector2 position, Vector2 size) :
+         RectangleObject(game) {
+        this->size = size;
+        SetPosition(position);
         AddCollider(new RectangleCollider(this, Vector2::Zero, size));
     }
-
-    const char* GetClass() override { return "RectangleObject"; }
 
     virtual void Serialize(json& obj) override {
         Object::Serialize(obj);
@@ -22,4 +23,5 @@ public:
     }
 };
 
+CLASS_REGISTER(RectangleObject);
 #endif

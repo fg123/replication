@@ -2,13 +2,35 @@
 #define OBJECT_H
 
 #include <cstdint>
+#include <unordered_map>
+
 #include "timer.h"
 #include "vector.h"
 #include "collision.h"
 
-using ObjectID = uint64_t;
+// This must be 32 bit because client side JS only supports 32 bit
+using ObjectID = uint32_t;
 
 class Game;
+class Object;
+
+using json = nlohmann::json;
+
+using ObjectConstructor = Object*(*)(Game& game);
+std::unordered_map<std::string, ObjectConstructor>& GetClassLookup();
+
+template<class T>
+struct ObjectRegister {
+    ObjectRegister(const char* name) {
+        GetClassLookup()[name] = T::Create;
+    }
+};
+
+#define CLASS_CREATE(name) \
+    static Object* Create(Game& game) { return new name(game); } \
+    const char* GetClass() override { return #name; }
+
+#define CLASS_REGISTER(name) static ObjectRegister<name> name##_Register { #name }
 
 enum class Tag : uint64_t {
     PLAYER = 0b001,
@@ -53,16 +75,14 @@ public:
     void AddCollider(Collider* col) { colliders.push_back(col); }
     ObjectID GetId() const { return id; }
 
-#ifdef BUILD_CLIENT
-    // Very dangerous, only client side replication uses
     void SetId(ObjectID newId) { id = newId; }
-#endif
+
     void ProcessReplication(json& object) override;
 
     bool IsDirty() const { return isDirty; }
     void SetDirty(bool dirty) { isDirty = dirty; }
 
-    virtual const char* GetClass() { return "Object"; }
+    virtual const char* GetClass() = 0;
     virtual void Serialize(json& obj) override;
 
     const Vector2& GetPosition() const { return position; }

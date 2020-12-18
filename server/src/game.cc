@@ -15,8 +15,6 @@ Game::Game() : nextId(0) {
     AddObject(new RectangleObject(*this, Vector2{200, 100}, Vector2{50, 50}));
     // AddObject(new RectangleObject(*this, Vector2{300, 200}, Vector2{50, 50}));
     // AddObject(new RectangleObject(*this, Vector2{400, 200}, Vector2{50, 50}));
-
-    
 }
 
 Game::~Game() {
@@ -37,11 +35,11 @@ void Game::Tick(Time time) {
     for (auto& object : gameObjects) {
         object.second->Tick(time);
         if (object.second->GetPosition().y > killPlaneY) {
-            killPlaned.insert(object.second);
+            // TODO: Deal damage instead of insta kill
         }
     }
     for (auto& object : killPlaned) {
-        DestroyObject(object);
+        DestroyObject(object->GetId());
     }
 }
 
@@ -72,6 +70,9 @@ void Game::Replicate(Time time) {
         for (auto& object : serialized) {
             player->ws->send(object.second, uWS::OpCode::TEXT);
         }
+        json objectNotify;
+        objectNotify["playerLocalObjectId"] = player->playerObject->GetId();
+        player->ws->send(objectNotify.dump(), uWS::OpCode::TEXT);
     }
 }
 #endif
@@ -82,15 +83,15 @@ void Game::ProcessReplication(json& object) {
     if (object.contains("dead")) {
         // Kill
         if (gameObjects.find(id) != gameObjects.end()) {
-            DestroyObject(gameObjects[id]);
+            DestroyObject(id);
             return;
         }
         return;
     }
     if (gameObjects.find(id) == gameObjects.end()) {
-        Object* obj = new Object(*this);
+        Object* obj = GetClassLookup()[object["t"]](*this);
         obj->SetId(id);
-        AddObject(obj);
+        gameObjects[id] = obj;
     }
     Object* obj = GetObject(id);
     obj->ProcessReplication(object);
@@ -116,34 +117,51 @@ void Game::HandleCollisions(Object* obj) {
     obj->ResolveCollision(collisionResolution);
 }
 
+void Game::ChangeId(ObjectID oldId, ObjectID newId) {
+    if (oldId == newId) return;
+    if (gameObjects.find(oldId) == gameObjects.end()) {
+        throw std::runtime_error("Invalid old ID " + std::to_string(oldId));
+    }
+    else if (gameObjects.find(newId) != gameObjects.end()) {
+        throw std::runtime_error("New ID already exists " + std::to_string(newId));
+    }
+    std::cout << "Changing ID " << oldId << " -> " << newId << " " << gameObjects[oldId] << std::endl;
+    gameObjects[newId] = gameObjects[oldId];
+    gameObjects[newId]->SetId(newId);
+    gameObjects.erase(oldId);
+}
+
 void Game::AddObject(Object* obj) {
-    gameObjects[obj->GetId()] = obj;
+    // Client should never add object and wait for server to tell me
+    ObjectID newId = RequestId();
+    obj->SetId(newId);
+    gameObjects[newId] = obj;
 }
 
-void Game::DestroyObject(Object* obj) {
-    gameObjects.erase(obj->GetId());
-    obj->OnDeath();
-#ifdef BUILD_SERVER
-    deadObjects.insert(obj);
-#endif
-#ifdef BUILD_CLIENT
-    // Client doesn't need to further replicate 
-    delete obj;
-#endif
+void Game::DestroyObject(ObjectID objectId) {
+    std::cout << "Destroying Object " << objectId << std::endl;
+    if (gameObjects.find(objectId) == gameObjects.end()) {
+        return;
+    }
+    Object* object = gameObjects[objectId];
+    gameObjects.erase(objectId);
+    object->OnDeath();
+    deadObjects.insert(object);
 }
 
-ObjectID Game::RequestId(Object* obj) {
+ObjectID Game::RequestId() {
     return nextId++;
 }
 
-void Game::AddPlayer(PlayerSocketData* data) {
+#ifdef BUILD_SERVER
+void Game::AddPlayer(PlayerSocketData* data, PlayerObject* playerObject, ObjectID reservedId) {
     std::scoped_lock<std::mutex> lock(playersSetMutex);
     players.insert(data);
 
-    QueueNextTick([&]() {
-        PlayerObject* playerObject = new PlayerObject(*this, Vector2(100, 100));
+    QueueNextTick([playerObject, reservedId, this]() {
+        // Already reserved one to tell the client, so we override it.
         AddObject(playerObject);
-        data->playerObject = playerObject;
+        ChangeId(playerObject->GetId(), reservedId);
     });
 }
 
@@ -151,7 +169,10 @@ void Game::RemovePlayer(PlayerSocketData* data) {
     std::scoped_lock<std::mutex> lock(playersSetMutex);
     players.erase(data);
 
-    QueueNextTick([&]() {
-        DestroyObject(data->playerObject);
+    PlayerObject* playerObject = data->playerObject;
+    std::cout << "Removing player " << playerObject << std::endl;
+    QueueNextTick([playerObject, this]() {
+        DestroyObject(playerObject->GetId());
     });
 }
+#endif

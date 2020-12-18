@@ -5,6 +5,11 @@
 
 static const double GRAVITY = 3000;
 
+std::unordered_map<std::string, ObjectConstructor>& GetClassLookup() {
+    static std::unordered_map<std::string, ObjectConstructor> ClassLookup;
+    return ClassLookup;
+}
+
 Time Object::DeltaTime(Time currentTime) {
     if (lastTickTime == 0) {
         lastTickTime = currentTime;
@@ -16,7 +21,6 @@ Time Object::DeltaTime(Time currentTime) {
 }
 
 Object::Object(Game& game) : game(game), airFriction(0.97, 1) {
-    id = game.RequestId(this);
 }
 
 Object::~Object() {
@@ -113,6 +117,9 @@ void Object::ProcessReplication(json& object) {
     collideExclusion = object["ce"];
 
     if (colliders.size() != object["c"].size()) {
+        for (auto& collider : colliders) {
+            delete collider;
+        }
         colliders.clear();
     }
     if (colliders.empty()) {

@@ -13,17 +13,23 @@ CPPFLAGS += -std=c++17
 CFLAGS += -g -Wall -I $(SRC_DIR) -I $(USOCKET)/src 
 LDLIBS = -L/usr/lib
 SERVER_LDLIBS = $(LDLIBS) -L$(USOCKET) -lz -l:uSockets.a -lpthread
+WASM_FLAGS = -g4 -s ASSERTIONS=2 -s SAFE_HEAP=1 -s STACK_OVERFLOW_CHECK=1 \
+	-s MODULARIZE -s EXPORTED_RUNTIME_METHODS=['ccall'] \
+	-s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
+	--source-map-base http://localhost:8000/ \
+	-s ALLOW_MEMORY_GROWTH=1
 
 all: server client
 
 server: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
-	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) -o bin/$(EXE)_server
+	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) -g -o bin/$(EXE)_server
 
 client: $(CLIENT_OBJ)
-	em++ -O2 $(LDFLAGS) $^ $(LDLIBS) -g -s MODULARIZE -s EXPORTED_RUNTIME_METHODS=['ccall'] -s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8'] -o bin/$(EXE)_client.js
+	em++ -O2 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) -o bin/$(EXE)_client.js
 	cp bin/$(EXE)_client.wasm ../client/dist/
 	cp bin/$(EXE)_client.js ../client/
+	cp bin/$(EXE)_client.wasm.map ../client/dist/
 
 %.o: %.cc $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CFLAGS) -DBUILD_SERVER -c $< -o $@

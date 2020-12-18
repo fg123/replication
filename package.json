@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "build": "webpack",
+    "build-dev": "webpack --config webpack.dev.js",
     "watch-client": "nodemon --watch client client/serve.js",
-    "dev": "concurrently --kill-others 'npm:watch-client' 'npm:build'"
+    "build-prod": "webpack --config webpack.prod.js",
+    "start-client": "node client/serve.js",
+    "dev": "concurrently --kill-others 'npm:watch-client' 'npm:build-dev'",
+    "prod": "NODE_ENV=production npm run build-prod && NODE_ENV=production npm run start-client"
   },
   "repository": {
     "type": "git",
@@ -19,12 +22,13 @@
   "homepage": "https://github.com/fg123/replication#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "path-browserify": "^1.0.1"
+    "path-browserify": "^1.0.1",
+    "webpack-merge": "^5.7.2",
+    "webpack": "^5.10.3",
+    "webpack-cli": "^4.2.0"
   },
   "devDependencies": {
     "concurrently": "^5.3.0",
-    "nodemon": "^2.0.6",
-    "webpack": "^5.10.3",
-    "webpack-cli": "^4.2.0"
+    "nodemon": "^2.0.6"
   }
 }

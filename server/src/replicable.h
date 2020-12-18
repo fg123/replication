@@ -12,4 +12,5 @@ public:
     virtual void ProcessReplication(json& obj) = 0;
 };
 
+
 #endif

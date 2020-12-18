@@ -10,7 +10,7 @@
 static bool gameRunning = true;
 
 static const int TickRate = 128;
-static const int ReplicateRate = 20;
+static const int ReplicateRate = 10;
 
 void GameLoop(Timer& gameTimer) {
     while (gameRunning) {
@@ -44,47 +44,23 @@ int main() {
             std::cout << "Connection Opened" << std::endl;
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
             data->ws = ws;
-            game.AddPlayer(data);
+
+            PlayerObject* playerObject = new PlayerObject(game, Vector2(100, 100));
+            data->playerObject = playerObject;
+
+            // Reserve an ID first
+            ObjectID id = game.RequestId();
+        
+            game.AddPlayer(data, playerObject, id);
         },
         .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
-            std::cout << message << std::endl;
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
             if (!data->playerObject) {
                 // Next tick hasn't been scheduled yet
                 return;
             }
             json obj = json::parse(message);
-            if (obj["event"] == "ku") {
-                //std::cout << "KEYUP " << obj["key"] << std::endl;
-                std::string key = obj["key"];
-                std::scoped_lock lock(data->playerObject->socketDataMutex);
-                data->playerObject->keyboardState.erase(key);
-            }
-            else if (obj["event"] == "kd") {
-                //std::cout << "KEYDOWN " << obj["key"] << std::endl;
-                std::string key = obj["key"];
-                std::scoped_lock lock(data->playerObject->socketDataMutex);
-                data->playerObject->keyboardState.insert(key);
-            }
-            else if (obj["event"] == "mm") {
-                std::scoped_lock lock(data->playerObject->socketDataMutex);
-                data->playerObject->mousePosition.x = obj["x"];
-                data->playerObject->mousePosition.y = obj["y"];
-            }
-            else if (obj["event"] == "md") {
-                int button = obj["button"];
-                std::scoped_lock lock(data->playerObject->socketDataMutex);\
-                if (button >= 0 && button < 5) {
-                    data->playerObject->mouseState[button] = true;
-                }
-            }
-            else if (obj["event"] == "mu") {
-                int button = obj["button"];
-                std::scoped_lock lock(data->playerObject->socketDataMutex);
-                if (button >= 0 && button < 5) {
-                    data->playerObject->mouseState[button] = false;
-                }
-            }
+            data->playerObject->ProcessInputData(obj);
         },
         .drain = [](auto */*ws*/) {
             /* Check ws->getBufferedAmount() here */

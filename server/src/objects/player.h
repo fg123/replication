@@ -19,20 +19,26 @@ class PlayerObject : public Object {
     
     Time canPickupTime = 0;
 public:
+
+    CLASS_CREATE(PlayerObject)
+
     std::mutex socketDataMutex;
     std::unordered_set<std::string> keyboardState;
     bool mouseState[5];
     Vector2 mousePosition;
 
+    PlayerObject(Game& game);
     PlayerObject(Game& game, Vector2 position);
     ~PlayerObject();
 
     virtual void OnDeath() override;
     virtual void Tick(Time time) override;
-    virtual const char* GetClass() override { return "Marine"; }
     virtual void Serialize(json& obj) override;
+    virtual void ProcessReplication(json& obj) override;
     virtual void OnCollide(CollisionResult& result) override;
     
+    void ProcessInputData(json& obj);
+
     void PickupWeapon(WeaponObject* weapon);
     void DropWeapon();
 
@@ -40,5 +46,7 @@ public:
 
     Vector2 GetAimDirection() const;
 };
+
+CLASS_REGISTER(PlayerObject);
 
 #endif

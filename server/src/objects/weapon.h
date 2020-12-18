@@ -13,8 +13,10 @@ class WeaponObject : public Object {
     double fireRate = 3;
     Time nextFireTime = 0;
 public:
+    CLASS_CREATE(WeaponObject)
+
+    WeaponObject(Game& game) : Object(game) {}
     WeaponObject(Game& game, Vector2 position);
-    virtual const char* GetClass() override { return "M4A1"; }
 
     void AttachToPlayer(PlayerObject* player);
     void Detach();
@@ -22,7 +24,10 @@ public:
     void Fire(Time time);
     virtual void Tick(Time time) override;
     virtual void Serialize(json& obj) override;
+    virtual void ProcessReplication(json& obj) override;
     
 };
+
+CLASS_REGISTER(WeaponObject);
 
 #endif
