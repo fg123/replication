@@ -89,7 +89,9 @@ CollisionResult RectangleCollider::CollidesWith(Collider* other) {
         return r;
     }
     else {
-        return RectangleAndCircleCollide(this, static_cast<CircleCollider*>(other));
+        CollisionResult r = RectangleAndCircleCollide(this, static_cast<CircleCollider*>(other));
+        r.collisionDifference *= -1;
+        return r;
     }
 }
 

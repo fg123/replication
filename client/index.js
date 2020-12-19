@@ -60,16 +60,28 @@ function StartGame(modules) {
     const { wasm, webSocket, resourceManager, mapImage } = modules;
     const gameObjects = {};
 
+    webSocket.send('{"event":"rdy"}');
+
+    setInterval(() => {
+        webSocket.send('{"event":"hb"}');
+    }, 10000);
+
     webSocket.onmessage = function (ev) {
-        const obj = JSON.parse(ev.data);
-        if (obj["playerLocalObjectId"]) {
-            localPlayerObjectId = obj["playerLocalObjectId"];
+        const events = JSON.parse(ev.data);
+        if (events["playerLocalObjectId"]) {
+            console.log("player Local id", events);
+            localPlayerObjectId = events["playerLocalObjectId"];
         }
         else {
             const heapString = ToHeapString(wasm, ev.data);
             wasm._HandleReplicate(heapString);
             wasm._free(heapString);
-            gameObjects[obj.id] = obj;
+            events.forEach(obj => {
+                if (gameObjects[obj.id] === undefined) {
+                    // New Object
+                    gameObjects[obj.id] = { id: obj.id };
+                }
+            });
         }
     };
 
@@ -103,18 +115,22 @@ function StartGame(modules) {
 
         context.drawImage(mapImage, 0, 0);
         Object.keys(gameObjects).forEach((k) => {
-            const obj = gameObjects[k];
-            if (!wasm._IsObjectAlive(obj.id)) {
+            if (!wasm._IsObjectAlive(k)) {
                 delete gameObjects[k];
                 return;
             }
+
+            const serializedString = wasm._GetObjectSerialized(k);
+            const jsonString = wasm.UTF8ToString(serializedString);
+            const serializedObject = JSON.parse(jsonString);
+            wasm._free(serializedString);
+            gameObjects[k] = serializedObject;
+
+            const obj = gameObjects[k];
+            
             if (gameObjectLookup[obj.t] !== undefined) {
-                const serializedString = wasm._GetObjectSerialized(obj.id);
-                const jsonString = wasm.UTF8ToString(serializedString);
-                const serializedObject = JSON.parse(jsonString);
-                wasm._free(serializedString);
-                gameObjects[k] = serializedObject;
-                gameObjectLookup[obj.t].draw(context, resourceManager, serializedObject, gameObjects);
+                gameObjectLookup[obj.t].draw(context, resourceManager,
+                    serializedObject, gameObjects);
             }
             else {
                 console.error('Invalid object class', obj.t);

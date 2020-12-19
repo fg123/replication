@@ -49,14 +49,19 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     void HandleReplicate(const char* input) {
-        // std::cout << input << std::endl;
-        json object = json::parse(input);
-        game.ProcessReplication(object);
+        try {
+            json object = json::parse(input);
+            for (auto& event : object) {
+                game.ProcessReplication(event);
+            }
+        } catch(...) {
+            std::cout << input << std::endl;
+            throw;
+        }
     }
 
     EMSCRIPTEN_KEEPALIVE
     void HandleLocalInput(ObjectID object, const char* input) {
-        //std::cout << object << " " << input << std::endl; 
         Object* obj = game.GetObject(object);
         if (obj) {
             json object = json::parse(input);

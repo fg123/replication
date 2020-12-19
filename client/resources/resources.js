@@ -6,5 +6,8 @@ module.exports = {
     'm4.png': {
         flipDirection: true
     },
+    'bow.png': {
+        flipDirection: true
+    },
     "map1Tiles.png": {}
 };

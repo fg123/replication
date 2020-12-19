@@ -9,9 +9,6 @@
 
 static bool gameRunning = true;
 
-static const int TickRate = 128;
-static const int ReplicateRate = 30;
-
 void GameLoop(Timer& gameTimer) {
     while (gameRunning) {
         gameTimer.Tick();
@@ -35,12 +32,12 @@ int main(int argc, char** argv) {
 
     std::thread s { GameLoop, std::ref(gameTimer) };
     
-    uWS::App().get("/*", [](auto *res, auto */*req*/) {
+    uWS::App().get("/status", [](auto *res, auto */*req*/) {
 	    res->end("ok");
 	}).ws<PlayerSocketData>("/connect", {
         .compression = uWS::SHARED_COMPRESSOR,
         .maxPayloadLength = 16 * 1024,
-        .idleTimeout = 10,
+        .idleTimeout = 30,
         .maxBackpressure = 1 * 1024 * 1024,
         /* Handlers */
         .upgrade = nullptr,
@@ -55,7 +52,6 @@ int main(int argc, char** argv) {
 
             // Reserve an ID first
             ObjectID id = game.RequestId();
-        
             game.AddPlayer(data, playerObject, id);
         },
         .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
@@ -65,6 +61,9 @@ int main(int argc, char** argv) {
                 return;
             }
             json obj = json::parse(message);
+            if (obj["event"] == "rdy") {
+                data->isReady = true;
+            }
             data->playerObject->ProcessInputData(obj);
         },
         .drain = [](auto */*ws*/) {

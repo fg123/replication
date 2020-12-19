@@ -15,15 +15,20 @@
 
 class PlayerObject;
 
+static const int TickRate = 128;
+static const int ReplicateRate = 20;
+
 struct PlayerSocketData {
 #ifdef BUILD_SERVER
     uWS::WebSocket<false, true>* ws;
+    bool hasInitialReplication = false;
+    bool isReady = false;
 #endif
     PlayerObject* playerObject;
 };
 
 class Game {
-    std::atomic<ObjectID> nextId;
+    std::atomic<ObjectID> nextId = 1;
 
     std::mutex queuedCallsMutex;
     std::vector<std::function<void(Game& game)>> queuedCalls;
@@ -51,10 +56,13 @@ public:
 #ifdef BUILD_SERVER
     // Replicate objects that have changed to clients
     void Replicate(Time time);
+    void InitialReplication(PlayerSocketData* data);
 #endif
+
 #ifdef BUILD_CLIENT
     void ProcessReplication(json& incObject);
 #endif
+
     void HandleCollisions(Object* obj);
     void AddObject(Object* obj);
     void DestroyObject(ObjectID objectId);
@@ -86,6 +94,7 @@ public:
     void AddPlayer(PlayerSocketData* data, PlayerObject* playerObject, ObjectID reservedId);
     void RemovePlayer(PlayerSocketData* data);
 #endif
+
 };
 
 #endif

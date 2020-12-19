@@ -61,6 +61,7 @@
         "valarray": "cpp",
         "clocale": "cpp",
         "forward_list": "cpp",
-        "numeric": "cpp"
+        "numeric": "cpp",
+        "fstream": "cpp"
     }
 }

@@ -8,12 +8,10 @@
 class PlayerObject;
 
 class WeaponObject : public Object {
+protected:
     PlayerObject* attachedTo = nullptr;
 
-    double fireRate = 10;
-    Time nextFireTime = 0;
 public:
-    CLASS_CREATE(WeaponObject)
 
     WeaponObject(Game& game) : Object(game) {}
     WeaponObject(Game& game, Vector2 position);
@@ -21,13 +19,11 @@ public:
     void AttachToPlayer(PlayerObject* player);
     void Detach();
 
-    void Fire(Time time);
+    virtual void Fire(Time time) = 0;
     virtual void Tick(Time time) override;
     virtual void Serialize(json& obj) override;
     virtual void ProcessReplication(json& obj) override;
     
 };
-
-CLASS_REGISTER(WeaponObject);
 
 #endif

@@ -29,10 +29,9 @@ Object::~Object() {
     }
 }
 
+#include <iostream>
 void Object::Tick(Time time) {
     // Always replicate for now
-    SetDirty(true);
-
     if (isStatic) return;
 
     Time delta = DeltaTime(time);
@@ -42,6 +41,9 @@ void Object::Tick(Time time) {
     if (!isStatic && GetColliderCount() > 0 && !IsTagged(Tag::NO_GRAVITY)) {
         velocity.y += GRAVITY * timeFactor;
     }
+    else if (!IsTagged(Tag::WEAPON)) {
+        std::cout << "NO GRAV " << isStatic << GetColliderCount() << IsTagged(Tag::NO_GRAVITY) << std::endl;
+    }
 
     velocity *= airFriction;
 
@@ -49,10 +51,13 @@ void Object::Tick(Time time) {
     position += positionDelta;
 
     isGrounded = false;
-    game.HandleCollisions(this);        
+    game.HandleCollisions(this);
+    
+    SetDirty(true);  
 }
 
 void Object::ResolveCollision(const Vector2& difference) {
+    if (isStatic) return;
     // TODO: this collision difference really should be negated
     position -= difference;
     // We had to adjust the collision in a certain direction.
@@ -88,6 +93,11 @@ CollisionResult Object::CollidesWith(Object* other) {
         }
     }
     return finalResult;
+}
+
+void Object::SetIsStatic(bool isStatic) {
+    this->isStatic = isStatic; 
+    SetDirty(true);
 }
 
 void Object::Serialize(json& obj) {

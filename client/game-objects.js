@@ -37,7 +37,18 @@ module.exports = {
             context.fill();
         }
     },
-    "WeaponObject": {
+    "ArrowObject": {
+        draw (context, resourceManager, obj, objects) {
+            context.strokeStyle = "black";
+            context.lineWidth = 3;
+            context.beginPath();
+            context.moveTo(obj.p.x, obj.p.y);
+            const mag = Math.sqrt(Math.pow(obj.v.x, 2) + Math.pow(obj.v.y, 2))
+            context.lineTo(obj.p.x - (obj.v.x / mag)* 30, obj.p.y - (obj.v.y / mag) * 30)
+            context.stroke();
+        }
+    },
+    "AssaultRifleObject": {
         draw (context, resourceManager, obj, objects) {
             let isFlip = false;
             let angle = 0;
@@ -50,6 +61,22 @@ module.exports = {
                 angle += playerAttach.aa;
             }
             const image = isFlip ? resourceManager.get('m4.png-FLIPPED') : resourceManager.get('m4.png');
+            drawImage(context, image, obj.p.x, obj.p.y, (image.width / 3), (image.height / 3), angle);
+        }
+    },
+    "BowObject": {
+        draw (context, resourceManager, obj, objects) {
+            let isFlip = false;
+            let angle = 0;
+            const playerAttach = objects[obj.attach];            
+            if (playerAttach) {
+                isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
+                if (isFlip) {
+                    angle = Math.PI;
+                }
+                angle += playerAttach.aa;
+            }
+            const image = isFlip ? resourceManager.get('bow.png-FLIPPED') : resourceManager.get('bow.png');
             drawImage(context, image, obj.p.x, obj.p.y, (image.width / 3), (image.height / 3), angle);
         }
     },

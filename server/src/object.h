@@ -33,9 +33,9 @@ struct ObjectRegister {
 #define CLASS_REGISTER(name) static ObjectRegister<name> name##_Register { #name }
 
 enum class Tag : uint64_t {
-    PLAYER = 0b001,
-    GROUND = 0b010,
-    WEAPON = 0b100,
+    PLAYER = 0b0001,
+    GROUND = 0b0010,
+    WEAPON = 0b0100,
     NO_GRAVITY = 0b1000
 };
 
@@ -48,17 +48,22 @@ protected:
     Vector2 velocity;
     Vector2 airFriction;
 
-    ObjectID id;
+    ObjectID id = 0;
     bool isDirty = false;
     bool isStatic = false;
     bool isGrounded = false;
     Time lastTickTime = 0;
 
     std::vector<Collider*> colliders;
-    uint64_t tags;
+    uint64_t tags = 0;
     uint64_t collideExclusion = 0;
 
 public:
+
+#ifdef BUILD_SERVER
+    size_t replicateSoftCounter = 0;
+#endif
+
     Object(Game& game);
     virtual ~Object();
 
@@ -92,7 +97,7 @@ public:
     void SetVelocity(const Vector2& in) { velocity = in; }
 
     bool IsStatic() const { return isStatic; }
-    void SetIsStatic(bool isStatic) { this->isStatic = isStatic; }
+    void SetIsStatic(bool isStatic);
 
     uint64_t IsCollideExcluded(uint64_t tags) { return collideExclusion & tags; }
     uint64_t GetTags() const { return tags; };

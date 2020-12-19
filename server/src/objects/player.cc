@@ -1,6 +1,7 @@
 #include "player.h"
 #include "collision.h"
 #include "game.h"
+#include "assault-rifle.h"
 
 #include <iostream>
 
@@ -14,10 +15,10 @@ PlayerObject::PlayerObject(Game& game, Vector2 position) : PlayerObject(game) {
     SetTag(Tag::PLAYER);
     SetPosition(position);
 
-    AddCollider(new CircleCollider(this, Vector2(0, -15), 10.0));
+    AddCollider(new CircleCollider(this, Vector2(0, -15), 15.0));
     AddCollider(new RectangleCollider(this, Vector2(-15, -5), Vector2(30, 33)));
 
-    WeaponObject* obj = new WeaponObject(game, Vector2::Zero);
+    AssaultRifleObject* obj = new AssaultRifleObject(game, Vector2::Zero);
     game.AddObject(obj);
     PickupWeapon(obj);
 }
@@ -150,5 +151,8 @@ void PlayerObject::ProcessInputData(json& obj) {
         if (button >= 0 && button < 5) {
             mouseState[button] = false;
         }
+    }
+    else if (obj["event"] == "hb") {
+        std::cout << "Client Heartbeat" << std::endl;
     }
 }

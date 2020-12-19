@@ -10,6 +10,7 @@ WeaponObject::WeaponObject(Game& game, Vector2 position) : WeaponObject(game) {
     // No Colliders
     collideExclusion |= (uint64_t)Tag::PLAYER;
     SetTag(Tag::WEAPON);
+    Detach();
 }
 
 void WeaponObject::AttachToPlayer(PlayerObject* player) {
@@ -23,12 +24,14 @@ void WeaponObject::AttachToPlayer(PlayerObject* player) {
     if (attachedTo) {
         colliders.clear();
     }
+    SetDirty(true);
 }
 
 void WeaponObject::Detach() {
     attachedTo = nullptr;
     SetVelocity(Vector2::Zero);
     AddCollider(new RectangleCollider(this, Vector2(-3, -10), Vector2(74, 24)));
+    SetDirty(true);
 }
 
 void WeaponObject::Tick(Time time) {
@@ -55,17 +58,4 @@ void WeaponObject::ProcessReplication(json& obj) {
     else {
         attachedTo = nullptr;
     }
-}
-
-void WeaponObject::Fire(Time time) {
-    if (time < nextFireTime) {
-        return;
-    }
-    nextFireTime = time + (1000.0 / fireRate);
-#ifdef BUILD_SERVER
-    BulletObject* bullet = new BulletObject(game);
-    bullet->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 50);
-    bullet->SetVelocity(attachedTo->GetAimDirection() * 2000.0);
-    game.AddObject(bullet);
-#endif
 }
