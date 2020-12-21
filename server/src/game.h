@@ -42,7 +42,8 @@ class Game {
 
     Time gameTime;
 
-    Vector2 killPlaneSize = Vector2 { 3000, 2000 };
+    Vector2 killPlaneStart = { -3000, -2000 };
+    Vector2 killPlaneEnd = Vector2 { 3000, 2000 };
 
 public:
     Game();

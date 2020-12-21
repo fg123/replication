@@ -71,11 +71,12 @@ void Game::Tick(Time time) {
 #ifdef BUILD_SERVER
     for (auto& object : gameObjects) {
         if (!object.second->IsStatic() &&
-            !IsPointInRect(Vector2::Zero, killPlaneSize,
+            !IsPointInRect(killPlaneStart, killPlaneEnd - killPlaneStart,
                 object.second->GetPosition())) {
             // TODO: Deal damage instead of insta kill
             // You're out of the range 
-           killPlaned.insert(object.second);
+            LOG_INFO("Kill Planed: (" << object.second->GetId() << ") " << object.second->GetClass() << " " << object.second->GetPosition());
+            killPlaned.insert(object.second);
         }
     }
 #endif

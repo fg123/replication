@@ -114,6 +114,9 @@ void PlayerObject::Tick(Time time)  {
     aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
     Object::Tick(time);
 
+    if (currentWeapon) {
+        currentWeapon->SetPosition(GetAttachmentPoint());
+    }
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;
 }
