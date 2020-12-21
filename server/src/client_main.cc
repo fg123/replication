@@ -1,6 +1,6 @@
 #include <emscripten.h>
 
-#include <iostream>
+#include "logging.h"
 #include "game.h"
 #include "objects/player.h"
 #include "object.h"
@@ -16,9 +16,9 @@ extern "C" {
         try {
             game.Tick(time);
         } catch(std::runtime_error& error) {
-            std::cout << error.what() << std::endl;
+            LOG_ERROR(error.what());
         } catch(...) {
-            std::cout << "Unhandled Exception!" << std::endl;
+            LOG_ERROR("Unhandled Exception!");
         }
     }
 
@@ -61,7 +61,7 @@ extern "C" {
                 game.ProcessReplication(event);
             }
         } catch(...) {
-            std::cout << input << std::endl;
+            LOG_ERROR(input);
             throw;
         }
     }

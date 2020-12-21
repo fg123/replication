@@ -21,8 +21,6 @@ void GrenadeObject::OnCollide(CollisionResult& result) {
     }
 }
 
-#include <iostream>
-
 void GrenadeObject::Tick(Time time) {
     Object::Tick(time);
     if (isPrimed && startTickingTime == 0) {

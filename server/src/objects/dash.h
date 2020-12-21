@@ -3,7 +3,6 @@
 
 #include "weapon.h"
 #include "player.h"
-#include <iostream>
 
 class DashWeapon : public WeaponObject {
     static const int DashAmount = 1500;
@@ -35,9 +34,7 @@ public:
         Vector2 velocity = attachedTo->GetVelocity();
         velocity += attachedTo->GetAimDirection().Normalize() * DashAmount;
         
-        std::cout << "DASH NOW" << velocity << std::endl;
         attachedTo->SetVelocity(velocity);
-        std::cout << "DASH NOW" << attachedTo->GetVelocity() << std::endl;
     }
 
     virtual void Serialize(json& obj) override {

@@ -255,6 +255,51 @@ if (!Object.getOwnPropertyDescriptor(Module["ready"], "_setThrew")) {
  });
 }
 
+if (!Object.getOwnPropertyDescriptor(Module["ready"], "__get_tzname")) {
+ Object.defineProperty(Module["ready"], "__get_tzname", {
+  configurable: true,
+  get: function() {
+   abort("You are getting __get_tzname on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+ Object.defineProperty(Module["ready"], "__get_tzname", {
+  configurable: true,
+  set: function() {
+   abort("You are setting __get_tzname on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+}
+
+if (!Object.getOwnPropertyDescriptor(Module["ready"], "__get_daylight")) {
+ Object.defineProperty(Module["ready"], "__get_daylight", {
+  configurable: true,
+  get: function() {
+   abort("You are getting __get_daylight on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+ Object.defineProperty(Module["ready"], "__get_daylight", {
+  configurable: true,
+  set: function() {
+   abort("You are setting __get_daylight on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+}
+
+if (!Object.getOwnPropertyDescriptor(Module["ready"], "__get_timezone")) {
+ Object.defineProperty(Module["ready"], "__get_timezone", {
+  configurable: true,
+  get: function() {
+   abort("You are getting __get_timezone on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+ Object.defineProperty(Module["ready"], "__get_timezone", {
+  configurable: true,
+  set: function() {
+   abort("You are setting __get_timezone on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+}
+
 if (!Object.getOwnPropertyDescriptor(Module["ready"], "onRuntimeInitialized")) {
  Object.defineProperty(Module["ready"], "onRuntimeInitialized", {
   configurable: true,
@@ -1810,6 +1855,61 @@ function ___cxa_throw(ptr, type, destructor) {
  exceptionLast = ptr;
  uncaughtExceptionCount++;
  throw ptr + " - Exception catching is disabled, this exception cannot be caught. Compile with -s DISABLE_EXCEPTION_CATCHING=0 or DISABLE_EXCEPTION_CATCHING=2 to catch.";
+}
+
+function _tzset() {
+ if (_tzset.called) return;
+ _tzset.called = true;
+ var currentYear = new Date().getFullYear();
+ var winter = new Date(currentYear, 0, 1);
+ var summer = new Date(currentYear, 6, 1);
+ var winterOffset = winter.getTimezoneOffset();
+ var summerOffset = summer.getTimezoneOffset();
+ var stdTimezoneOffset = Math.max(winterOffset, summerOffset);
+ SAFE_HEAP_STORE(__get_timezone() | 0, stdTimezoneOffset * 60 | 0, 4);
+ SAFE_HEAP_STORE(__get_daylight() | 0, Number(winterOffset != summerOffset) | 0, 4);
+ function extractZone(date) {
+  var match = date.toTimeString().match(/\(([A-Za-z ]+)\)$/);
+  return match ? match[1] : "GMT";
+ }
+ var winterName = extractZone(winter);
+ var summerName = extractZone(summer);
+ var winterNamePtr = allocateUTF8(winterName);
+ var summerNamePtr = allocateUTF8(summerName);
+ if (summerOffset < winterOffset) {
+  SAFE_HEAP_STORE(__get_tzname() | 0, winterNamePtr | 0, 4);
+  SAFE_HEAP_STORE(__get_tzname() + 4 | 0, summerNamePtr | 0, 4);
+ } else {
+  SAFE_HEAP_STORE(__get_tzname() | 0, summerNamePtr | 0, 4);
+  SAFE_HEAP_STORE(__get_tzname() + 4 | 0, winterNamePtr | 0, 4);
+ }
+}
+
+function _localtime_r(time, tmPtr) {
+ _tzset();
+ var date = new Date((SAFE_HEAP_LOAD(time | 0, 4, 0) | 0) * 1e3);
+ SAFE_HEAP_STORE(tmPtr | 0, date.getSeconds() | 0, 4);
+ SAFE_HEAP_STORE(tmPtr + 4 | 0, date.getMinutes() | 0, 4);
+ SAFE_HEAP_STORE(tmPtr + 8 | 0, date.getHours() | 0, 4);
+ SAFE_HEAP_STORE(tmPtr + 12 | 0, date.getDate() | 0, 4);
+ SAFE_HEAP_STORE(tmPtr + 16 | 0, date.getMonth() | 0, 4);
+ SAFE_HEAP_STORE(tmPtr + 20 | 0, date.getFullYear() - 1900 | 0, 4);
+ SAFE_HEAP_STORE(tmPtr + 24 | 0, date.getDay() | 0, 4);
+ var start = new Date(date.getFullYear(), 0, 1);
+ var yday = (date.getTime() - start.getTime()) / (1e3 * 60 * 60 * 24) | 0;
+ SAFE_HEAP_STORE(tmPtr + 28 | 0, yday | 0, 4);
+ SAFE_HEAP_STORE(tmPtr + 36 | 0, -(date.getTimezoneOffset() * 60) | 0, 4);
+ var summerOffset = new Date(date.getFullYear(), 6, 1).getTimezoneOffset();
+ var winterOffset = start.getTimezoneOffset();
+ var dst = (summerOffset != winterOffset && date.getTimezoneOffset() == Math.min(winterOffset, summerOffset)) | 0;
+ SAFE_HEAP_STORE(tmPtr + 32 | 0, dst | 0, 4);
+ var zonePtr = SAFE_HEAP_LOAD(__get_tzname() + (dst ? 4 : 0) | 0, 4, 0) | 0;
+ SAFE_HEAP_STORE(tmPtr + 40 | 0, zonePtr | 0, 4);
+ return tmPtr;
+}
+
+function ___localtime_r(a0, a1) {
+ return _localtime_r(a0, a1);
 }
 
 function _abort() {
@@ -4971,6 +5071,14 @@ function _strftime_l(s, maxsize, format, tm) {
  return _strftime(s, maxsize, format, tm);
 }
 
+function _time(ptr) {
+ var ret = Date.now() / 1e3 | 0;
+ if (ptr) {
+  SAFE_HEAP_STORE(ptr | 0, ret | 0, 4);
+ }
+ return ret;
+}
+
 var FSNode = function(parent, name, mode, rdev) {
  if (!parent) {
   parent = this;
@@ -5059,6 +5167,7 @@ var asmLibraryArg = {
  "__cxa_allocate_exception": ___cxa_allocate_exception,
  "__cxa_atexit": ___cxa_atexit,
  "__cxa_throw": ___cxa_throw,
+ "__localtime_r": ___localtime_r,
  "abort": _abort,
  "alignfault": alignfault,
  "emscripten_memcpy_big": _emscripten_memcpy_big,
@@ -5071,7 +5180,8 @@ var asmLibraryArg = {
  "fd_write": _fd_write,
  "segfault": segfault,
  "setTempRet0": _setTempRet0,
- "strftime_l": _strftime_l
+ "strftime_l": _strftime_l,
+ "time": _time
 };
 
 var asm = createWasm();
@@ -5099,6 +5209,12 @@ var _HandleLocalInput = Module["_HandleLocalInput"] = createExportWrapper("Handl
 var _free = Module["_free"] = createExportWrapper("free");
 
 var _malloc = Module["_malloc"] = createExportWrapper("malloc");
+
+var __get_tzname = Module["__get_tzname"] = createExportWrapper("_get_tzname");
+
+var __get_daylight = Module["__get_daylight"] = createExportWrapper("_get_daylight");
+
+var __get_timezone = Module["__get_timezone"] = createExportWrapper("_get_timezone");
 
 var stackSave = Module["stackSave"] = createExportWrapper("stackSave");
 
@@ -5140,7 +5256,7 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 31880;
+var _game = Module["_game"] = 32344;
 
 if (!Object.getOwnPropertyDescriptor(Module, "intArrayFromString")) Module["intArrayFromString"] = function() {
  abort("'intArrayFromString' was not exported. add it to EXTRA_EXPORTED_RUNTIME_METHODS (see the FAQ)");

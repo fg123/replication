@@ -2,8 +2,8 @@
 #include "player.h"
 #include "bullet.h"
 #include "game.h"
+#include "logging.h"
 
-#include <iostream>
 #include <exception>
 
 WeaponObject::WeaponObject(Game& game, Vector2 position) : WeaponObject(game) {
@@ -16,11 +16,11 @@ WeaponObject::WeaponObject(Game& game, Vector2 position) : WeaponObject(game) {
 
 void WeaponObject::AttachToPlayer(PlayerObject* player) {
     if (player == nullptr) {
-        std::cout << "Can't attach to null! Use Detach() instead!" << std::endl;
+        LOG_ERROR("Can't attach to null! Use Detach() instead!");
         throw std::runtime_error("Can't attach to null! Use Detach() instead!");
     }
     if (attachedTo != nullptr && attachedTo != player) {
-        std::cout << "Weapon already attached!" << std::endl;
+        LOG_ERROR("Weapon already attached!");
         throw std::runtime_error("Weapon already attached!");
     }
     else if (player == attachedTo) {

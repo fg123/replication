@@ -29,7 +29,6 @@ Object::~Object() {
     }
 }
 
-#include <iostream>
 void Object::Tick(Time time) {
     // Always replicate for now
     if (isStatic) return;
@@ -41,9 +40,6 @@ void Object::Tick(Time time) {
     if (!isStatic && GetColliderCount() > 0 && !IsTagged(Tag::NO_GRAVITY)) {
         velocity.y += GRAVITY * timeFactor;
     }
-    // else if (!IsTagged(Tag::WEAPON)) {
-    //     std::cout << "NO GRAV " << isStatic << GetColliderCount() << IsTagged(Tag::NO_GRAVITY) << std::endl;
-    // }
 
     velocity *= airFriction;
 
@@ -80,16 +76,26 @@ void Object::OnCollide(CollisionResult& result) {
     }
 }
 
+CollisionResult Object::CollidesWith(Collider* other) {
+    CollisionResult finalResult;
+    for (auto& collider: colliders) {
+        CollisionResult r = collider->CollidesWith(other);
+        if (r.isColliding) {
+            finalResult.isColliding = true;
+            finalResult.collisionDifference += r.collisionDifference;
+        }
+    }
+    return finalResult;
+}
+
 CollisionResult Object::CollidesWith(Object* other) {
     // Add up all the collisions
     CollisionResult finalResult;
-    for (auto& collider: colliders) {
-        for (auto& colliderOther: other->colliders) {
-            CollisionResult r = collider->CollidesWith(colliderOther);
-            if (r.isColliding) {
-                finalResult.isColliding = true;
-                finalResult.collisionDifference += r.collisionDifference;
-            }
+    for (auto& colliderOther: other->colliders) {
+        CollisionResult r = CollidesWith(colliderOther);
+        if (r.isColliding) {
+            finalResult.isColliding = true;
+            finalResult.collisionDifference += r.collisionDifference;
         }
     }
     return finalResult;

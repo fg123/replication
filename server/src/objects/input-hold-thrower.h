@@ -42,9 +42,6 @@ public:
     }
     virtual void ReleaseFire(Time time) override {
         WeaponObject::ReleaseFire(time);
-        // Calculate power based on how long held down
-        // std::cout << "Time Diff " << time - fireHoldDownTime << std::endl;
-        
         fireHoldDownTime = 0;
         
     #ifdef BUILD_SERVER

@@ -1,6 +1,7 @@
 #include "game.h"
 #include "timer.h"
 #include "objects/player.h"
+#include "logging.h"
 
 #include <thread>
 #include <mutex>
@@ -21,7 +22,8 @@ int main(int argc, char** argv) {
         mapPath = argv[1];
     }
     Timer gameTimer;
-    std::cout << "Loading Map " << mapPath << std::endl;
+    LOG_INFO("Loading Map " << mapPath);
+
     Game game { mapPath };
     gameTimer.ScheduleInterval(std::bind(&Game::Tick, &game, std::placeholders::_1),
             1000.0 / TickRate);
@@ -43,7 +45,7 @@ int main(int argc, char** argv) {
         .upgrade = nullptr,
         .open = [&game](auto* ws) {
             /* Open event here, you may access ws->getUserData() which points to a PerSocketData struct */
-            std::cout << "Connection Opened" << std::endl;
+            LOG_INFO("Connection Opened");
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
             data->ws = ws;
 
@@ -81,7 +83,7 @@ int main(int argc, char** argv) {
         }
     }).listen(8080, [](auto *listenSocket) {
         if (listenSocket) {
-            std::cout << "Listening for connections..." << std::endl;
+            LOG_INFO("Listening for connections...");
         }
     }).run();
 

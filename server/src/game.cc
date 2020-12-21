@@ -1,6 +1,6 @@
 #include "game.h"
-#include <iostream>
-#include <fstream>
+#include "logging.h"
+
 
 #include "objects/rectangle.h"
 #include "objects/circle.h"
@@ -9,6 +9,8 @@
 #include "objects/assault-rifle.h"
 
 #include "json/json.hpp"
+
+#include <fstream>
 
 static const double TILE_SIZE = 48;
 
@@ -96,7 +98,7 @@ void Game::InitialReplication(PlayerSocketData* data) {
     }
     std::string finalPacketContents = finalPacket.dump();
     if (!data->ws->send(finalPacketContents, uWS::OpCode::TEXT)) {
-        std::cout << "Could not send!" << std::endl;
+        LOG_ERROR("Could not send!");
     }
 }
 
@@ -134,7 +136,7 @@ void Game::Replicate(Time time) {
         }*/
         if (!player->isReady) continue;
         if (!player->hasInitialReplication) {
-            std::cout << "Initial Replication" << std::endl;
+            LOG_DEBUG("Initial Replication");
             player->hasInitialReplication = true;
             InitialReplication(player);
             json objectNotify;
@@ -143,7 +145,7 @@ void Game::Replicate(Time time) {
         }
         else {
             if (!player->ws->send(finalPacketContents, uWS::OpCode::TEXT)) {
-                std::cout << "Send Error" << std::endl;
+                LOG_ERROR("Send Error");
             }
         }
     }
@@ -162,7 +164,7 @@ void Game::ProcessReplication(json& object) {
         return;
     }
     if (gameObjects.find(id) == gameObjects.end()) {
-        std::cout << "Got new object (" << id << ") " << object["t"] << std::endl;
+        LOG_DEBUG("Got new object (" << id << ") " << object["t"]);
         Object* obj = GetClassLookup()[object["t"]](*this);
         obj->SetId(id);
         gameObjects[id] = obj;
@@ -199,7 +201,7 @@ void Game::ChangeId(ObjectID oldId, ObjectID newId) {
     else if (gameObjects.find(newId) != gameObjects.end()) {
         throw std::runtime_error("New ID already exists " + std::to_string(newId));
     }
-    std::cout << "Changing ID " << oldId << " -> " << newId << " " << gameObjects[oldId] << std::endl;
+    LOG_DEBUG("Changing ID " << oldId << " -> " << newId << " " << gameObjects[oldId]);
     gameObjects[newId] = gameObjects[oldId];
     gameObjects[newId]->SetId(newId);
     gameObjects.erase(oldId);
@@ -217,7 +219,7 @@ void Game::DestroyObject(ObjectID objectId) {
         return;
     }
     Object* object = gameObjects[objectId];
-    std::cout << "Destroy Object " << objectId << std::endl;
+    LOG_DEBUG("Destroy Object " << objectId);
     gameObjects.erase(objectId);
     object->OnDeath();
     deadObjects.insert(object);
@@ -244,9 +246,32 @@ void Game::RemovePlayer(PlayerSocketData* data) {
     players.erase(data);
 
     PlayerObject* playerObject = data->playerObject;
-    std::cout << "Removing player " << playerObject << std::endl;
+    LOG_INFO("Removing player " << playerObject);
     QueueNextTick([playerObject, this](Game& game) {
         DestroyObject(playerObject->GetId());
     });
 }
 #endif
+
+void Game::GetUnitsInRange(Vector2 position, double range,
+    bool includeBoundingBox, std::vector<Object*>& results) {
+
+    if (includeBoundingBox) {
+        CircleCollider collider { position, range };
+        for (auto& pair : gameObjects) {
+            Object* obj = pair.second;
+            CollisionResult result = obj->CollidesWith(&collider);
+            if (result.isColliding) {
+                results.push_back(obj);
+            }
+        }
+    }
+    else {
+        for (auto& pair : gameObjects) {
+            Object* obj = pair.second;
+            if (position.Distance(obj->GetPosition()) < range) {
+                results.push_back(obj);
+            }
+        }
+    }
+}

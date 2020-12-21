@@ -95,6 +95,14 @@ public:
     void RemovePlayer(PlayerSocketData* data);
 #endif
 
+    // Finding Units:
+
+    // Gets all units within a certain radial range (by position), if
+    //   includeBoundingBox is set, counts unit if any part of bounding box
+    //   is part of that range.
+    void GetUnitsInRange(Vector2 position, double range,
+        bool includeBoundingBox,
+        std::vector<Object*>& results);
 };
 
 #endif

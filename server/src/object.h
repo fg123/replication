@@ -80,6 +80,8 @@ public:
 
     size_t GetColliderCount() const { return colliders.size(); }
 
+    CollisionResult CollidesWith(Collider* other);
+
     CollisionResult CollidesWith(Object* other);
     void AddCollider(Collider* col) { colliders.push_back(col); }
     ObjectID GetId() const { return id; }

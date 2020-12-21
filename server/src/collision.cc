@@ -1,10 +1,13 @@
 #include "collision.h"
 #include "object.h"
 
-#include <iostream>
-
 Vector2 Collider::GetPosition() {
-    return position + owner->GetPosition();
+    if (owner) {
+        return position + owner->GetPosition();
+    }
+    else {
+        return position;
+    }
 }
 
 CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollider* circle) {

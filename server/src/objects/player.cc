@@ -5,8 +5,7 @@
 #include "grenade-thrower.h"
 #include "artillery-strike.h"
 #include "dash.h"
-
-#include <iostream>
+#include "logging.h"
 
 static const int LEFT_MOUSE_BUTTON = 1;
 static const int A_KEY = 65;
@@ -79,7 +78,7 @@ void PlayerObject::Tick(Time time)  {
         // velocity.y = -300;
     }
     SetVelocity(velocity);
-    
+
     if (currentWeapon) {
         if (mouseState[LEFT_MOUSE_BUTTON]) {
             currentWeapon->Fire(time);
@@ -212,7 +211,7 @@ void PlayerObject::ProcessInputData(json& obj) {
         }
     }
     else if (obj["event"] == "hb") {
-        std::cout << "Client Heartbeat" << std::endl;
+        LOG_DEBUG("Client Heartbeat");
     }
 }
 

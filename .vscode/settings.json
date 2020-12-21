@@ -62,6 +62,21 @@
         "clocale": "cpp",
         "forward_list": "cpp",
         "numeric": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "ctime": "cpp",
+        "iomanip": "cpp",
+        "xlocmon": "cpp",
+        "xloctime": "cpp"
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/*.d": true,
+        "**/*.wd": true,
+        "**/*.o": true,
+        "**/*.wo": true,
     }
 }

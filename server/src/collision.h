@@ -40,6 +40,7 @@ struct RectangleCollider : public Collider {
 
 struct CircleCollider : public Collider {
     double radius;
+    CircleCollider(Vector2 position, double radius) : CircleCollider(nullptr, position, radius) {}
     CircleCollider(Object* owner, Vector2 position, double radius) : Collider(owner, position),
             radius(radius) {}
     virtual int GetType() override { return 1; } 
