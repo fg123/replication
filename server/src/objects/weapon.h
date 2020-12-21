@@ -12,14 +12,17 @@ protected:
     PlayerObject* attachedTo = nullptr;
 
 public:
-
-    WeaponObject(Game& game) : Object(game) {}
+    WeaponObject(Game& game) : Object(game) {
+        z = 1;
+    }
     WeaponObject(Game& game, Vector2 position);
 
     void AttachToPlayer(PlayerObject* player);
     void Detach();
 
-    virtual void Fire(Time time) = 0;
+    virtual void Fire(Time time) {} 
+    virtual void ReleaseFire(Time time) {}
+
     virtual void Tick(Time time) override;
     virtual void Serialize(json& obj) override;
     virtual void ProcessReplication(json& obj) override;

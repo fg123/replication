@@ -41,9 +41,9 @@ void Object::Tick(Time time) {
     if (!isStatic && GetColliderCount() > 0 && !IsTagged(Tag::NO_GRAVITY)) {
         velocity.y += GRAVITY * timeFactor;
     }
-    else if (!IsTagged(Tag::WEAPON)) {
-        std::cout << "NO GRAV " << isStatic << GetColliderCount() << IsTagged(Tag::NO_GRAVITY) << std::endl;
-    }
+    // else if (!IsTagged(Tag::WEAPON)) {
+    //     std::cout << "NO GRAV " << isStatic << GetColliderCount() << IsTagged(Tag::NO_GRAVITY) << std::endl;
+    // }
 
     velocity *= airFriction;
 
@@ -106,6 +106,7 @@ void Object::Serialize(json& obj) {
     position.Serialize(obj["p"]);
     velocity.Serialize(obj["v"]);
     obj["s"] = isStatic;
+    obj["z"] = z;
 
     obj["ta"] = tags;
     obj["ce"] = collideExclusion;
@@ -123,6 +124,7 @@ void Object::ProcessReplication(json& object) {
     SetPosition(Vector2(object["p"]["x"], object["p"]["y"]));
     SetVelocity(Vector2(object["v"]["x"], object["v"]["y"]));
     SetIsStatic(object["s"]);
+    z = object["z"];
     tags = object["ta"];
     collideExclusion = object["ce"];
 

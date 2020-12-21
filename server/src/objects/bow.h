@@ -1,19 +1,18 @@
-#ifndef ASSAULT_RIFLE_H
-#define ASSAULT_RIFLE_H
+#ifndef BOW_H
+#define BOW_H
 
-#include "weapon.h"
 #include "game.h"
+#include "input-hold-thrower.h"
+#include "arrow.h"
 
-class BowObject : public WeaponObject {
-    double fireRate = 1;
-    Time nextFireTime = 0;
+class BowObject : public InputHoldThrower<ArrowObject> {
 public:
     CLASS_CREATE(BowObject)
     
-    BowObject(Game& game) : WeaponObject(game) {}
-    BowObject(Game& game, Vector2 position) : WeaponObject(game, position) {}
-
-    virtual void Fire(Time time) override;
+    BowObject(Game& game) : BowObject(game, Vector2::Zero) {}
+    BowObject(Game& game, Vector2 position) : InputHoldThrower<ArrowObject>(game, position) {
+        AddCollider(new RectangleCollider(this, Vector2(-11, -50), Vector2(22, 101)));
+    }
 };
 
 CLASS_REGISTER(BowObject);

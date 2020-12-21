@@ -32,11 +32,13 @@ struct ObjectRegister {
 
 #define CLASS_REGISTER(name) static ObjectRegister<name> name##_Register { #name }
 
+// Bitflag, everything is AT LEAST an object.
 enum class Tag : uint64_t {
-    PLAYER = 0b0001,
-    GROUND = 0b0010,
-    WEAPON = 0b0100,
-    NO_GRAVITY = 0b1000
+    OBJECT      = 0b00001,
+    PLAYER      = 0b00010,
+    GROUND      = 0b00100,
+    WEAPON      = 0b01000,
+    NO_GRAVITY  = 0b10000
 };
 
 class Object : Replicable {
@@ -45,6 +47,8 @@ protected:
     // All are measured in the same units, velocity is in position units
     //   per second
     Vector2 position;
+    int z;
+
     Vector2 velocity;
     Vector2 airFriction;
 
@@ -55,7 +59,7 @@ protected:
     Time lastTickTime = 0;
 
     std::vector<Collider*> colliders;
-    uint64_t tags = 0;
+    uint64_t tags = (uint64_t)Tag::OBJECT;
     uint64_t collideExclusion = 0;
 
 public:
@@ -69,7 +73,7 @@ public:
 
     Time DeltaTime(Time currentTime);
     virtual void Tick(Time time);
-
+    
     virtual void OnDeath() {}
 
     void ResolveCollision(const Vector2& difference);
@@ -82,13 +86,12 @@ public:
 
     void SetId(ObjectID newId) { id = newId; }
 
-    void ProcessReplication(json& object) override;
-
     bool IsDirty() const { return isDirty; }
     void SetDirty(bool dirty) { isDirty = dirty; }
 
     virtual const char* GetClass() = 0;
     virtual void Serialize(json& obj) override;
+    void ProcessReplication(json& object) override;
 
     const Vector2& GetPosition() const { return position; }
     const Vector2& GetVelocity() const { return velocity; }

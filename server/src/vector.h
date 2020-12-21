@@ -52,7 +52,7 @@ struct Vector2 : Replicable {
     
     virtual void ProcessReplication(json& obj) override;
 
-    void Normalize();
+    Vector2& Normalize();
     double Length() const { return std::sqrt(std::pow(x, 2) + std::pow(y, 2)); }
     inline Vector2 Clamp(const Vector2& min, const Vector2& max) const {
         return Vector2(clamp(x, min.x, max.x), clamp(y, min.y, max.y));

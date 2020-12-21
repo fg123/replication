@@ -1,26 +1,43 @@
 #include "player.h"
 #include "collision.h"
 #include "game.h"
-#include "assault-rifle.h"
+#include "bow.h"
+#include "grenade-thrower.h"
+#include "artillery-strike.h"
+#include "dash.h"
 
 #include <iostream>
 
 static const int LEFT_MOUSE_BUTTON = 1;
+static const int A_KEY = 65;
+static const int S_KEY = 83;
+static const int D_KEY = 68;
+static const int F_KEY = 70;
+static const int G_KEY = 71;
+static const int Q_KEY = 81;
+static const int Z_KEY = 90;
+static const int W_KEY = 87;
+static const int SPACE_KEY = 32;
 
-PlayerObject::PlayerObject(Game& game) : Object(game) {
+PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector2::Zero) {
     airFriction.x = 0.9;
 }
 
-PlayerObject::PlayerObject(Game& game, Vector2 position) : PlayerObject(game) {
+PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
     SetTag(Tag::PLAYER);
     SetPosition(position);
 
     AddCollider(new CircleCollider(this, Vector2(0, -15), 15.0));
     AddCollider(new RectangleCollider(this, Vector2(-15, -5), Vector2(30, 33)));
+#ifdef BUILD_SERVER
+    qWeapon = new DashWeapon{ game };
+    game.AddObject(qWeapon);
+    qWeapon->AttachToPlayer(this);
 
-    AssaultRifleObject* obj = new AssaultRifleObject(game, Vector2::Zero);
-    game.AddObject(obj);
-    PickupWeapon(obj);
+    zWeapon = new ArtilleryStrikeWeapon{ game };
+    game.AddObject(zWeapon);
+    zWeapon->AttachToPlayer(this);
+#endif
 }
 
 void PlayerObject::OnDeath() {
@@ -45,34 +62,54 @@ void PlayerObject::PickupWeapon(WeaponObject* weapon) {
 void PlayerObject::Tick(Time time)  {
     std::scoped_lock lock(socketDataMutex);
     Vector2 velocity = GetVelocity();
-    if (keyboardState.find("a") != keyboardState.end()) {
+    if (keyboardState[A_KEY]) {
         velocity.x = -200;
     }
-    if (keyboardState.find("d") != keyboardState.end()) {
+    if (keyboardState[D_KEY]) {
         velocity.x = 200;
     }
-    if (keyboardState.find("g") != keyboardState.end()) {
+    if (keyboardState[G_KEY]) {
         DropWeapon();
     }
-    if (keyboardState.find("w") != keyboardState.end()) {
+    if (keyboardState[W_KEY] || keyboardState[SPACE_KEY]) {
         // Can only jump if touching ground
         if (IsGrounded()) {
             velocity.y = -600;
         }
         // velocity.y = -300;
     }
-    if (mouseState[LEFT_MOUSE_BUTTON]) {
-        if (currentWeapon) {
+    SetVelocity(velocity);
+    
+    if (currentWeapon) {
+        if (mouseState[LEFT_MOUSE_BUTTON]) {
             currentWeapon->Fire(time);
         }
+        else if (lastMouseState[LEFT_MOUSE_BUTTON]) {
+            currentWeapon->ReleaseFire(time);
+        }
     }
-    // if (keyboardState.find("s") != keyboardState.end()) {
-    //     velocity.y = 300;
-    // }
-    SetVelocity(velocity);
+    if (qWeapon) {
+        if (keyboardState[Q_KEY]) {
+            qWeapon->Fire(time);
+        }
+        else if (lastKeyboardState[Q_KEY]) {
+            qWeapon->ReleaseFire(time);
+        }
+    }
+    if (zWeapon) {
+        if (keyboardState[Z_KEY]) {
+            zWeapon->Fire(time);
+        }
+        else if (lastKeyboardState[Z_KEY]) {
+            zWeapon->ReleaseFire(time);
+        }
+    }
     const Vector2& position = GetPosition();
     aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
     Object::Tick(time);
+
+    lastMouseState = mouseState;
+    lastKeyboardState = keyboardState;
 }
 
 void PlayerObject::Serialize(json& obj) {
@@ -81,6 +118,12 @@ void PlayerObject::Serialize(json& obj) {
     obj["aa"] = aimAngle;
     if (currentWeapon) {
         obj["w"] = currentWeapon->GetId();
+    }
+    if (qWeapon) {
+        obj["wq"] = qWeapon->GetId();
+    }
+    if (zWeapon) {
+        obj["wz"] = zWeapon->GetId();
     }
 }
 
@@ -93,6 +136,18 @@ void PlayerObject::ProcessReplication(json& obj) {
     }
     else {
         currentWeapon = nullptr;
+    }
+    if (obj.contains("wq")) {
+        qWeapon = game.GetObject<WeaponObject>(obj["wq"]);
+    }
+    else {
+        qWeapon = nullptr;
+    }
+    if (obj.contains("wz")) {
+        zWeapon = game.GetObject<WeaponObject>(obj["wz"]);
+    }
+    else {
+        zWeapon = nullptr;
     }
 }
 
@@ -124,14 +179,18 @@ void PlayerObject::DealDamage(int damage) {
 
 void PlayerObject::ProcessInputData(json& obj) {
     if (obj["event"] == "ku") {
-        std::string key = obj["key"];
+        int key = obj["key"];
         std::scoped_lock lock(socketDataMutex);
-        keyboardState.erase(key);
+        if (key >= 0 && key < 256) {
+            keyboardState[key] = false;
+        }
     }
     else if (obj["event"] == "kd") {
-        std::string key = obj["key"];
+        int key = obj["key"];
         std::scoped_lock lock(socketDataMutex);
-        keyboardState.insert(key);
+        if (key >= 0 && key < 256) {
+            keyboardState[key] = true;
+        }
     }
     else if (obj["event"] == "mm") {
         std::scoped_lock lock(socketDataMutex);
@@ -155,4 +214,8 @@ void PlayerObject::ProcessInputData(json& obj) {
     else if (obj["event"] == "hb") {
         std::cout << "Client Heartbeat" << std::endl;
     }
+}
+
+Vector2 PlayerObject::GetAttachmentPoint() const {
+    return GetPosition() + GetAimDirection().Normalize() * 20.0;
 }

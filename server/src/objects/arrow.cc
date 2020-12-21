@@ -31,8 +31,6 @@ void ArrowObject::OnCollide(CollisionResult& result) {
     // });
 }
 
-#include <iostream>
-
 void ArrowObject::Tick(Time time) {
     Object::Tick(time);
 }

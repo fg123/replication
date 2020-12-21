@@ -60,6 +60,8 @@ function StartGame(modules) {
     const { wasm, webSocket, resourceManager, mapImage } = modules;
     const gameObjects = {};
 
+    let showColliders = false;
+
     webSocket.send('{"event":"rdy"}');
 
     setInterval(() => {
@@ -114,6 +116,7 @@ function StartGame(modules) {
         context.fillRect(0, 0, width, height);
 
         context.drawImage(mapImage, 0, 0);
+        const sorter = [];
         Object.keys(gameObjects).forEach((k) => {
             if (!wasm._IsObjectAlive(k)) {
                 delete gameObjects[k];
@@ -125,17 +128,22 @@ function StartGame(modules) {
             const serializedObject = JSON.parse(jsonString);
             wasm._free(serializedString);
             gameObjects[k] = serializedObject;
-
-            const obj = gameObjects[k];
+            sorter.push({ id: k, z: serializedObject.z });
+        });
+        sorter.sort((a, b) => a.z - b.z);
+        sorter.forEach(pair => {
+            const obj = gameObjects[pair.id];
             
             if (gameObjectLookup[obj.t] !== undefined) {
-                gameObjectLookup[obj.t].draw(context, resourceManager,
-                    serializedObject, gameObjects);
+                if (gameObjectLookup[obj.t].draw) {
+                    gameObjectLookup[obj.t].draw(context, resourceManager,
+                        obj, gameObjects);
+                }
             }
             else {
                 console.error('Invalid object class', obj.t);
             }
-            if (obj.c && !Constants.isProduction) {
+            if (obj.c && !Constants.isProduction && showColliders) {
                 for (let i = 0; i < obj.c.length; i++) {
                     const collider = obj.c[i];
                     context.strokeStyle = "purple";
@@ -151,17 +159,6 @@ function StartGame(modules) {
                 }
             }
         });
-        Object.keys(gameObjects).forEach((k) => {
-            const obj = gameObjects[k];
-            if (gameObjectLookup[obj.t] !== undefined) {
-                if (gameObjectLookup[obj.t].postDraw) {
-                    gameObjectLookup[obj.t].postDraw(context, resourceManager, obj, gameObjects);
-                }
-            }
-            else {
-                console.error('Invalid object class', obj.t);
-            }
-        });
         lastTime = currentTime;
         wasm._TickGame(currentTime);
         requestAnimationFrame(tick);
@@ -171,15 +168,18 @@ function StartGame(modules) {
         if (e.repeat) { return; }
         sendInputPacket({
             event: "kd",
-            key: e.key
+            key: e.keyCode
         });
     });
 
     window.addEventListener('keyup', e => {
         sendInputPacket({
             event: "ku",
-            key: e.key
+            key: e.keyCode
         });
+        if (e.key === "1") {
+            showColliders = !showColliders;
+        }
     });
 
     let lastMouseMoveSend = Date.now();

@@ -13,7 +13,13 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     void TickGame(Time time) {
-        game.Tick(time);
+        try {
+            game.Tick(time);
+        } catch(std::runtime_error& error) {
+            std::cout << error.what() << std::endl;
+        } catch(...) {
+            std::cout << "Unhandled Exception!" << std::endl;
+        }
     }
 
     EMSCRIPTEN_KEEPALIVE

@@ -6,11 +6,12 @@ CLIENT_SRC = $(SRC) src/client_main.cc
 SERVER_OBJ = $(SERVER_SRC:%.cc=%.o)
 # Use .wo for webassembly
 CLIENT_OBJ = $(CLIENT_SRC:%.cc=%.wo)
+SERVER_DEPS = $(SERVER_OBJ:%.o=%.d)
+CLIENT_DEPS = $(CLIENT_OBJ:%.wo=%.wd)
 HEADERS = $(shell find src/ -name "*.h") Makefile
 USOCKET = $(SRC_DIR)/uWebSocket/uSocket
 
-CPPFLAGS = -std=c++17
-CFLAGS = -Wall -I $(SRC_DIR) -I $(USOCKET)/src 
+CPPFLAGS = -std=c++17 -Wall -I $(SRC_DIR) -I $(USOCKET)/src -I $(SRC_DIR)/objects
 LDLIBS = -L/usr/lib
 SERVER_DEBUG = -g 
 SERVER_PROD = -O2
@@ -40,18 +41,23 @@ client_prod: $(CLIENT_OBJ)
 	cp bin/$(EXE)_client_prod.wasm ../client/dist/
 	cp bin/$(EXE)_client_prod.js ../client/
 
-%.o: %.cc $(HEADERS)
-	$(CXX) $(CPPFLAGS) $(CFLAGS) -DBUILD_SERVER -c $< -o $@
+%.o: %.cc
+	$(CXX) $(CPPFLAGS) -DBUILD_SERVER -MMD -c $< -o $@
 
-%.wo: %.cc $(HEADERS)
-	em++ -O2 $(CPPFLAGS) $(CFLAGS) -DBUILD_CLIENT -c $< -o $@
+%.wo: %.cc
+	em++ -O2 $(CPPFLAGS) -DBUILD_CLIENT -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
 
 $(USOCKET)/uSockets.a:
 	$(MAKE) $(USOCKET)
+
+-include $(SERVER_DEPS)
+
+-include $(CLIENT_DEPS)
 
 .PHONY: all clean release
 
 clean:
 	find . -name "*.o" -type f -delete
 	find . -name "*.wo" -type f -delete
+	find . -name "*.d" -type f -delete
 	rm -f *~ core $(SRC_DIR)/*~

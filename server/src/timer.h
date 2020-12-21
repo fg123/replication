@@ -18,7 +18,7 @@ struct ScheduledCall {
         nextScheduled(nextScheduled),
         interval(0),
         shouldRepeat(false) {}
-        
+
     ScheduledCall(std::function<void(Time)> function, Time nextScheduled,
         Time interval) :
         function(function),

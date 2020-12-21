@@ -3,6 +3,7 @@
 #include "bullet.h"
 #include "game.h"
 
+#include <iostream>
 #include <exception>
 
 WeaponObject::WeaponObject(Game& game, Vector2 position) : WeaponObject(game) {
@@ -14,23 +15,27 @@ WeaponObject::WeaponObject(Game& game, Vector2 position) : WeaponObject(game) {
 }
 
 void WeaponObject::AttachToPlayer(PlayerObject* player) {
-    if (attachedTo) {
-        throw std::runtime_error("Weapon already attached!");
-    }
-    else if (player == nullptr) {
+    if (player == nullptr) {
+        std::cout << "Can't attach to null! Use Detach() instead!" << std::endl;
         throw std::runtime_error("Can't attach to null! Use Detach() instead!");
     }
-    attachedTo = player;
-    if (attachedTo) {
-        colliders.clear();
+    if (attachedTo != nullptr && attachedTo != player) {
+        std::cout << "Weapon already attached!" << std::endl;
+        throw std::runtime_error("Weapon already attached!");
     }
+    else if (player == attachedTo) {
+        return;
+    }
+    attachedTo = player;
     SetDirty(true);
+    // No Collision
+    collideExclusion |= (uint64_t)Tag::OBJECT;
 }
 
 void WeaponObject::Detach() {
     attachedTo = nullptr;
     SetVelocity(Vector2::Zero);
-    AddCollider(new RectangleCollider(this, Vector2(-3, -10), Vector2(74, 24)));
+    collideExclusion &= ~(uint64_t)Tag::OBJECT;
     SetDirty(true);
 }
 
@@ -38,7 +43,7 @@ void WeaponObject::Tick(Time time) {
     Object::Tick(time);
     if (attachedTo) {
         // Attached!
-        SetPosition(attachedTo->GetPosition());
+        SetPosition(attachedTo->GetAttachmentPoint());
         SetVelocity(attachedTo->GetVelocity());
     }
 }

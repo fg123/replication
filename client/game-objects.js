@@ -29,6 +29,20 @@ module.exports = {
             context.fill();
         }
     },
+    "GrenadeObject": {
+        draw (context, resourceManager, obj, objects) {
+            context.fillStyle = "black";
+            context.beginPath();
+            context.arc(obj.p.x, obj.p.y, 5, 0, 2 * Math.PI);
+            context.fill();
+        }
+    },
+    "ArtilleryObject": {
+        draw (context, resourceManager, obj, objects) {
+            const image = resourceManager.get('artillery.png');
+            drawImage(context, image, obj.p.x, obj.p.y);
+        }
+    },
     "BulletObject": {
         draw (context, resourceManager, obj, objects) {
             context.fillStyle = "black";
@@ -44,7 +58,7 @@ module.exports = {
             context.beginPath();
             context.moveTo(obj.p.x, obj.p.y);
             const mag = Math.sqrt(Math.pow(obj.v.x, 2) + Math.pow(obj.v.y, 2))
-            context.lineTo(obj.p.x - (obj.v.x / mag)* 30, obj.p.y - (obj.v.y / mag) * 30)
+            context.lineTo(obj.p.x - (obj.v.x / mag) * 45, obj.p.y - (obj.v.y / mag) * 45)
             context.stroke();
         }
     },
@@ -75,17 +89,61 @@ module.exports = {
                     angle = Math.PI;
                 }
                 angle += playerAttach.aa;
+
+                // Charge up time (charging)
+                const afv = obj.afv;
+                if (afv.x !== 0 || afv.y !== 0) {
+                    context.lineWidth = 3;
+                    context.strokeStyle = 'black';
+                    context.beginPath();
+                    context.moveTo(obj.p.x, obj.p.y);
+                    const x = afv.x / 10;
+                    const y = afv.y / 10;
+                    context.lineTo(obj.p.x + x, obj.p.y + y);
+                    context.stroke();   
+                }
             }
             const image = isFlip ? resourceManager.get('bow.png-FLIPPED') : resourceManager.get('bow.png');
-            drawImage(context, image, obj.p.x, obj.p.y, (image.width / 3), (image.height / 3), angle);
+            drawImage(context, image, obj.p.x, obj.p.y, (image.width), (image.height), angle);
+        }
+    },
+    "ArtilleryStrikeWeapon": {
+
+    },
+    "DashWeapon": {
+
+    },
+    "GrenadeThrower": {
+        draw (context, resourceManager, obj, objects) {
+            let isFlip = false;
+            let angle = 0;
+            const playerAttach = objects[obj.attach];            
+            if (playerAttach) {
+                isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
+                if (isFlip) {
+                    angle = Math.PI;
+                }
+                angle += playerAttach.aa;
+
+                // Charge up time (charging)
+                const afv = obj.afv;
+                if (afv.x !== 0 || afv.y !== 0) {
+                    context.lineWidth = 3;
+                    context.strokeStyle = 'black';
+                    context.beginPath();
+                    context.moveTo(obj.p.x, obj.p.y);
+                    const x = afv.x / 10;
+                    const y = afv.y / 10;
+                    context.lineTo(obj.p.x + x, obj.p.y + y);
+                    context.stroke();   
+                }
+            }
         }
     },
     "PlayerObject": {
         draw (context, resourceManager, obj, objects) {
             const image = obj.v.x < 0 ? resourceManager.get('marine.png-FLIPPED') : resourceManager.get('marine.png');
             drawImage(context, image, obj.p.x, obj.p.y, (image.width / 2), (image.height / 2));
-        },
-        postDraw(context, resourceManager, obj, objects) {
             const arm = resourceManager.get('marineArm.png');
             drawImage(context, arm, obj.p.x, obj.p.y + 7, (arm.width / 2), (arm.height / 2), obj.aa);
 

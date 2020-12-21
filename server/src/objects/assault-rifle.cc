@@ -14,3 +14,7 @@ void AssaultRifleObject::Fire(Time time) {
     game.AddObject(bullet);
 #endif
 }
+
+AssaultRifleObject::AssaultRifleObject(Game& game, Vector2 position) : WeaponObject(game, position) {
+    AddCollider(new RectangleCollider(this, Vector2(-26, -10), Vector2(74, 24)));
+}

@@ -10,9 +10,9 @@ class AssaultRifleObject : public WeaponObject {
 public:
     CLASS_CREATE(AssaultRifleObject)
     
-    AssaultRifleObject(Game& game) : WeaponObject(game) {}
-    AssaultRifleObject(Game& game, Vector2 position) : WeaponObject(game, position) {}
-
+    AssaultRifleObject(Game& game) : AssaultRifleObject(game, Vector2::Zero) {}
+    AssaultRifleObject(Game& game, Vector2 position);
+    
     virtual void Fire(Time time) override;
 };
 

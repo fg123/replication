@@ -16,15 +16,21 @@ class PlayerObject : public Object {
     double aimAngle = 0;
 
     WeaponObject* currentWeapon = nullptr;
-    
+    WeaponObject* qWeapon = nullptr;
+    WeaponObject* zWeapon = nullptr;
+
     Time canPickupTime = 0;
 public:
 
     CLASS_CREATE(PlayerObject)
 
     std::mutex socketDataMutex;
-    std::unordered_set<std::string> keyboardState;
-    bool mouseState[5];
+    std::array<bool, 256> keyboardState {};
+    std::array<bool, 256> lastKeyboardState {};
+
+    std::array<bool, 5> mouseState {};
+    std::array<bool, 5> lastMouseState {};
+
     Vector2 mousePosition;
 
     PlayerObject(Game& game);
@@ -45,6 +51,7 @@ public:
     void DealDamage(int damage);
 
     Vector2 GetAimDirection() const;
+    Vector2 GetAttachmentPoint() const;
 };
 
 CLASS_REGISTER(PlayerObject);

@@ -6,6 +6,7 @@
 #include "objects/circle.h"
 #include "objects/player.h"
 #include "objects/bow.h"
+#include "objects/assault-rifle.h"
 
 #include "json/json.hpp"
 
@@ -38,6 +39,7 @@ Game::Game(std::string mapPath) : Game() {
     }
 
     AddObject(new BowObject(*this, Vector2{400, 100}));
+    AddObject(new AssaultRifleObject(*this, Vector2{600, 100}));
     // CircleObject* c = new CircleObject(*this, Vector2{400, 600}, 20.0);
     // c->SetIsStatic(true);
     // AddObject(c);
