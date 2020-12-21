@@ -1,26 +1,29 @@
 #ifndef DASH_H
 #define DASH_H
 
-#include "weapon.h"
+#include "weapons/weapon.h"
 #include "player.h"
 
-class DashWeapon : public WeaponObject {
-    static const int DashAmount = 1500;
-
+class DashAbility : public WeaponObject {
+    static const int DashAmount = 1800;
     Time lastDash = 0;
     Time timeSinceLastDash = 0;
-
-    Time cooldown = 500;
+    Time cooldown = 2000;
 
 public:
-    CLASS_CREATE(DashWeapon)
-    DashWeapon(Game& game) : DashWeapon(game, Vector2::Zero) {}
-    DashWeapon(Game& game, Vector2 position) : WeaponObject(game, position) {}
+    CLASS_CREATE(DashAbility)
+    DashAbility(Game& game) : DashAbility(game, Vector2::Zero) {}
+    DashAbility(Game& game, Vector2 position) : WeaponObject(game, position) {}
 
     virtual void Tick(Time time) override {
         WeaponObject::Tick(time);
         // Calculate cooldown
         timeSinceLastDash = time - lastDash;
+
+        if (timeSinceLastDash > cooldown) {
+            attachedTo->RemoveTag(Tag::NO_GRAVITY);
+            attachedTo->airFriction.y = 1;
+        }
     }
 
     virtual void Fire(Time time) override {
@@ -32,9 +35,12 @@ public:
         lastDash = time;
         
         Vector2 velocity = attachedTo->GetVelocity();
-        velocity += attachedTo->GetAimDirection().Normalize() * DashAmount;
+        velocity.y -= DashAmount;
         
         attachedTo->SetVelocity(velocity);
+        attachedTo->SetTag(Tag::NO_GRAVITY);
+        attachedTo->airFriction.y = 0.95;
+        
     }
 
     virtual void Serialize(json& obj) override {
@@ -48,6 +54,6 @@ public:
     }
 };
 
-CLASS_REGISTER(DashWeapon);
+CLASS_REGISTER(DashAbility);
 
 #endif

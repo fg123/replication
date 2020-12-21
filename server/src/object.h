@@ -7,6 +7,7 @@
 #include "timer.h"
 #include "vector.h"
 #include "collision.h"
+#include "logging.h"
 
 // This must be 32 bit because client side JS only supports 32 bit
 using ObjectID = uint32_t;
@@ -22,6 +23,7 @@ std::unordered_map<std::string, ObjectConstructor>& GetClassLookup();
 template<class T>
 struct ObjectRegister {
     ObjectRegister(const char* name) {
+        LOG_DEBUG("Auto Registering " << name);
         GetClassLookup()[name] = T::Create;
     }
 };
@@ -50,7 +52,6 @@ protected:
     int z;
 
     Vector2 velocity;
-    Vector2 airFriction;
 
     ObjectID id = 0;
     bool isDirty = false;
@@ -63,6 +64,7 @@ protected:
     uint64_t collideExclusion = 0;
 
 public:
+    Vector2 airFriction;
 
 #ifdef BUILD_SERVER
     size_t replicateSoftCounter = 0;

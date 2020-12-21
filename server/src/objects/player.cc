@@ -1,10 +1,6 @@
 #include "player.h"
 #include "collision.h"
 #include "game.h"
-#include "bow.h"
-#include "grenade-thrower.h"
-#include "artillery-strike.h"
-#include "dash.h"
 #include "logging.h"
 
 static const int LEFT_MOUSE_BUTTON = 1;
@@ -28,21 +24,23 @@ PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
 
     AddCollider(new CircleCollider(this, Vector2(0, -15), 15.0));
     AddCollider(new RectangleCollider(this, Vector2(-15, -5), Vector2(30, 33)));
-#ifdef BUILD_SERVER
-    qWeapon = new DashWeapon{ game };
-    game.AddObject(qWeapon);
-    qWeapon->AttachToPlayer(this);
-
-    zWeapon = new ArtilleryStrikeWeapon{ game };
-    game.AddObject(zWeapon);
-    zWeapon->AttachToPlayer(this);
-#endif
 }
 
 void PlayerObject::OnDeath() {
     // This calls before you get destructed, but client will already know you're
     //   dead (but you don't actually get GCed until next tick)
     DropWeapon();
+
+    if (qWeapon) {
+        game.DestroyObject(qWeapon->GetId());
+        qWeapon->Detach();
+        qWeapon = nullptr;
+    }
+    if (zWeapon) {
+        game.DestroyObject(zWeapon->GetId());
+        zWeapon->Detach();
+        zWeapon = nullptr;
+    }
 }
 
 PlayerObject::~PlayerObject() {
@@ -81,6 +79,9 @@ void PlayerObject::Tick(Time time)  {
 
     if (currentWeapon) {
         if (mouseState[LEFT_MOUSE_BUTTON]) {
+            if (!lastMouseState[LEFT_MOUSE_BUTTON]) {
+                currentWeapon->StartFire(time);
+            }
             currentWeapon->Fire(time);
         }
         else if (lastMouseState[LEFT_MOUSE_BUTTON]) {
@@ -89,6 +90,9 @@ void PlayerObject::Tick(Time time)  {
     }
     if (qWeapon) {
         if (keyboardState[Q_KEY]) {
+            if (!lastMouseState[Q_KEY]) {
+                qWeapon->StartFire(time);
+            }
             qWeapon->Fire(time);
         }
         else if (lastKeyboardState[Q_KEY]) {
@@ -97,6 +101,9 @@ void PlayerObject::Tick(Time time)  {
     }
     if (zWeapon) {
         if (keyboardState[Z_KEY]) {
+            if (!lastMouseState[Z_KEY]) {
+                zWeapon->StartFire(time);
+            }
             zWeapon->Fire(time);
         }
         else if (lastKeyboardState[Z_KEY]) {

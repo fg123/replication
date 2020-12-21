@@ -1,12 +1,10 @@
 #include "game.h"
 #include "logging.h"
 
-
-#include "objects/rectangle.h"
-#include "objects/circle.h"
 #include "objects/player.h"
-#include "objects/bow.h"
-#include "objects/assault-rifle.h"
+#include "objects/rectangle.h"
+#include "weapons/bow.h"
+#include "weapons/assault-rifle.h"
 
 #include "json/json.hpp"
 
@@ -14,7 +12,7 @@
 
 static const double TILE_SIZE = 48;
 
-Game::Game() : nextId(0) {    
+Game::Game() : nextId(1) {    
    
 }
 
@@ -68,8 +66,10 @@ void Game::Tick(Time time) {
 
     for (auto& object : gameObjects) {
         object.second->Tick(time);
+    }
 
-    #ifdef BUILD_SERVER
+#ifdef BUILD_SERVER
+    for (auto& object : gameObjects) {
         if (!object.second->IsStatic() &&
             !IsPointInRect(Vector2::Zero, killPlaneSize,
                 object.second->GetPosition())) {
@@ -77,8 +77,8 @@ void Game::Tick(Time time) {
             // You're out of the range 
            killPlaned.insert(object.second);
         }
-    #endif
     }
+#endif
 
 #ifdef BUILD_SERVER
     for (auto& object : killPlaned) {
@@ -165,6 +165,11 @@ void Game::ProcessReplication(json& object) {
     }
     if (gameObjects.find(id) == gameObjects.end()) {
         LOG_DEBUG("Got new object (" << id << ") " << object["t"]);
+        auto& ClassLookup = GetClassLookup();
+        if (ClassLookup.find(object["t"]) == ClassLookup.end()) {
+            LOG_ERROR("Class " << object["t"] << " is not registered!");
+            throw std::runtime_error("Class " + std::string(object["t"]) + " is not registered!");
+        }
         Object* obj = GetClassLookup()[object["t"]](*this);
         obj->SetId(id);
         gameObjects[id] = obj;
@@ -209,12 +214,22 @@ void Game::ChangeId(ObjectID oldId, ObjectID newId) {
 
 void Game::AddObject(Object* obj) {
     // Client should never add object and wait for server to tell me
+#ifdef BUILD_CLIENT
+    LOG_ERROR("Don't call AddObject on the client!!");
+    throw std::runtime_error("Don't call AddObject on the client!!");
+#endif
     ObjectID newId = RequestId();
+    LOG_DEBUG("Add Object " << newId);
     obj->SetId(newId);
     gameObjects[newId] = obj;
 }
 
-void Game::DestroyObject(ObjectID objectId) {    
+void Game::DestroyObject(ObjectID objectId) {
+    if (objectId == 0) {
+        // Something has gone wrong
+        LOG_ERROR("Tried to destroy object ID 0!");
+        throw std::runtime_error("Invalid destroy of ID 0, probably a memory leak!");
+    }
     if (gameObjects.find(objectId) == gameObjects.end()) {
         return;
     }
@@ -254,24 +269,21 @@ void Game::RemovePlayer(PlayerSocketData* data) {
 #endif
 
 void Game::GetUnitsInRange(Vector2 position, double range,
-    bool includeBoundingBox, std::vector<Object*>& results) {
+    bool includeBoundingBox, std::vector<RangeQueryResult>& results) {
 
-    if (includeBoundingBox) {
-        CircleCollider collider { position, range };
-        for (auto& pair : gameObjects) {
-            Object* obj = pair.second;
+    CircleCollider collider { position, range };
+
+    for (auto& pair : gameObjects) {
+        Object* obj = pair.second;
+        double actualRange = position.Distance(obj->GetPosition());
+        if (includeBoundingBox) {
             CollisionResult result = obj->CollidesWith(&collider);
             if (result.isColliding) {
-                results.push_back(obj);
+                results.emplace_back(obj, actualRange);
             }
         }
-    }
-    else {
-        for (auto& pair : gameObjects) {
-            Object* obj = pair.second;
-            if (position.Distance(obj->GetPosition()) < range) {
-                results.push_back(obj);
-            }
+        else if (actualRange < range) {
+            results.emplace_back(obj, actualRange);
         }
     }
 }

@@ -42,7 +42,7 @@ client_prod: $(CLIENT_OBJ)
 	cp bin/$(EXE)_client_prod.js ../client/
 
 %.o: %.cc
-	$(CXX) $(CPPFLAGS) -DBUILD_SERVER -MMD -c $< -o $@
+	$(CXX) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
 %.wo: %.cc
 	em++ -O2 $(CPPFLAGS) -DBUILD_CLIENT -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
@@ -60,4 +60,4 @@ clean:
 	find . -name "*.o" -type f -delete
 	find . -name "*.wo" -type f -delete
 	find . -name "*.d" -type f -delete
-	rm -f *~ core $(SRC_DIR)/*~
+	find . -name "*.wd" -type f -delete

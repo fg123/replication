@@ -28,7 +28,7 @@ struct PlayerSocketData {
 };
 
 class Game {
-    std::atomic<ObjectID> nextId = 1;
+    std::atomic<ObjectID> nextId;
 
     std::mutex queuedCallsMutex;
     std::vector<std::function<void(Game& game)>> queuedCalls;
@@ -42,7 +42,7 @@ class Game {
 
     Time gameTime;
 
-    Vector2 killPlaneSize = Vector2 {3000, 2000};
+    Vector2 killPlaneSize = Vector2 { 3000, 2000 };
 
 public:
     Game();
@@ -95,14 +95,13 @@ public:
     void RemovePlayer(PlayerSocketData* data);
 #endif
 
-    // Finding Units:
-
+    using RangeQueryResult = std::pair<Object*, double>;
     // Gets all units within a certain radial range (by position), if
     //   includeBoundingBox is set, counts unit if any part of bounding box
     //   is part of that range.
     void GetUnitsInRange(Vector2 position, double range,
         bool includeBoundingBox,
-        std::vector<Object*>& results);
+        std::vector<RangeQueryResult>& results);
 };
 
 #endif

@@ -14,6 +14,27 @@ function drawImage(context, img, x, y, width = -1, height = -1, angle = 0) {
     }
 }
 
+function drawPlayer(body, arm, context, resourceManager, obj) {
+    const image = obj.v.x < 0 ? resourceManager.get(body + '-FLIPPED') : resourceManager.get(body);
+    drawImage(context, image, obj.p.x, obj.p.y, (image.width / 2), (image.height / 2));
+    const armImage = resourceManager.get(arm);
+    drawImage(context, armImage, obj.p.x, obj.p.y + 7, (armImage.width / 2), (armImage.height / 2), obj.aa);
+
+    // Draw Health Bar
+    context.fillStyle = "black";
+    context.fillRect(
+        obj.p.x - 25,
+        obj.p.y - 50,
+        50, 5
+    );
+    context.fillStyle = "green";
+    context.fillRect(
+        obj.p.x - 25,
+        obj.p.y - 50,
+        0.5 * obj.h, 5
+    );
+}
+
 module.exports = {
     "RectangleObject": {
         draw (context, resourceManager, obj, objects) {
@@ -110,7 +131,10 @@ module.exports = {
     "ArtilleryStrikeWeapon": {
 
     },
-    "DashWeapon": {
+    "DashAbility": {
+
+    },
+    "ArrowChargeUpAbility": {
 
     },
     "GrenadeThrower": {
@@ -140,26 +164,14 @@ module.exports = {
             }
         }
     },
-    "PlayerObject": {
+    "Marine": {
         draw (context, resourceManager, obj, objects) {
-            const image = obj.v.x < 0 ? resourceManager.get('marine.png-FLIPPED') : resourceManager.get('marine.png');
-            drawImage(context, image, obj.p.x, obj.p.y, (image.width / 2), (image.height / 2));
-            const arm = resourceManager.get('marineArm.png');
-            drawImage(context, arm, obj.p.x, obj.p.y + 7, (arm.width / 2), (arm.height / 2), obj.aa);
-
-            // Draw Health Bar
-            context.fillStyle = "black";
-            context.fillRect(
-                obj.p.x - 25,
-                obj.p.y - 50,
-                50, 5
-            )
-            context.fillStyle = "green";
-            context.fillRect(
-                obj.p.x - 25,
-                obj.p.y - 50,
-                0.5 * obj.h, 5
-            )
+            drawPlayer('marine.png', 'marineArm.png', context, resourceManager, obj);
+        }
+    },
+    "Archer": {
+        draw (context, resourceManager, obj, objects) {
+            drawPlayer('archer.png', 'archerArm.png', context, resourceManager, obj);
         }
     }
 };

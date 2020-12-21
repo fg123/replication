@@ -3,6 +3,10 @@ module.exports = {
         flipDirection: true
     },
     'marineArm.png': {},
+    'archer.png': {
+        flipDirection: true
+    },
+    'archerArm.png': {},
     'm4.png': {
         flipDirection: true
     },

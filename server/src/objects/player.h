@@ -3,13 +3,14 @@
 
 #include "object.h"
 #include "vector.h"
-#include "weapon.h"
+#include "weapons/weapon.h"
 
 #include <mutex>
 #include <unordered_set>
 
 class Game;
 class PlayerObject : public Object {
+protected:
     int health = 100;
 
     // in Radians
@@ -21,8 +22,6 @@ class PlayerObject : public Object {
 
     Time canPickupTime = 0;
 public:
-
-    CLASS_CREATE(PlayerObject)
 
     std::mutex socketDataMutex;
     std::array<bool, 256> keyboardState {};
@@ -45,6 +44,7 @@ public:
     
     void ProcessInputData(json& obj);
 
+    WeaponObject* GetWeapon() { return currentWeapon; }
     void PickupWeapon(WeaponObject* weapon);
     void DropWeapon();
 
@@ -54,6 +54,5 @@ public:
     Vector2 GetAttachmentPoint() const;
 };
 
-CLASS_REGISTER(PlayerObject);
 
 #endif

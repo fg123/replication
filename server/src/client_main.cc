@@ -1,10 +1,15 @@
 #include <emscripten.h>
 
 #include "logging.h"
+
 #include "game.h"
 #include "objects/player.h"
 #include "object.h"
 #include "json/json.hpp"
+
+// We probably need to include all these so it registers
+#include "characters/marine.h"
+#include "characters/archer.h"
 
 extern "C" {
     /** Client Interface for the JS Front End */

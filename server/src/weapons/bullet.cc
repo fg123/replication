@@ -25,7 +25,8 @@ void BulletObject::OnCollide(CollisionResult& result) {
 
     dead = true;
     
-    game.QueueNextTick([this](Game& game) {
-        game.DestroyObject(GetId());
+    ObjectID id = GetId();
+    game.QueueNextTick([id](Game& game) {
+        game.DestroyObject(id);
     });
 }

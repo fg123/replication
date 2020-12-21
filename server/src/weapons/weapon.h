@@ -20,6 +20,7 @@ public:
     void AttachToPlayer(PlayerObject* player);
     void Detach();
 
+    virtual void StartFire(Time time) {} 
     virtual void Fire(Time time) {} 
     virtual void ReleaseFire(Time time) {}
 

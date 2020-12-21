@@ -35,7 +35,14 @@ void GrenadeObject::Tick(Time time) {
 }
 
 void GrenadeObject::Explode() {
-    // IMPLEMENT EXPLODE
+    // IMPLEMENT EXPLODE, scale damage as required
+    std::vector<Game::RangeQueryResult> results;
+    game.GetUnitsInRange(position, 200, false, results);
+
+    // for (auto& result : results) {
+    //     // Flat Damage for now
+    //     result.first->Damage
+    // }
     game.QueueNextTick([this](Game& game) {
         game.DestroyObject(GetId());
     });
