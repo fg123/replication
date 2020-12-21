@@ -100,6 +100,8 @@ function StartGame(modules) {
 
     let lastTime = Date.now();
 
+    const cameraPos = { x: 0, y: 0 };
+
     const backgroundGradient = context.createLinearGradient(0, 0, 0, height);
     backgroundGradient.addColorStop(0, "#cbc4d3");
     backgroundGradient.addColorStop(0.5, "#d8c39b");
@@ -111,10 +113,19 @@ function StartGame(modules) {
         const currentTime = Date.now();
         const deltaTime = currentTime - lastTime;
         
-        // Create Gradient
         context.fillStyle = backgroundGradient;
         context.fillRect(0, 0, width, height);
+        if (localPlayerObjectId && gameObjects[localPlayerObjectId].p) {
+            cameraPos.x = gameObjects[localPlayerObjectId].p.x;
+            cameraPos.y = gameObjects[localPlayerObjectId].p.y;
+        }
 
+        const cameraTranslation = { 
+            x: cameraPos.x - width / 2,
+            y: cameraPos.y - height / 2
+        };
+       
+        context.translate(-cameraTranslation.x, -cameraTranslation.y);
         context.drawImage(mapImage, 0, 0);
         const sorter = [];
         Object.keys(gameObjects).forEach((k) => {
@@ -130,6 +141,7 @@ function StartGame(modules) {
             gameObjects[k] = serializedObject;
             sorter.push({ id: k, z: serializedObject.z });
         });
+
         sorter.sort((a, b) => a.z - b.z);
         sorter.forEach(pair => {
             const obj = gameObjects[pair.id];
@@ -159,6 +171,11 @@ function StartGame(modules) {
                 }
             }
         });
+        context.translate(cameraTranslation.x, cameraTranslation.y);
+
+        context.font = "20px monospace";
+        context.fillStyle = "black";
+        context.fillText(Math.ceil(1000 / deltaTime), 5, 20);
         lastTime = currentTime;
         wasm._TickGame(currentTime);
         requestAnimationFrame(tick);
@@ -190,8 +207,8 @@ function StartGame(modules) {
             lastMouseMoveSend = current;
             sendInputPacket({
                 event: "mm",
-                x: e.pageX,
-                y: e.pageY
+                x: e.pageX + cameraPos.x - (width / 2),
+                y: e.pageY + cameraPos.y - (height / 2)
             });
         }
     });

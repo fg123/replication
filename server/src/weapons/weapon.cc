@@ -43,8 +43,12 @@ void WeaponObject::Tick(Time time) {
     Object::Tick(time);
     if (attachedTo) {
         // Attached!
-        SetPosition(attachedTo->GetAttachmentPoint());
-        SetVelocity(attachedTo->GetVelocity());
+        // SetPosition(attachedTo->GetAttachmentPoint());
+        SetTag(Tag::NO_GRAVITY);
+        // SetVelocity(attachedTo->GetVelocity());
+    }
+    else {
+        RemoveTag(Tag::NO_GRAVITY);
     }
 }
 

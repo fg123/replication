@@ -21,7 +21,7 @@ public:
         // Calculate cooldown
         timeSinceLastUse = time - lastUse;
         if (timeSinceLastUse > cooldown) {
-            if (attachedTo && static_cast<BowObject*>(attachedTo->GetWeapon())) {
+            if (attachedTo && attachedTo->GetWeapon() && static_cast<BowObject*>(attachedTo->GetWeapon())) {
                 static_cast<BowObject*>(attachedTo->GetWeapon())->SetInstantFire(false);
             }
         }
@@ -34,7 +34,7 @@ public:
         }
 
         lastUse = time;
-        if (attachedTo && static_cast<BowObject*>(attachedTo->GetWeapon())) {
+        if (attachedTo && attachedTo->GetWeapon() && static_cast<BowObject*>(attachedTo->GetWeapon())) {
             static_cast<BowObject*>(attachedTo->GetWeapon())->SetInstantFire(true);
         }
     }
