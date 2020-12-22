@@ -103,6 +103,21 @@ public:
     void GetUnitsInRange(Vector2 position, double range,
         bool includeBoundingBox,
         std::vector<RangeQueryResult>& results);
+    
+    CollisionResult CheckLineSegmentCollide(const Vector2& start,
+        const Vector2& end, uint64_t includeTags = ~0) {
+        CollisionResult result;
+        for (auto& object : gameObjects) {
+            if (((uint64_t)object.second->GetTags() & includeTags) != 0) {
+                CollisionResult r = object.second->CollidesWith(start, end);
+                if (r.isColliding) {
+                    r.collidedWith = object.second;
+                    return r;
+                }
+            }
+        }
+        return CollisionResult{};
+    }
 };
 
 #endif

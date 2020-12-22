@@ -22,11 +22,11 @@ void HookObject::OnCollide(CollisionResult& result) {
 
 void HookObject::Tick(Time time) {
     ThrownProjectile::Tick(time);
+    bool isDead = false;
     if (!IsStatic() && 
         firedBy->GetAttachedTo()->GetPosition().Distance(GetPosition()) > 500) {
-        game.QueueNextTick([this](Game& game) {
-            game.DestroyObject(GetId());
-        });
+        isDead = true;
+        
     }
     else if (IsStatic()) {
         Vector2 position = firedBy->GetAttachedTo()->GetPosition();
@@ -38,12 +38,21 @@ void HookObject::Tick(Time time) {
         hasForceBeenApplied = true;
 
         // TODO: Cut off the rope if it intersects map object
+        CollisionResult r = game.CheckLineSegmentCollide(position + direction * 10,
+            GetPosition() - (direction * 10), (uint64_t)Tag::GROUND);
+        if (r.isColliding) {
+            isDead = true;
+        }
     }
     if (hasForceBeenApplied &&
         firedBy->GetAttachedTo()->GetPosition().Distance(GetPosition()) < 100) {
-            game.QueueNextTick([this](Game& game) {
-                game.DestroyObject(GetId());
-            });
+        isDead = true;
+    }
+
+    if (isDead) {
+        game.QueueNextTick([this](Game& game) {
+            game.DestroyObject(GetId());
+        });
     }
 }
 

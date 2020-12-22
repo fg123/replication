@@ -48,6 +48,10 @@ struct Vector2 : Replicable {
     inline Vector2 & operator *= (double v) { x *= v; y *= v; return *this; }
     inline Vector2 & operator /= (double v) { x /= v; y /= v; return *this; }
 
+    static inline double CrossProduct(const Vector2 & a, const Vector2 & b) {
+        return a.x * b.y - a.y * b.x;
+    }
+
     virtual void Serialize(json& obj) override;
     
     virtual void ProcessReplication(json& obj) override;
@@ -65,12 +69,6 @@ struct Vector2 : Replicable {
 inline std::ostream& operator<<(std::ostream& os, const Vector2& v) {
     os << "(" << v.x << ", " << v.y << ")";
     return os;
-}
-
-inline bool IsPointInRect(const Vector2& RectPosition, const Vector2& RectSize, const Vector2& Point) {
-    return 
-        (Point.x > RectPosition.x && Point.x < RectPosition.x + RectSize.x) &&
-        (Point.y > RectPosition.y && Point.y < RectPosition.y + RectSize.y);
 }
 
 template<typename T>

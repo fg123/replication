@@ -83,8 +83,9 @@ public:
     size_t GetColliderCount() const { return colliders.size(); }
 
     CollisionResult CollidesWith(Collider* other);
-
     CollisionResult CollidesWith(Object* other);
+    CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2);
+    
     void AddCollider(Collider* col) { colliders.push_back(col); }
     ObjectID GetId() const { return id; }
 

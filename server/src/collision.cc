@@ -117,3 +117,40 @@ CollisionResult CircleCollider::CollidesWith(Collider* other) {
         return RectangleAndCircleCollide(static_cast<RectangleCollider*>(other), this);
     }
 }
+
+bool AreLineSegmentsIntersecting(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2);
+
+inline bool IsLineSegmentCollideRect(const Vector2& RectPosition, const Vector2& RectSize, const Vector2& p1, const Vector2& p2) {
+
+}
+
+inline bool IsLineSegmentCollideCircle(const Vector2& CirclePosition, const double& Radius, const Vector2& p1, const Vector2& p2) {
+
+}
+
+CollisionResult RectangleCollider::CollidesWith(const Vector2& p1, const Vector2& p2) {
+    CollisionResult result;
+    Vector2 RectPosition = GetPosition();
+    if (IsPointInRect(RectPosition, size, p1) || IsPointInRect(RectPosition, size, p2)) {
+        result.isColliding = true;
+        return result;
+    }
+    Vector2 topRight = RectPosition;
+    topRight.x += size.x;
+
+    Vector2 bottomLeft = RectPosition;
+    bottomLeft.y += size.y;
+
+    Vector2 bottomRight = RectPosition + size;
+
+    result.isColliding = AreLineSegmentsIntersecting(p1, p2, RectPosition, topRight) ||
+        AreLineSegmentsIntersecting(p1, p2, topRight, bottomRight) ||
+        AreLineSegmentsIntersecting(p1, p2, bottomRight, bottomLeft) ||
+        AreLineSegmentsIntersecting(p1, p2, RectPosition, bottomLeft);
+    return result;
+}
+
+CollisionResult CircleCollider::CollidesWith(const Vector2& p1, const Vector2& p2) {
+    // TODO:
+    return CollisionResult();
+}

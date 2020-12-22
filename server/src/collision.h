@@ -21,6 +21,7 @@ public:
     virtual ~Collider() { }
     virtual int GetType() = 0;
     virtual CollisionResult CollidesWith(Collider* other) = 0;
+    virtual CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) = 0;
     Vector2 GetPosition();
 };
 
@@ -30,6 +31,7 @@ struct RectangleCollider : public Collider {
         size(size) {}
     virtual int GetType() override { return 0; }
     CollisionResult CollidesWith(Collider* other) override;
+    CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) override;
     virtual void Serialize(json& obj) override {
         size.Serialize(obj["size"]);
     }
@@ -45,6 +47,7 @@ struct CircleCollider : public Collider {
             radius(radius) {}
     virtual int GetType() override { return 1; } 
     CollisionResult CollidesWith(Collider* other) override;
+    CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) override;
     virtual void Serialize(json& obj) override {
         obj["radius"] = radius;
     }
@@ -53,5 +56,10 @@ struct CircleCollider : public Collider {
     }
 };
 
+inline bool IsPointInRect(const Vector2& RectPosition, const Vector2& RectSize, const Vector2& Point) {
+    return 
+        (Point.x > RectPosition.x && Point.x < RectPosition.x + RectSize.x) &&
+        (Point.y > RectPosition.y && Point.y < RectPosition.y + RectSize.y);
+}
 
 #endif

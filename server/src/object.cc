@@ -101,6 +101,16 @@ CollisionResult Object::CollidesWith(Object* other) {
     return finalResult;
 }
 
+CollisionResult Object::CollidesWith(const Vector2& p1, const Vector2& p2) {
+    for (auto& collider: colliders) {
+        CollisionResult r = collider->CollidesWith(p1, p2);
+        if (r.isColliding) {
+            return r;
+        }
+    }
+    return CollisionResult{};
+}
+
 void Object::SetIsStatic(bool isStatic) {
     this->isStatic = isStatic; 
     SetDirty(true);
