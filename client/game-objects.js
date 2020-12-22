@@ -118,6 +118,22 @@ module.exports = {
             drawImage(context, image, obj.p.x, obj.p.y, (image.width / 3), (image.height / 3), angle);
         }
     },
+    "PistolObject": {
+        draw (context, resourceManager, obj, objects) {
+            let isFlip = false;
+            let angle = 0;
+            const playerAttach = objects[obj.attach];            
+            if (playerAttach) {
+                isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
+                if (isFlip) {
+                    angle = Math.PI;
+                }
+                angle += playerAttach.aa;
+            }
+            const image = isFlip ? resourceManager.get('de.png-FLIPPED') : resourceManager.get('de.png');
+            drawImage(context, image, obj.p.x, obj.p.y, (image.width / 2), (image.height / 2), angle);
+        }
+    },
     "BowObject": {
         draw (context, resourceManager, obj, objects) {
             let isFlip = false;
@@ -198,7 +214,7 @@ module.exports = {
     },
     "Hookman": {
         draw (context, resourceManager, obj, objects) {
-            drawPlayer('archer.png', 'archerArm.png', context, resourceManager, obj);
+            drawPlayer('hookman.png', 'hookmanArm.png', context, resourceManager, obj);
         }
     }
 };

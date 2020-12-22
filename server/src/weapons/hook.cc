@@ -1,6 +1,5 @@
 #include "hook.h"
 
-
 HookObject::HookObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
     collideExclusion |= (uint64_t) Tag::WEAPON;
@@ -37,6 +36,8 @@ void HookObject::Tick(Time time) {
         velocity = (direction + aimDirection).Normalize() * 1000;
         firedBy->GetAttachedTo()->SetVelocity(velocity);
         hasForceBeenApplied = true;
+
+        // TODO: Cut off the rope if it intersects map object
     }
     if (hasForceBeenApplied &&
         firedBy->GetAttachedTo()->GetPosition().Distance(GetPosition()) < 100) {

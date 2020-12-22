@@ -65,9 +65,9 @@ void PlayerObject::Tick(Time time)  {
     if (keyboardState[D_KEY]) {
         velocity.x = 200;
     }
-    if (keyboardState[G_KEY]) {
-        DropWeapon();
-    }
+    // if (keyboardState[G_KEY]) {
+    //     DropWeapon();
+    // }
     if (keyboardState[W_KEY] || keyboardState[SPACE_KEY]) {
         // Can only jump if touching ground
         if (IsGrounded()) {

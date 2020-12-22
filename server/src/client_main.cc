@@ -61,6 +61,7 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     void HandleReplicate(const char* input) {
+        LOG_DEBUG(input);
         try {
             json object = json::parse(input);
             for (auto& event : object) {

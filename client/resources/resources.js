@@ -7,7 +7,14 @@ module.exports = {
         flipDirection: true
     },
     'archerArm.png': {},
+    'hookman.png': {
+        flipDirection: true
+    },
+    'hookmanArm.png': {},
     'm4.png': {
+        flipDirection: true
+    },
+    'de.png': {
         flipDirection: true
     },
     'bow.png': {

@@ -3,6 +3,7 @@
 
 #include "player.h"
 #include "weapons/hook-thrower.h"
+#include "weapons/pistol.h"
 
 class Hookman : public PlayerObject {
     
@@ -14,6 +15,10 @@ public:
             qWeapon = new HookThrower { game };
             game.AddObject(qWeapon);
             qWeapon->AttachToPlayer(this);
+            
+            PistolObject* pistol = new PistolObject(game);
+            game.AddObject(pistol);
+            PickupWeapon(pistol);
 
             // zWeapon = new ArrowChargeUpAbility { game };
             // game.AddObject(zWeapon);
