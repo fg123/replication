@@ -2,6 +2,7 @@
 #include "timer.h"
 #include "characters/marine.h"
 #include "characters/archer.h"
+#include "characters/hookman.h"
 #include "logging.h"
 
 #include <thread>
@@ -50,7 +51,7 @@ int main(int argc, char** argv) {
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
             data->ws = ws;
 
-            PlayerObject* playerObject = new Archer(game, Vector2(100, 100));
+            PlayerObject* playerObject = new Hookman(game, Vector2(100, 100));
             data->playerObject = playerObject;
 
             // Reserve an ID first

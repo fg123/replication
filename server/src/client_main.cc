@@ -10,6 +10,7 @@
 // We probably need to include all these so it registers
 #include "characters/marine.h"
 #include "characters/archer.h"
+#include "characters/hookman.h"
 
 extern "C" {
     /** Client Interface for the JS Front End */

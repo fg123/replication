@@ -15,6 +15,11 @@ Vector2& Vector2::Normalize() {
     return *this;
 }
 
+Vector2 Vector2::Normalize() const {
+    double norm = Length();
+    return Vector2(x / norm, y / norm);
+}
+
 void Vector2::ProcessReplication(json& obj) {
     x = obj["x"];
     y = obj["y"];

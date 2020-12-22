@@ -1,9 +1,9 @@
 #ifndef GRENADE_H
 #define GRENADE_H
 
-#include "weapon.h"
+#include "input-hold-thrower.h"
 
-class GrenadeObject : public Object {
+class GrenadeObject : public ThrownProjectile {
     bool isPrimed = false;
     Time startTickingTime = 0;
     Time tickTimeDiff = 0;

@@ -58,6 +58,25 @@ module.exports = {
             context.fill();
         }
     },
+    "HookObject": {
+        draw (context, resourceManager, obj, objects) {
+            context.fillStyle = "black";
+            context.beginPath();
+            context.arc(obj.p.x, obj.p.y, 5, 0, 2 * Math.PI);
+            context.fill();
+
+            const owner = objects[obj.owner];
+            if (owner) {
+                context.strokeStyle = "black";
+                context.lineWidth = 3;
+                context.beginPath();
+                context.moveTo(obj.p.x, obj.p.y);
+                context.lineTo(owner.p.x, owner.p.y);
+                context.stroke();
+            }
+            
+        }
+    },
     "ArtilleryObject": {
         draw (context, resourceManager, obj, objects) {
             const image = resourceManager.get('artillery.png');
@@ -137,6 +156,9 @@ module.exports = {
     "ArrowChargeUpAbility": {
 
     },
+    "HookThrower": {
+
+    },
     "GrenadeThrower": {
         draw (context, resourceManager, obj, objects) {
             let isFlip = false;
@@ -170,6 +192,11 @@ module.exports = {
         }
     },
     "Archer": {
+        draw (context, resourceManager, obj, objects) {
+            drawPlayer('archer.png', 'archerArm.png', context, resourceManager, obj);
+        }
+    },
+    "Hookman": {
         draw (context, resourceManager, obj, objects) {
             drawPlayer('archer.png', 'archerArm.png', context, resourceManager, obj);
         }

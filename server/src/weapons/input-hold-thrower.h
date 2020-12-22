@@ -5,8 +5,28 @@
 #include "game.h"
 #include "player.h"
 
+class ThrownProjectile : public Object {
+public:
+    WeaponObject* firedBy;
+    ThrownProjectile(Game& game) : Object(game) {}
+    void SetFiredBy(WeaponObject* obj) { firedBy = obj; }
+
+    virtual void Serialize(json& obj) override {
+        Object::Serialize(obj);
+        obj["tb"] = firedBy->GetId();
+    }
+
+    virtual void ProcessReplication(json& obj) override {
+        Object::ProcessReplication(obj);
+        firedBy = game.GetObject<WeaponObject>(obj["tb"]);
+    }
+};
+
 template <class Projectile>
 class InputHoldThrower : public WeaponObject {
+    static_assert(std::is_base_of<ThrownProjectile, Projectile>::value,
+        "Input Hold Thrower can only throw ThrownProjectiles");
+
     Time fireHoldDownTime = 0;
     Time chargeUpTime = 0;
     Vector2 arrowFireVel;
@@ -58,6 +78,7 @@ public:
     void FireProjectile(Time time) {
         #ifdef BUILD_SERVER
             Projectile* proj = new Projectile(game);
+            proj->SetFiredBy(this);
             proj->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 15.0);
             proj->SetVelocity(arrowFireVel);
             game.AddObject(proj);

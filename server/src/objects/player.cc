@@ -117,6 +117,15 @@ void PlayerObject::Tick(Time time)  {
     if (currentWeapon) {
         currentWeapon->SetPosition(GetAttachmentPoint());
     }
+
+    if (zWeapon) {
+        zWeapon->SetPosition(GetAttachmentPoint());
+    }
+
+    if (qWeapon) {
+        qWeapon->SetPosition(GetAttachmentPoint());
+    }
+
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;
 }

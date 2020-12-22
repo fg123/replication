@@ -17,6 +17,7 @@ public:
     }
     WeaponObject(Game& game, Vector2 position);
 
+    PlayerObject* GetAttachedTo() { return attachedTo; }
     void AttachToPlayer(PlayerObject* player);
     void Detach();
 

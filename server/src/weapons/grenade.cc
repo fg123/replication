@@ -1,7 +1,7 @@
 #include "grenade.h"
 #include "game.h"
 
-GrenadeObject::GrenadeObject(Game& game) : Object(game) {
+GrenadeObject::GrenadeObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
     collideExclusion |= (uint64_t) Tag::WEAPON;
     AddCollider(new CircleCollider(this, Vector2(0, 0), 5.0));
@@ -22,7 +22,7 @@ void GrenadeObject::OnCollide(CollisionResult& result) {
 }
 
 void GrenadeObject::Tick(Time time) {
-    Object::Tick(time);
+    ThrownProjectile::Tick(time);
     if (isPrimed && startTickingTime == 0) {
         startTickingTime = time;
     }
@@ -49,13 +49,13 @@ void GrenadeObject::Explode() {
 }
 
 void GrenadeObject::Serialize(json& obj) {
-    Object::Serialize(obj);
+    ThrownProjectile::Serialize(obj);
     obj["ip"] = isPrimed;
     obj["ttf"] = tickTimeDiff;
 }
 
 void GrenadeObject::ProcessReplication(json& obj) {
-    Object::ProcessReplication(obj);
+    ThrownProjectile::ProcessReplication(obj);
     isPrimed = obj["ip"];
     tickTimeDiff = obj["ttf"];
 }

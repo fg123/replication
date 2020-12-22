@@ -2,7 +2,7 @@
 #include "game.h"
 #include "player.h"
 
-ArrowObject::ArrowObject(Game& game) : Object(game) {
+ArrowObject::ArrowObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
     collideExclusion |= (uint64_t) Tag::WEAPON;
     AddCollider(new CircleCollider(this, Vector2(0, 0), 3.0));
@@ -32,15 +32,15 @@ void ArrowObject::OnCollide(CollisionResult& result) {
 }
 
 void ArrowObject::Tick(Time time) {
-    Object::Tick(time);
+    ThrownProjectile::Tick(time);
 }
 
 void ArrowObject::Serialize(json& obj) {
-    Object::Serialize(obj);
+    ThrownProjectile::Serialize(obj);
     obj["hp"] = hitPlayer;
 }
 
 void ArrowObject::ProcessReplication(json& obj) {
-    Object::ProcessReplication(obj);
+    ThrownProjectile::ProcessReplication(obj);
     hitPlayer = obj["hp"];
 }

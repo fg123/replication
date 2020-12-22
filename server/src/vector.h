@@ -20,7 +20,7 @@ struct Vector2 : Replicable {
     
     static const Vector2 Zero;
 
-    inline double Distance(const Vector2& v) { return std::sqrt(std::pow(x - v.x, 2) + std::pow(y - v.y, 2)); }
+    inline double Distance(const Vector2& v) const { return std::sqrt(std::pow(x - v.x, 2) + std::pow(y - v.y, 2)); }
     
     inline Vector2 & operator = (const Vector2 & v) { x = v.x; y = v.y; return *this; }
     inline Vector2 & operator = (const double & f) { x = f; y = f; return *this; }
@@ -53,6 +53,7 @@ struct Vector2 : Replicable {
     virtual void ProcessReplication(json& obj) override;
 
     Vector2& Normalize();
+    Vector2 Normalize() const;
     double Length() const { return std::sqrt(std::pow(x, 2) + std::pow(y, 2)); }
     inline Vector2 Clamp(const Vector2& min, const Vector2& max) const {
         return Vector2(clamp(x, min.x, max.x), clamp(y, min.y, max.y));

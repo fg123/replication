@@ -1,14 +1,14 @@
-#ifndef ARROW_H
-#define ARROW_H
+#ifndef HOOK_H
+#define HOOK_H
 
 #include "input-hold-thrower.h"
 
-class ArrowObject : public ThrownProjectile {
-    bool hitPlayer = false;
+class HookObject : public ThrownProjectile {
+    bool hasForceBeenApplied = false;
 public:
-    CLASS_CREATE(ArrowObject)
-
-    ArrowObject(Game& game);
+    CLASS_CREATE(HookObject)
+    
+    HookObject(Game& game);
 
     virtual void OnCollide(CollisionResult& result) override;
     virtual void Tick(Time time) override;
@@ -16,5 +16,6 @@ public:
     virtual void ProcessReplication(json& obj) override;
 };
 
-CLASS_REGISTER(ArrowObject);
+CLASS_REGISTER(HookObject);
+
 #endif
