@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
             LOG_INFO("Connection Opened");
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
             data->ws = ws;
-
+            data->nextRespawnCharacter = "Archer";
             PlayerObject* playerObject = new Archer(game, Vector2(100, 100));
             data->playerObject = playerObject;
 
@@ -65,6 +65,9 @@ int main(int argc, char** argv) {
             json obj = json::parse(message);
             if (obj["event"] == "rdy") {
                 data->isReady = true;
+            }
+            else if (obj["event"] == "setchar") {
+                data->nextRespawnCharacter = obj["char"];
             }
             data->playerObject->ProcessInputData(obj);
         },

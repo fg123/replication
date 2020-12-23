@@ -9,7 +9,7 @@ class Marine : public PlayerObject {
     
 public:
     CLASS_CREATE(Marine)
-    Marine(Game& game) : PlayerObject(game) {}
+    Marine(Game& game) : Marine(game, Vector2::Zero) {}
     Marine(Game& game, Vector2 position) : PlayerObject(game, position) {
         #ifdef BUILD_SERVER
             qWeapon = new GrenadeThrower { game };

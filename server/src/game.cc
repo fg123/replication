@@ -261,12 +261,17 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
             p->playerObjectDirty = true;
             
             // Implement letting user select things
-            PlayerObject* playerObject = new Archer(*this, Vector2(100, 100));
-            p->playerObject = playerObject;
+            auto& ClassLookup = GetClassLookup();
+            if (ClassLookup.find(p->nextRespawnCharacter) == ClassLookup.end()) {
+                p->nextRespawnCharacter = "Archer";
+            }
+            Object* obj = GetClassLookup()[p->nextRespawnCharacter](*this);
+            
+            p->playerObject = static_cast<PlayerObject*>(obj);
 
-            QueueNextTick([playerObject](Game& game) {
-                game.AddObject(playerObject);
-                LOG_INFO("Respawn Player! New ID " << playerObject->GetId());
+            QueueNextTick([obj](Game& game) {
+                game.AddObject(obj);
+                LOG_INFO("Respawn Player! New ID " << obj->GetId());
             });
             return;
         }

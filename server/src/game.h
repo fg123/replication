@@ -24,6 +24,7 @@ struct PlayerSocketData {
     bool hasInitialReplication = false;
     bool playerObjectDirty = true;
     bool isReady = false;
+    std::string nextRespawnCharacter;
 #endif
     PlayerObject* playerObject;
 };
