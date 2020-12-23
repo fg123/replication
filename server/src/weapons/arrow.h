@@ -5,6 +5,12 @@
 
 class ArrowObject : public ThrownProjectile {
     bool hitPlayer = false;
+    
+    Time timeLanded = 0;
+    Time timeSinceLanded = 0;
+
+    static const Time timeBeforeDie = 3000;
+
 public:
     CLASS_CREATE(ArrowObject)
 

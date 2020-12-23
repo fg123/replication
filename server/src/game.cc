@@ -3,8 +3,6 @@
 
 #include "objects/player.h"
 #include "objects/rectangle.h"
-#include "weapons/bow.h"
-#include "weapons/assault-rifle.h"
 
 #include "json/json.hpp"
 
@@ -37,12 +35,6 @@ Game::Game(std::string mapPath) : Game() {
             AddObject(floor);
         }
     }
-
-    AddObject(new BowObject(*this, Vector2{400, 100}));
-    AddObject(new AssaultRifleObject(*this, Vector2{600, 100}));
-    // CircleObject* c = new CircleObject(*this, Vector2{400, 600}, 20.0);
-    // c->SetIsStatic(true);
-    // AddObject(c);
 }
 
 Game::~Game() {
@@ -179,6 +171,9 @@ void Game::EnsureObjectExists(json& object) {
 
 void Game::ProcessReplication(json& object) {
     ObjectID id = object["id"];
+    if (object.contains("dead")) {
+        return;
+    }
     Object* obj = GetObject(id);
     if (obj == nullptr) {
         LOG_ERROR("Replicating on non-existant object!" << id);

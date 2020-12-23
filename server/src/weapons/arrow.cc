@@ -21,7 +21,7 @@ void ArrowObject::OnCollide(CollisionResult& result) {
         static_cast<PlayerObject*>(result.collidedWith)->DealDamage(50);
         SetVelocity(Vector2::Zero);
     }
-    else if (result.collidedWith->IsStatic()) {
+    else if (result.collidedWith->IsStatic() && !IsStatic()) {
         SetIsStatic(true);
         collideExclusion |= (uint64_t) Tag::PLAYER;
     }
@@ -33,6 +33,15 @@ void ArrowObject::OnCollide(CollisionResult& result) {
 
 void ArrowObject::Tick(Time time) {
     ThrownProjectile::Tick(time);
+    if (timeLanded == 0 && IsStatic()) {
+        timeLanded = time;
+    }
+    timeSinceLanded = time - timeLanded;
+    if (timeLanded != 0 && timeSinceLanded > timeBeforeDie) {
+        game.QueueNextTick([this](Game& game) {
+            game.DestroyObject(GetId());
+        });
+    }
 }
 
 void ArrowObject::Serialize(json& obj) {
