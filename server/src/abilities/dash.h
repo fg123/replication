@@ -20,6 +20,9 @@ public:
         // Calculate cooldown
         timeSinceLastDash = time - lastDash;
 
+        if (!attachedTo) {
+            throw "what the heck";
+        }
         if (timeSinceLastDash > cooldown) {
             attachedTo->RemoveTag(Tag::NO_GRAVITY);
             attachedTo->airFriction.y = 1;
@@ -40,7 +43,6 @@ public:
         attachedTo->SetVelocity(velocity);
         attachedTo->SetTag(Tag::NO_GRAVITY);
         attachedTo->airFriction.y = 0.95;
-        
     }
 
     virtual void Serialize(json& obj) override {

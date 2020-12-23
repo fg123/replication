@@ -154,7 +154,7 @@ void Game::Replicate(Time time) {
 #endif
 
 #ifdef BUILD_CLIENT
-void Game::ProcessReplication(json& object) {
+void Game::EnsureObjectExists(json& object) {
     ObjectID id = object["id"];
     if (object.contains("dead")) {
         // Kill
@@ -175,7 +175,15 @@ void Game::ProcessReplication(json& object) {
         obj->SetId(id);
         gameObjects[id] = obj;
     }
+}
+
+void Game::ProcessReplication(json& object) {
+    ObjectID id = object["id"];
     Object* obj = GetObject(id);
+    if (obj == nullptr) {
+        LOG_ERROR("Replicating on non-existant object!" << id);
+        return;
+    }
     obj->ProcessReplication(object);
 }
 #endif

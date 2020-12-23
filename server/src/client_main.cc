@@ -65,6 +65,9 @@ extern "C" {
         try {
             json object = json::parse(input);
             for (auto& event : object) {
+                game.EnsureObjectExists(event);
+            }
+            for (auto& event : object) {
                 game.ProcessReplication(event);
             }
         } catch(...) {

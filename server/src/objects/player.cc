@@ -29,8 +29,11 @@ PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
 void PlayerObject::OnDeath() {
     // This calls before you get destructed, but client will already know you're
     //   dead (but you don't actually get GCed until next tick)
-    DropWeapon();
-
+    if (currentWeapon) {
+        game.DestroyObject(currentWeapon->GetId());
+        currentWeapon->Detach();
+        currentWeapon = nullptr;
+    }
     if (qWeapon) {
         game.DestroyObject(qWeapon->GetId());
         qWeapon->Detach();
@@ -44,7 +47,7 @@ void PlayerObject::OnDeath() {
 }
 
 PlayerObject::~PlayerObject() {
-    DropWeapon();
+    
 }
 
 Vector2 PlayerObject::GetAimDirection() const {

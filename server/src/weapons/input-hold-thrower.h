@@ -7,18 +7,23 @@
 
 class ThrownProjectile : public Object {
 public:
-    WeaponObject* firedBy;
+    // Could be null if the weapon / person doesn't exist anymore
+    WeaponObject* firedBy = nullptr;
     ThrownProjectile(Game& game) : Object(game) {}
     void SetFiredBy(WeaponObject* obj) { firedBy = obj; }
 
     virtual void Serialize(json& obj) override {
         Object::Serialize(obj);
-        obj["tb"] = firedBy->GetId();
+        if (firedBy) {
+            obj["tb"] = firedBy->GetId();
+        }
     }
 
     virtual void ProcessReplication(json& obj) override {
         Object::ProcessReplication(obj);
-        firedBy = game.GetObject<WeaponObject>(obj["tb"]);
+        if (obj.contains("tb")) {
+            firedBy = game.GetObject<WeaponObject>(obj["tb"]);
+        }
     }
 };
 

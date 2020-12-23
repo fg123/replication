@@ -61,6 +61,7 @@ public:
 #endif
 
 #ifdef BUILD_CLIENT
+    void EnsureObjectExists(json& object);
     void ProcessReplication(json& incObject);
 #endif
 
