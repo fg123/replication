@@ -22,6 +22,7 @@ struct PlayerSocketData {
 #ifdef BUILD_SERVER
     uWS::WebSocket<false, true>* ws;
     bool hasInitialReplication = false;
+    bool playerObjectDirty = true;
     bool isReady = false;
 #endif
     PlayerObject* playerObject;
@@ -93,8 +94,9 @@ public:
 
     // Communicate with Sockets (everything here must be locked)
 #ifdef BUILD_SERVER
-    void AddPlayer(PlayerSocketData* data, PlayerObject* playerObject, ObjectID reservedId);
+    void AddPlayer(PlayerSocketData* data, PlayerObject* playerObject);
     void RemovePlayer(PlayerSocketData* data);
+    void OnPlayerDead(PlayerObject* playerObject);
 #endif
 
     using RangeQueryResult = std::pair<Object*, double>;

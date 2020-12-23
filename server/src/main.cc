@@ -54,9 +54,7 @@ int main(int argc, char** argv) {
             PlayerObject* playerObject = new Archer(game, Vector2(100, 100));
             data->playerObject = playerObject;
 
-            // Reserve an ID first
-            ObjectID id = game.RequestId();
-            game.AddPlayer(data, playerObject, id);
+            game.AddPlayer(data, playerObject);
         },
         .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());

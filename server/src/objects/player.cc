@@ -44,6 +44,11 @@ void PlayerObject::OnDeath() {
         zWeapon->Detach();
         zWeapon = nullptr;
     }
+
+#ifdef BUILD_SERVER
+    // Notify game so it can replace a new character
+    game.OnPlayerDead(this);
+#endif
 }
 
 PlayerObject::~PlayerObject() {

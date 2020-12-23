@@ -56,7 +56,12 @@ module.exports = class ClientState {
             const events = JSON.parse(ev.data);
             if (events["playerLocalObjectId"]) {
                 console.log("Player Local ID", events);
-                this.localPlayerObjectId = events["playerLocalObjectId"];
+                if (events["playerLocalObjectId"] === 0) {
+                    this.localPlayerObjectId = undefined;
+                }
+                else {
+                    this.localPlayerObjectId = events["playerLocalObjectId"];
+                }
             }
             else {
                 const heapString = this.ToHeapString(this.wasm, ev.data);

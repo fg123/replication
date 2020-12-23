@@ -3,6 +3,7 @@
 
 #include "objects/player.h"
 #include "objects/rectangle.h"
+#include "characters/archer.h"
 
 #include "json/json.hpp"
 
@@ -71,9 +72,6 @@ void Game::Tick(Time time) {
             killPlaned.insert(object.second);
         }
     }
-#endif
-
-#ifdef BUILD_SERVER
     for (auto& object : killPlaned) {
         DestroyObject(object->GetId());
     }
@@ -132,14 +130,19 @@ void Game::Replicate(Time time) {
             LOG_DEBUG("Initial Replication");
             player->hasInitialReplication = true;
             InitialReplication(player);
-            json objectNotify;
-            objectNotify["playerLocalObjectId"] = player->playerObject->GetId();
-            player->ws->send(objectNotify.dump(), uWS::OpCode::TEXT);
         }
         else {
             if (!player->ws->send(finalPacketContents, uWS::OpCode::TEXT)) {
                 LOG_ERROR("Send Error");
             }
+        }
+        if (player->playerObjectDirty) {
+            if (player->playerObject->GetId() != 0) {
+                player->playerObjectDirty = false;
+            }            
+            json objectNotify;
+            objectNotify["playerLocalObjectId"] = player->playerObject->GetId();
+            player->ws->send(objectNotify.dump(), uWS::OpCode::TEXT);
         }
     }
 }
@@ -147,6 +150,10 @@ void Game::Replicate(Time time) {
 
 #ifdef BUILD_CLIENT
 void Game::EnsureObjectExists(json& object) {
+    if (!object.contains("id")) {
+        LOG_ERROR("EnsureObjectExists: no ID on replication packet!");
+        throw std::runtime_error("EnsureObjectExists: no ID on replication packet!");
+    }
     ObjectID id = object["id"];
     if (object.contains("dead")) {
         // Kill
@@ -244,19 +251,41 @@ void Game::DestroyObject(ObjectID objectId) {
     deadObjects.insert(object);
 }
 
+#ifdef BUILD_SERVER
+void Game::OnPlayerDead(PlayerObject* playerObject) {
+    std::scoped_lock<std::mutex> lock(playersSetMutex);
+    for (auto& p : players) {
+        if (p->playerObject == playerObject) {
+            LOG_INFO("Found player! Respawning by setting to dirty!");
+            // Found the player. Handle respawn mechanics here.
+            p->playerObjectDirty = true;
+            
+            // Implement letting user select things
+            PlayerObject* playerObject = new Archer(*this, Vector2(100, 100));
+            p->playerObject = playerObject;
+
+            QueueNextTick([playerObject](Game& game) {
+                game.AddObject(playerObject);
+                LOG_INFO("Respawn Player! New ID " << playerObject->GetId());
+            });
+            return;
+        }
+    }
+}
+#endif
+
 ObjectID Game::RequestId() {
     return nextId++;
 }
 
 #ifdef BUILD_SERVER
-void Game::AddPlayer(PlayerSocketData* data, PlayerObject* playerObject, ObjectID reservedId) {
+void Game::AddPlayer(PlayerSocketData* data, PlayerObject* playerObject) {
     std::scoped_lock<std::mutex> lock(playersSetMutex);
     players.insert(data);
 
-    QueueNextTick([data, playerObject, reservedId, this](Game& game) {
+    QueueNextTick([playerObject](Game& game) {
         // Already reserved one to tell the client, so we override it.
-        AddObject(playerObject);
-        ChangeId(playerObject->GetId(), reservedId);
+        game.AddObject(playerObject);
     });
 }
 
@@ -266,8 +295,8 @@ void Game::RemovePlayer(PlayerSocketData* data) {
 
     PlayerObject* playerObject = data->playerObject;
     LOG_INFO("Removing player " << playerObject);
-    QueueNextTick([playerObject, this](Game& game) {
-        DestroyObject(playerObject->GetId());
+    QueueNextTick([playerObject](Game& game) {
+        game.DestroyObject(playerObject->GetId());
     });
 }
 #endif
