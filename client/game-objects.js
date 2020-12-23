@@ -74,7 +74,6 @@ module.exports = {
                 context.lineTo(owner.p.x, owner.p.y);
                 context.stroke();
             }
-            
         }
     },
     "ArtilleryObject": {

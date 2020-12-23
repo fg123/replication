@@ -1,3 +1,18 @@
 html, body {
     margin: 0px;
+    position: relative;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+canvas.game {
+    z-index: 0;
+}
+
+canvas.ui {
+    z-index: 10;
 }
