@@ -89,7 +89,9 @@ function StartGame(modules) {
 
     function sendInputPacket(input) {
         const inputStr = JSON.stringify(input);
-        webSocket.send(inputStr);
+        if (webSocket.readyState === WebSocket.OPEN) {
+            webSocket.send(inputStr);
+        }
         if (localPlayerObjectId !== undefined) {
             // Serve Inputs into Local
             const heapString = ToHeapString(wasm, inputStr);
