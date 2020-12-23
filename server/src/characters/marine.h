@@ -4,6 +4,7 @@
 #include "player.h"
 #include "weapons/grenade-thrower.h"
 #include "weapons/artillery-strike.h"
+#include "weapons/assault-rifle.h"
 
 class Marine : public PlayerObject {
     
@@ -15,6 +16,10 @@ public:
             qWeapon = new GrenadeThrower { game };
             game.AddObject(qWeapon);
             qWeapon->AttachToPlayer(this);
+        
+            AssaultRifleObject* rifle = new AssaultRifleObject(game);
+            game.AddObject(rifle);
+            PickupWeapon(rifle);
 
             zWeapon = new ArtilleryStrikeWeapon { game };
             game.AddObject(zWeapon);

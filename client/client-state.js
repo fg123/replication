@@ -8,7 +8,8 @@ module.exports = class ClientState {
         this.showColliders = false;
         this.localPlayerObjectId = undefined;
         this.isPaused = false;
-
+        this.events = {};
+    
         this.StartGame();
 
         this.width = 0;
@@ -54,6 +55,10 @@ module.exports = class ClientState {
         }
     }
 
+    RegisterEvent(event, fn) {
+        this.events[event] = fn;
+    }
+
     StartGame() {
         this.webSocket.send('{"event":"rdy"}');
 
@@ -72,8 +77,17 @@ module.exports = class ClientState {
                 else {
                     this.localPlayerObjectId = events["playerLocalObjectId"];
                 }
+                return;
             }
-            else {
+            const allRegistered = Object.keys(this.events);
+            let matchedOne = false;
+            for (let i = 0; i < allRegistered.length; i++) {
+                if (events[allRegistered[i]]) {
+                    this.events[allRegistered[i]](events);
+                    matchedOne = true;
+                }
+            }
+            if (!matchedOne) {
                 const heapString = this.ToHeapString(this.wasm, ev.data);
                 this.wasm._HandleReplicate(heapString);
                 this.wasm._free(heapString);
