@@ -5,6 +5,7 @@ const { createMap } = require('./map');
 const ClientState = require('./client-state');
 const GameCanvas = require('./canvas/game');
 const UICanvas = require('./canvas/ui');
+const EscapeMenu = require('./canvas/escape-menu');
 
 const gameCanvas = document.getElementById('game');
 const gameContext = gameCanvas.getContext('2d');
@@ -26,6 +27,7 @@ Client().then((instance) => {
                 const clientState = new ClientState(webSocket, instance, resourceManager, mapImage);
                 new GameCanvas(clientState, gameCanvas, gameContext);
                 new UICanvas(clientState, uiCanvas, uiContext);
+                new EscapeMenu(clientState, document.getElementById('escapeMenu'));
             });
         });
     };

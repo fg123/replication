@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
             }
             else if (obj["event"] == "setchar") {
                 data->nextRespawnCharacter = obj["char"];
+                LOG_DEBUG("Changing character to " << data->nextRespawnCharacter);
             }
             data->playerObject->ProcessInputData(obj);
         },

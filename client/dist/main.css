@@ -16,3 +16,28 @@ canvas.game {
 canvas.ui {
     z-index: 10;
 }
+
+div.escapeMenu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 20;
+}
+
+div.characterSelect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+div.characterSelect div {
+    display: inline-block;
+    border-radius: 50%;
+    background: #000;
+    padding: 10px;
+    margin: 10px;
+}

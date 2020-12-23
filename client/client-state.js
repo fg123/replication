@@ -7,6 +7,7 @@ module.exports = class ClientState {
         this.gameObjects = {};
         this.showColliders = false;
         this.localPlayerObjectId = undefined;
+        this.isPaused = false;
 
         this.StartGame();
 
@@ -31,6 +32,15 @@ module.exports = class ClientState {
         return buffer;
     }
     
+    SendCharacterSelection(selection) {
+        console.log("Changing selection", selection);
+        this.webSocket.send(JSON.stringify(
+            {
+                "event":"setchar",
+                "char": selection
+            }));
+    }
+
     SendInputPacket(input) {
         const inputStr = JSON.stringify(input);
         if (this.webSocket.readyState === WebSocket.OPEN) {
@@ -80,6 +90,9 @@ module.exports = class ClientState {
 
         window.addEventListener('keydown', e => {
             if (e.repeat) { return; }
+            if (e.key === "Escape") {
+                this.isPaused = !this.isPaused;
+            }
             this.SendInputPacket({
                 event: "kd",
                 key: e.keyCode
@@ -111,18 +124,22 @@ module.exports = class ClientState {
         });
 
         window.addEventListener('mousedown', e => {
-            this.SendInputPacket({
-                event: "md",
-                button: e.which
-            });
+            if (!this.isPaused) {
+                this.SendInputPacket({
+                    event: "md",
+                    button: e.which
+                });
+            }
         });
 
         window.addEventListener('mouseup', e => {
-            this.SendInputPacket({
-                event: "mu",
-                button: e.which
-            });
-        })
+            if (!this.isPaused) {
+                this.SendInputPacket({
+                    event: "mu",
+                    button: e.which
+                });
+            }
+        });
     }
     
     GetPlayerObject() {
