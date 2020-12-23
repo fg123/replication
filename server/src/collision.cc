@@ -120,14 +120,6 @@ CollisionResult CircleCollider::CollidesWith(Collider* other) {
 
 bool AreLineSegmentsIntersecting(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2);
 
-inline bool IsLineSegmentCollideRect(const Vector2& RectPosition, const Vector2& RectSize, const Vector2& p1, const Vector2& p2) {
-
-}
-
-inline bool IsLineSegmentCollideCircle(const Vector2& CirclePosition, const double& Radius, const Vector2& p1, const Vector2& p2) {
-
-}
-
 CollisionResult RectangleCollider::CollidesWith(const Vector2& p1, const Vector2& p2) {
     CollisionResult result;
     Vector2 RectPosition = GetPosition();

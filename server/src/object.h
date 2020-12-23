@@ -35,12 +35,12 @@ struct ObjectRegister {
 #define CLASS_REGISTER(name) static ObjectRegister<name> name##_Register { #name }
 
 // Bitflag, everything is AT LEAST an object.
-enum class Tag : uint64_t {
-    OBJECT      = 0b00001,
-    PLAYER      = 0b00010,
-    GROUND      = 0b00100,
-    WEAPON      = 0b01000,
-    NO_GRAVITY  = 0b10000
+enum Tag : uint64_t {
+    OBJECT          = 0b0000000000000000001,
+    PLAYER          = 0b0000000000000000010,
+    GROUND          = 0b0000000000000000100,
+    WEAPON          = 0b0000000000000001000,
+    NO_GRAVITY      = 0b0000000000000010000
 };
 
 class Object : Replicable {
@@ -85,7 +85,7 @@ public:
     CollisionResult CollidesWith(Collider* other);
     CollisionResult CollidesWith(Object* other);
     CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2);
-    
+
     void AddCollider(Collider* col) { colliders.push_back(col); }
     ObjectID GetId() const { return id; }
 
