@@ -6,7 +6,6 @@ module.exports = class GameCanvas {
         this.canvas = canvas;
         this.clientState = clientState;
         this.context = context;
-        this.lastDrawTime = 0;
 
         this.backgroundGradient = context.createLinearGradient(0, 0, 0, clientState.height);
         this.backgroundGradient.addColorStop(0, "#cbc4d3");
@@ -22,7 +21,6 @@ module.exports = class GameCanvas {
         this.canvas.style.width  = this.clientState.width + 'px';
         this.canvas.style.height = this.clientState.height + 'px';
 
-        const currentTime = Date.now();
         this.context.fillStyle = this.backgroundGradient;
         this.context.fillRect(0, 0, this.clientState.width, this.clientState.height);
 
@@ -76,8 +74,6 @@ module.exports = class GameCanvas {
             }
         });
         this.context.translate(cameraTranslation.x, cameraTranslation.y);
-
-        this.lastDrawTime = currentTime;
         requestAnimationFrame(() => { this.Draw() });
     }
 }

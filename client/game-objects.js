@@ -1,18 +1,4 @@
-// Contains draw instructions for different game objects 
-function drawImage(context, img, x, y, width = -1, height = -1, angle = 0) {
-    if (width === -1) width = img.width;
-    if (height === -1) height = img.height;
-    if (angle === 0) {
-        context.drawImage(img, x - width / 2, y - height / 2, width, height);
-    }
-    else {
-        context.translate(x, y);
-        context.rotate(angle);
-        context.drawImage(img, -width / 2, -height / 2, width, height);
-        context.rotate(-angle);
-        context.translate(-x, -y);
-    }
-}
+const { drawImage } = require('./draw-util');
 
 function drawPlayer(body, arm, context, resourceManager, obj) {
     const image = obj.v.x < 0 ? resourceManager.get(body + '-FLIPPED') : resourceManager.get(body);
@@ -34,6 +20,8 @@ function drawPlayer(body, arm, context, resourceManager, obj) {
         0.5 * obj.h, 5
     );
 }
+
+const characters = require('./characters');
 
 module.exports = {
     "RectangleObject": {
@@ -203,17 +191,20 @@ module.exports = {
     },
     "Marine": {
         draw (context, resourceManager, obj, objects) {
-            drawPlayer('marine.png', 'marineArm.png', context, resourceManager, obj);
+            const r = characters["Marine"].resources;
+            drawPlayer(r.base, r.arm, context, resourceManager, obj);
         }
     },
     "Archer": {
         draw (context, resourceManager, obj, objects) {
-            drawPlayer('archer.png', 'archerArm.png', context, resourceManager, obj);
+            const r = characters["Archer"].resources;
+            drawPlayer(r.base, r.arm, context, resourceManager, obj);
         }
     },
     "Hookman": {
         draw (context, resourceManager, obj, objects) {
-            drawPlayer('hookman.png', 'hookmanArm.png', context, resourceManager, obj);
+            const r = characters["Hookman"].resources;
+            drawPlayer(r.base, r.arm, context, resourceManager, obj);
         }
     }
 };

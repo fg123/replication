@@ -45,8 +45,6 @@ module.exports = class ClientState {
     }
 
     StartGame() {
-        let showColliders = false;
-
         this.webSocket.send('{"event":"rdy"}');
 
         setInterval(() => {
@@ -72,8 +70,6 @@ module.exports = class ClientState {
                 });
             }
         };
-
-        let lastTime = Date.now();
 
         this.Tick();
 
@@ -124,6 +120,11 @@ module.exports = class ClientState {
         })
     }
     
+    GetPlayerObject() {
+        if (this.localPlayerObjectId === undefined) return undefined;
+        return this.gameObjects[this.localPlayerObjectId];
+    }
+
     Tick() {
         const currentTime = Date.now();
         const wasm = this.wasm;
