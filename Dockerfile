@@ -7,4 +7,4 @@ COPY . .
 RUN cd server/src/uWebSocket/uSocket && make
 RUN cd server && make server_prod
 
-CMD ["bin/game_server_prod"]
+CMD ["server/bin/game_server_prod"]
