@@ -15,8 +15,8 @@
 
 class PlayerObject;
 
-static const int TickRate = 128;
-static const int ReplicateRate = 20;
+static const int TickRate = 64;
+static const int ReplicateRate = 10;
 
 struct PlayerSocketData {
 #ifdef BUILD_SERVER

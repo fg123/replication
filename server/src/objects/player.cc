@@ -98,7 +98,7 @@ void PlayerObject::Tick(Time time)  {
     }
     if (qWeapon) {
         if (keyboardState[Q_KEY]) {
-            if (!lastMouseState[Q_KEY]) {
+            if (!lastKeyboardState[Q_KEY]) {
                 qWeapon->StartFire(time);
             }
             qWeapon->Fire(time);
@@ -109,7 +109,7 @@ void PlayerObject::Tick(Time time)  {
     }
     if (zWeapon) {
         if (keyboardState[Z_KEY]) {
-            if (!lastMouseState[Z_KEY]) {
+            if (!lastKeyboardState[Z_KEY]) {
                 zWeapon->StartFire(time);
             }
             zWeapon->Fire(time);
@@ -119,7 +119,11 @@ void PlayerObject::Tick(Time time)  {
         }
     }
     const Vector2& position = GetPosition();
+    
+#ifdef BUILD_SERVER
     aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
+#endif
+
     Object::Tick(time);
 
     if (currentWeapon) {
