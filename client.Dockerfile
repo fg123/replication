@@ -4,8 +4,7 @@ RUN apk add --no-cache bash
 
 ADD package.json /app/
 WORKDIR /app
+RUN npm install --production
 
 COPY . .
-
-RUN npm install --production
 CMD ["npm", "run", "prod-client"]
