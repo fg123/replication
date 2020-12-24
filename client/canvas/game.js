@@ -24,11 +24,11 @@ module.exports = class GameCanvas {
         this.context.fillStyle = this.backgroundGradient;
         this.context.fillRect(0, 0, this.clientState.width, this.clientState.height);
 
-        if (this.clientState.localPlayerObjectId &&
-            this.clientState.gameObjects[this.clientState.localPlayerObjectId].p) {
-
-            this.clientState.cameraPos.x = this.clientState.gameObjects[this.clientState.localPlayerObjectId].p.x;
-            this.clientState.cameraPos.y = this.clientState.gameObjects[this.clientState.localPlayerObjectId].p.y;
+        if (this.clientState.localPlayerObjectId) {
+            if (this.clientState.gameObjects[this.clientState.localPlayerObjectId]) {
+                this.clientState.cameraPos.x = this.clientState.gameObjects[this.clientState.localPlayerObjectId].p.x;
+                this.clientState.cameraPos.y = this.clientState.gameObjects[this.clientState.localPlayerObjectId].p.y;
+            }
         }
 
         const cameraTranslation = { 

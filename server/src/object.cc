@@ -43,7 +43,7 @@ void Object::Tick(Time time) {
 
     velocity *= airFriction;
 
-    Vector2 positionDelta = velocity * timeFactor;
+    Vector2 positionDelta = GetVelocity() * timeFactor;
     position += positionDelta;
 
     isGrounded = false;

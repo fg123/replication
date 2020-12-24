@@ -99,7 +99,7 @@ public:
     void ProcessReplication(json& object) override;
 
     const Vector2& GetPosition() const { return position; }
-    const Vector2& GetVelocity() const { return velocity; }
+    virtual Vector2 GetVelocity() { return velocity; }
 
     void SetPosition(const Vector2& in) { position = in; }
     void SetVelocity(const Vector2& in) { velocity = in; }
