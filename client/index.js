@@ -13,12 +13,14 @@ const gameContext = gameCanvas.getContext('2d');
 const uiCanvas = document.getElementById('ui');
 const uiContext = uiCanvas.getContext('2d');
 
+const localAddress = 'ws://' + location.hostname + ':8080/connect';
+const remoteAddress = "wss://replication-server.felixguo.me/connect";
+
 console.log('Loading Game WASM');
 Client().then((instance) => {
     console.log(instance);
     console.log('Loading Web Socket');
-    const protocol = Constants.isProduction ? 'wss' : 'ws';
-    const webSocket = new WebSocket(protocol + '://' + location.hostname + ':8080/connect');
+    const webSocket = new WebSocket(Constants.isProduction ? remoteAddress : localAddress);
     webSocket.onopen = function (event) {
         console.log('Loading Resource Manager');
         const resourceManager = new ResourceManager(() => {
