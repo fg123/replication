@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cp server.Dockerfile Dockerfile
+git add .
+git commit -m "Server Deploy"
+git push production-server
