@@ -7,14 +7,19 @@
 
 #include <thread>
 #include <mutex>
+#include <chrono>
 
 #include "uWebSocket/App.h"
 
 static bool gameRunning = true;
 
 void GameLoop(Timer& gameTimer) {
+    static const int sleepRate = (int)(1000.0 / (TickRate * 2));
+    LOG_DEBUG("Tick Rate: " << TickRate << " Sleep Time: " << sleepRate);
     while (gameRunning) {
         gameTimer.Tick();
+        // Reduce CPU load
+        std::this_thread::sleep_for(std::chrono::milliseconds((int) sleepRate));
     }
 }
 

@@ -119,7 +119,7 @@ void PlayerObject::Tick(Time time)  {
         }
     }
     const Vector2& position = GetPosition();
-    
+
 #ifdef BUILD_SERVER
     aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
 #endif
@@ -202,7 +202,11 @@ void PlayerObject::OnCollide(CollisionResult& result) {
 
 void PlayerObject::DealDamage(int damage) {
     health -= damage;
-    if (health < 0) {
+    if (health <= 0) {
+        ObjectID id = GetId();
+        game.QueueNextTick([id](Game& game) {
+            game.DestroyObject(id);
+        });
         health = 100;
     }
 }
