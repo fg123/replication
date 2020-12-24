@@ -1,5 +1,8 @@
 #!/bin/bash
 
+cd server && make client_prod
+cd ..
+
 cp client.Dockerfile Dockerfile
 git add .
 git commit -m "Client Deploy"
