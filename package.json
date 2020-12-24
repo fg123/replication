@@ -9,7 +9,8 @@
     "start-client": "node client/serve.js",
     "start-server": "./server/bin/game_server_prod ./data/maps/map1.json",
     "dev": "concurrently --kill-others 'npm:watch-client' 'npm:build-dev'",
-    "prod": "NODE_ENV=production npm run build-prod && NODE_ENV=production concurrently --kill-others 'npm:start-client' 'npm:start-server'"
+    "prod-client": "NODE_ENV=production npm run build-prod && NODE_ENV=production npm run start-client",
+    "prod-server": "NODE_ENV=production npm run build-prod && NODE_ENV=production npm run start-server"
   },
   "repository": {
     "type": "git",

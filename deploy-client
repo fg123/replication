@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cp client.Dockerfile Dockerfile
+git add .
+git commit -m "Client Deploy"
+git push production-client
