@@ -53,9 +53,11 @@ void Game::Tick(Time time) {
     queuedCalls.clear();
     queuedCallsMutex.unlock();
 
-#ifdef BUILD_SERVER
-    std::unordered_set<Object*> killPlaned;
-#endif
+    for (auto& newObject : newObjects) {
+        gameObjects[newObject->GetId()] = newObject;
+    }
+
+    newObjects.clear();
 
     for (auto& object : gameObjects) {
         object.second->Tick(time);
@@ -69,13 +71,23 @@ void Game::Tick(Time time) {
             // TODO: Deal damage instead of insta kill
             // You're out of the range 
             LOG_INFO("Kill Planed: (" << object.second->GetId() << ") " << object.second->GetClass() << " " << object.second->GetPosition());
-            killPlaned.insert(object.second);
+            
+            DestroyObject(object.second->GetId());
         }
     }
-    for (auto& object : killPlaned) {
-        DestroyObject(object->GetId());
-    }
 #endif
+
+    for (auto& objectId : deadObjects) {
+        if (gameObjects.find(objectId) != gameObjects.end()) {
+            Object* object = gameObjects[objectId];
+            LOG_DEBUG("Destroy Object " << objectId);
+            gameObjects.erase(objectId);
+            object->OnDeath();
+            delete object;
+        }
+    }
+
+    // Don't clear dead objects until replicate has sent it out
 }
 
 #ifdef BUILD_SERVER
@@ -97,13 +109,11 @@ void Game::Replicate(Time time) {
     //std::unordered_map<Object*, std::string> serialized;
     json finalPacket;
 
-    for (auto& object : deadObjects) {
+    for (auto& objectId : deadObjects) {
         json obj;
-        obj["id"] = object->GetId();
+        obj["id"] = objectId;
         obj["dead"] = true;
         finalPacket.push_back(obj);
-        //serialized.emplace(object, obj.dump());
-        delete object;
     }
 
     deadObjects.clear();
@@ -232,7 +242,7 @@ void Game::AddObject(Object* obj) {
     ObjectID newId = RequestId();
     LOG_DEBUG("Add Object " << newId);
     obj->SetId(newId);
-    gameObjects[newId] = obj;
+    newObjects.insert(obj);
 }
 
 void Game::DestroyObject(ObjectID objectId) {
@@ -244,11 +254,7 @@ void Game::DestroyObject(ObjectID objectId) {
     if (gameObjects.find(objectId) == gameObjects.end()) {
         return;
     }
-    Object* object = gameObjects[objectId];
-    LOG_DEBUG("Destroy Object " << objectId);
-    gameObjects.erase(objectId);
-    object->OnDeath();
-    deadObjects.insert(object);
+    deadObjects.insert(objectId);
 }
 
 #ifdef BUILD_SERVER

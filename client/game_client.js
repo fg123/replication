@@ -255,6 +255,51 @@ if (!Object.getOwnPropertyDescriptor(Module["ready"], "_setThrew")) {
  });
 }
 
+if (!Object.getOwnPropertyDescriptor(Module["ready"], "__ZSt18uncaught_exceptionv")) {
+ Object.defineProperty(Module["ready"], "__ZSt18uncaught_exceptionv", {
+  configurable: true,
+  get: function() {
+   abort("You are getting __ZSt18uncaught_exceptionv on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+ Object.defineProperty(Module["ready"], "__ZSt18uncaught_exceptionv", {
+  configurable: true,
+  set: function() {
+   abort("You are setting __ZSt18uncaught_exceptionv on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+}
+
+if (!Object.getOwnPropertyDescriptor(Module["ready"], "___cxa_is_pointer_type")) {
+ Object.defineProperty(Module["ready"], "___cxa_is_pointer_type", {
+  configurable: true,
+  get: function() {
+   abort("You are getting ___cxa_is_pointer_type on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+ Object.defineProperty(Module["ready"], "___cxa_is_pointer_type", {
+  configurable: true,
+  set: function() {
+   abort("You are setting ___cxa_is_pointer_type on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+}
+
+if (!Object.getOwnPropertyDescriptor(Module["ready"], "___cxa_can_catch")) {
+ Object.defineProperty(Module["ready"], "___cxa_can_catch", {
+  configurable: true,
+  get: function() {
+   abort("You are getting ___cxa_can_catch on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+ Object.defineProperty(Module["ready"], "___cxa_can_catch", {
+  configurable: true,
+  set: function() {
+   abort("You are setting ___cxa_can_catch on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+}
+
 if (!Object.getOwnPropertyDescriptor(Module["ready"], "__get_tzname")) {
  Object.defineProperty(Module["ready"], "__get_tzname", {
   configurable: true,
@@ -1845,16 +1890,242 @@ function ExceptionInfo(excPtr) {
  };
 }
 
-var exceptionLast = 0;
+function CatchInfo(ptr) {
+ this.free = function() {
+  _free(this.ptr);
+  this.ptr = 0;
+ };
+ this.set_base_ptr = function(basePtr) {
+  SAFE_HEAP_STORE(this.ptr | 0, basePtr | 0, 4);
+ };
+ this.get_base_ptr = function() {
+  return SAFE_HEAP_LOAD(this.ptr | 0, 4, 0) | 0;
+ };
+ this.set_adjusted_ptr = function(adjustedPtr) {
+  var ptrSize = 4;
+  SAFE_HEAP_STORE(this.ptr + ptrSize | 0, adjustedPtr | 0, 4);
+ };
+ this.get_adjusted_ptr = function() {
+  var ptrSize = 4;
+  return SAFE_HEAP_LOAD(this.ptr + ptrSize | 0, 4, 0) | 0;
+ };
+ this.get_exception_ptr = function() {
+  var isPointer = ___cxa_is_pointer_type(this.get_exception_info().get_type());
+  if (isPointer) {
+   return SAFE_HEAP_LOAD(this.get_base_ptr() | 0, 4, 0) | 0;
+  }
+  var adjusted = this.get_adjusted_ptr();
+  if (adjusted !== 0) return adjusted;
+  return this.get_base_ptr();
+ };
+ this.get_exception_info = function() {
+  return new ExceptionInfo(this.get_base_ptr());
+ };
+ if (ptr === undefined) {
+  this.ptr = _malloc(8);
+  this.set_adjusted_ptr(0);
+ } else {
+  this.ptr = ptr;
+ }
+}
+
+var exceptionCaught = [];
+
+function exception_addRef(info) {
+ info.add_ref();
+}
 
 var uncaughtExceptionCount = 0;
+
+function ___cxa_begin_catch(ptr) {
+ var catchInfo = new CatchInfo(ptr);
+ var info = catchInfo.get_exception_info();
+ if (!info.get_caught()) {
+  info.set_caught(true);
+  uncaughtExceptionCount--;
+ }
+ info.set_rethrown(false);
+ exceptionCaught.push(catchInfo);
+ exception_addRef(info);
+ return catchInfo.get_exception_ptr();
+}
+
+var exceptionLast = 0;
+
+function ___cxa_free_exception(ptr) {
+ try {
+  return _free(new ExceptionInfo(ptr).ptr);
+ } catch (e) {
+  err("exception during cxa_free_exception: " + e);
+ }
+}
+
+function exception_decRef(info) {
+ if (info.release_ref() && !info.get_rethrown()) {
+  var destructor = info.get_destructor();
+  if (destructor) {
+   wasmTable.get(destructor)(info.excPtr);
+  }
+  ___cxa_free_exception(info.excPtr);
+ }
+}
+
+function ___cxa_end_catch() {
+ _setThrew(0);
+ assert(exceptionCaught.length > 0);
+ var catchInfo = exceptionCaught.pop();
+ exception_decRef(catchInfo.get_exception_info());
+ catchInfo.free();
+ exceptionLast = 0;
+}
+
+function ___resumeException(catchInfoPtr) {
+ var catchInfo = new CatchInfo(catchInfoPtr);
+ var ptr = catchInfo.get_base_ptr();
+ if (!exceptionLast) {
+  exceptionLast = ptr;
+ }
+ catchInfo.free();
+ throw ptr;
+}
+
+function ___cxa_find_matching_catch_2() {
+ var thrown = exceptionLast;
+ if (!thrown) {
+  setTempRet0(0 | 0);
+  return 0 | 0;
+ }
+ var info = new ExceptionInfo(thrown);
+ var thrownType = info.get_type();
+ var catchInfo = new CatchInfo();
+ catchInfo.set_base_ptr(thrown);
+ if (!thrownType) {
+  setTempRet0(0 | 0);
+  return catchInfo.ptr | 0;
+ }
+ var typeArray = Array.prototype.slice.call(arguments);
+ var stackTop = stackSave();
+ var exceptionThrowBuf = stackAlloc(4);
+ SAFE_HEAP_STORE(exceptionThrowBuf | 0, thrown | 0, 4);
+ for (var i = 0; i < typeArray.length; i++) {
+  var caughtType = typeArray[i];
+  if (caughtType === 0 || caughtType === thrownType) {
+   break;
+  }
+  if (___cxa_can_catch(caughtType, thrownType, exceptionThrowBuf)) {
+   var adjusted = SAFE_HEAP_LOAD(exceptionThrowBuf | 0, 4, 0) | 0;
+   if (thrown !== adjusted) {
+    catchInfo.set_adjusted_ptr(adjusted);
+   }
+   setTempRet0(caughtType | 0);
+   return catchInfo.ptr | 0;
+  }
+ }
+ stackRestore(stackTop);
+ setTempRet0(thrownType | 0);
+ return catchInfo.ptr | 0;
+}
+
+function ___cxa_find_matching_catch_3() {
+ var thrown = exceptionLast;
+ if (!thrown) {
+  setTempRet0(0 | 0);
+  return 0 | 0;
+ }
+ var info = new ExceptionInfo(thrown);
+ var thrownType = info.get_type();
+ var catchInfo = new CatchInfo();
+ catchInfo.set_base_ptr(thrown);
+ if (!thrownType) {
+  setTempRet0(0 | 0);
+  return catchInfo.ptr | 0;
+ }
+ var typeArray = Array.prototype.slice.call(arguments);
+ var stackTop = stackSave();
+ var exceptionThrowBuf = stackAlloc(4);
+ SAFE_HEAP_STORE(exceptionThrowBuf | 0, thrown | 0, 4);
+ for (var i = 0; i < typeArray.length; i++) {
+  var caughtType = typeArray[i];
+  if (caughtType === 0 || caughtType === thrownType) {
+   break;
+  }
+  if (___cxa_can_catch(caughtType, thrownType, exceptionThrowBuf)) {
+   var adjusted = SAFE_HEAP_LOAD(exceptionThrowBuf | 0, 4, 0) | 0;
+   if (thrown !== adjusted) {
+    catchInfo.set_adjusted_ptr(adjusted);
+   }
+   setTempRet0(caughtType | 0);
+   return catchInfo.ptr | 0;
+  }
+ }
+ stackRestore(stackTop);
+ setTempRet0(thrownType | 0);
+ return catchInfo.ptr | 0;
+}
+
+function ___cxa_find_matching_catch_4() {
+ var thrown = exceptionLast;
+ if (!thrown) {
+  setTempRet0(0 | 0);
+  return 0 | 0;
+ }
+ var info = new ExceptionInfo(thrown);
+ var thrownType = info.get_type();
+ var catchInfo = new CatchInfo();
+ catchInfo.set_base_ptr(thrown);
+ if (!thrownType) {
+  setTempRet0(0 | 0);
+  return catchInfo.ptr | 0;
+ }
+ var typeArray = Array.prototype.slice.call(arguments);
+ var stackTop = stackSave();
+ var exceptionThrowBuf = stackAlloc(4);
+ SAFE_HEAP_STORE(exceptionThrowBuf | 0, thrown | 0, 4);
+ for (var i = 0; i < typeArray.length; i++) {
+  var caughtType = typeArray[i];
+  if (caughtType === 0 || caughtType === thrownType) {
+   break;
+  }
+  if (___cxa_can_catch(caughtType, thrownType, exceptionThrowBuf)) {
+   var adjusted = SAFE_HEAP_LOAD(exceptionThrowBuf | 0, 4, 0) | 0;
+   if (thrown !== adjusted) {
+    catchInfo.set_adjusted_ptr(adjusted);
+   }
+   setTempRet0(caughtType | 0);
+   return catchInfo.ptr | 0;
+  }
+ }
+ stackRestore(stackTop);
+ setTempRet0(thrownType | 0);
+ return catchInfo.ptr | 0;
+}
+
+function ___cxa_rethrow() {
+ var catchInfo = exceptionCaught.pop();
+ var info = catchInfo.get_exception_info();
+ var ptr = catchInfo.get_base_ptr();
+ if (!info.get_rethrown()) {
+  exceptionCaught.push(catchInfo);
+  info.set_rethrown(true);
+  info.set_caught(false);
+  uncaughtExceptionCount++;
+ } else {
+  catchInfo.free();
+ }
+ exceptionLast = ptr;
+ throw ptr;
+}
 
 function ___cxa_throw(ptr, type, destructor) {
  var info = new ExceptionInfo(ptr);
  info.init(type, destructor);
  exceptionLast = ptr;
  uncaughtExceptionCount++;
- throw ptr + " - Exception catching is disabled, this exception cannot be caught. Compile with -s DISABLE_EXCEPTION_CATCHING=0 or DISABLE_EXCEPTION_CATCHING=2 to catch.";
+ throw ptr;
+}
+
+function ___cxa_uncaught_exceptions() {
+ return uncaughtExceptionCount;
 }
 
 function _tzset() {
@@ -4768,6 +5039,14 @@ function _fd_write(fd, iov, iovcnt, pnum) {
  }
 }
 
+function _getTempRet0() {
+ return getTempRet0() | 0;
+}
+
+function _llvm_eh_typeid_for(type) {
+ return type;
+}
+
 function _setTempRet0($i) {
  setTempRet0($i | 0);
 }
@@ -5166,8 +5445,17 @@ var asmLibraryArg = {
  "__assert_fail": ___assert_fail,
  "__cxa_allocate_exception": ___cxa_allocate_exception,
  "__cxa_atexit": ___cxa_atexit,
+ "__cxa_begin_catch": ___cxa_begin_catch,
+ "__cxa_end_catch": ___cxa_end_catch,
+ "__cxa_find_matching_catch_2": ___cxa_find_matching_catch_2,
+ "__cxa_find_matching_catch_3": ___cxa_find_matching_catch_3,
+ "__cxa_find_matching_catch_4": ___cxa_find_matching_catch_4,
+ "__cxa_free_exception": ___cxa_free_exception,
+ "__cxa_rethrow": ___cxa_rethrow,
  "__cxa_throw": ___cxa_throw,
+ "__cxa_uncaught_exceptions": ___cxa_uncaught_exceptions,
  "__localtime_r": ___localtime_r,
+ "__resumeException": ___resumeException,
  "abort": _abort,
  "alignfault": alignfault,
  "emscripten_memcpy_big": _emscripten_memcpy_big,
@@ -5178,6 +5466,34 @@ var asmLibraryArg = {
  "fd_read": _fd_read,
  "fd_seek": _fd_seek,
  "fd_write": _fd_write,
+ "getTempRet0": _getTempRet0,
+ "invoke_diii": invoke_diii,
+ "invoke_fiii": invoke_fiii,
+ "invoke_i": invoke_i,
+ "invoke_ii": invoke_ii,
+ "invoke_iii": invoke_iii,
+ "invoke_iiii": invoke_iiii,
+ "invoke_iiiii": invoke_iiiii,
+ "invoke_iiiiii": invoke_iiiiii,
+ "invoke_iiiiiii": invoke_iiiiiii,
+ "invoke_iiiiiiii": invoke_iiiiiiii,
+ "invoke_iiiiiiiiiii": invoke_iiiiiiiiiii,
+ "invoke_iiiiiiiiiiii": invoke_iiiiiiiiiiii,
+ "invoke_iiiiiiiiiiiii": invoke_iiiiiiiiiiiii,
+ "invoke_jiiii": invoke_jiiii,
+ "invoke_v": invoke_v,
+ "invoke_vi": invoke_vi,
+ "invoke_vii": invoke_vii,
+ "invoke_viidii": invoke_viidii,
+ "invoke_viii": invoke_viii,
+ "invoke_viiii": invoke_viiii,
+ "invoke_viiiii": invoke_viiiii,
+ "invoke_viiiiii": invoke_viiiiii,
+ "invoke_viiiiiii": invoke_viiiiiii,
+ "invoke_viiiiiiiiii": invoke_viiiiiiiiii,
+ "invoke_viiiiiiiiiiiiiii": invoke_viiiiiiiiiiiiiii,
+ "invoke_vij": invoke_vij,
+ "llvm_eh_typeid_for": _llvm_eh_typeid_for,
  "segfault": segfault,
  "setTempRet0": _setTempRet0,
  "strftime_l": _strftime_l,
@@ -5191,6 +5507,8 @@ var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__w
 var _fflush = Module["_fflush"] = createExportWrapper("fflush");
 
 var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
+
+var _SetLocalPlayerClient = Module["_SetLocalPlayerClient"] = createExportWrapper("SetLocalPlayerClient");
 
 var _TickGame = Module["_TickGame"] = createExportWrapper("TickGame");
 
@@ -5240,6 +5558,12 @@ var _emscripten_stack_get_end = Module["_emscripten_stack_get_end"] = function()
 
 var _setThrew = Module["_setThrew"] = createExportWrapper("setThrew");
 
+var __ZSt18uncaught_exceptionv = Module["__ZSt18uncaught_exceptionv"] = createExportWrapper("_ZSt18uncaught_exceptionv");
+
+var ___cxa_can_catch = Module["___cxa_can_catch"] = createExportWrapper("__cxa_can_catch");
+
+var ___cxa_is_pointer_type = Module["___cxa_is_pointer_type"] = createExportWrapper("__cxa_is_pointer_type");
+
 var _sbrk = Module["_sbrk"] = createExportWrapper("sbrk");
 
 var _emscripten_get_sbrk_ptr = Module["_emscripten_get_sbrk_ptr"] = createExportWrapper("emscripten_get_sbrk_ptr");
@@ -5250,13 +5574,303 @@ var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_vii
 
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 
+var dynCall_jiiii = Module["dynCall_jiiii"] = createExportWrapper("dynCall_jiiii");
+
 var dynCall_iiiiij = Module["dynCall_iiiiij"] = createExportWrapper("dynCall_iiiiij");
 
 var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_iiiiijj");
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 34920;
+var _game = Module["_game"] = 38160;
+
+var _localClientId = Module["_localClientId"] = 38152;
+
+function invoke_iii(index, a1, a2) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiiii(index, a1, a2, a3, a4, a5, a6) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_vi(index, a1) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_ii(index, a1) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiii(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viii(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiii(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_vii(index, a1, a2) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiii(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_v(index) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)();
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4, a5);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiii(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_i(index) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)();
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viidii(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_fiii(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_diii(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiiiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_vij(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  dynCall_vij(index, a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_jiiii(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  return dynCall_jiiii(index, a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
 
 if (!Object.getOwnPropertyDescriptor(Module, "intArrayFromString")) Module["intArrayFromString"] = function() {
  abort("'intArrayFromString' was not exported. add it to EXTRA_EXPORTED_RUNTIME_METHODS (see the FAQ)");

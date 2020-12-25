@@ -1,3 +1,7 @@
+const Constants = require('./constants');
+
+const SIMULATED_LAG = Constants.isProduction ? 0 : 0;
+
 module.exports = class ClientState {
     constructor(webSocket, wasm, resourceManager, mapImage) {
         this.webSocket = webSocket;
@@ -12,6 +16,7 @@ module.exports = class ClientState {
     
         this.StartGame();
 
+        this.ping = 0;
         this.width = 0;
         this.height = 0;
 
@@ -63,41 +68,54 @@ module.exports = class ClientState {
         this.webSocket.send('{"event":"rdy"}');
 
         setInterval(() => {
-            // Heartbeat Send
-            this.webSocket.send('{"event":"hb"}');
-        }, 10000);
+            // Heartbeat Send (for ping)
+            const hb = {
+                event: "hb",
+                time: Date.now()
+            };
+            this.webSocket.send(JSON.stringify(hb));
+        }, 1000);
 
         this.webSocket.onmessage = (ev) => {
-            const events = JSON.parse(ev.data);
-            if (events["playerLocalObjectId"]) {
-                console.log("Player Local ID", events);
-                if (events["playerLocalObjectId"] === 0) {
-                    this.localPlayerObjectId = undefined;
-                }
-                else {
-                    this.localPlayerObjectId = events["playerLocalObjectId"];
-                }
-                return;
-            }
-            const allRegistered = Object.keys(this.events);
-            let matchedOne = false;
-            for (let i = 0; i < allRegistered.length; i++) {
-                if (events[allRegistered[i]]) {
-                    this.events[allRegistered[i]](events);
-                    matchedOne = true;
-                }
-            }
-            if (!matchedOne) {
-                const heapString = this.ToHeapString(this.wasm, ev.data);
-                this.wasm._HandleReplicate(heapString);
-                this.wasm._free(heapString);
-                events.forEach(obj => {
-                    if (this.gameObjects[obj.id] === undefined) {
-                        // New Object
-                        this.gameObjects[obj.id] = { id: obj.id };
+            setTimeout(() => {
+                const events = JSON.parse(ev.data);
+                if (events["playerLocalObjectId"] !== undefined) {
+                    console.log("Player Local ID", events);
+                    const id = events["playerLocalObjectId"];
+
+                    this.wasm._SetLocalPlayerClient(id);
+                    if (id === 0) {
+                        this.localPlayerObjectId = undefined;
                     }
-                });
-            }
+                    else {
+                        this.localPlayerObjectId = id;
+                    }
+                    return;
+                }
+                else if (events["event"] == "hb") {
+                    this.ping = (Date.now() - events.time);
+                    return;
+                }
+                const allRegistered = Object.keys(this.events);
+                let matchedOne = false;
+                for (let i = 0; i < allRegistered.length; i++) {
+                    if (events[allRegistered[i]]) {
+                        this.events[allRegistered[i]](events);
+                        matchedOne = true;
+                    }
+                }
+                if (!matchedOne) {
+                    const heapString = this.ToHeapString(this.wasm, ev.data);
+                    this.wasm._HandleReplicate(heapString);
+                    this.wasm._free(heapString);
+                    events.forEach(obj => {
+                        if (this.gameObjects[obj.id] === undefined) {
+                            // New Object
+                            this.gameObjects[obj.id] = { id: obj.id };
+                        }
+                    });
+                }
+            }, SIMULATED_LAG);
         };
 
         this.Tick();

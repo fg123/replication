@@ -13,9 +13,17 @@
 #include "characters/hookman.h"
 
 extern "C" {
+    EMSCRIPTEN_KEEPALIVE
+    ObjectID localClientId;
+
     /** Client Interface for the JS Front End */
     EMSCRIPTEN_KEEPALIVE
     Game game;
+
+    EMSCRIPTEN_KEEPALIVE
+    void SetLocalPlayerClient(ObjectID client) {
+        localClientId = client;
+    }
 
     EMSCRIPTEN_KEEPALIVE
     void TickGame(Time time) {
@@ -68,7 +76,12 @@ extern "C" {
                 game.EnsureObjectExists(event);
             }
             for (auto& event : object) {
-                game.ProcessReplication(event);
+                // if (event["id"] == localClientId) {
+                //     // We have local prediction for this 
+                // }
+                // else {
+                    game.ProcessReplication(event);
+                // }
             }
         } catch(...) {
             LOG_ERROR(input);
@@ -78,10 +91,10 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     void HandleLocalInput(ObjectID object, const char* input) {
-        Object* obj = game.GetObject(object);
-        if (obj) {
-            json object = json::parse(input);
-            static_cast<PlayerObject*>(obj)->ProcessInputData(object);
-        }
+        // Object* obj = game.GetObject(object);
+        // if (obj) {
+        //     json object = json::parse(input);
+        //     static_cast<PlayerObject*>(obj)->ProcessInputData(object);
+        // }
     }
 }

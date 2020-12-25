@@ -120,9 +120,7 @@ void PlayerObject::Tick(Time time)  {
     }
     const Vector2& position = GetPosition();
 
-#ifdef BUILD_SERVER
     aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
-#endif
 
     Object::Tick(time);
 
@@ -146,6 +144,7 @@ void PlayerObject::Serialize(json& obj) {
     Object::Serialize(obj);
     obj["h"] = health;
     obj["aa"] = aimAngle;
+    mousePosition.Serialize(obj["mp"]);
     if (currentWeapon) {
         obj["w"] = currentWeapon->GetId();
     }
@@ -161,6 +160,7 @@ void PlayerObject::ProcessReplication(json& obj) {
     Object::ProcessReplication(obj);
     health = obj["h"];
     aimAngle = obj["aa"];
+    mousePosition.ProcessReplication(obj["mp"]);
     if (obj.contains("w")) {
         currentWeapon = game.GetObject<WeaponObject>(obj["w"]);
     }
@@ -244,9 +244,6 @@ void PlayerObject::ProcessInputData(json& obj) {
         if (button >= 0 && button < 5) {
             mouseState[button] = false;
         }
-    }
-    else if (obj["event"] == "hb") {
-        LOG_DEBUG("Client Heartbeat");
     }
 }
 

@@ -19,7 +19,8 @@ SERVER_LDLIBS = $(LDLIBS) -L$(USOCKET) -lz -l:uSockets.a -lpthread
 WASM_DEBUG = -g4 -s ASSERTIONS=2 -s SAFE_HEAP=1 -s STACK_OVERFLOW_CHECK=1 
 WASM_FLAGS = -s MODULARIZE \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
-	-s ALLOW_MEMORY_GROWTH=1
+	-s ALLOW_MEMORY_GROWTH=1 \
+	-s DISABLE_EXCEPTION_CATCHING=0
 
 all: server client
 
@@ -45,7 +46,7 @@ client_prod: $(CLIENT_OBJ)
 	$(CXX) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
 %.wo: %.cc
-	em++ -O2 $(CPPFLAGS) -DBUILD_CLIENT -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
+	em++ -O2 $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
 
 $(USOCKET)/uSockets.a:
 	$(MAKE) $(USOCKET)

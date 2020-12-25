@@ -16,7 +16,7 @@
 class PlayerObject;
 
 static const int TickRate = 64;
-static const int ReplicateRate = 10;
+static const int ReplicateRate = 20;
 
 struct PlayerSocketData {
 #ifdef BUILD_SERVER
@@ -40,7 +40,8 @@ class Game {
     std::unordered_set<PlayerSocketData*> players;
     std::mutex playersSetMutex;
 
-    std::unordered_set<Object*> deadObjects;
+    std::unordered_set<ObjectID> deadObjects;
+    std::unordered_set<Object*> newObjects;
 
     Time gameTime;
 

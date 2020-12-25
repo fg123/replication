@@ -71,6 +71,9 @@ int main(int argc, char** argv) {
             if (obj["event"] == "rdy") {
                 data->isReady = true;
             }
+            else if (obj["event"] == "hb") {
+                ws->send(message, uWS::OpCode::TEXT);
+            }
             else if (obj["event"] == "setchar") {
                 data->nextRespawnCharacter = obj["char"];
                 LOG_DEBUG("Changing character to " << data->nextRespawnCharacter);
