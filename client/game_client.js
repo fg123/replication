@@ -5474,6 +5474,7 @@ var asmLibraryArg = {
  "invoke_iii": invoke_iii,
  "invoke_iiii": invoke_iiii,
  "invoke_iiiii": invoke_iiiii,
+ "invoke_iiiiid": invoke_iiiiid,
  "invoke_iiiiii": invoke_iiiiii,
  "invoke_iiiiiii": invoke_iiiiiii,
  "invoke_iiiiiiii": invoke_iiiiiiii,
@@ -5582,9 +5583,9 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 38160;
+var _game = Module["_game"] = 38104;
 
-var _localClientId = Module["_localClientId"] = 38152;
+var _localClientId = Module["_localClientId"] = 38096;
 
 function invoke_iii(index, a1, a2) {
  var sp = stackSave();
@@ -5674,10 +5675,10 @@ function invoke_vii(index, a1, a2) {
  }
 }
 
-function invoke_viiiii(index, a1, a2, a3, a4, a5) {
+function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
  var sp = stackSave();
  try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
+  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5696,10 +5697,10 @@ function invoke_v(index) {
  }
 }
 
-function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5707,10 +5708,10 @@ function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
  }
 }
 
-function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
+function invoke_viiiii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5755,6 +5756,17 @@ function invoke_viidii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3, a4, a5);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiiid(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

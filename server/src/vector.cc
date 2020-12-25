@@ -10,8 +10,14 @@ void Vector2::Serialize(json& obj) {
 
 Vector2& Vector2::Normalize() {
     double norm = Length();
-    x /= norm;
-    y /= norm;
+	if (norm == 0) {
+		x = 0;
+		y = 0;
+	}
+	else {
+		x /= norm;
+		y /= norm;
+	}
     return *this;
 }
 

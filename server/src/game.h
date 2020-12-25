@@ -41,6 +41,8 @@ class Game {
     std::mutex playersSetMutex;
 
     std::unordered_set<ObjectID> deadObjects;
+    std::unordered_set<ObjectID> deadSinceLastReplicate;
+
     std::unordered_set<Object*> newObjects;
 
     Time gameTime;
@@ -109,7 +111,7 @@ public:
         bool includeBoundingBox,
         std::vector<RangeQueryResult>& results);
     
-    CollisionResult CheckLineSegmentCollide(const Vector2& start,
+CollisionResult CheckLineSegmentCollide(const Vector2& start,
         const Vector2& end, uint64_t includeTags = ~0) {
         CollisionResult result;
         for (auto& object : gameObjects) {

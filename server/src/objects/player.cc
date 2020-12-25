@@ -204,10 +204,7 @@ void PlayerObject::DealDamage(int damage) {
     health -= damage;
     if (health <= 0) {
         ObjectID id = GetId();
-        game.QueueNextTick([id](Game& game) {
-            game.DestroyObject(id);
-        });
-        health = 100;
+        game.DestroyObject(id);
     }
 }
 

@@ -32,6 +32,7 @@ CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollide
     // add clamped value to AABB_center and we get the value of box closest to circle
     Vector2 closest = rectCenter + clamped;
     // retrieve vector between center circle and closest point AABB and check if length <= radius
+    // LOG_DEBUG("Difference " << closest << " " << circPosition);
     difference = closest - circPosition;
     // Difference should point away from the rectangle.
     double differenceLength = difference.Length();
@@ -43,6 +44,7 @@ CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollide
     CollisionResult r;
     r.isColliding = overlapRange > 0;
     if (r.isColliding) {
+        // LOG_DEBUG("Circ Rect " << difference << " " << overlapRange);
         r.collisionDifference = difference * overlapRange;
     }
     return r;

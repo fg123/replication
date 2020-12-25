@@ -55,6 +55,10 @@ void Object::Tick(Time time) {
 void Object::ResolveCollision(const Vector2& difference) {
     if (isStatic) return;
     // TODO: this collision difference really should be negated
+    if (std::isnan(difference.x) || std::isnan(difference.y)) {
+        LOG_ERROR("ResolveCollision has nan difference " << difference);
+        throw std::runtime_error("ResolveCollision has nan difference!");
+    }
     position -= difference;
     // We had to adjust the collision in a certain direction.
     // If the velocity does not match the direction of resolution, do nothing

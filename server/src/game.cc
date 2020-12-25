@@ -82,10 +82,11 @@ void Game::Tick(Time time) {
             Object* object = gameObjects[objectId];
             LOG_DEBUG("Destroy Object " << objectId);
             gameObjects.erase(objectId);
-            object->OnDeath();
+            deadSinceLastReplicate.insert(objectId);
             delete object;
         }
     }
+    deadObjects.clear();
 
     // Don't clear dead objects until replicate has sent it out
 }
@@ -109,14 +110,14 @@ void Game::Replicate(Time time) {
     //std::unordered_map<Object*, std::string> serialized;
     json finalPacket;
 
-    for (auto& objectId : deadObjects) {
+    for (auto& objectId : deadSinceLastReplicate) {
         json obj;
         obj["id"] = objectId;
         obj["dead"] = true;
         finalPacket.push_back(obj);
     }
 
-    deadObjects.clear();
+    deadSinceLastReplicate.clear();
 
     for (auto& object : gameObjects) {
         if (object.second->IsDirty()) {
@@ -255,6 +256,7 @@ void Game::DestroyObject(ObjectID objectId) {
         return;
     }
     deadObjects.insert(objectId);
+    gameObjects[objectId]->OnDeath();
 }
 
 #ifdef BUILD_SERVER
@@ -272,6 +274,7 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
                 p->nextRespawnCharacter = "Archer";
             }
             Object* obj = GetClassLookup()[p->nextRespawnCharacter](*this);
+            obj->SetPosition(Vector2(200, 0));
             
             p->playerObject = static_cast<PlayerObject*>(obj);
 

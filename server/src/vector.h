@@ -64,6 +64,8 @@ struct Vector2 : Replicable {
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Vector2& v);
+
+    bool CheckNan() const { return std::isnan(x) || std::isnan(y); }
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Vector2& v) {

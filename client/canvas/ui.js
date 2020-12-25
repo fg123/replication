@@ -57,6 +57,7 @@ module.exports = class UICanvas {
         this.context.fillStyle = "green";
         this.currentHealth += (player.h - this.currentHealth) / 10;
         this.context.beginPath();
+        this.context.moveTo(100, height - 100);
         this.context.arc(100, height - 100, 55, -Math.PI / 2, -(Math.PI / 2) + (2 * Math.PI) * (this.currentHealth / 100));
         this.context.fill();
 
