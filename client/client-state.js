@@ -121,12 +121,14 @@ module.exports = class ClientState {
                 const heapString = this.ToHeapString(this.wasm, ev.data);
                 this.wasm._HandleReplicate(heapString);
                 this.wasm._free(heapString);
-                event["objs"].forEach(obj => {
-                    if (this.gameObjects[obj.id] === undefined) {
-                        // New Object
-                        this.gameObjects[obj.id] = { id: obj.id };
-                    }
-                });
+                if (event["objs"]) {
+                    event["objs"].forEach(obj => {
+                        if (this.gameObjects[obj.id] === undefined) {
+                            // New Object
+                            this.gameObjects[obj.id] = { id: obj.id };
+                        }
+                    });
+                }
             }
             const allRegistered = Object.keys(this.events);
             for (let i = 0; i < allRegistered.length; i++) {

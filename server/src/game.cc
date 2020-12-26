@@ -53,6 +53,10 @@ void Game::Tick(Time time) {
     queuedCalls.clear();
     queuedCallsMutex.unlock();
 
+#ifdef BUILD_SERVER
+    bool hasNewObjects = !newObjects.empty();
+#endif
+
     for (auto& newObject : newObjects) {
         gameObjects[newObject->GetId()] = newObject;
     }
@@ -64,6 +68,10 @@ void Game::Tick(Time time) {
     }
 
 #ifdef BUILD_SERVER
+    if (hasNewObjects) {
+        LOG_DEBUG("Has new objects!");
+        Replicate(time);
+    }
     for (auto& object : gameObjects) {
         if (!object.second->IsStatic() &&
             !IsPointInRect(killPlaneStart, killPlaneEnd - killPlaneStart,
@@ -124,7 +132,6 @@ void Game::Replicate(Time time) {
 
     json finalPacket;
     finalPacket["event"] = "r";
-
     for (auto& objectId : deadSinceLastReplicate) {
         json obj;
         obj["id"] = objectId;

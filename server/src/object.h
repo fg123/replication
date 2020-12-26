@@ -55,7 +55,7 @@ protected:
     Vector2 velocity;
 
     ObjectID id = 0;
-    bool isDirty = false;
+    bool isDirty = true;
     bool isStatic = false;
     bool isGrounded = false;
     Time lastTickTime = 0;
