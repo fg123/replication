@@ -81,7 +81,9 @@ int main(int argc, char** argv) {
                 result["char-selected"] = obj["char"];
                 ws->send(result.dump(), uWS::OpCode::TEXT);
             }
-            data->playerObject->ProcessInputData(obj);
+            else {
+                data->playerObject->ProcessInputData(obj);
+            }
         },
         .drain = [](auto */*ws*/) {
             /* Check ws->getBufferedAmount() here */

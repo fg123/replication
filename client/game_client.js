@@ -5481,6 +5481,7 @@ var asmLibraryArg = {
  "invoke_iiiiiiiiiii": invoke_iiiiiiiiiii,
  "invoke_iiiiiiiiiiii": invoke_iiiiiiiiiiii,
  "invoke_iiiiiiiiiiiii": invoke_iiiiiiiiiiiii,
+ "invoke_iiiiij": invoke_iiiiij,
  "invoke_jiiii": invoke_jiiii,
  "invoke_v": invoke_v,
  "invoke_vi": invoke_vi,
@@ -5517,13 +5518,9 @@ var _IsObjectAlive = Module["_IsObjectAlive"] = createExportWrapper("IsObjectAli
 
 var _GetObjectSerialized = Module["_GetObjectSerialized"] = createExportWrapper("GetObjectSerialized");
 
-var _GetObjectX = Module["_GetObjectX"] = createExportWrapper("GetObjectX");
-
-var _GetObjectY = Module["_GetObjectY"] = createExportWrapper("GetObjectY");
+var _HandleLocalInput = Module["_HandleLocalInput"] = createExportWrapper("HandleLocalInput");
 
 var _HandleReplicate = Module["_HandleReplicate"] = createExportWrapper("HandleReplicate");
-
-var _HandleLocalInput = Module["_HandleLocalInput"] = createExportWrapper("HandleLocalInput");
 
 var _free = Module["_free"] = createExportWrapper("free");
 
@@ -5571,21 +5568,25 @@ var _emscripten_get_sbrk_ptr = Module["_emscripten_get_sbrk_ptr"] = createExport
 
 var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
 
+var dynCall_iiiiij = Module["dynCall_iiiiij"] = createExportWrapper("dynCall_iiiiij");
+
 var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
 
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 
 var dynCall_jiiii = Module["dynCall_jiiii"] = createExportWrapper("dynCall_jiiii");
 
-var dynCall_iiiiij = Module["dynCall_iiiiij"] = createExportWrapper("dynCall_iiiiij");
-
 var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_iiiiijj");
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 38048;
+var _game = Module["_game"] = 37288;
 
-var _localClientId = Module["_localClientId"] = 38044;
+var _inputEvents = Module["_inputEvents"] = 37544;
+
+var _localClientId = Module["_localClientId"] = 37284;
+
+var _lastReplicatedTime = Module["_lastReplicatedTime"] = 37560;
 
 function invoke_iii(index, a1, a2) {
  var sp = stackSave();
@@ -5675,10 +5676,10 @@ function invoke_vii(index, a1, a2) {
  }
 }
 
-function invoke_viiiii(index, a1, a2, a3, a4, a5) {
+function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
  var sp = stackSave();
  try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
+  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5697,17 +5698,6 @@ function invoke_v(index) {
  }
 }
 
-function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
 function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  var sp = stackSave();
  try {
@@ -5719,10 +5709,10 @@ function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  }
 }
 
-function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
+function invoke_viiiii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5);
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5734,6 +5724,17 @@ function invoke_iiiii(index, a1, a2, a3, a4) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5866,6 +5867,17 @@ function invoke_vij(index, a1, a2, a3) {
  var sp = stackSave();
  try {
   dynCall_vij(index, a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiiij(index, a1, a2, a3, a4, a5, a6) {
+ var sp = stackSave();
+ try {
+  return dynCall_iiiiij(index, a1, a2, a3, a4, a5, a6);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

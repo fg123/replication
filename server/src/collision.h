@@ -23,6 +23,7 @@ public:
     virtual CollisionResult CollidesWith(Collider* other) = 0;
     virtual CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) = 0;
     Vector2 GetPosition();
+    Object* GetOwner() { return owner; }
 };
 
 struct RectangleCollider : public Collider {
@@ -45,7 +46,7 @@ struct CircleCollider : public Collider {
     CircleCollider(Vector2 position, double radius) : CircleCollider(nullptr, position, radius) {}
     CircleCollider(Object* owner, Vector2 position, double radius) : Collider(owner, position),
             radius(radius) {}
-    virtual int GetType() override { return 1; } 
+    virtual int GetType() override { return 1; }
     CollisionResult CollidesWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) override;
     virtual void Serialize(json& obj) override {
@@ -57,7 +58,7 @@ struct CircleCollider : public Collider {
 };
 
 inline bool IsPointInRect(const Vector2& RectPosition, const Vector2& RectSize, const Vector2& Point) {
-    return 
+    return
         (Point.x > RectPosition.x && Point.x < RectPosition.x + RectSize.x) &&
         (Point.y > RectPosition.y && Point.y < RectPosition.y + RectSize.y);
 }

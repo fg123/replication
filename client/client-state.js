@@ -1,6 +1,6 @@
 const Constants = require('./constants');
 
-const SIMULATED_LAG = Constants.isProduction ? 0 : 0;
+const SIMULATED_LAG = Constants.isProduction ? 0 : 60;
 
 module.exports = class ClientState {
     constructor(webSocket, wasm, resourceManager, mapImage) {
@@ -13,12 +13,18 @@ module.exports = class ClientState {
         this.localPlayerObjectId = undefined;
         this.isPaused = false;
         this.events = {};
-    
+
         this.StartGame();
 
         this.ping = 0;
         this.width = 0;
         this.height = 0;
+
+        this.lastMouseMoveSend = 0;
+        this.rawMousePos = {
+            x: 0,
+            y: 0
+        };
 
         const resize = () => {
             this.width  = window.innerWidth;
@@ -37,7 +43,7 @@ module.exports = class ClientState {
         wasm.stringToUTF8(str, buffer, length);
         return buffer;
     }
-    
+
     SendCharacterSelection(selection) {
         console.log("Changing selection", selection);
         this.webSocket.send(JSON.stringify(
@@ -48,11 +54,16 @@ module.exports = class ClientState {
     }
 
     SendInputPacket(input) {
-        const inputStr = JSON.stringify(input);
-        if (this.webSocket.readyState === WebSocket.OPEN) {
-            this.webSocket.send(inputStr);
-        }
         if (this.localPlayerObjectId !== undefined) {
+            // Because all the timestamps in the engine are
+            //   only the lower 32 bits due to truncation when
+            //   passing from JS to WASM, just truncate this.
+            input.time = Date.now();
+            const inputStr = JSON.stringify(input);
+            if (this.webSocket.readyState === WebSocket.OPEN) {
+                this.SendData(inputStr);
+            }
+
             // Serve Inputs into Local
             const heapString = this.ToHeapString(this.wasm, inputStr);
             this.wasm._HandleLocalInput(this.localPlayerObjectId, heapString);
@@ -64,8 +75,19 @@ module.exports = class ClientState {
         this.events[event] = fn;
     }
 
+    SendData(data) {
+        if (SIMULATED_LAG !== 0) {
+            setTimeout(() => {
+                this.webSocket.send(data);
+            }, SIMULATED_LAG / 2);
+        }
+        else {
+            this.webSocket.send(data);
+        }
+    }
+
     StartGame() {
-        this.webSocket.send('{"event":"rdy"}');
+        this.SendData('{"event":"rdy"}');
 
         setInterval(() => {
             // Heartbeat Send (for ping)
@@ -73,62 +95,67 @@ module.exports = class ClientState {
                 event: "hb",
                 time: Date.now()
             };
-            this.webSocket.send(JSON.stringify(hb));
+            this.SendData(JSON.stringify(hb));
         }, 1000);
 
-        this.webSocket.onmessage = (ev) => {
-            setTimeout(() => {
-                const events = JSON.parse(ev.data);
-                if (events["playerLocalObjectId"] !== undefined) {
-                    console.log("Player Local ID", events);
-                    const id = events["playerLocalObjectId"];
+        const handler = (ev) => {
+            const event = JSON.parse(ev.data);
+            if (event["playerLocalObjectId"] !== undefined) {
+                console.log("Player Local ID", event);
+                const id = event["playerLocalObjectId"];
 
-                    this.wasm._SetLocalPlayerClient(id);
-                    if (id === 0) {
-                        this.localPlayerObjectId = undefined;
+                this.wasm._SetLocalPlayerClient(id);
+                if (id === 0) {
+                    this.localPlayerObjectId = undefined;
+                }
+                else {
+                    this.localPlayerObjectId = id;
+                }
+                return;
+            }
+            else if (event["event"] == "hb") {
+                this.ping = (Date.now() - event.time);
+                return;
+            }
+            else if (event["event"] == "r") {
+                const heapString = this.ToHeapString(this.wasm, ev.data);
+                this.wasm._HandleReplicate(heapString);
+                this.wasm._free(heapString);
+                event["objs"].forEach(obj => {
+                    if (this.gameObjects[obj.id] === undefined) {
+                        // New Object
+                        this.gameObjects[obj.id] = { id: obj.id };
                     }
-                    else {
-                        this.localPlayerObjectId = id;
-                    }
-                    return;
+                });
+            }
+            const allRegistered = Object.keys(this.events);
+            for (let i = 0; i < allRegistered.length; i++) {
+                if (event[allRegistered[i]]) {
+                    this.events[allRegistered[i]](event);
                 }
-                else if (events["event"] == "hb") {
-                    this.ping = (Date.now() - events.time);
-                    return;
-                }
-                const allRegistered = Object.keys(this.events);
-                let matchedOne = false;
-                for (let i = 0; i < allRegistered.length; i++) {
-                    if (events[allRegistered[i]]) {
-                        this.events[allRegistered[i]](events);
-                        matchedOne = true;
-                    }
-                }
-                if (!matchedOne) {
-                    const heapString = this.ToHeapString(this.wasm, ev.data);
-                    this.wasm._HandleReplicate(heapString);
-                    this.wasm._free(heapString);
-                    events.forEach(obj => {
-                        if (this.gameObjects[obj.id] === undefined) {
-                            // New Object
-                            this.gameObjects[obj.id] = { id: obj.id };
-                        }
-                    });
-                }
-            }, SIMULATED_LAG);
+            }
+        };
+        this.webSocket.onmessage = (ev) => {
+            if (SIMULATED_LAG !== 0) {
+                setTimeout(() => { handler(ev); }, SIMULATED_LAG / 2);
+            }
+            else {
+                handler(ev);
+            }
         };
 
         this.Tick();
 
         window.addEventListener('keydown', e => {
-            if (e.repeat) { return; }
             if (e.key === "Escape") {
                 this.isPaused = !this.isPaused;
             }
-            this.SendInputPacket({
-                event: "kd",
-                key: e.keyCode
-            });
+            if (!e.repeat) {
+                this.SendInputPacket({
+                    event: "kd",
+                    key: e.keyCode
+                });
+            }
         });
 
         window.addEventListener('keyup', e => {
@@ -141,18 +168,9 @@ module.exports = class ClientState {
             }
         });
 
-        let lastMouseMoveSend = Date.now();
         window.addEventListener('mousemove', e => {
-            // Rate limit this!!
-            const current = Date.now();
-            if (current - lastMouseMoveSend > 30) {
-                lastMouseMoveSend = current;
-                this.SendInputPacket({
-                    event: "mm",
-                    x: e.pageX + this.cameraPos.x - (this.width / 2),
-                    y: e.pageY + this.cameraPos.y - (this.height / 2)
-                });
-            }
+            this.rawMousePos.x = e.pageX;
+            this.rawMousePos.y = e.pageY;
         });
 
         window.addEventListener('mousedown', e => {
@@ -173,7 +191,19 @@ module.exports = class ClientState {
             }
         });
     }
-    
+
+    SendMouseMoveEvent() {
+        const current = Date.now();
+        if (current - this.lastMouseMoveSend > 30) {
+            this.lastMouseMoveSend = current;
+            this.SendInputPacket({
+                event: "mm",
+                x: this.rawMousePos.x + this.cameraPos.x - (this.width / 2),
+                y: this.rawMousePos.y + this.cameraPos.y - (this.height / 2)
+            });
+        }
+    }
+
     GetPlayerObject() {
         if (this.localPlayerObjectId === undefined) return undefined;
         return this.gameObjects[this.localPlayerObjectId];

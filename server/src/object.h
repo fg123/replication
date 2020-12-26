@@ -30,7 +30,7 @@ struct ObjectRegister {
 
 #define CLASS_CREATE(name) \
     static Object* Create(Game& game) { return new name(game); } \
-    const char* GetClass() override { return #name; }
+    const char* GetClass() const override { return #name; }
 
 #define CLASS_REGISTER(name) static ObjectRegister<name> name##_Register { #name }
 
@@ -40,7 +40,8 @@ enum Tag : uint64_t {
     PLAYER          = 0b0000000000000000010,
     GROUND          = 0b0000000000000000100,
     WEAPON          = 0b0000000000000001000,
-    NO_GRAVITY      = 0b0000000000000010000
+    NO_GRAVITY      = 0b0000000000000010000,
+    NO_KILLPLANE    = 0b0000000000000100000
 };
 
 class Object : Replicable {
@@ -70,12 +71,15 @@ public:
     size_t replicateSoftCounter = 0;
 #endif
 
+#ifdef BUILD_CLIENT
+    void SetLastTickTime(Time time) { lastTickTime = time; }
+#endif
     Object(Game& game);
     virtual ~Object();
 
     Time DeltaTime(Time currentTime);
     virtual void Tick(Time time);
-    
+
     virtual void OnDeath() {}
 
     void ResolveCollision(const Vector2& difference);
@@ -94,7 +98,7 @@ public:
     bool IsDirty() const { return isDirty; }
     void SetDirty(bool dirty) { isDirty = dirty; }
 
-    virtual const char* GetClass() = 0;
+    virtual const char* GetClass() const = 0;
     virtual void Serialize(json& obj) override;
     void ProcessReplication(json& object) override;
 
@@ -116,5 +120,10 @@ public:
 
     virtual void OnCollide(CollisionResult& result);
 };
+
+inline std::ostream& operator<<(std::ostream& os, const Object* obj) {
+    os << "(" << obj->GetId() << ") " << obj->GetClass();
+    return os;
+}
 
 #endif

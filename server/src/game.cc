@@ -11,8 +11,8 @@
 
 static const double TILE_SIZE = 48;
 
-Game::Game() : nextId(1) {    
-   
+Game::Game() : nextId(1) {
+
 }
 
 Game::Game(std::string mapPath) : Game() {
@@ -67,26 +67,32 @@ void Game::Tick(Time time) {
     for (auto& object : gameObjects) {
         if (!object.second->IsStatic() &&
             !IsPointInRect(killPlaneStart, killPlaneEnd - killPlaneStart,
-                object.second->GetPosition())) {
+                object.second->GetPosition()) &&
+            !object.second->IsTagged(Tag::NO_KILLPLANE)) {
             // TODO: Deal damage instead of insta kill
-            // You're out of the range 
-            LOG_INFO("Kill Planed: (" << object.second->GetId() << ") " << object.second->GetClass() << " " << object.second->GetPosition());
-            
+            // You're out of the range
+            LOG_INFO("Kill Planed: " << object.second << " " << object.second->GetPosition());
+
             DestroyObject(object.second->GetId());
         }
     }
 #endif
 
-    for (auto& objectId : deadObjects) {
+    // OnDeath could potentially add more stuff to DeadObjects
+    std::vector<ObjectID> deadObjectsThisTick;
+    deadObjectsThisTick.insert(deadObjectsThisTick.begin(),
+        deadObjects.begin(), deadObjects.end());
+    deadObjects.clear();
+    for (auto& objectId : deadObjectsThisTick) {
         if (gameObjects.find(objectId) != gameObjects.end()) {
             Object* object = gameObjects[objectId];
-            LOG_DEBUG("Destroy Object " << objectId);
+            LOG_DEBUG("Destroy Object (" << objectId << ") " << object->GetClass());
+            object->OnDeath();
             gameObjects.erase(objectId);
             deadSinceLastReplicate.insert(objectId);
             delete object;
         }
     }
-    deadObjects.clear();
 
     // Don't clear dead objects until replicate has sent it out
 }
@@ -94,27 +100,36 @@ void Game::Tick(Time time) {
 #ifdef BUILD_SERVER
 void Game::InitialReplication(PlayerSocketData* data) {
     json finalPacket;
+    finalPacket["event"] = "r";
+    finalPacket["time"] = 0;
     for (auto& object : gameObjects) {
         // All Objects
         json obj;
         object.second->Serialize(obj);
-        finalPacket.push_back(obj);
+        finalPacket["objs"].push_back(obj);
     }
-    std::string finalPacketContents = finalPacket.dump();
-    if (!data->ws->send(finalPacketContents, uWS::OpCode::TEXT)) {
+    if (!data->ws->send(finalPacket.dump(), uWS::OpCode::TEXT)) {
         LOG_ERROR("Could not send!");
     }
 }
 
 void Game::Replicate(Time time) {
-    //std::unordered_map<Object*, std::string> serialized;
+    /* A Replication Packet:
+        {
+            event: "r",
+            objs: [ list of replicated objects ],
+            time: lastTimestamp
+        }
+    */
+
     json finalPacket;
+    finalPacket["event"] = "r";
 
     for (auto& objectId : deadSinceLastReplicate) {
         json obj;
         obj["id"] = objectId;
         obj["dead"] = true;
-        finalPacket.push_back(obj);
+        finalPacket["objs"].push_back(obj);
     }
 
     deadSinceLastReplicate.clear();
@@ -125,11 +140,9 @@ void Game::Replicate(Time time) {
             json obj;
             object.second->Serialize(obj);
             //serialized.emplace(object.second, obj.dump());
-            finalPacket.push_back(obj);
+            finalPacket["objs"].push_back(obj);
         }
     }
-
-    std::string finalPacketContents = finalPacket.dump();
 
     std::scoped_lock<std::mutex> lock(playersSetMutex);
     for (auto& player : players) {
@@ -143,14 +156,15 @@ void Game::Replicate(Time time) {
             InitialReplication(player);
         }
         else {
-            if (!player->ws->send(finalPacketContents, uWS::OpCode::TEXT)) {
+            finalPacket["time"] = player->playerObject->lastTickedInputClientTime;
+            if (!player->ws->send(finalPacket.dump(), uWS::OpCode::TEXT)) {
                 LOG_ERROR("Send Error");
             }
         }
         if (player->playerObjectDirty) {
             if (player->playerObject->GetId() != 0) {
                 player->playerObjectDirty = false;
-            }            
+            }
             json objectNotify;
             objectNotify["playerLocalObjectId"] = player->playerObject->GetId();
             player->ws->send(objectNotify.dump(), uWS::OpCode::TEXT);
@@ -160,6 +174,12 @@ void Game::Replicate(Time time) {
 #endif
 
 #ifdef BUILD_CLIENT
+void Game::RollbackTime(Time time) {
+    for (auto& object : gameObjects) {
+        object.second->SetLastTickTime(time);
+    }
+}
+
 void Game::EnsureObjectExists(json& object) {
     if (!object.contains("id")) {
         LOG_ERROR("EnsureObjectExists: no ID on replication packet!");
@@ -169,7 +189,8 @@ void Game::EnsureObjectExists(json& object) {
     if (object.contains("dead")) {
         // Kill
         if (gameObjects.find(id) != gameObjects.end()) {
-            DestroyObject(id);
+            delete gameObjects[id];
+            gameObjects.erase(id);
             return;
         }
         return;
@@ -206,15 +227,15 @@ void Game::HandleCollisions(Object* obj) {
     for (auto& object : gameObjects) {
         if (obj == object.second) continue;
 
-        CollisionResult r = obj->CollidesWith(object.second);
-        if (r.isColliding) {
-            r.collidedWith = object.second;
-            // Check for Collision Exclusion
-            if (!(obj->IsCollideExcluded(object.second->GetTags()) ||
-                object.second->IsCollideExcluded(obj->GetTags()))) {
+        // Check for Collision Exclusion
+        if (!(obj->IsCollideExcluded(object.second->GetTags()) ||
+            object.second->IsCollideExcluded(obj->GetTags()))) {
+            CollisionResult r = obj->CollidesWith(object.second);
+            if (r.isColliding) {
+                r.collidedWith = object.second;
                 collisionResolution += r.collisionDifference;
+                obj->OnCollide(r);
             }
-            obj->OnCollide(r);
         }
     }
     obj->ResolveCollision(collisionResolution);
@@ -240,23 +261,29 @@ void Game::AddObject(Object* obj) {
     LOG_ERROR("Don't call AddObject on the client!!");
     throw std::runtime_error("Don't call AddObject on the client!!");
 #endif
+    std::scoped_lock<std::mutex> lock(newObjectsMutex);
     ObjectID newId = RequestId();
-    LOG_DEBUG("Add Object " << newId);
     obj->SetId(newId);
+    LOG_DEBUG("Add Object " << obj);
     newObjects.insert(obj);
 }
 
 void Game::DestroyObject(ObjectID objectId) {
+#ifdef BUILD_CLIENT
+    LOG_ERROR("Don't call DestroyObject on the client!!");
+    throw std::runtime_error("Don't call DestroyObject on the client!!");
+#endif
     if (objectId == 0) {
         // Something has gone wrong
         LOG_ERROR("Tried to destroy object ID 0!");
         throw std::runtime_error("Invalid destroy of ID 0, probably a memory leak!");
     }
     if (gameObjects.find(objectId) == gameObjects.end()) {
+        LOG_ERROR("Tried to queue destruction for object not exist " << objectId);
         return;
     }
+    LOG_DEBUG("Queued for Destruction " << objectId);
     deadObjects.insert(objectId);
-    gameObjects[objectId]->OnDeath();
 }
 
 #ifdef BUILD_SERVER
@@ -267,7 +294,7 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
             LOG_INFO("Found player! Respawning by setting to dirty!");
             // Found the player. Handle respawn mechanics here.
             p->playerObjectDirty = true;
-            
+
             // Implement letting user select things
             auto& ClassLookup = GetClassLookup();
             if (ClassLookup.find(p->nextRespawnCharacter) == ClassLookup.end()) {
@@ -275,7 +302,7 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
             }
             Object* obj = GetClassLookup()[p->nextRespawnCharacter](*this);
             obj->SetPosition(Vector2(200, 0));
-            
+
             p->playerObject = static_cast<PlayerObject*>(obj);
 
             QueueNextTick([obj](Game& game) {
@@ -298,7 +325,6 @@ void Game::AddPlayer(PlayerSocketData* data, PlayerObject* playerObject) {
     players.insert(data);
 
     QueueNextTick([playerObject](Game& game) {
-        // Already reserved one to tell the client, so we override it.
         game.AddObject(playerObject);
     });
 }

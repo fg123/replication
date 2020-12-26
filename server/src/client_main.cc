@@ -13,12 +13,19 @@
 #include "characters/hookman.h"
 
 extern "C" {
+    /** Client Interface for the JS Front End */
+
     EMSCRIPTEN_KEEPALIVE
     ObjectID localClientId;
 
-    /** Client Interface for the JS Front End */
     EMSCRIPTEN_KEEPALIVE
     Game game;
+
+    EMSCRIPTEN_KEEPALIVE
+    std::vector<json> inputEvents;
+
+    EMSCRIPTEN_KEEPALIVE
+    Time lastReplicatedTime = 0;
 
     EMSCRIPTEN_KEEPALIVE
     void SetLocalPlayerClient(ObjectID client) {
@@ -56,45 +63,67 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
-    double GetObjectX(ObjectID objectId) {
-        Object* obj = game.GetObject(objectId);
-        return obj->GetPosition().x;
-    }
-
-    EMSCRIPTEN_KEEPALIVE
-    double GetObjectY(ObjectID objectId) {
-        Object* obj = game.GetObject(objectId);
-        return obj->GetPosition().y;
-    }
-
-    EMSCRIPTEN_KEEPALIVE
-    void HandleReplicate(const char* input) {
-        // LOG_DEBUG(input);
-        try {
+    void HandleLocalInput(ObjectID object, const char* input) {
+        Object* obj = game.GetObject(object);
+        if (obj) {
             json object = json::parse(input);
-            for (auto& event : object) {
-                game.EnsureObjectExists(event);
-            }
-            for (auto& event : object) {
-                // if (event["id"] == localClientId) {
-                //     // We have local prediction for this 
-                // }
-                // else {
-                    game.ProcessReplication(event);
-                // }
-            }
-        } catch(...) {
-            LOG_ERROR(input);
-            throw;
+            object["time"] = (uint32_t) object["time"];
+            inputEvents.emplace_back(object);
+            static_cast<PlayerObject*>(obj)->ProcessInputData(object);
         }
     }
 
     EMSCRIPTEN_KEEPALIVE
-    void HandleLocalInput(ObjectID object, const char* input) {
-        // Object* obj = game.GetObject(object);
-        // if (obj) {
-        //     json object = json::parse(input);
-        //     static_cast<PlayerObject*>(obj)->ProcessInputData(object);
-        // }
+    void HandleReplicate(const char* input) {
+        try {
+            json object = json::parse(input);
+
+            for (auto& event : object["objs"]) {
+                game.EnsureObjectExists(event);
+            }
+            for (auto& event : object["objs"]) {
+                game.ProcessReplication(event);
+            }
+
+            // Resolve Inputs:
+            Time newTime = (uint32_t) object["time"];
+            // LOG_DEBUG("New Time " << newTime << " Last Replicated " << lastReplicatedTime);
+            size_t thingsToDelete = 0;
+            for (;thingsToDelete < inputEvents.size(); thingsToDelete++) {
+                // LOG_DEBUG("Input Event Time " << inputEvents[thingsToDelete]["time"]);
+                if (inputEvents[thingsToDelete]["time"] > newTime) break;
+            }
+            // LOG_DEBUG("To Delete: " << thingsToDelete);
+            inputEvents.erase(inputEvents.begin(), inputEvents.begin() + thingsToDelete);
+            // Reapply inputs that server doesn't have yet
+
+            Object* obj = game.GetObject(localClientId);
+            lastReplicatedTime = newTime;
+
+            if (obj && newTime != 0) {
+                // Replay Actions to Now
+                // LOG_DEBUG("Replaying actions... Start Tick: " << newTime);
+                // game.RollbackTime(newTime);
+                obj->SetLastTickTime(newTime);
+                // LOG_DEBUG(inputEvents.size() << " queued locally!");
+                Time nextTick = newTime;
+                for (auto& jsonEvent : inputEvents) {
+                    Time eventTime = jsonEvent["time"];
+                    while (nextTick < eventTime) {
+                        obj->Tick(nextTick);
+                        nextTick += (1000.0 / TickRate);
+                        // LOG_DEBUG(nextTick << " " << eventTime);
+                    }
+                    static_cast<PlayerObject*>(obj)->ProcessInputData(jsonEvent);
+                }
+            }
+
+        } catch(std::exception& e) {
+            LOG_ERROR(e.what());
+            LOG_ERROR(input);
+        } catch(...) {
+            LOG_ERROR(input);
+            throw;
+        }
     }
 }

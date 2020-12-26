@@ -15,10 +15,11 @@ static const int W_KEY = 87;
 static const int SPACE_KEY = 32;
 
 PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector2::Zero) {
-    airFriction.x = 0.9;
 }
 
 PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
+    airFriction.x = 0.8;
+
     SetTag(Tag::PLAYER);
     SetPosition(position);
 
@@ -29,6 +30,9 @@ PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
 void PlayerObject::OnDeath() {
     // This calls before you get destructed, but client will already know you're
     //   dead (but you don't actually get GCed until next tick)
+    LOG_DEBUG("Player Death " << currentWeapon);
+
+#ifdef BUILD_SERVER
     if (currentWeapon) {
         game.DestroyObject(currentWeapon->GetId());
         currentWeapon->Detach();
@@ -45,14 +49,13 @@ void PlayerObject::OnDeath() {
         zWeapon = nullptr;
     }
 
-#ifdef BUILD_SERVER
     // Notify game so it can replace a new character
     game.OnPlayerDead(this);
 #endif
 }
 
 PlayerObject::~PlayerObject() {
-    
+
 }
 
 Vector2 PlayerObject::GetAimDirection() const {
@@ -68,10 +71,10 @@ void PlayerObject::Tick(Time time)  {
     std::scoped_lock lock(socketDataMutex);
     Vector2 velocity = GetVelocity();
     if (keyboardState[A_KEY]) {
-        velocity.x = -200;
+        velocity.x = -300;
     }
     if (keyboardState[D_KEY]) {
-        velocity.x = 200;
+        velocity.x = 300;
     }
     // if (keyboardState[G_KEY]) {
     //     DropWeapon();
@@ -118,11 +121,11 @@ void PlayerObject::Tick(Time time)  {
             zWeapon->ReleaseFire(time);
         }
     }
-    const Vector2& position = GetPosition();
-
-    aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
 
     Object::Tick(time);
+
+    const Vector2& position = GetPosition();
+    aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
 
     if (currentWeapon) {
         currentWeapon->SetPosition(GetAttachmentPoint());
@@ -138,6 +141,7 @@ void PlayerObject::Tick(Time time)  {
 
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;
+    lastTickedInputClientTime = lastProcessedInputClientTime;
 }
 
 void PlayerObject::Serialize(json& obj) {
@@ -202,46 +206,46 @@ void PlayerObject::OnCollide(CollisionResult& result) {
 
 void PlayerObject::DealDamage(int damage) {
     health -= damage;
+#ifdef BUILD_SERVER
     if (health <= 0) {
         ObjectID id = GetId();
         game.DestroyObject(id);
     }
+#endif
 }
 
 void PlayerObject::ProcessInputData(json& obj) {
+    std::scoped_lock lock(socketDataMutex);
     if (obj["event"] == "ku") {
         int key = obj["key"];
-        std::scoped_lock lock(socketDataMutex);
         if (key >= 0 && key < 256) {
             keyboardState[key] = false;
         }
     }
     else if (obj["event"] == "kd") {
         int key = obj["key"];
-        std::scoped_lock lock(socketDataMutex);
         if (key >= 0 && key < 256) {
             keyboardState[key] = true;
         }
     }
     else if (obj["event"] == "mm") {
-        std::scoped_lock lock(socketDataMutex);
         mousePosition.x = obj["x"];
         mousePosition.y = obj["y"];
     }
     else if (obj["event"] == "md") {
         int button = obj["button"];
-        std::scoped_lock lock(socketDataMutex);
         if (button >= 0 && button < 5) {
             mouseState[button] = true;
         }
     }
     else if (obj["event"] == "mu") {
         int button = obj["button"];
-        std::scoped_lock lock(socketDataMutex);
         if (button >= 0 && button < 5) {
             mouseState[button] = false;
         }
     }
+    // TODO: assert this is monotonically growing
+    lastProcessedInputClientTime = obj["time"];
 }
 
 Vector2 PlayerObject::GetAttachmentPoint() const {

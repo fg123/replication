@@ -43,9 +43,9 @@ void GrenadeObject::Explode() {
     //     // Flat Damage for now
     //     result.first->Damage
     // }
-    game.QueueNextTick([this](Game& game) {
-        game.DestroyObject(GetId());
-    });
+#ifdef BUILD_SERVER
+    game.DestroyObject(GetId());
+#endif
 }
 
 void GrenadeObject::Serialize(json& obj) {

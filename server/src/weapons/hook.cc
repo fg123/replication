@@ -23,10 +23,10 @@ void HookObject::OnCollide(CollisionResult& result) {
 void HookObject::Tick(Time time) {
     ThrownProjectile::Tick(time);
     bool isDead = false;
-    if (!IsStatic() && 
+    if (!IsStatic() &&
         firedBy->GetAttachedTo()->GetPosition().Distance(GetPosition()) > 500) {
         isDead = true;
-        
+
     }
     else if (IsStatic()) {
         Vector2 position = firedBy->GetAttachedTo()->GetPosition();
@@ -48,12 +48,11 @@ void HookObject::Tick(Time time) {
         firedBy->GetAttachedTo()->GetPosition().Distance(GetPosition()) < 100) {
         isDead = true;
     }
-
+#ifdef BUILD_SERVER
     if (isDead) {
-        game.QueueNextTick([this](Game& game) {
-            game.DestroyObject(GetId());
-        });
+        game.DestroyObject(GetId());
     }
+#endif
 }
 
 void HookObject::Serialize(json& obj) {

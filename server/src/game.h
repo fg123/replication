@@ -15,8 +15,8 @@
 
 class PlayerObject;
 
-static const int TickRate = 64;
-static const int ReplicateRate = 20;
+static const int TickRate = 128;
+static const int ReplicateRate = 10;
 
 struct PlayerSocketData {
 #ifdef BUILD_SERVER
@@ -36,13 +36,14 @@ class Game {
     std::vector<std::function<void(Game& game)>> queuedCalls;
 
     std::unordered_map<ObjectID, Object*> gameObjects;
-    
+
     std::unordered_set<PlayerSocketData*> players;
     std::mutex playersSetMutex;
 
     std::unordered_set<ObjectID> deadObjects;
     std::unordered_set<ObjectID> deadSinceLastReplicate;
 
+    std::mutex newObjectsMutex;
     std::unordered_set<Object*> newObjects;
 
     Time gameTime;
@@ -68,6 +69,8 @@ public:
 #ifdef BUILD_CLIENT
     void EnsureObjectExists(json& object);
     void ProcessReplication(json& incObject);
+
+    void RollbackTime(Time time);
 #endif
 
     void HandleCollisions(Object* obj);
@@ -87,7 +90,7 @@ public:
     }
 
     ObjectID RequestId();
-    
+
     void ChangeId(ObjectID oldId, ObjectID newId);
 
     void QueueNextTick(const std::function <void(Game& game)>& func) {
@@ -110,7 +113,7 @@ public:
     void GetUnitsInRange(Vector2 position, double range,
         bool includeBoundingBox,
         std::vector<RangeQueryResult>& results);
-    
+
 CollisionResult CheckLineSegmentCollide(const Vector2& start,
         const Vector2& end, uint64_t includeTags = ~0) {
         CollisionResult result;

@@ -15,6 +15,11 @@ Time Object::DeltaTime(Time currentTime) {
         lastTickTime = currentTime;
         return 0;
     }
+    if (currentTime < lastTickTime) {
+        LOG_WARN("Tick time inconsistency: " << currentTime
+            << " < " << lastTickTime << " for object ("
+            << GetId() << ") " << GetClass());
+    }
     Time delta = currentTime - lastTickTime;
     lastTickTime = currentTime;
     return delta;
@@ -34,6 +39,8 @@ void Object::Tick(Time time) {
     if (isStatic) return;
 
     Time delta = DeltaTime(time);
+    if (delta == 0) return;
+    
     // Apply Physics
     double timeFactor = delta / 1000.0;
 

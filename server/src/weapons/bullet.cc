@@ -17,16 +17,14 @@ void BulletObject::OnCollide(CollisionResult& result) {
         // Ignore
         return;
     }
-    
+
     // Check Player Hit
     if (result.collidedWith->IsTagged(Tag::PLAYER)) {
         static_cast<PlayerObject*>(result.collidedWith)->DealDamage(11);
     }
 
     dead = true;
-    
-    ObjectID id = GetId();
-    game.QueueNextTick([id](Game& game) {
-        game.DestroyObject(id);
-    });
+#ifdef BUILD_SERVER
+    game.DestroyObject(GetId());
+#endif
 }

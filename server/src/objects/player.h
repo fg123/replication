@@ -24,6 +24,9 @@ protected:
 public:
 
     std::mutex socketDataMutex;
+    Time lastProcessedInputClientTime = 0;
+    Time lastTickedInputClientTime = 0;
+
     std::array<bool, 256> keyboardState {};
     std::array<bool, 256> lastKeyboardState {};
 

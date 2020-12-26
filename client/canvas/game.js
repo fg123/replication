@@ -74,6 +74,8 @@ module.exports = class GameCanvas {
             }
         });
         this.context.translate(cameraTranslation.x, cameraTranslation.y);
+
+        this.clientState.SendMouseMoveEvent();
         requestAnimationFrame(() => { this.Draw() });
     }
 }

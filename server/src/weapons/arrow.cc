@@ -14,7 +14,7 @@ void ArrowObject::OnCollide(CollisionResult& result) {
         // Ignore
         return;
     }
-    
+
     // Check Player Hit
     if (!hitPlayer && result.collidedWith->IsTagged(Tag::PLAYER)) {
         hitPlayer = true;
@@ -37,11 +37,11 @@ void ArrowObject::Tick(Time time) {
         timeLanded = time;
     }
     timeSinceLanded = time - timeLanded;
+#ifdef BUILD_SERVER
     if (timeLanded != 0 && timeSinceLanded > timeBeforeDie) {
-        game.QueueNextTick([this](Game& game) {
-            game.DestroyObject(GetId());
-        });
+        game.DestroyObject(GetId());
     }
+#endif
 }
 
 void ArrowObject::Serialize(json& obj) {

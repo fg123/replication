@@ -30,12 +30,14 @@ void WeaponObject::AttachToPlayer(PlayerObject* player) {
     SetDirty(true);
     // No Collision
     collideExclusion |= (uint64_t)Tag::OBJECT;
+    SetTag(Tag::NO_KILLPLANE);
 }
 
 void WeaponObject::Detach() {
     attachedTo = nullptr;
     SetVelocity(Vector2::Zero);
     collideExclusion &= ~(uint64_t)Tag::OBJECT;
+    RemoveTag(Tag::NO_KILLPLANE);
     SetDirty(true);
 }
 

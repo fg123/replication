@@ -14,15 +14,13 @@ CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollide
     Vector2 rectPosition = rect->GetPosition();
     Vector2 circPosition = circle->GetPosition();
 
-    // if (IsPointInRect(rectPosition, rect->size, circPosition)) {
-    //     // Uh Oh Spaghettioh probably just return something that spits the ball out
-    //     // Don't collide for now
-    //     return CollisionResult();
-    // }
+    if (IsPointInRect(rectPosition, rect->size, circPosition)) {
+        LOG_WARN("Circle (" << circle->GetOwner() << ") in Rectangle (" << rect->GetOwner() << ")");
+    }
 
     Vector2 rectHalf (rect->size.x / 2.0f, rect->size.y / 2.0f);
     Vector2 rectCenter (
-        rectPosition.x + rectHalf.x, 
+        rectPosition.x + rectHalf.x,
         rectPosition.y + rectHalf.y
     );
     // get difference vector between both centers
@@ -36,7 +34,7 @@ CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollide
     difference = closest - circPosition;
     // Difference should point away from the rectangle.
     double differenceLength = difference.Length();
-    
+
     difference.Normalize();
 
     double overlapRange = circle->radius - differenceLength;
@@ -64,7 +62,7 @@ CollisionResult RectangleCollider::CollidesWith(Collider* other) {
         double w2 = otherRect->size.x;
         double h1 = size.y;
         double h2 = otherRect->size.y;
-        
+
         bool leftCollide = (x1 < x2 + w2);
         bool rightCollide = (x1 + w1 > x2);
         bool topCollide = (y1 < y2 + h2);
@@ -75,14 +73,14 @@ CollisionResult RectangleCollider::CollidesWith(Collider* other) {
 
         bool biasX = myCenter.x < otherCenter.x;
         bool biasY = myCenter.y < otherCenter.y;
-        
+
         CollisionResult r;
         r.isColliding = (leftCollide && rightCollide) && (topCollide && bottomCollide);
         if (r.isColliding) {
-            
+
             r.collisionDifference.x = !biasX ? -(x2 + w2 - x1) : x1 + w1 - x2;
             r.collisionDifference.y = !biasY ? -(y2 + h2 - y1) : y1 + h1 - y2;
-        
+
             double diff = std::abs(r.collisionDifference.x) - std::abs(r.collisionDifference.y);
             if (diff > 0.01) {
                 r.collisionDifference.x = 0;
