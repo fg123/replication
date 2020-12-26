@@ -40,7 +40,7 @@ void Object::Tick(Time time) {
 
     Time delta = DeltaTime(time);
     if (delta == 0) return;
-    
+
     // Apply Physics
     double timeFactor = delta / 1000.0;
 
@@ -55,12 +55,12 @@ void Object::Tick(Time time) {
 
     isGrounded = false;
     game.HandleCollisions(this);
-    
-    SetDirty(true);  
+
+    SetDirty(true);
 }
 
 void Object::ResolveCollision(const Vector2& difference) {
-    if (isStatic) return;
+    // if (isStatic) return;
     // TODO: this collision difference really should be negated
     if (std::isnan(difference.x) || std::isnan(difference.y)) {
         LOG_ERROR("ResolveCollision has nan difference " << difference);
@@ -71,7 +71,7 @@ void Object::ResolveCollision(const Vector2& difference) {
     // If the velocity does not match the direction of resolution, do nothing
     // If it does, we need to clamp it to zero.
     // This is kinda wonky and unintuitive because you decided to do -=
-    //   collisionDifference, changing it around requires changing the 
+    //   collisionDifference, changing it around requires changing the
     //   calculations for collisionDifference in the collision subroutines
     if (SameSign(difference.x, velocity.x)) {
         velocity.x = 0;
@@ -123,7 +123,7 @@ CollisionResult Object::CollidesWith(const Vector2& p1, const Vector2& p2) {
 }
 
 void Object::SetIsStatic(bool isStatic) {
-    this->isStatic = isStatic; 
+    this->isStatic = isStatic;
     SetDirty(true);
 }
 

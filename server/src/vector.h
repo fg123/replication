@@ -17,11 +17,11 @@ struct Vector2 : Replicable {
 
     Vector2() : Vector2(0.0, 0.0) {}
     Vector2(double x, double y) : x(x), y(y) {}
-    
+
     static const Vector2 Zero;
 
     inline double Distance(const Vector2& v) const { return std::sqrt(std::pow(x - v.x, 2) + std::pow(y - v.y, 2)); }
-    
+
     inline Vector2 & operator = (const Vector2 & v) { x = v.x; y = v.y; return *this; }
     inline Vector2 & operator = (const double & f) { x = f; y = f; return *this; }
     inline bool operator == (const Vector2 & v) const { return (x == v.x) && (y == v.y); }
@@ -37,7 +37,7 @@ struct Vector2 : Replicable {
     inline Vector2 & operator *= (const Vector2 & v) { x *= v.x; y *= v.y; return *this; }
     inline Vector2 & operator /= (const Vector2 & v) { x /= v.x; y /= v.y; return *this; }
 
-    inline const Vector2 operator - (void) { return Vector2(-x, -y); }
+    inline const Vector2 operator - (void) const { return Vector2(-x, -y); }
     inline const Vector2 operator + (double v) const { return Vector2(x + v, y + v); }
     inline const Vector2 operator - (double v) const { return Vector2(x - v, y - v); }
     inline const Vector2 operator * (double v) const { return Vector2(x * v, y * v); }
@@ -53,7 +53,7 @@ struct Vector2 : Replicable {
     }
 
     virtual void Serialize(json& obj) override;
-    
+
     virtual void ProcessReplication(json& obj) override;
 
     Vector2& Normalize();
@@ -68,6 +68,9 @@ struct Vector2 : Replicable {
     bool CheckNan() const { return std::isnan(x) || std::isnan(y); }
     bool IsZero() const { return x == 0 && y == 0; }
 };
+
+bool AreLineSegmentsIntersecting(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2);
+bool LineSegmentsIntersectPoint(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2, Vector2& result);
 
 inline std::ostream& operator<<(std::ostream& os, const Vector2& v) {
     os << "(" << v.x << ", " << v.y << ")";

@@ -24,6 +24,8 @@ void BulletObject::OnCollide(CollisionResult& result) {
     }
 
     dead = true;
+    SetIsStatic(true);
+    collideExclusion |= (uint64_t)Tag::OBJECT;
 #ifdef BUILD_SERVER
     game.DestroyObject(GetId());
 #endif

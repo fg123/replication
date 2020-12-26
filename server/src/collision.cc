@@ -14,15 +14,57 @@ CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollide
     Vector2 rectPosition = rect->GetPosition();
     Vector2 circPosition = circle->GetPosition();
 
-    if (IsPointInRect(rectPosition, rect->size, circPosition)) {
-        LOG_WARN("Circle (" << circle->GetOwner() << ") in Rectangle (" << rect->GetOwner() << ")");
-    }
-
     Vector2 rectHalf (rect->size.x / 2.0f, rect->size.y / 2.0f);
     Vector2 rectCenter (
         rectPosition.x + rectHalf.x,
         rectPosition.y + rectHalf.y
     );
+
+    if (IsPointInRect(rectPosition, rect->size, circPosition)) {
+        // Calculate how far back to move the circle to get it out of the rectangle
+        // LOG_WARN("Circle (" << circle->GetOwner() << ") in Rectangle (" << rect->GetOwner() << ")");
+
+        // LOG_DEBUG("Circle Position " << circPosition);
+        // LOG_DEBUG("Circle Velocity " << circle->GetOwner()->GetVelocity());
+        // LOG_DEBUG("Rectangle Position " << rectPosition);
+        // LOG_DEBUG("Rectangle Size " << rect->size);
+
+        // Clamp backwards to edge of rectangle
+        Vector2 cVel = -circle->GetOwner()->GetVelocity();
+        Vector2 lastFrame = circPosition + cVel; // Where we were last frame
+
+        Vector2 topLeft = rectPosition - circle->radius;
+        Vector2 topRight = rectPosition;
+        topRight.x += rect->size.x + circle->radius;
+        topRight.y -= circle->radius;
+
+        Vector2 bottomLeft = rectPosition;
+        bottomLeft.x -= circle->radius;
+        bottomLeft.y += rect->size.y + circle->radius;
+        Vector2 bottomRight = rectPosition + rect->size + circle->radius;
+
+        // Test each intersection
+        Vector2 intersectionPoint;
+
+        if (LineSegmentsIntersectPoint(circPosition, lastFrame, topLeft, topRight, intersectionPoint)) {
+        }
+        else if (LineSegmentsIntersectPoint(circPosition, lastFrame, topRight, bottomRight, intersectionPoint)) {
+        }
+        else if (LineSegmentsIntersectPoint(circPosition, lastFrame, bottomRight, bottomLeft, intersectionPoint)) {
+        }
+        else if (LineSegmentsIntersectPoint(circPosition, lastFrame, topLeft, bottomLeft, intersectionPoint)) {
+        }
+        else {
+            LOG_WARN("No intersection with edge!");
+        }
+        CollisionResult r;
+        r.collisionDifference = -(intersectionPoint - circPosition);
+        // LOG_DEBUG("Difference " << r.collisionDifference);
+        // LOG_DEBUG("New Pos " << circPosition - r.collisionDifference);
+        r.isColliding = true;
+        return r;
+    }
+
     // get difference vector between both centers
     Vector2 difference = circPosition - rectCenter;
     Vector2 clamped = difference.Clamp(-rectHalf, rectHalf);
@@ -117,8 +159,6 @@ CollisionResult CircleCollider::CollidesWith(Collider* other) {
         return RectangleAndCircleCollide(static_cast<RectangleCollider*>(other), this);
     }
 }
-
-bool AreLineSegmentsIntersecting(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2);
 
 CollisionResult RectangleCollider::CollidesWith(const Vector2& p1, const Vector2& p2) {
     CollisionResult result;
