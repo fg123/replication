@@ -1,6 +1,6 @@
 const Constants = require('./constants');
 
-const SIMULATED_LAG = Constants.isProduction ? 0 : 60;
+const SIMULATED_LAG = Constants.isProduction ? 0 : 0;
 
 module.exports = class ClientState {
     constructor(webSocket, wasm, resourceManager, mapImage) {

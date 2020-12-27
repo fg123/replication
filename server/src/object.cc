@@ -132,6 +132,7 @@ void Object::Serialize(json& obj) {
     obj["t"] = GetClass();
     position.Serialize(obj["p"]);
     velocity.Serialize(obj["v"]);
+    airFriction.Serialize(obj["af"]);
     obj["s"] = isStatic;
     obj["z"] = z;
 
@@ -148,8 +149,10 @@ void Object::Serialize(json& obj) {
 }
 
 void Object::ProcessReplication(json& object) {
-    SetPosition(Vector2(object["p"]["x"], object["p"]["y"]));
-    SetVelocity(Vector2(object["v"]["x"], object["v"]["y"]));
+    position.ProcessReplication(object["p"]);
+    velocity.ProcessReplication(object["v"]);
+    airFriction.ProcessReplication(object["af"]);
+
     SetIsStatic(object["s"]);
     z = object["z"];
     tags = object["ta"];

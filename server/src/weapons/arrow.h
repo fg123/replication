@@ -5,9 +5,11 @@
 
 class ArrowObject : public ThrownProjectile {
     bool hitPlayer = false;
-    
+
     Time timeLanded = 0;
     Time timeSinceLanded = 0;
+
+    Vector2 savedVelocity;
 
     static const Time timeBeforeDie = 3000;
 

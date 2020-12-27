@@ -22,7 +22,9 @@ void ArrowObject::OnCollide(CollisionResult& result) {
         SetVelocity(Vector2::Zero);
     }
     else if (result.collidedWith->IsStatic() && !IsStatic()) {
+        LOG_DEBUG("Setting to Static");
         SetIsStatic(true);
+        savedVelocity = GetVelocity();
         collideExclusion |= (uint64_t) Tag::PLAYER;
     }
 
@@ -37,10 +39,14 @@ void ArrowObject::Tick(Time time) {
         timeLanded = time;
     }
     timeSinceLanded = time - timeLanded;
-#ifdef BUILD_SERVER
-    if (timeLanded != 0 && timeSinceLanded > timeBeforeDie) {
-        game.DestroyObject(GetId());
+    if (IsStatic()) {
+        // For display purposes
+        SetVelocity(savedVelocity);
     }
+#ifdef BUILD_SERVER
+    // if (timeLanded != 0 && timeSinceLanded > timeBeforeDie) {
+    //     game.DestroyObject(GetId());
+    // }
 #endif
 }
 

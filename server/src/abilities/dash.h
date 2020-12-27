@@ -36,10 +36,10 @@ public:
         }
 
         lastDash = time;
-        
+
         Vector2 velocity = attachedTo->GetVelocity();
         velocity.y -= DashAmount;
-        
+
         attachedTo->SetVelocity(velocity);
         attachedTo->SetTag(Tag::NO_GRAVITY);
         attachedTo->airFriction.y = 0.95;
@@ -47,12 +47,14 @@ public:
 
     virtual void Serialize(json& obj) override {
         WeaponObject::Serialize(obj);
-        obj["tsld"] = timeSinceLastDash;
+        // Replicating this desyncs the client side prediction of these
+        //   abilities
+        // obj["tsld"] = timeSinceLastDash;
     }
 
     virtual void ProcessReplication(json& obj) override {
         WeaponObject::ProcessReplication(obj);
-        timeSinceLastDash = obj["tsld"];
+        // timeSinceLastDash = obj["tsld"];
     }
 };
 
