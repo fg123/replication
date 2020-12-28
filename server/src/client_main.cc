@@ -25,17 +25,39 @@ extern "C" {
     std::vector<json> inputEvents;
 
     EMSCRIPTEN_KEEPALIVE
-    Time lastReplicatedTime = 0;
-
-    EMSCRIPTEN_KEEPALIVE
     void SetLocalPlayerClient(ObjectID client) {
         localClientId = client;
     }
 
     EMSCRIPTEN_KEEPALIVE
-    void TickGame(Time time) {
+    Time lastTickTime = 0;
+
+    EMSCRIPTEN_KEEPALIVE
+    Time ping = 0;
+
+    EMSCRIPTEN_KEEPALIVE
+    void SetPing(Time inPing) {
+        ping = inPing;
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    int GetTickInterval() {
+        return TickInterval;
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    Time GetLastTickTime() {
+        return lastTickTime;
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    void TickGame() {
         try {
-            game.Tick(time);
+            // Don't worry about slow ticks here, each tick
+            //   is guaranteed to be fixed interval, but when
+            //   we fall behind HandleReplicate() will autocorrect
+            lastTickTime += TickInterval;
+            game.Tick(lastTickTime);
         } catch(std::runtime_error& error) {
             LOG_ERROR(error.what());
         } catch(...) {
@@ -67,15 +89,21 @@ extern "C" {
         Object* obj = game.GetObject(object);
         if (obj) {
             json object = json::parse(input);
-            object["time"] = (uint32_t) object["time"];
             inputEvents.emplace_back(object);
-            static_cast<PlayerObject*>(obj)->ProcessInputData(object);
+            static_cast<PlayerObject*>(obj)->OnInput(object);
         }
     }
 
     EMSCRIPTEN_KEEPALIVE
     void HandleReplicate(const char* input) {
+        // LOG_DEBUG("Handle Replicate");
         try {
+            Object* obj = game.GetObject(localClientId);
+            Vector2 oldPosition, serverPosition;
+            if (obj) {
+                // LOG_DEBUG("OldPosition Tick Time" << lastTickTime);
+                oldPosition = obj->GetPosition();
+            }
             json object = json::parse(input);
 
             for (auto& event : object["objs"]) {
@@ -85,39 +113,58 @@ extern "C" {
                 game.ProcessReplication(event);
             }
 
-            // Resolve Inputs:
-            Time newTime = (uint32_t) object["time"];
-            // LOG_DEBUG("New Time " << newTime << " Last Replicated " << lastReplicatedTime);
+            if (obj) {
+                serverPosition = obj->GetPosition();
+            }
+
+            Time serverLastProcessedTime = (uint32_t) object["time"];
+            if (!obj) return;
+
+
+            // Calculate where the server is now
+            uint64_t ticksSinceLastProcessed = object["ticks"];
+            Time serverCurrentTickTime = serverLastProcessedTime +
+                (ticksSinceLastProcessed * TickInterval);
+
+            // Delete inputs that the server has already processed (or that are too late?)
             size_t thingsToDelete = 0;
             for (;thingsToDelete < inputEvents.size(); thingsToDelete++) {
-                // LOG_DEBUG("Input Event Time " << inputEvents[thingsToDelete]["time"]);
-                if (inputEvents[thingsToDelete]["time"] > newTime) break;
+                if (inputEvents[thingsToDelete]["time"] > serverLastProcessedTime) break;
             }
-            // LOG_DEBUG("To Delete: " << thingsToDelete);
             inputEvents.erase(inputEvents.begin(), inputEvents.begin() + thingsToDelete);
-            // Reapply inputs that server doesn't have yet
 
-            Object* obj = game.GetObject(localClientId);
-            lastReplicatedTime = newTime;
+            // There's a chance here that the server has gone on faster than us, but has not
+            //    processed our input yet.
+            // Regardless, start game back at oldest known state.
 
-            if (obj && newTime != 0) {
-                // Replay Actions to Now
-                // LOG_DEBUG("Replaying actions... Start Tick: " << newTime);
-                // game.RollbackTime(newTime);
-                obj->SetLastTickTime(newTime);
-                // LOG_DEBUG(inputEvents.size() << " queued locally!");
-                Time nextTick = newTime;
-                for (auto& jsonEvent : inputEvents) {
-                    Time eventTime = jsonEvent["time"];
-                    while (nextTick < eventTime) {
-                        obj->Tick(nextTick);
-                        nextTick += (1000.0 / TickRate);
-                        // LOG_DEBUG(nextTick << " " << eventTime);
-                    }
-                    static_cast<PlayerObject*>(obj)->ProcessInputData(jsonEvent);
-                }
+            // Queue up inputs that the server hasn't processed yet
+            Time nextTick = serverCurrentTickTime;
+            if (!inputEvents.empty() && inputEvents[0]["time"] < nextTick) {
+                nextTick = inputEvents[0]["time"];
+            }
+            obj->SetLastTickTime(nextTick - TickInterval);
+            for (auto& jsonEvent : inputEvents) {
+                // Queue into Buffer
+                static_cast<PlayerObject*>(obj)->OnInput(jsonEvent);
             }
 
+            Time ending = std::max(serverCurrentTickTime + ping, lastTickTime);
+
+            // LOG_DEBUG("Bringing to present (" << serverLastProcessedTime << ") " << nextTick << " -> " << ending);
+            // LOG_DEBUG("Server Current Tick Time (" << serverCurrentTickTime << ") ");
+            while (nextTick <= ending) {
+                // LOG_DEBUG("Next Tick: " << nextTick);
+                obj->Tick(nextTick);
+                nextTick += TickInterval;
+            }
+            // LOG_DEBUG("To Present Done!");
+            lastTickTime = nextTick;
+
+            Vector2 newPosition = obj->GetPosition();
+            Vector2 difference = (newPosition - oldPosition);
+            if (difference.Length() > 5.0) {
+                LOG_DEBUG("Server Position Desync: " << newPosition << " - " << oldPosition << " = " << (newPosition - oldPosition));
+            }
         } catch(std::exception& e) {
             LOG_ERROR(e.what());
             LOG_ERROR(input);

@@ -4,6 +4,7 @@
 #include "json/json.hpp"
 
 static const double GRAVITY = 3000;
+static const double EPSILON = 10e-20;
 
 std::unordered_map<std::string, ObjectConstructor>& GetClassLookup() {
     static std::unordered_map<std::string, ObjectConstructor> ClassLookup;
@@ -41,6 +42,9 @@ void Object::Tick(Time time) {
     Time delta = DeltaTime(time);
     if (delta == 0) return;
 
+    // if (IsTagged(Tag::PLAYER)) {
+    //     LOG_DEBUG(delta);
+    // }
     // Apply Physics
     double timeFactor = delta / 1000.0;
 
@@ -56,6 +60,12 @@ void Object::Tick(Time time) {
     isGrounded = false;
     game.HandleCollisions(this);
 
+    if (std::abs(velocity.x) < EPSILON) {
+        velocity.x = 0;
+    }
+    if (std::abs(velocity.y) < EPSILON) {
+        velocity.y = 0;
+    }
     SetDirty(true);
 }
 
@@ -135,6 +145,7 @@ void Object::Serialize(json& obj) {
     airFriction.Serialize(obj["af"]);
     obj["s"] = isStatic;
     obj["z"] = z;
+    obj["ig"] = isGrounded;
 
     obj["ta"] = tags;
     obj["ce"] = collideExclusion;
@@ -156,6 +167,7 @@ void Object::ProcessReplication(json& object) {
     SetIsStatic(object["s"]);
     z = object["z"];
     tags = object["ta"];
+    isGrounded = object["ig"];
     collideExclusion = object["ce"];
 
     if (colliders.size() != object["c"].size()) {

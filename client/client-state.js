@@ -55,10 +55,8 @@ module.exports = class ClientState {
 
     SendInputPacket(input) {
         if (this.localPlayerObjectId !== undefined) {
-            // Because all the timestamps in the engine are
-            //   only the lower 32 bits due to truncation when
-            //   passing from JS to WASM, just truncate this.
-            input.time = Date.now();
+            input.time = this.wasm._GetLastTickTime();
+            console.log("Input at ", input.time, input);
             const inputStr = JSON.stringify(input);
             if (this.webSocket.readyState === WebSocket.OPEN) {
                 this.SendData(inputStr);
@@ -87,7 +85,12 @@ module.exports = class ClientState {
     }
 
     StartGame() {
-        this.SendData('{"event":"rdy"}');
+        const rdyTick = this.wasm._GetLastTickTime();
+        console.log("Sending RDY_SYNC", rdyTick);
+        this.SendData(JSON.stringify({
+            "event": "rdy",
+            "time": rdyTick
+        }));
 
         setInterval(() => {
             // Heartbeat Send (for ping)
@@ -97,6 +100,12 @@ module.exports = class ClientState {
             };
             this.SendData(JSON.stringify(hb));
         }, 1000);
+
+        const tickInterval = this.wasm._GetTickInterval();
+        setInterval(() => {
+            // To ensure fixed time step
+            this.wasm._TickGame();
+        }, tickInterval);
 
         const handler = (ev) => {
             const event = JSON.parse(ev.data);
@@ -115,6 +124,7 @@ module.exports = class ClientState {
             }
             else if (event["event"] == "hb") {
                 this.ping = (Date.now() - event.time);
+                this.wasm._SetPing(this.ping);
                 return;
             }
             else if (event["event"] == "r") {
@@ -195,7 +205,8 @@ module.exports = class ClientState {
     }
 
     SendMouseMoveEvent() {
-        const current = Date.now();
+        return;
+        const current = this.wasm._GetLastTickTime();
         if (current - this.lastMouseMoveSend > 30) {
             this.lastMouseMoveSend = current;
             this.SendInputPacket({
@@ -212,7 +223,6 @@ module.exports = class ClientState {
     }
 
     Tick() {
-        const currentTime = Date.now();
         const wasm = this.wasm;
         Object.keys(this.gameObjects).forEach((k) => {
             if (!wasm._IsObjectAlive(k)) {
@@ -226,12 +236,6 @@ module.exports = class ClientState {
             wasm._free(serializedString);
             this.gameObjects[k] = serializedObject;
         });
-
-        // context.font = "20px monospace";
-        // context.fillStyle = "black";
-        // context.fillText(Math.ceil(1000 / deltaTime), 5, 20);
-        // lastTime = currentTime;
-        wasm._TickGame(currentTime);
         requestAnimationFrame(() => { this.Tick() });
     }
 };

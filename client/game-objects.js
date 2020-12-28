@@ -93,7 +93,7 @@ module.exports = {
         draw (context, resourceManager, obj, objects) {
             let isFlip = false;
             let angle = 0;
-            const playerAttach = objects[obj.attach];            
+            const playerAttach = objects[obj.attach];
             if (playerAttach) {
                 isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
                 if (isFlip) {
@@ -109,7 +109,7 @@ module.exports = {
         draw (context, resourceManager, obj, objects) {
             let isFlip = false;
             let angle = 0;
-            const playerAttach = objects[obj.attach];            
+            const playerAttach = objects[obj.attach];
             if (playerAttach) {
                 isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
                 if (isFlip) {
@@ -125,7 +125,7 @@ module.exports = {
         draw (context, resourceManager, obj, objects) {
             let isFlip = false;
             let angle = 0;
-            const playerAttach = objects[obj.attach];            
+            const playerAttach = objects[obj.attach];
             if (playerAttach) {
                 isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
                 if (isFlip) {
@@ -143,7 +143,7 @@ module.exports = {
                     const x = afv.x / 10;
                     const y = afv.y / 10;
                     context.lineTo(obj.p.x + x, obj.p.y + y);
-                    context.stroke();   
+                    context.stroke();
                 }
             }
             const image = isFlip ? resourceManager.get('bow.png-FLIPPED') : resourceManager.get('bow.png');
@@ -166,7 +166,7 @@ module.exports = {
         draw (context, resourceManager, obj, objects) {
             let isFlip = false;
             let angle = 0;
-            const playerAttach = objects[obj.attach];            
+            const playerAttach = objects[obj.attach];
             if (playerAttach) {
                 isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
                 if (isFlip) {
@@ -184,7 +184,7 @@ module.exports = {
                     const x = afv.x / 10;
                     const y = afv.y / 10;
                     context.lineTo(obj.p.x + x, obj.p.y + y);
-                    context.stroke();   
+                    context.stroke();
                 }
             }
         }
@@ -192,6 +192,7 @@ module.exports = {
     "Marine": {
         draw (context, resourceManager, obj, objects) {
             const r = characters["Marine"].resources;
+            // console.log("DrawMarine!", obj.p);
             drawPlayer(r.base, r.arm, context, resourceManager, obj);
         }
     },

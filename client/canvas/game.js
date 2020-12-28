@@ -11,7 +11,7 @@ module.exports = class GameCanvas {
         this.backgroundGradient.addColorStop(0, "#cbc4d3");
         this.backgroundGradient.addColorStop(0.5, "#d8c39b");
         this.backgroundGradient.addColorStop(1, "#b49862");
-        
+
         this.Draw();
     }
 
@@ -31,11 +31,11 @@ module.exports = class GameCanvas {
             }
         }
 
-        const cameraTranslation = { 
+        const cameraTranslation = {
             x: this.clientState.cameraPos.x - this.clientState.width / 2,
             y: this.clientState.cameraPos.y - this.clientState.height / 2
         };
-    
+
         this.context.translate(-cameraTranslation.x, -cameraTranslation.y);
         this.context.drawImage(this.clientState.mapImage, 0, 0);
         const sorter = [];
@@ -46,7 +46,6 @@ module.exports = class GameCanvas {
         sorter.sort((a, b) => a.z - b.z);
         sorter.forEach(pair => {
             const obj = this.clientState.gameObjects[pair.id];
-            
             if (gameObjectLookup[obj.t] !== undefined) {
                 if (gameObjectLookup[obj.t].draw) {
                     gameObjectLookup[obj.t].draw(this.context,

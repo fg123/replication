@@ -106,10 +106,20 @@ void Game::Tick(Time time) {
 }
 
 #ifdef BUILD_SERVER
+/* A Replication Packet:
+    {
+        event: "r",
+        objs: [ list of replicated objects ],
+        time: client timestamp of last input.
+        ticks: ticks server has processed sicne that last input
+    }
+*/
+
 void Game::InitialReplication(PlayerSocketData* data) {
     json finalPacket;
     finalPacket["event"] = "r";
     finalPacket["time"] = 0;
+    finalPacket["ticks"] = 0;
     for (auto& object : gameObjects) {
         // All Objects
         json obj;
@@ -122,14 +132,6 @@ void Game::InitialReplication(PlayerSocketData* data) {
 }
 
 void Game::Replicate(Time time) {
-    /* A Replication Packet:
-        {
-            event: "r",
-            objs: [ list of replicated objects ],
-            time: lastTimestamp
-        }
-    */
-
     json finalPacket;
     finalPacket["event"] = "r";
     for (auto& objectId : deadSinceLastReplicate) {
@@ -163,7 +165,8 @@ void Game::Replicate(Time time) {
             InitialReplication(player);
         }
         else {
-            finalPacket["time"] = player->playerObject->lastTickedInputClientTime;
+            finalPacket["time"] = player->playerObject->lastClientInputTime;
+            finalPacket["ticks"] = player->playerObject->ticksSinceLastProcessed;
             if (!player->ws->send(finalPacket.dump(), uWS::OpCode::TEXT)) {
                 LOG_ERROR("Send Error");
             }

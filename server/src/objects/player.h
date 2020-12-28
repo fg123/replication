@@ -24,11 +24,17 @@ protected:
 public:
 
     std::mutex socketDataMutex;
-    Time lastProcessedInputClientTime = 0;
-    Time lastTickedInputClientTime = 0;
 
-    std::array<bool, 256> keyboardState {};
-    std::array<bool, 256> lastKeyboardState {};
+    std::vector<json> inputBuffer;
+
+    // The last input from the client (given in client frame)
+    Time lastClientInputTime = 0;
+
+    // Ticks since we processed the last client input frame
+    Time ticksSinceLastProcessed = 0;
+
+    std::array<bool, 10> keyboardState {};
+    std::array<bool, 10> lastKeyboardState {};
 
     std::array<bool, 5> mouseState {};
     std::array<bool, 5> lastMouseState {};
@@ -44,7 +50,8 @@ public:
     virtual void Serialize(json& obj) override;
     virtual void ProcessReplication(json& obj) override;
     virtual void OnCollide(CollisionResult& result) override;
-    
+
+    void OnInput(json& obj);
     void ProcessInputData(json& obj);
 
     WeaponObject* GetWeapon() { return currentWeapon; }

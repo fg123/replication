@@ -7,24 +7,24 @@
 #include "weapons/assault-rifle.h"
 
 class Marine : public PlayerObject {
-    
+
 public:
     CLASS_CREATE(Marine)
     Marine(Game& game) : Marine(game, Vector2::Zero) {}
     Marine(Game& game, Vector2 position) : PlayerObject(game, position) {
-        #ifdef BUILD_SERVER
-            qWeapon = new GrenadeThrower { game };
-            game.AddObject(qWeapon);
-            qWeapon->AttachToPlayer(this);
-        
-            AssaultRifleObject* rifle = new AssaultRifleObject(game);
-            game.AddObject(rifle);
-            PickupWeapon(rifle);
+        // #ifdef BUILD_SERVER
+        //     qWeapon = new GrenadeThrower { game };
+        //     game.AddObject(qWeapon);
+        //     qWeapon->AttachToPlayer(this);
 
-            zWeapon = new ArtilleryStrikeWeapon { game };
-            game.AddObject(zWeapon);
-            zWeapon->AttachToPlayer(this);
-        #endif
+        //     AssaultRifleObject* rifle = new AssaultRifleObject(game);
+        //     game.AddObject(rifle);
+        //     PickupWeapon(rifle);
+
+        //     zWeapon = new ArtilleryStrikeWeapon { game };
+        //     game.AddObject(zWeapon);
+        //     zWeapon->AttachToPlayer(this);
+        // #endif
     }
 };
 

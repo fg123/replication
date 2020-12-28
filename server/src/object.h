@@ -122,6 +122,10 @@ public:
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Object* obj) {
+    if (!obj) {
+        os << "[No Object]";
+        return os;
+    }
     os << "(" << obj->GetId() << ") " << obj->GetClass();
     return os;
 }

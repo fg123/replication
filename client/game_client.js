@@ -5471,6 +5471,7 @@ var asmLibraryArg = {
  "invoke_fiii": invoke_fiii,
  "invoke_i": invoke_i,
  "invoke_ii": invoke_ii,
+ "invoke_iid": invoke_iid,
  "invoke_iii": invoke_iii,
  "invoke_iiii": invoke_iiii,
  "invoke_iiiii": invoke_iiiii,
@@ -5511,6 +5512,12 @@ var _fflush = Module["_fflush"] = createExportWrapper("fflush");
 var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
 
 var _SetLocalPlayerClient = Module["_SetLocalPlayerClient"] = createExportWrapper("SetLocalPlayerClient");
+
+var _SetPing = Module["_SetPing"] = createExportWrapper("SetPing");
+
+var _GetTickInterval = Module["_GetTickInterval"] = createExportWrapper("GetTickInterval");
+
+var _GetLastTickTime = Module["_GetLastTickTime"] = createExportWrapper("GetLastTickTime");
 
 var _TickGame = Module["_TickGame"] = createExportWrapper("TickGame");
 
@@ -5580,13 +5587,15 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 37408;
+var _game = Module["_game"] = 37848;
 
-var _inputEvents = Module["_inputEvents"] = 37664;
+var _inputEvents = Module["_inputEvents"] = 38104;
 
-var _localClientId = Module["_localClientId"] = 37404;
+var _localClientId = Module["_localClientId"] = 37844;
 
-var _lastReplicatedTime = Module["_lastReplicatedTime"] = 37680;
+var _ping = Module["_ping"] = 38128;
+
+var _lastTickTime = Module["_lastTickTime"] = 38120;
 
 function invoke_iii(index, a1, a2) {
  var sp = stackSave();
@@ -5757,6 +5766,17 @@ function invoke_viidii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3, a4, a5);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iid(index, a1, a2) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

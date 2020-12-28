@@ -14,12 +14,12 @@
 static bool gameRunning = true;
 
 void GameLoop(Timer& gameTimer) {
-    static const int sleepRate = (int)(1000.0 / (TickRate * 2));
-    LOG_DEBUG("Tick Rate: " << TickRate << " Sleep Time: " << sleepRate);
+    static const int sleepRate = (int)(TickInterval / 2);
+    LOG_DEBUG("Tick Interval: " << TickInterval << " Sleep Time: " << sleepRate);
     while (gameRunning) {
         gameTimer.Tick();
         // Reduce CPU load
-        std::this_thread::sleep_for(std::chrono::milliseconds((int) sleepRate));
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepRate));
     }
 }
 
@@ -33,14 +33,14 @@ int main(int argc, char** argv) {
 
     Game game { mapPath };
     gameTimer.ScheduleInterval(std::bind(&Game::Tick, &game, std::placeholders::_1),
-            1000.0 / TickRate);
+            TickInterval);
 #ifdef BUILD_SERVER
     gameTimer.ScheduleInterval(std::bind(&Game::Replicate, &game, std::placeholders::_1),
-        1000.0 / ReplicateRate);
+        ReplicateInterval);
 #endif
 
     std::thread s { GameLoop, std::ref(gameTimer) };
-    
+
     uWS::App().get("/status", [](auto *res, auto */*req*/) {
 	    res->end("ok");
 	}).ws<PlayerSocketData>("/connect", {
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
                 ws->send(result.dump(), uWS::OpCode::TEXT);
             }
             else {
-                data->playerObject->ProcessInputData(obj);
+                data->playerObject->OnInput(obj);
             }
         },
         .drain = [](auto */*ws*/) {

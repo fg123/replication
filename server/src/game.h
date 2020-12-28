@@ -15,8 +15,8 @@
 
 class PlayerObject;
 
-static const int TickRate = 128;
-static const int ReplicateRate = 15;
+static const int TickInterval = 16;
+static const int ReplicateInterval = 100;
 
 struct PlayerSocketData {
 #ifdef BUILD_SERVER
@@ -114,7 +114,7 @@ public:
         bool includeBoundingBox,
         std::vector<RangeQueryResult>& results);
 
-CollisionResult CheckLineSegmentCollide(const Vector2& start,
+    CollisionResult CheckLineSegmentCollide(const Vector2& start,
         const Vector2& end, uint64_t includeTags = ~0) {
         CollisionResult result;
         for (auto& object : gameObjects) {

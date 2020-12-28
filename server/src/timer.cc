@@ -15,9 +15,9 @@ void Timer::Tick() {
     for (auto it = schedule.begin(); it != schedule.end(); it++) {
         auto& event = *it;
         if (current > event.nextScheduled) {
-            event.function(current);
+            event.function(event.nextScheduled);
             if (event.shouldRepeat) {
-                event.nextScheduled = current + event.interval;
+                event.nextScheduled += event.interval;
             }
             else {
                 it = schedule.erase(it);

@@ -14,6 +14,18 @@ static const int Z_KEY = 90;
 static const int W_KEY = 87;
 static const int SPACE_KEY = 32;
 
+std::unordered_map<int, size_t> KEY_MAP = {
+    { D_KEY, 0 },
+    { S_KEY, 1 },
+    { A_KEY, 2 },
+    { F_KEY, 3 },
+    { G_KEY, 4 },
+    { Q_KEY, 5 },
+    { Z_KEY, 6 },
+    { W_KEY, 7 },
+    { SPACE_KEY, 8 }
+};
+
 PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector2::Zero) {
 }
 
@@ -67,25 +79,55 @@ void PlayerObject::PickupWeapon(WeaponObject* weapon) {
     currentWeapon = weapon;
 }
 
-void PlayerObject::Tick(Time time)  {
-    std::scoped_lock lock(socketDataMutex);
+void PlayerObject::Tick(Time time) {
+    {
+        std::scoped_lock lock(socketDataMutex);
+        #ifdef BUILD_SERVER
+            Time clientTime = lastClientInputTime + (ticksSinceLastProcessed * TickInterval);
+        #else
+            Time clientTime = time;
+        #endif
+        while (inputBuffer.size() > 0) {
+            //LOG_DEBUG("[" << clientTime << "] Processing input " << inputBuffer.front()["time"]);
+            if (inputBuffer.front()["time"] <= clientTime) {
+                ProcessInputData(inputBuffer.front());
+                inputBuffer.erase(inputBuffer.begin());
+            }
+            else {
+                break;
+            }
+        }
+    }
+
     Vector2 velocity = GetVelocity();
-    if (keyboardState[A_KEY]) {
+
+    if (keyboardState[KEY_MAP[A_KEY]]) {
         velocity.x = -300;
     }
-    if (keyboardState[D_KEY]) {
+
+    if (keyboardState[KEY_MAP[D_KEY]]) {
         velocity.x = 300;
     }
     // if (keyboardState[G_KEY]) {
     //     DropWeapon();
     // }
-    if (keyboardState[W_KEY] || keyboardState[SPACE_KEY]) {
+    if (keyboardState[KEY_MAP[W_KEY]] || keyboardState[KEY_MAP[SPACE_KEY]]) {
         // Can only jump if touching ground
         if (IsGrounded()) {
+            // LOG_DEBUG("Applying Jump");
             velocity.y = -600;
         }
         // velocity.y = -300;
     }
+    // if (velocity.x != 0) {
+    //     #ifdef BUILD_SERVER
+    //         LOG_DEBUG(lastClientInputTime << ": " << (lastClientInputTime + (ticksSinceLastProcessed * TickInterval)) << ": " <<
+    //         GetPosition() << " " << GetVelocity());
+    //     #else
+    //         LOG_DEBUG(time << ": " <<
+    //         GetPosition() << " " << GetVelocity());
+    //     #endif
+    // }
     SetVelocity(velocity);
 
     if (currentWeapon) {
@@ -100,24 +142,24 @@ void PlayerObject::Tick(Time time)  {
         }
     }
     if (qWeapon) {
-        if (keyboardState[Q_KEY]) {
-            if (!lastKeyboardState[Q_KEY]) {
+        if (keyboardState[KEY_MAP[Q_KEY]]) {
+            if (!lastKeyboardState[KEY_MAP[Q_KEY]]) {
                 qWeapon->StartFire(time);
             }
             qWeapon->Fire(time);
         }
-        else if (lastKeyboardState[Q_KEY]) {
+        else if (lastKeyboardState[KEY_MAP[Q_KEY]]) {
             qWeapon->ReleaseFire(time);
         }
     }
     if (zWeapon) {
-        if (keyboardState[Z_KEY]) {
-            if (!lastKeyboardState[Z_KEY]) {
+        if (keyboardState[KEY_MAP[Z_KEY]]) {
+            if (!lastKeyboardState[KEY_MAP[Z_KEY]]) {
                 zWeapon->StartFire(time);
             }
             zWeapon->Fire(time);
         }
-        else if (lastKeyboardState[Z_KEY]) {
+        else if (lastKeyboardState[KEY_MAP[Z_KEY]]) {
             zWeapon->ReleaseFire(time);
         }
     }
@@ -141,7 +183,7 @@ void PlayerObject::Tick(Time time)  {
 
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;
-    lastTickedInputClientTime = lastProcessedInputClientTime;
+    ticksSinceLastProcessed += 1;
 }
 
 void PlayerObject::Serialize(json& obj) {
@@ -158,10 +200,14 @@ void PlayerObject::Serialize(json& obj) {
     if (zWeapon) {
         obj["wz"] = zWeapon->GetId();
     }
+    for (const bool &kb : keyboardState) {
+        obj["kb"].push_back(kb);
+    }
 }
 
 void PlayerObject::ProcessReplication(json& obj) {
     Object::ProcessReplication(obj);
+    inputBuffer.clear();
     health = obj["h"];
     aimAngle = obj["aa"];
     mousePosition.ProcessReplication(obj["mp"]);
@@ -182,6 +228,11 @@ void PlayerObject::ProcessReplication(json& obj) {
     }
     else {
         zWeapon = nullptr;
+    }
+    size_t i = 0;
+    for (const json &kb : obj["kb"]) {
+        keyboardState[i] = kb;
+        i++;
     }
 }
 
@@ -214,18 +265,23 @@ void PlayerObject::DealDamage(int damage) {
 #endif
 }
 
-void PlayerObject::ProcessInputData(json& obj) {
+void PlayerObject::OnInput(json& obj) {
     std::scoped_lock lock(socketDataMutex);
+    inputBuffer.push_back(obj);
+}
+
+void PlayerObject::ProcessInputData(json& obj) {
+    LOG_DEBUG("Processing input " << obj.dump());
     if (obj["event"] == "ku") {
         int key = obj["key"];
-        if (key >= 0 && key < 256) {
-            keyboardState[key] = false;
+        if (KEY_MAP.find(key) != KEY_MAP.end()) {
+            keyboardState[KEY_MAP[key]] = false;
         }
     }
     else if (obj["event"] == "kd") {
         int key = obj["key"];
-        if (key >= 0 && key < 256) {
-            keyboardState[key] = true;
+        if (KEY_MAP.find(key) != KEY_MAP.end()) {
+            keyboardState[KEY_MAP[key]] = true;
         }
     }
     else if (obj["event"] == "mm") {
@@ -244,8 +300,11 @@ void PlayerObject::ProcessInputData(json& obj) {
             mouseState[button] = false;
         }
     }
-    // TODO: assert this is monotonically growing
-    lastProcessedInputClientTime = obj["time"];
+    #ifdef BUILD_SERVER
+        // TODO: assert this is monotonically growing
+        lastClientInputTime = obj["time"];
+        ticksSinceLastProcessed = 0;
+    #endif
 }
 
 Vector2 PlayerObject::GetAttachmentPoint() const {
