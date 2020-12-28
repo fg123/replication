@@ -5467,13 +5467,16 @@ var asmLibraryArg = {
  "fd_seek": _fd_seek,
  "fd_write": _fd_write,
  "getTempRet0": _getTempRet0,
+ "invoke_dii": invoke_dii,
  "invoke_diii": invoke_diii,
  "invoke_fiii": invoke_fiii,
  "invoke_i": invoke_i,
  "invoke_ii": invoke_ii,
- "invoke_iid": invoke_iid,
+ "invoke_iidi": invoke_iidi,
  "invoke_iii": invoke_iii,
+ "invoke_iiid": invoke_iiid,
  "invoke_iiii": invoke_iiii,
+ "invoke_iiiid": invoke_iiiid,
  "invoke_iiiii": invoke_iiiii,
  "invoke_iiiiid": invoke_iiiiid,
  "invoke_iiiiii": invoke_iiiiii,
@@ -5483,10 +5486,13 @@ var asmLibraryArg = {
  "invoke_iiiiiiiiiiii": invoke_iiiiiiiiiiii,
  "invoke_iiiiiiiiiiiii": invoke_iiiiiiiiiiiii,
  "invoke_iiiiij": invoke_iiiiij,
+ "invoke_iij": invoke_iij,
+ "invoke_ji": invoke_ji,
  "invoke_jiiii": invoke_jiiii,
  "invoke_v": invoke_v,
  "invoke_vi": invoke_vi,
  "invoke_vii": invoke_vii,
+ "invoke_viid": invoke_viid,
  "invoke_viidii": invoke_viidii,
  "invoke_viii": invoke_viii,
  "invoke_viiii": invoke_viiii,
@@ -5575,6 +5581,10 @@ var _emscripten_get_sbrk_ptr = Module["_emscripten_get_sbrk_ptr"] = createExport
 
 var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
 
+var dynCall_ji = Module["dynCall_ji"] = createExportWrapper("dynCall_ji");
+
+var dynCall_iij = Module["dynCall_iij"] = createExportWrapper("dynCall_iij");
+
 var dynCall_iiiiij = Module["dynCall_iiiiij"] = createExportWrapper("dynCall_iiiiij");
 
 var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
@@ -5587,15 +5597,15 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 37848;
+var _game = Module["_game"] = 38472;
 
-var _inputEvents = Module["_inputEvents"] = 38104;
+var _inputEvents = Module["_inputEvents"] = 38728;
 
-var _localClientId = Module["_localClientId"] = 37844;
+var _localClientId = Module["_localClientId"] = 38468;
 
-var _ping = Module["_ping"] = 38128;
+var _ping = Module["_ping"] = 38752;
 
-var _lastTickTime = Module["_lastTickTime"] = 38120;
+var _lastTickTime = Module["_lastTickTime"] = 38744;
 
 function invoke_iii(index, a1, a2) {
  var sp = stackSave();
@@ -5718,6 +5728,17 @@ function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  }
 }
 
+function invoke_iiiii(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_viiiii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
@@ -5729,10 +5750,21 @@ function invoke_viiiii(index, a1, a2, a3, a4, a5) {
  }
 }
 
-function invoke_iiiii(index, a1, a2, a3, a4) {
+function invoke_iiid(index, a1, a2, a3) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1, a2, a3, a4);
+  return wasmTable.get(index)(a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viid(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5762,10 +5794,10 @@ function invoke_i(index) {
  }
 }
 
-function invoke_viidii(index, a1, a2, a3, a4, a5) {
+function invoke_dii(index, a1, a2) {
  var sp = stackSave();
  try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
+  return wasmTable.get(index)(a1, a2);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5773,10 +5805,32 @@ function invoke_viidii(index, a1, a2, a3, a4, a5) {
  }
 }
 
-function invoke_iid(index, a1, a2) {
+function invoke_iidi(index, a1, a2, a3) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1, a2);
+  return wasmTable.get(index)(a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiid(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viidii(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5876,6 +5930,28 @@ function invoke_viiiiiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10,
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iij(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  return dynCall_iij(index, a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_ji(index, a1) {
+ var sp = stackSave();
+ try {
+  return dynCall_ji(index, a1);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

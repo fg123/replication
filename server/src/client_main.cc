@@ -98,9 +98,8 @@ extern "C" {
     void HandleReplicate(const char* input) {
         // LOG_DEBUG("Handle Replicate");
         try {
-            Object* obj = game.GetObject(localClientId);
             Vector2 oldPosition, serverPosition;
-            if (obj) {
+            if (Object* obj = game.GetObject(localClientId)) {
                 // LOG_DEBUG("OldPosition Tick Time" << lastTickTime);
                 oldPosition = obj->GetPosition();
             }
@@ -113,13 +112,11 @@ extern "C" {
                 game.ProcessReplication(event);
             }
 
-            if (obj) {
+            if (Object* obj = game.GetObject(localClientId)) {
                 serverPosition = obj->GetPosition();
             }
 
             Time serverLastProcessedTime = (uint32_t) object["time"];
-            if (!obj) return;
-
 
             // Calculate where the server is now
             uint64_t ticksSinceLastProcessed = object["ticks"];
@@ -133,6 +130,14 @@ extern "C" {
             }
             inputEvents.erase(inputEvents.begin(), inputEvents.begin() + thingsToDelete);
 
+            // Client too far ahead
+            if (lastTickTime > serverCurrentTickTime + 1000) {
+                LOG_DEBUG("Client ahead by " << lastTickTime - serverCurrentTickTime << ", resetting!");
+                lastTickTime = serverCurrentTickTime;
+                game.RollbackTime(lastTickTime);
+                inputEvents.clear();
+            }
+
             // There's a chance here that the server has gone on faster than us, but has not
             //    processed our input yet.
             // Regardless, start game back at oldest known state.
@@ -142,28 +147,32 @@ extern "C" {
             if (!inputEvents.empty() && inputEvents[0]["time"] < nextTick) {
                 nextTick = inputEvents[0]["time"];
             }
-            obj->SetLastTickTime(nextTick - TickInterval);
-            for (auto& jsonEvent : inputEvents) {
-                // Queue into Buffer
-                static_cast<PlayerObject*>(obj)->OnInput(jsonEvent);
-            }
 
-            Time ending = std::max(serverCurrentTickTime + ping, lastTickTime);
+            if (Object* obj = game.GetObject(localClientId)) {
+                obj->SetLastTickTime(nextTick - TickInterval);
+                for (auto& jsonEvent : inputEvents) {
+                    // Queue into Buffer
+                    static_cast<PlayerObject*>(obj)->OnInput(jsonEvent);
+                }
 
-            // LOG_DEBUG("Bringing to present (" << serverLastProcessedTime << ") " << nextTick << " -> " << ending);
-            // LOG_DEBUG("Server Current Tick Time (" << serverCurrentTickTime << ") ");
-            while (nextTick <= ending) {
-                // LOG_DEBUG("Next Tick: " << nextTick);
-                obj->Tick(nextTick);
-                nextTick += TickInterval;
+                Time ending = std::max(serverCurrentTickTime + ping, lastTickTime);
+
+                // LOG_DEBUG("Bringing to present (" << serverLastProcessedTime << ") " << nextTick << " -> " << ending);
+                // LOG_DEBUG("Server Current Tick Time (" << serverCurrentTickTime << ") ");
+                while (nextTick < ending) {
+                    obj->Tick(nextTick);
+                    nextTick += TickInterval;
+                }
             }
             // LOG_DEBUG("To Present Done!");
-            lastTickTime = nextTick;
+            lastTickTime = nextTick - TickInterval;
 
-            Vector2 newPosition = obj->GetPosition();
-            Vector2 difference = (newPosition - oldPosition);
-            if (difference.Length() > 5.0) {
-                LOG_DEBUG("Server Position Desync: " << newPosition << " - " << oldPosition << " = " << (newPosition - oldPosition));
+            if (Object* obj = game.GetObject(localClientId)) {
+                Vector2 newPosition = obj->GetPosition();
+                Vector2 difference = (newPosition - oldPosition);
+                if (difference.Length() > 5.0) {
+                    LOG_DEBUG("Server Position Desync: " << newPosition << " - " << oldPosition << " = " << (newPosition - oldPosition));
+                }
             }
         } catch(std::exception& e) {
             LOG_ERROR(e.what());

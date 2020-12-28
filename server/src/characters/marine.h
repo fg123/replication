@@ -12,19 +12,19 @@ public:
     CLASS_CREATE(Marine)
     Marine(Game& game) : Marine(game, Vector2::Zero) {}
     Marine(Game& game, Vector2 position) : PlayerObject(game, position) {
-        // #ifdef BUILD_SERVER
-        //     qWeapon = new GrenadeThrower { game };
-        //     game.AddObject(qWeapon);
-        //     qWeapon->AttachToPlayer(this);
+        #ifdef BUILD_SERVER
+            qWeapon = new GrenadeThrower { game };
+            game.AddObject(qWeapon);
+            qWeapon->AttachToPlayer(this);
 
-        //     AssaultRifleObject* rifle = new AssaultRifleObject(game);
-        //     game.AddObject(rifle);
-        //     PickupWeapon(rifle);
+            AssaultRifleObject* rifle = new AssaultRifleObject(game);
+            game.AddObject(rifle);
+            PickupWeapon(rifle);
 
-        //     zWeapon = new ArtilleryStrikeWeapon { game };
-        //     game.AddObject(zWeapon);
-        //     zWeapon->AttachToPlayer(this);
-        // #endif
+            zWeapon = new ArtilleryStrikeWeapon { game };
+            game.AddObject(zWeapon);
+            zWeapon->AttachToPlayer(this);
+        #endif
     }
 };
 

@@ -56,7 +56,6 @@ module.exports = class ClientState {
     SendInputPacket(input) {
         if (this.localPlayerObjectId !== undefined) {
             input.time = this.wasm._GetLastTickTime();
-            console.log("Input at ", input.time, input);
             const inputStr = JSON.stringify(input);
             if (this.webSocket.readyState === WebSocket.OPEN) {
                 this.SendData(inputStr);
@@ -205,9 +204,8 @@ module.exports = class ClientState {
     }
 
     SendMouseMoveEvent() {
-        return;
         const current = this.wasm._GetLastTickTime();
-        if (current - this.lastMouseMoveSend > 30) {
+        if (current - this.lastMouseMoveSend > 30 || current < this.lastMouseMoveSend) {
             this.lastMouseMoveSend = current;
             this.SendInputPacket({
                 event: "mm",

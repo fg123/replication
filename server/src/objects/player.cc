@@ -88,8 +88,8 @@ void PlayerObject::Tick(Time time) {
             Time clientTime = time;
         #endif
         while (inputBuffer.size() > 0) {
-            //LOG_DEBUG("[" << clientTime << "] Processing input " << inputBuffer.front()["time"]);
-            if (inputBuffer.front()["time"] <= clientTime) {
+            Time firstTime = inputBuffer.front()["time"];
+            if (firstTime <= clientTime) {
                 ProcessInputData(inputBuffer.front());
                 inputBuffer.erase(inputBuffer.begin());
             }
@@ -119,15 +119,6 @@ void PlayerObject::Tick(Time time) {
         }
         // velocity.y = -300;
     }
-    // if (velocity.x != 0) {
-    //     #ifdef BUILD_SERVER
-    //         LOG_DEBUG(lastClientInputTime << ": " << (lastClientInputTime + (ticksSinceLastProcessed * TickInterval)) << ": " <<
-    //         GetPosition() << " " << GetVelocity());
-    //     #else
-    //         LOG_DEBUG(time << ": " <<
-    //         GetPosition() << " " << GetVelocity());
-    //     #endif
-    // }
     SetVelocity(velocity);
 
     if (currentWeapon) {
@@ -266,12 +257,12 @@ void PlayerObject::DealDamage(int damage) {
 }
 
 void PlayerObject::OnInput(json& obj) {
+    // LOG_DEBUG("Processing input " << obj.dump());
     std::scoped_lock lock(socketDataMutex);
     inputBuffer.push_back(obj);
 }
 
 void PlayerObject::ProcessInputData(json& obj) {
-    LOG_DEBUG("Processing input " << obj.dump());
     if (obj["event"] == "ku") {
         int key = obj["key"];
         if (KEY_MAP.find(key) != KEY_MAP.end()) {

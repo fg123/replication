@@ -313,6 +313,9 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
             Object* obj = GetClassLookup()[p->nextRespawnCharacter](*this);
             obj->SetPosition(Vector2(200, 0));
 
+            static_cast<PlayerObject*>(obj)->lastClientInputTime = playerObject->lastClientInputTime;
+            static_cast<PlayerObject*>(obj)->ticksSinceLastProcessed = playerObject->ticksSinceLastProcessed;
+
             p->playerObject = static_cast<PlayerObject*>(obj);
 
             QueueNextTick([obj](Game& game) {
