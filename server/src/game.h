@@ -16,7 +16,7 @@
 class PlayerObject;
 
 static const int TickInterval = 16;
-static const int ReplicateInterval = 100;
+static const int ReplicateInterval = 50;
 
 struct PlayerSocketData {
 #ifdef BUILD_SERVER
@@ -49,7 +49,7 @@ class Game {
     Time gameTime;
 
     Vector2 killPlaneStart = { -3000, -2000 };
-    Vector2 killPlaneEnd = Vector2 { 3000, 2000 };
+    Vector2 killPlaneEnd = { 3000, 2000 };
 
 public:
     Game();

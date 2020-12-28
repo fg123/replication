@@ -1,6 +1,6 @@
 const Constants = require('./constants');
 
-const SIMULATED_LAG = Constants.isProduction ? 0 : 0;
+const SIMULATED_LAG = Constants.isProduction ? 0 : 60;
 
 module.exports = class ClientState {
     constructor(webSocket, wasm, resourceManager, mapImage) {
@@ -55,6 +55,7 @@ module.exports = class ClientState {
 
     SendInputPacket(input) {
         if (this.localPlayerObjectId !== undefined) {
+            console.log("Sending Input", input);
             input.time = this.wasm._GetLastTickTime();
             const inputStr = JSON.stringify(input);
             if (this.webSocket.readyState === WebSocket.OPEN) {

@@ -66,7 +66,8 @@
         "ctime": "cpp",
         "iomanip": "cpp",
         "xlocmon": "cpp",
-        "xloctime": "cpp"
+        "xloctime": "cpp",
+        "queue": "cpp"
     },
     "files.exclude": {
         "**/.git": true,

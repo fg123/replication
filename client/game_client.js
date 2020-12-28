@@ -5501,6 +5501,7 @@ var asmLibraryArg = {
  "invoke_viiiiiii": invoke_viiiiiii,
  "invoke_viiiiiiiiii": invoke_viiiiiiiiii,
  "invoke_viiiiiiiiiiiiiii": invoke_viiiiiiiiiiiiiii,
+ "invoke_viiiij": invoke_viiiij,
  "invoke_vij": invoke_vij,
  "llvm_eh_typeid_for": _llvm_eh_typeid_for,
  "segfault": segfault,
@@ -5583,6 +5584,8 @@ var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
 
 var dynCall_ji = Module["dynCall_ji"] = createExportWrapper("dynCall_ji");
 
+var dynCall_viiiij = Module["dynCall_viiiij"] = createExportWrapper("dynCall_viiiij");
+
 var dynCall_iij = Module["dynCall_iij"] = createExportWrapper("dynCall_iij");
 
 var dynCall_iiiiij = Module["dynCall_iiiiij"] = createExportWrapper("dynCall_iiiiij");
@@ -5597,15 +5600,15 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 38472;
+var _game = Module["_game"] = 38216;
 
-var _inputEvents = Module["_inputEvents"] = 38728;
+var _inputEvents = Module["_inputEvents"] = 38472;
 
-var _localClientId = Module["_localClientId"] = 38468;
+var _localClientId = Module["_localClientId"] = 38212;
 
-var _ping = Module["_ping"] = 38752;
+var _ping = Module["_ping"] = 38496;
 
-var _lastTickTime = Module["_lastTickTime"] = 38744;
+var _lastTickTime = Module["_lastTickTime"] = 38488;
 
 function invoke_iii(index, a1, a2) {
  var sp = stackSave();
@@ -5963,6 +5966,17 @@ function invoke_vij(index, a1, a2, a3) {
  var sp = stackSave();
  try {
   dynCall_vij(index, a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiij(index, a1, a2, a3, a4, a5, a6) {
+ var sp = stackSave();
+ try {
+  dynCall_viiiij(index, a1, a2, a3, a4, a5, a6);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

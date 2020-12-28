@@ -7,6 +7,7 @@
 
 #include <mutex>
 #include <unordered_set>
+#include <queue>
 
 class Game;
 class PlayerObject : public Object {
@@ -25,7 +26,7 @@ public:
 
     std::mutex socketDataMutex;
 
-    std::vector<json> inputBuffer;
+    std::queue<json> inputBuffer;
 
     // The last input from the client (given in client frame)
     Time lastClientInputTime = 0;

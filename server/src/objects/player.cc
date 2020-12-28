@@ -91,7 +91,7 @@ void PlayerObject::Tick(Time time) {
             Time firstTime = inputBuffer.front()["time"];
             if (firstTime <= clientTime) {
                 ProcessInputData(inputBuffer.front());
-                inputBuffer.erase(inputBuffer.begin());
+                inputBuffer.pop();
             }
             else {
                 break;
@@ -120,7 +120,7 @@ void PlayerObject::Tick(Time time) {
         // velocity.y = -300;
     }
     SetVelocity(velocity);
-
+#ifdef BUILD_SERVER
     if (currentWeapon) {
         if (mouseState[LEFT_MOUSE_BUTTON]) {
             if (!lastMouseState[LEFT_MOUSE_BUTTON]) {
@@ -154,7 +154,7 @@ void PlayerObject::Tick(Time time) {
             zWeapon->ReleaseFire(time);
         }
     }
-
+#endif
     Object::Tick(time);
 
     const Vector2& position = GetPosition();
@@ -198,7 +198,12 @@ void PlayerObject::Serialize(json& obj) {
 
 void PlayerObject::ProcessReplication(json& obj) {
     Object::ProcessReplication(obj);
-    inputBuffer.clear();
+    {
+        std::scoped_lock lock(socketDataMutex);
+        while (!inputBuffer.empty()) {
+            inputBuffer.pop();
+        }
+    }
     health = obj["h"];
     aimAngle = obj["aa"];
     mousePosition.ProcessReplication(obj["mp"]);
@@ -257,9 +262,9 @@ void PlayerObject::DealDamage(int damage) {
 }
 
 void PlayerObject::OnInput(json& obj) {
-    // LOG_DEBUG("Processing input " << obj.dump());
+    LOG_DEBUG("Processing input " << obj.dump());
     std::scoped_lock lock(socketDataMutex);
-    inputBuffer.push_back(obj);
+    inputBuffer.push(obj);
 }
 
 void PlayerObject::ProcessInputData(json& obj) {
