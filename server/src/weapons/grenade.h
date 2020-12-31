@@ -12,14 +12,14 @@ class GrenadeObject : public ThrownProjectile {
 
 public:
     CLASS_CREATE(GrenadeObject)
-    
+
     GrenadeObject(Game& game);
 
     void Explode();
 
     virtual void OnCollide(CollisionResult& result) override;
     virtual void Tick(Time time) override;
-    virtual void Serialize(json& obj) override;
+    virtual void Serialize(JSONWriter& obj) override;
     virtual void ProcessReplication(json& obj) override;
 };
 

@@ -52,7 +52,7 @@ struct Vector2 : Replicable {
         return a.x * b.y - a.y * b.x;
     }
 
-    virtual void Serialize(json& obj) override;
+    virtual void Serialize(JSONWriter& obj) override;
 
     virtual void ProcessReplication(json& obj) override;
 

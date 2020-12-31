@@ -23,7 +23,7 @@ extern "C" {
     Game game;
 
     EMSCRIPTEN_KEEPALIVE
-    std::vector<json> inputEvents;
+    std::vector<JSONDocument> inputEvents;
 
     EMSCRIPTEN_KEEPALIVE
     void SetLocalPlayerClient(ObjectID client) {
@@ -75,9 +75,14 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     const char* GetObjectSerialized(ObjectID objectId) {
         Object* obj = game.GetObject(objectId);
-        json object;
-        obj->Serialize(object);
-        std::string s = object.dump();
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer writer(buffer);
+
+        writer.StartObject();
+        obj->Serialize(writer);
+        writer.EndObject();
+
+        std::string s { buffer.GetString() };
         size_t length = s.size() + 1;
         char* writable = new char[length];
         std::copy(s.begin(), s.end(), writable);
@@ -89,9 +94,9 @@ extern "C" {
     void HandleLocalInput(ObjectID object, const char* input) {
         Object* obj = game.GetObject(object);
         if (obj) {
-            json object = json::parse(input);
-            inputEvents.emplace_back(object);
-            static_cast<PlayerObject*>(obj)->OnInput(object);
+            inputEvents.emplace_back();
+            inputEvents.back().Parse(input);
+            static_cast<PlayerObject*>(obj)->OnInput(inputEvents.back());
         }
     }
 
@@ -104,23 +109,32 @@ extern "C" {
                 // LOG_DEBUG("OldPosition Tick Time" << lastTickTime);
                 oldPosition = obj->GetPosition();
             }
-            json object = json::parse(input);
+            JSONDocument object;
+            object.Parse(input);
 
-            for (auto& event : object["objs"]) {
+            bool hasPlayerIn = false;
+
+            for (auto& event : object["objs"].GetArray()) {
+                if (event["id"].GetUint() == localClientId) {
+                    hasPlayerIn = true;
+                }
                 game.EnsureObjectExists(event);
             }
-            for (auto& event : object["objs"]) {
+
+            for (auto& event : object["objs"].GetArray()) {
                 game.ProcessReplication(event);
             }
+
+            if (!hasPlayerIn) return;
 
             if (Object* obj = game.GetObject(localClientId)) {
                 serverPosition = obj->GetPosition();
             }
 
-            Time serverLastProcessedTime = (uint32_t) object["time"];
+            Time serverLastProcessedTime = object["time"].GetUint();
 
             // Calculate where the server is now
-            uint64_t ticksSinceLastProcessed = object["ticks"];
+            uint64_t ticksSinceLastProcessed = object["ticks"].GetUint64();
             // LOG_DEBUG("serverLastProcessedTime " << serverLastProcessedTime << " ticksSinceLastProcessed" << ticksSinceLastProcessed);
             Time serverCurrentTickTime = serverLastProcessedTime +
                 (ticksSinceLastProcessed * TickInterval);
@@ -128,7 +142,7 @@ extern "C" {
             // Delete inputs that the server has already processed (or that are too late?)
             size_t thingsToDelete = 0;
             for (;thingsToDelete < inputEvents.size(); thingsToDelete++) {
-                if (inputEvents[thingsToDelete]["time"] > serverLastProcessedTime) break;
+                if (inputEvents[thingsToDelete]["time"].GetUint() > serverLastProcessedTime) break;
             }
             inputEvents.erase(inputEvents.begin(), inputEvents.begin() + thingsToDelete);
 
@@ -146,8 +160,8 @@ extern "C" {
 
             // Queue up inputs that the server hasn't processed yet
             Time nextTick = serverCurrentTickTime;
-            if (!inputEvents.empty() && inputEvents[0]["time"] < nextTick) {
-                nextTick = inputEvents[0]["time"];
+            if (!inputEvents.empty() && inputEvents[0]["time"].GetUint64() < nextTick) {
+                nextTick = inputEvents[0]["time"].GetUint64();
             }
 
             if (Object* obj = game.GetObject(localClientId)) {

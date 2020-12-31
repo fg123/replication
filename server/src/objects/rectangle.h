@@ -17,9 +17,12 @@ public:
         AddCollider(new RectangleCollider(this, Vector2::Zero, size));
     }
 
-    virtual void Serialize(json& obj) override {
+    virtual void Serialize(JSONWriter& obj) override {
         Object::Serialize(obj);
-        size.Serialize(obj["size"]);
+        obj.Key("size");
+        obj.StartObject();
+        size.Serialize(obj);
+        obj.EndObject();
     }
 
     virtual void ProcessReplication(json& obj) override {

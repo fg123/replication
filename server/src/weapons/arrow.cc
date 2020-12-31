@@ -50,12 +50,13 @@ void ArrowObject::Tick(Time time) {
 #endif
 }
 
-void ArrowObject::Serialize(json& obj) {
+void ArrowObject::Serialize(JSONWriter& obj) {
     ThrownProjectile::Serialize(obj);
-    obj["hp"] = hitPlayer;
+    obj.Key("hp");
+    obj.Bool(hitPlayer);
 }
 
 void ArrowObject::ProcessReplication(json& obj) {
     ThrownProjectile::ProcessReplication(obj);
-    hitPlayer = obj["hp"];
+    hitPlayer = obj["hp"].GetBool();
 }

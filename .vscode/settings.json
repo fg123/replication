@@ -67,7 +67,12 @@
         "iomanip": "cpp",
         "xlocmon": "cpp",
         "xloctime": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "locale": "cpp",
+        "xlocmes": "cpp",
+        "regex": "cpp",
+        "sstream": "cpp",
+        "xlocbuf": "cpp"
     },
     "files.exclude": {
         "**/.git": true,

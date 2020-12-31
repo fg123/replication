@@ -4,9 +4,11 @@
 
 const Vector2 Vector2::Zero;
 
-void Vector2::Serialize(json& obj) {
-    obj["x"] = x;
-    obj["y"] = y;
+void Vector2::Serialize(JSONWriter& obj) {
+    obj.Key("x");
+	obj.Double(x);
+	obj.Key("y");
+    obj.Double(y);
 }
 
 Vector2& Vector2::Normalize() {
@@ -28,8 +30,8 @@ Vector2 Vector2::Normalize() const {
 }
 
 void Vector2::ProcessReplication(json& obj) {
-    x = obj["x"];
-    y = obj["y"];
+    x = obj["x"].GetDouble();
+    y = obj["y"].GetDouble();
 }
 
 bool AllEqual(bool a, bool b, bool c, bool d) {

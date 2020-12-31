@@ -26,7 +26,7 @@ public:
 
     std::mutex socketDataMutex;
 
-    std::queue<json> inputBuffer;
+    std::queue<JSONDocument> inputBuffer;
 
     // The last input from the client (given in client frame)
     Time lastClientInputTime = 0;
@@ -48,12 +48,12 @@ public:
 
     virtual void OnDeath() override;
     virtual void Tick(Time time) override;
-    virtual void Serialize(json& obj) override;
+    virtual void Serialize(JSONWriter& obj) override;
     virtual void ProcessReplication(json& obj) override;
     virtual void OnCollide(CollisionResult& result) override;
 
-    void OnInput(json& obj);
-    void ProcessInputData(json& obj);
+    void OnInput(const JSONDocument& obj);
+    void ProcessInputData(const JSONDocument& obj);
 
     WeaponObject* GetWeapon() { return currentWeapon; }
     void PickupWeapon(WeaponObject* weapon);

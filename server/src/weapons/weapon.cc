@@ -54,17 +54,18 @@ void WeaponObject::Tick(Time time) {
     }
 }
 
-void WeaponObject::Serialize(json& obj) {
+void WeaponObject::Serialize(JSONWriter& obj) {
     Object::Serialize(obj);
     if (attachedTo) {
-        obj["attach"] = attachedTo->GetId();
+        obj.Key("attach");
+        obj.Uint(attachedTo->GetId());
     }
 }
 
 void WeaponObject::ProcessReplication(json& obj) {
     Object::ProcessReplication(obj);
-    if (obj.contains("attach")) {
-        attachedTo = game.GetObject<PlayerObject>(obj["attach"]);
+    if (obj.HasMember("attach")) {
+        attachedTo = game.GetObject<PlayerObject>(obj["attach"].GetUint());
     }
     else {
         attachedTo = nullptr;

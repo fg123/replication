@@ -55,9 +55,10 @@ void HookObject::Tick(Time time) {
 #endif
 }
 
-void HookObject::Serialize(json& obj) {
+void HookObject::Serialize(JSONWriter& obj) {
     ThrownProjectile::Serialize(obj);
-    obj["owner"] = firedBy->GetAttachedTo()->GetId();
+    obj.Key("owner");
+    obj.Uint(firedBy->GetAttachedTo()->GetId());
 }
 
 void HookObject::ProcessReplication(json& obj) {

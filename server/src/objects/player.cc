@@ -88,10 +88,11 @@ void PlayerObject::Tick(Time time) {
             Time clientTime = time;
         #endif
         while (inputBuffer.size() > 0) {
-            Time firstTime = inputBuffer.front()["time"];
+            JSONDocument& front = inputBuffer.front();
+            Time firstTime = front["time"].GetUint();
             // LOG_DEBUG("First " << firstTime << " client Time " << clientTime);
             if (firstTime <= clientTime) {
-                ProcessInputData(inputBuffer.front());
+                ProcessInputData(front);
                 inputBuffer.pop();
             }
             else {
@@ -178,23 +179,37 @@ void PlayerObject::Tick(Time time) {
     ticksSinceLastProcessed += 1;
 }
 
-void PlayerObject::Serialize(json& obj) {
+void PlayerObject::Serialize(JSONWriter& obj) {
     Object::Serialize(obj);
-    obj["h"] = health;
-    obj["aa"] = aimAngle;
-    mousePosition.Serialize(obj["mp"]);
+    obj.Key("h");
+    obj.Int(health);
+
+    obj.Key("aa");
+    obj.Double(aimAngle);
+
+    obj.Key("mp");
+    obj.StartObject();
+    mousePosition.Serialize(obj);
+    obj.EndObject();
+
     if (currentWeapon) {
-        obj["w"] = currentWeapon->GetId();
+        obj.Key("w");
+        obj.Uint(currentWeapon->GetId());
     }
     if (qWeapon) {
-        obj["wq"] = qWeapon->GetId();
+        obj.Key("wq");
+        obj.Uint(qWeapon->GetId());
     }
     if (zWeapon) {
-        obj["wz"] = zWeapon->GetId();
+        obj.Key("wz");
+        obj.Uint(zWeapon->GetId());
     }
+    obj.Key("kb");
+    obj.StartArray();
     for (const bool &kb : keyboardState) {
-        obj["kb"].push_back(kb);
+        obj.Bool(kb);
     }
+    obj.EndArray();
 }
 
 void PlayerObject::ProcessReplication(json& obj) {
@@ -205,30 +220,30 @@ void PlayerObject::ProcessReplication(json& obj) {
             inputBuffer.pop();
         }
     }
-    health = obj["h"];
-    aimAngle = obj["aa"];
+    health = obj["h"].GetInt();
+    aimAngle = obj["aa"].GetDouble();
     mousePosition.ProcessReplication(obj["mp"]);
-    if (obj.contains("w")) {
-        currentWeapon = game.GetObject<WeaponObject>(obj["w"]);
+    if (obj.HasMember("w")) {
+        currentWeapon = game.GetObject<WeaponObject>(obj["w"].GetUint());
     }
     else {
         currentWeapon = nullptr;
     }
-    if (obj.contains("wq")) {
-        qWeapon = game.GetObject<WeaponObject>(obj["wq"]);
+    if (obj.HasMember("wq")) {
+        qWeapon = game.GetObject<WeaponObject>(obj["wq"].GetUint());
     }
     else {
         qWeapon = nullptr;
     }
-    if (obj.contains("wz")) {
-        zWeapon = game.GetObject<WeaponObject>(obj["wz"]);
+    if (obj.HasMember("wz")) {
+        zWeapon = game.GetObject<WeaponObject>(obj["wz"].GetUint());
     }
     else {
         zWeapon = nullptr;
     }
     size_t i = 0;
-    for (const json &kb : obj["kb"]) {
-        keyboardState[i] = kb;
+    for (const json &kb : obj["kb"].GetArray()) {
+        keyboardState[i] = kb.GetBool();
         i++;
     }
 }
@@ -262,37 +277,37 @@ void PlayerObject::DealDamage(int damage) {
 #endif
 }
 
-void PlayerObject::OnInput(json& obj) {
+void PlayerObject::OnInput(const JSONDocument& obj) {
     std::scoped_lock lock(socketDataMutex);
-    // LOG_DEBUG("Processing input " << obj["time"]);
-    inputBuffer.push(obj);
+    inputBuffer.emplace();
+    inputBuffer.back().CopyFrom(obj, inputBuffer.back().GetAllocator());
 }
 
-void PlayerObject::ProcessInputData(json& obj) {
+void PlayerObject::ProcessInputData(const JSONDocument& obj) {
     if (obj["event"] == "ku") {
-        int key = obj["key"];
+        int key = obj["key"].GetInt();
         if (KEY_MAP.find(key) != KEY_MAP.end()) {
             keyboardState[KEY_MAP[key]] = false;
         }
     }
     else if (obj["event"] == "kd") {
-        int key = obj["key"];
+        int key = obj["key"].GetInt();
         if (KEY_MAP.find(key) != KEY_MAP.end()) {
             keyboardState[KEY_MAP[key]] = true;
         }
     }
     else if (obj["event"] == "mm") {
-        mousePosition.x = obj["x"];
-        mousePosition.y = obj["y"];
+        mousePosition.x = obj["x"].GetDouble();
+        mousePosition.y = obj["y"].GetDouble();
     }
     else if (obj["event"] == "md") {
-        int button = obj["button"];
+        int button = obj["button"].GetInt();
         if (button >= 0 && button < 5) {
             mouseState[button] = true;
         }
     }
     else if (obj["event"] == "mu") {
-        int button = obj["button"];
+        int button = obj["button"].GetInt();
         if (button >= 0 && button < 5) {
             mouseState[button] = false;
         }
@@ -300,7 +315,7 @@ void PlayerObject::ProcessInputData(json& obj) {
     #ifdef BUILD_SERVER
         // LOG_DEBUG("Setting last client input time: " << obj["time"]);
         // TODO: assert this is monotonically growing
-        lastClientInputTime = obj["time"];
+        lastClientInputTime = obj["time"].GetUint64();
         ticksSinceLastProcessed = 0;
     #endif
 }

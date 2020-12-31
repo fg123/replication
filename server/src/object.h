@@ -15,8 +15,6 @@ using ObjectID = uint32_t;
 class Game;
 class Object;
 
-using json = nlohmann::json;
-
 using ObjectConstructor = Object*(*)(Game& game);
 std::unordered_map<std::string, ObjectConstructor>& GetClassLookup();
 
@@ -110,7 +108,7 @@ public:
     void SetDirty(bool dirty) { isDirty = dirty; }
 
     virtual const char* GetClass() const = 0;
-    virtual void Serialize(json& obj) override;
+    virtual void Serialize(JSONWriter& obj) override;
     void ProcessReplication(json& object) override;
 
     const Vector2& GetPosition() const { return position; }

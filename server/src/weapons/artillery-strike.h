@@ -54,7 +54,7 @@ public:
 
     }
 
-    virtual void Serialize(json& obj) override {
+    virtual void Serialize(JSONWriter& obj) override {
         WeaponObject::Serialize(obj);
     }
 

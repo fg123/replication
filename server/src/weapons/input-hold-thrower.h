@@ -12,17 +12,18 @@ public:
     ThrownProjectile(Game& game) : Object(game) {}
     void SetFiredBy(WeaponObject* obj) { firedBy = obj; }
 
-    virtual void Serialize(json& obj) override {
+    virtual void Serialize(JSONWriter& obj) override {
         Object::Serialize(obj);
         if (firedBy) {
-            obj["tb"] = firedBy->GetId();
+            obj.Key("tb");
+            obj.Uint(firedBy->GetId());
         }
     }
 
     virtual void ProcessReplication(json& obj) override {
         Object::ProcessReplication(obj);
-        if (obj.contains("tb")) {
-            firedBy = game.GetObject<WeaponObject>(obj["tb"]);
+        if (obj.HasMember("tb")) {
+            firedBy = game.GetObject<WeaponObject>(obj["tb"].GetUint());
         }
     }
 };
@@ -99,18 +100,24 @@ public:
         }
     }
 
-    virtual void Serialize(json& obj) override {
+    virtual void Serialize(JSONWriter& obj) override {
         WeaponObject::Serialize(obj);
-        arrowFireVel.Serialize(obj["afv"]);
-        obj["tslt"] = timeSinceLastThrow;
-        obj["inst"] = instantFire;
+        obj.Key("afv");
+        obj.StartObject();
+        arrowFireVel.Serialize(obj);
+        obj.EndObject();
+
+        obj.Key("tslt");
+        obj.Uint64(timeSinceLastThrow);
+        obj.Key("inst");
+        obj.Bool(instantFire);
     }
 
     virtual void ProcessReplication(json& obj) override {
         WeaponObject::ProcessReplication(obj);
         arrowFireVel.ProcessReplication(obj["afv"]);
-        timeSinceLastThrow = obj["tslt"];
-        instantFire = obj["inst"];
+        timeSinceLastThrow = obj["tslt"].GetUint64();
+        instantFire = obj["inst"].GetBool();
     }
 };
 

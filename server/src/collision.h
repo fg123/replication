@@ -33,8 +33,11 @@ struct RectangleCollider : public Collider {
     virtual int GetType() override { return 0; }
     CollisionResult CollidesWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) override;
-    virtual void Serialize(json& obj) override {
-        size.Serialize(obj["size"]);
+    virtual void Serialize(JSONWriter& obj) override {
+        obj.Key("size");
+        obj.StartObject();
+        size.Serialize(obj);
+        obj.EndObject();
     }
     virtual void ProcessReplication(json& obj) override {
         size.ProcessReplication(obj["size"]);
@@ -49,11 +52,12 @@ struct CircleCollider : public Collider {
     virtual int GetType() override { return 1; }
     CollisionResult CollidesWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) override;
-    virtual void Serialize(json& obj) override {
-        obj["radius"] = radius;
+    virtual void Serialize(JSONWriter& obj) override {
+        obj.Key("radius");
+        obj.Double(radius);
     }
     virtual void ProcessReplication(json& obj) override {
-        radius = obj["radius"];
+        radius = obj["radius"].GetDouble();
     }
 };
 

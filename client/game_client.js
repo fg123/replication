@@ -240,21 +240,6 @@ if (!Object.getOwnPropertyDescriptor(Module["ready"], "_free")) {
  });
 }
 
-if (!Object.getOwnPropertyDescriptor(Module["ready"], "_setThrew")) {
- Object.defineProperty(Module["ready"], "_setThrew", {
-  configurable: true,
-  get: function() {
-   abort("You are getting _setThrew on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
-  }
- });
- Object.defineProperty(Module["ready"], "_setThrew", {
-  configurable: true,
-  set: function() {
-   abort("You are setting _setThrew on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
-  }
- });
-}
-
 if (!Object.getOwnPropertyDescriptor(Module["ready"], "__ZSt18uncaught_exceptionv")) {
  Object.defineProperty(Module["ready"], "__ZSt18uncaught_exceptionv", {
   configurable: true,
@@ -266,6 +251,21 @@ if (!Object.getOwnPropertyDescriptor(Module["ready"], "__ZSt18uncaught_exception
   configurable: true,
   set: function() {
    abort("You are setting __ZSt18uncaught_exceptionv on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+}
+
+if (!Object.getOwnPropertyDescriptor(Module["ready"], "_setThrew")) {
+ Object.defineProperty(Module["ready"], "_setThrew", {
+  configurable: true,
+  get: function() {
+   abort("You are getting _setThrew on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+ Object.defineProperty(Module["ready"], "_setThrew", {
+  configurable: true,
+  set: function() {
+   abort("You are setting _setThrew on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
   }
  });
 }
@@ -5467,12 +5467,12 @@ var asmLibraryArg = {
  "fd_seek": _fd_seek,
  "fd_write": _fd_write,
  "getTempRet0": _getTempRet0,
- "invoke_dii": invoke_dii,
+ "invoke_ddi": invoke_ddi,
  "invoke_diii": invoke_diii,
  "invoke_fiii": invoke_fiii,
  "invoke_i": invoke_i,
  "invoke_ii": invoke_ii,
- "invoke_iidi": invoke_iidi,
+ "invoke_iid": invoke_iid,
  "invoke_iii": invoke_iii,
  "invoke_iiid": invoke_iiid,
  "invoke_iiii": invoke_iiii,
@@ -5497,7 +5497,6 @@ var asmLibraryArg = {
  "invoke_viii": invoke_viii,
  "invoke_viiii": invoke_viiii,
  "invoke_viiiii": invoke_viiiii,
- "invoke_viiiiii": invoke_viiiiii,
  "invoke_viiiiiii": invoke_viiiiiii,
  "invoke_viiiiiiiiii": invoke_viiiiiiiiii,
  "invoke_viiiiiiiiiiiiiii": invoke_viiiiiiiiiiiiiii,
@@ -5513,6 +5512,10 @@ var asmLibraryArg = {
 var asm = createWasm();
 
 var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__wasm_call_ctors");
+
+var _free = Module["_free"] = createExportWrapper("free");
+
+var _malloc = Module["_malloc"] = createExportWrapper("malloc");
 
 var _SetLocalPlayerClient = Module["_SetLocalPlayerClient"] = createExportWrapper("SetLocalPlayerClient");
 
@@ -5568,10 +5571,6 @@ var _setThrew = Module["_setThrew"] = createExportWrapper("setThrew");
 
 var __ZSt18uncaught_exceptionv = Module["__ZSt18uncaught_exceptionv"] = createExportWrapper("_ZSt18uncaught_exceptionv");
 
-var _free = Module["_free"] = createExportWrapper("free");
-
-var _malloc = Module["_malloc"] = createExportWrapper("malloc");
-
 var ___cxa_can_catch = Module["___cxa_can_catch"] = createExportWrapper("__cxa_can_catch");
 
 var ___cxa_is_pointer_type = Module["___cxa_is_pointer_type"] = createExportWrapper("__cxa_is_pointer_type");
@@ -5582,9 +5581,9 @@ var _emscripten_get_sbrk_ptr = Module["_emscripten_get_sbrk_ptr"] = createExport
 
 var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
 
-var dynCall_ji = Module["dynCall_ji"] = createExportWrapper("dynCall_ji");
-
 var dynCall_viiiij = Module["dynCall_viiiij"] = createExportWrapper("dynCall_viiiij");
+
+var dynCall_ji = Module["dynCall_ji"] = createExportWrapper("dynCall_ji");
 
 var dynCall_iij = Module["dynCall_iij"] = createExportWrapper("dynCall_iij");
 
@@ -5600,15 +5599,15 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 38744;
+var _game = Module["_game"] = 33936;
 
-var _inputEvents = Module["_inputEvents"] = 38912;
+var _inputEvents = Module["_inputEvents"] = 34104;
 
-var _localClientId = Module["_localClientId"] = 38740;
+var _localClientId = Module["_localClientId"] = 33932;
 
-var _ping = Module["_ping"] = 38936;
+var _ping = Module["_ping"] = 34128;
 
-var _lastTickTime = Module["_lastTickTime"] = 38928;
+var _lastTickTime = Module["_lastTickTime"] = 34120;
 
 function invoke_vii(index, a1, a2) {
  var sp = stackSave();
@@ -5698,28 +5697,6 @@ function invoke_iiiii(index, a1, a2, a3, a4) {
  }
 }
 
-function invoke_iiii(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiiii(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
 function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
  var sp = stackSave();
  try {
@@ -5764,6 +5741,28 @@ function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  }
 }
 
+function invoke_iiii(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_i(index) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)();
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_iiid(index, a1, a2, a3) {
  var sp = stackSave();
  try {
@@ -5786,21 +5785,10 @@ function invoke_iiiid(index, a1, a2, a3, a4) {
  }
 }
 
-function invoke_viiiiii(index, a1, a2, a3, a4, a5, a6) {
+function invoke_viiiii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_i(index) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)();
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5819,7 +5807,7 @@ function invoke_viidii(index, a1, a2, a3, a4, a5) {
  }
 }
 
-function invoke_dii(index, a1, a2) {
+function invoke_ddi(index, a1, a2) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1, a2);
@@ -5830,10 +5818,10 @@ function invoke_dii(index, a1, a2) {
  }
 }
 
-function invoke_iidi(index, a1, a2, a3) {
+function invoke_iid(index, a1, a2) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1, a2, a3);
+  return wasmTable.get(index)(a1, a2);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5940,10 +5928,10 @@ function invoke_viiiiiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10,
  }
 }
 
-function invoke_ji(index, a1) {
+function invoke_vij(index, a1, a2, a3) {
  var sp = stackSave();
  try {
-  return dynCall_ji(index, a1);
+  dynCall_vij(index, a1, a2, a3);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5951,10 +5939,10 @@ function invoke_ji(index, a1) {
  }
 }
 
-function invoke_vij(index, a1, a2, a3) {
+function invoke_ji(index, a1) {
  var sp = stackSave();
  try {
-  dynCall_vij(index, a1, a2, a3);
+  return dynCall_ji(index, a1);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

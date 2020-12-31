@@ -106,6 +106,7 @@ module.exports = class ClientState {
         }, tickInterval);
 
         const handler = (ev) => {
+            // console.log("WebSocket", ev.data);
             const event = JSON.parse(ev.data);
             if (event["playerLocalObjectId"] !== undefined) {
                 console.log("Player Local ID", event);

@@ -48,14 +48,16 @@ void GrenadeObject::Explode() {
 #endif
 }
 
-void GrenadeObject::Serialize(json& obj) {
+void GrenadeObject::Serialize(JSONWriter& obj) {
     ThrownProjectile::Serialize(obj);
-    obj["ip"] = isPrimed;
-    obj["ttf"] = tickTimeDiff;
+    obj.Key("ip");
+    obj.Bool(isPrimed);
+    obj.Key("ttf");
+    obj.Uint64(tickTimeDiff);
 }
 
 void GrenadeObject::ProcessReplication(json& obj) {
     ThrownProjectile::ProcessReplication(obj);
-    isPrimed = obj["ip"];
-    tickTimeDiff = obj["ttf"];
+    isPrimed = obj["ip"].GetBool();
+    tickTimeDiff = obj["ttf"].GetUint64();
 }

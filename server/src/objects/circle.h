@@ -17,15 +17,16 @@ public:
 
         AddCollider(new CircleCollider(this, Vector2::Zero, radius));
     }
-    
-    virtual void Serialize(json& obj) override {
+
+    virtual void Serialize(JSONWriter& obj) override {
         Object::Serialize(obj);
-        obj["radius"] = radius;
+        obj.Key("radius");
+        obj.Double(radius);
     }
 
     virtual void ProcessReplication(json& obj) override {
         Object::ProcessReplication(obj);
-        radius = obj["radius"];
+        radius = obj["radius"].GetDouble();
     }
 };
 

@@ -21,14 +21,14 @@ public:
     void AttachToPlayer(PlayerObject* player);
     void Detach();
 
-    virtual void StartFire(Time time) {} 
-    virtual void Fire(Time time) {} 
+    virtual void StartFire(Time time) {}
+    virtual void Fire(Time time) {}
     virtual void ReleaseFire(Time time) {}
 
     virtual void Tick(Time time) override;
-    virtual void Serialize(json& obj) override;
+    virtual void Serialize(JSONWriter& obj) override;
     virtual void ProcessReplication(json& obj) override;
-    
+
 };
 
 #endif

@@ -145,30 +145,62 @@ void Object::SetIsStatic(bool isStatic) {
     SetDirty(true);
 }
 
-void Object::Serialize(json& obj) {
-    obj["id"] = id;
-    obj["t"] = GetClass();
-    position.Serialize(obj["p"]);
-    velocity.Serialize(obj["v"]);
-    obj["z"] = z;
+void Object::Serialize(JSONWriter& obj) {
+    obj.Key("id");
+    obj.Uint(id);
+
+    obj.Key("t");
+    obj.String(GetClass());
+
+    obj.Key("p");
+    obj.StartObject();
+    position.Serialize(obj);
+    obj.EndObject();
+
+    obj.Key("v");
+    obj.StartObject();
+    velocity.Serialize(obj);
+    obj.EndObject();
+
+    obj.Key("z");
+    obj.Int(z);
 
 // The below isn't really used for client rendering
 #ifdef BUILD_SERVER
-    airFriction.Serialize(obj["af"]);
-    obj["s"] = isStatic;
-    obj["ig"] = isGrounded;
+    obj.Key("af");
+    obj.StartObject();
+    airFriction.Serialize(obj);
+    obj.EndObject();
 
-    obj["ta"] = tags;
-    obj["ce"] = collideExclusion;
+    obj.Key("s");
+    obj.Bool(isStatic);
+
+    obj.Key("ig");
+    obj.Bool(isGrounded);
+
+    obj.Key("ta");
+    obj.Uint64(tags);
+
+    obj.Key("ce");
+    obj.Uint64(collideExclusion);
 #endif
 
+    obj.Key("c");
+    obj.StartArray();
     for (auto& collider : colliders) {
-        obj["c"].emplace_back();
-        json& colliderObj = obj["c"].back();
-        collider->position.Serialize(colliderObj["p"]);
-        colliderObj["t"] = collider->GetType();
-        collider->Serialize(colliderObj);
+        obj.StartObject();
+        obj.Key("p");
+        obj.StartObject();
+        collider->position.Serialize(obj);
+        obj.EndObject();
+
+        obj.Key("t");
+        obj.Int(collider->GetType());
+
+        collider->Serialize(obj);
+        obj.EndObject();
     }
+    obj.EndArray();
 }
 
 void Object::ProcessReplication(json& object) {
@@ -176,13 +208,13 @@ void Object::ProcessReplication(json& object) {
     velocity.ProcessReplication(object["v"]);
     airFriction.ProcessReplication(object["af"]);
 
-    SetIsStatic(object["s"]);
-    z = object["z"];
-    tags = object["ta"];
-    isGrounded = object["ig"];
-    collideExclusion = object["ce"];
+    SetIsStatic(object["s"].GetBool());
+    z = object["z"].GetInt();
+    tags = object["ta"].GetUint64();
+    isGrounded = object["ig"].GetBool();
+    collideExclusion = object["ce"].GetUint64();
 
-    if (colliders.size() != object["c"].size()) {
+    if (colliders.size() != object["c"].GetArray().Size()) {
         for (auto& collider : colliders) {
             delete collider;
         }
@@ -190,22 +222,22 @@ void Object::ProcessReplication(json& object) {
     }
     if (colliders.empty()) {
         // Make some
-        for (json& colliderInfo : object["c"]) {
-            if (colliderInfo["t"] == 0) {
+        for (json& colliderInfo : object["c"].GetArray()) {
+            if (colliderInfo["t"].GetInt() == 0) {
                 AddCollider(new RectangleCollider(this, Vector2::Zero, Vector2::Zero));
             }
-            else if (colliderInfo["t"] == 1) {
+            else if (colliderInfo["t"].GetInt() == 1) {
                 AddCollider(new CircleCollider(this, Vector2::Zero, 0));
             }
         }
     }
     size_t i = 0;
-    for (json& colliderInfo : object["c"]) {
+    for (json& colliderInfo : object["c"].GetArray()) {
         colliders[i]->position.ProcessReplication(colliderInfo["p"]);
-        if (colliderInfo["t"] == 0) {
+        if (colliderInfo["t"].GetInt() == 0) {
             static_cast<RectangleCollider*>(colliders[i])->ProcessReplication(colliderInfo);
         }
-        else if (colliderInfo["t"] == 1) {
+        else if (colliderInfo["t"].GetInt() == 1) {
             static_cast<CircleCollider*>(colliders[i])->ProcessReplication(colliderInfo);
         }
         i += 1;

@@ -73,7 +73,12 @@ int main(int argc, char** argv) {
                 // Next tick hasn't been scheduled yet
                 return;
             }
-            json obj = json::parse(message);
+            std::istringstream stream {std::string(message)};
+            rapidjson::IStreamWrapper wrap(stream);
+
+            JSONDocument obj;
+            obj.ParseStream(wrap);
+
             if (obj["event"] == "rdy") {
                 data->isReady = true;
             }
@@ -81,11 +86,12 @@ int main(int argc, char** argv) {
                 ws->send(message, uWS::OpCode::TEXT);
             }
             else if (obj["event"] == "setchar") {
-                data->nextRespawnCharacter = obj["char"];
-                LOG_DEBUG("Changing character to " << data->nextRespawnCharacter);
+                std::string charName { obj["char"].GetString(), obj["char"].GetStringLength() };
+                data->nextRespawnCharacter = charName;
+                LOG_DEBUG("Changing character to " << charName);
                 json result;
-                result["char-selected"] = obj["char"];
-                ws->send(result.dump(), uWS::OpCode::TEXT);
+                result["char-selected"].SetString(charName.c_str(), charName.length());
+                ws->send(DumpJSON(result), uWS::OpCode::TEXT);
             }
             else {
                 data->playerObject->OnInput(obj);

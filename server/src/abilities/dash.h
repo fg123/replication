@@ -45,7 +45,7 @@ public:
         attachedTo->airFriction.y = 0.95;
     }
 
-    virtual void Serialize(json& obj) override {
+    virtual void Serialize(JSONWriter& obj) override {
         WeaponObject::Serialize(obj);
         // Replicating this desyncs the client side prediction of these
         //   abilities

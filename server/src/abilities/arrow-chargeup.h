@@ -39,14 +39,15 @@ public:
         }
     }
 
-    virtual void Serialize(json& obj) override {
+    virtual void Serialize(JSONWriter& obj) override {
         WeaponObject::Serialize(obj);
-        obj["tslu"] = timeSinceLastUse;
+        obj.Key("tslu");
+        obj.Uint64(timeSinceLastUse);
     }
 
     virtual void ProcessReplication(json& obj) override {
         WeaponObject::ProcessReplication(obj);
-        timeSinceLastUse = obj["tslu"];
+        timeSinceLastUse = obj["tslu"].GetUint64();
     }
 };
 

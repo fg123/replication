@@ -18,17 +18,20 @@ Game::Game() : nextId(1) {
 #ifdef BUILD_SERVER
 Game::Game(std::string mapPath) : Game() {
     std::ifstream mapFile(mapPath);
-    json obj;
-    mapFile >> obj;
+
+    rapidjson::IStreamWrapper stream(mapFile);
+
+    JSONDocument obj;
+    obj.ParseStream(stream);
 
     // Create collision for tiles in the map
     json& tiles = obj["tiles"];
-    for (json& tile : tiles) {
-        if (tile.contains("collision") && tile["collision"]) {
-            double startX = (double)tile["start"]["x"] * TILE_SIZE;
-            double startY = (double)tile["start"]["y"] * TILE_SIZE;
-            double endX = ((double)tile["end"]["x"] + 1) * TILE_SIZE;
-            double endY = ((double)tile["end"]["y"] + 1) * TILE_SIZE;
+    for (json& tile : tiles.GetArray()) {
+        if (tile.HasMember("collision")) {
+            double startX = tile["start"]["x"].GetDouble() * TILE_SIZE;
+            double startY = tile["start"]["y"].GetDouble() * TILE_SIZE;
+            double endX = (tile["end"]["x"].GetDouble() + 1) * TILE_SIZE;
+            double endY = (tile["end"]["y"].GetDouble() + 1) * TILE_SIZE;
             RectangleObject* floor = new RectangleObject(*this, Vector2{
                 startX, startY
             }, Vector2{endX - startX, endY - startY});
@@ -114,17 +117,28 @@ void Game::Tick(Time time) {
 */
 
 void Game::InitialReplication(PlayerSocketData* data) {
-    json finalPacket;
-    finalPacket["event"] = "r";
-    finalPacket["time"] = 0;
-    finalPacket["ticks"] = 0;
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+
+    writer.StartObject();
+    writer.Key("event");
+    writer.String("r");
+    writer.Key("time");
+    writer.Int(0);
+    writer.Key("ticks");
+    writer.Int(0);
+
+    writer.Key("objs");
+    writer.StartArray();
     for (auto& object : gameObjects) {
         // All Objects
-        json obj;
-        object.second->Serialize(obj);
-        finalPacket["objs"].push_back(obj);
+        writer.StartObject();
+        object.second->Serialize(writer);
+        writer.EndObject();
     }
-    if (!data->ws->send(finalPacket.dump(), uWS::OpCode::TEXT)) {
+    writer.EndArray();
+    writer.EndObject();
+    if (!data->ws->send(buffer.GetString(), uWS::OpCode::TEXT)) {
         LOG_ERROR("Could not send!");
     }
 }
@@ -146,13 +160,17 @@ void Game::Replicate(Time time) {
 
     // LOG_DEBUG("Replicate (" << time << ") " << replicateNextTick.size() << " objects");
 
-    json finalPacket;
-    finalPacket["event"] = "r";
+    rapidjson::StringBuffer buffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+    writer.StartArray();
+
     for (auto& objectId : deadSinceLastReplicate) {
-        json obj;
-        obj["id"] = objectId;
-        obj["dead"] = true;
-        finalPacket["objs"].push_back(obj);
+        writer.StartObject();
+        writer.Key("id");
+        writer.Uint(objectId);
+        writer.Key("dead");
+        writer.Bool(true);
+        writer.EndObject();
     }
 
     deadSinceLastReplicate.clear();
@@ -160,14 +178,17 @@ void Game::Replicate(Time time) {
     for (auto& objectId : replicateNextTick) {
         if (gameObjects.find(objectId) != gameObjects.end()) {
             gameObjects[objectId]->SetDirty(false);
-            json obj;
-            gameObjects[objectId]->Serialize(obj);
-            finalPacket["objs"].push_back(obj);
+
+            writer.StartObject();
+            gameObjects[objectId]->Serialize(writer);
+            writer.EndObject();
         }
     }
     replicateNextTick.clear();
 
-    std::scoped_lock<std::mutex> lock(playersSetMutex);
+    writer.EndArray();
+
+    // std::scoped_lock<std::mutex> lock(playersSetMutex);
     for (auto& player : players) {
         /*for (auto& object : serialized) {
             player->ws->send(object.second, uWS::OpCode::TEXT);
@@ -179,9 +200,21 @@ void Game::Replicate(Time time) {
             InitialReplication(player);
         }
         else {
-            finalPacket["time"] = player->playerObject->lastClientInputTime;
-            finalPacket["ticks"] = player->playerObject->ticksSinceLastProcessed;
-            if (!player->ws->send(finalPacket.dump(), uWS::OpCode::TEXT)) {
+            rapidjson::StringBuffer output;
+            rapidjson::Writer<rapidjson::StringBuffer> writer2(output);
+            writer2.StartObject();
+
+            writer2.Key("event");
+            writer2.String("r");
+            writer2.Key("time");
+            writer2.Uint64(player->playerObject->lastClientInputTime);
+            writer2.Key("ticks");
+            writer2.Uint64(player->playerObject->ticksSinceLastProcessed);
+            writer2.Key("objs");
+            writer2.RawValue(buffer.GetString(), buffer.GetSize(), rapidjson::kArrayType);
+            writer2.EndObject();
+
+            if (!player->ws->send(output.GetString(), uWS::OpCode::TEXT)) {
                 LOG_ERROR("Send Error");
             }
         }
@@ -189,9 +222,13 @@ void Game::Replicate(Time time) {
             if (player->playerObject->GetId() != 0) {
                 player->playerObjectDirty = false;
             }
-            json objectNotify;
-            objectNotify["playerLocalObjectId"] = player->playerObject->GetId();
-            player->ws->send(objectNotify.dump(), uWS::OpCode::TEXT);
+            rapidjson::StringBuffer output;
+            rapidjson::Writer<rapidjson::StringBuffer> writer2(output);
+            writer2.StartObject();
+            writer2.Key("playerLocalObjectId");
+            writer2.Uint(player->playerObject->GetId());
+            writer2.EndObject();
+            player->ws->send(output.GetString(), uWS::OpCode::TEXT);
         }
     }
 }
@@ -205,12 +242,12 @@ void Game::RollbackTime(Time time) {
 }
 
 void Game::EnsureObjectExists(json& object) {
-    if (!object.contains("id")) {
+    if (!object.HasMember("id")) {
         LOG_ERROR("EnsureObjectExists: no ID on replication packet!");
         throw std::runtime_error("EnsureObjectExists: no ID on replication packet!");
     }
-    ObjectID id = object["id"];
-    if (object.contains("dead")) {
+    ObjectID id = object["id"].GetUint();
+    if (object.HasMember("dead")) {
         // Kill
         if (gameObjects.find(id) != gameObjects.end()) {
             delete gameObjects[id];
@@ -219,22 +256,23 @@ void Game::EnsureObjectExists(json& object) {
         }
         return;
     }
+    std::string objectType (object["t"].GetString(), object["t"].GetStringLength());
     if (gameObjects.find(id) == gameObjects.end()) {
-        LOG_DEBUG("Got new object (" << id << ") " << object["t"]);
+        LOG_DEBUG("Got new object (" << id << ") " << objectType);
         auto& ClassLookup = GetClassLookup();
-        if (ClassLookup.find(object["t"]) == ClassLookup.end()) {
-            LOG_ERROR("Class " << object["t"] << " is not registered!");
-            throw std::runtime_error("Class " + std::string(object["t"]) + " is not registered!");
+        if (ClassLookup.find(objectType) == ClassLookup.end()) {
+            LOG_ERROR("Class " << objectType << " is not registered!");
+            throw std::runtime_error("Class " + objectType + " is not registered!");
         }
-        Object* obj = GetClassLookup()[object["t"]](*this);
+        Object* obj = GetClassLookup()[objectType](*this);
         obj->SetId(id);
         gameObjects[id] = obj;
     }
 }
 
 void Game::ProcessReplication(json& object) {
-    ObjectID id = object["id"];
-    if (object.contains("dead")) {
+    ObjectID id = object["id"].GetUint();
+    if (object.HasMember("dead")) {
         return;
     }
     Object* obj = GetObject(id);
