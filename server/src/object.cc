@@ -163,11 +163,11 @@ void Object::Serialize(json& obj) {
 #endif
 
     for (auto& collider : colliders) {
-        json colliderObj;
+        obj["c"].emplace_back();
+        json& colliderObj = obj["c"].back();
         collider->position.Serialize(colliderObj["p"]);
         colliderObj["t"] = collider->GetType();
         collider->Serialize(colliderObj);
-        obj["c"].push_back(colliderObj);
     }
 }
 
