@@ -89,6 +89,7 @@ void PlayerObject::Tick(Time time) {
         #endif
         while (inputBuffer.size() > 0) {
             Time firstTime = inputBuffer.front()["time"];
+            // LOG_DEBUG("First " << firstTime << " client Time " << clientTime);
             if (firstTime <= clientTime) {
                 ProcessInputData(inputBuffer.front());
                 inputBuffer.pop();
@@ -262,8 +263,8 @@ void PlayerObject::DealDamage(int damage) {
 }
 
 void PlayerObject::OnInput(json& obj) {
-    LOG_DEBUG("Processing input " << obj.dump());
     std::scoped_lock lock(socketDataMutex);
+    // LOG_DEBUG("Processing input " << obj["time"]);
     inputBuffer.push(obj);
 }
 
@@ -297,6 +298,7 @@ void PlayerObject::ProcessInputData(json& obj) {
         }
     }
     #ifdef BUILD_SERVER
+        // LOG_DEBUG("Setting last client input time: " << obj["time"]);
         // TODO: assert this is monotonically growing
         lastClientInputTime = obj["time"];
         ticksSinceLastProcessed = 0;

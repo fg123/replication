@@ -16,7 +16,7 @@
 class PlayerObject;
 
 static const int TickInterval = 16;
-static const int ReplicateInterval = 50;
+static const int ReplicateInterval = 100;
 
 struct PlayerSocketData {
 #ifdef BUILD_SERVER
@@ -40,11 +40,15 @@ class Game {
     std::unordered_set<PlayerSocketData*> players;
     std::mutex playersSetMutex;
 
+#ifdef BUILD_SERVER
     std::unordered_set<ObjectID> deadObjects;
     std::unordered_set<ObjectID> deadSinceLastReplicate;
 
     std::mutex newObjectsMutex;
     std::unordered_set<Object*> newObjects;
+
+    std::unordered_set<ObjectID> replicateNextTick;
+#endif
 
     Time gameTime;
 
@@ -53,17 +57,25 @@ class Game {
 
 public:
     Game();
+
+#ifdef BUILD_SERVER
     Game(std::string mapPath);
+#endif
+
     ~Game();
 
     // Simulate a tick of physics, not everyone ticks every frame
     void Tick(Time time);
 
-
 #ifdef BUILD_SERVER
-    // Replicate objects that have changed to clients
+    // Replicate objects in replicateNextTick to clients
     void Replicate(Time time);
+    void RequestReplication(ObjectID objectId);
+    void QueueAllDirtyForReplication(Time time);
     void InitialReplication(PlayerSocketData* data);
+
+    void AddObject(Object* obj);
+    void DestroyObject(ObjectID objectId);
 #endif
 
 #ifdef BUILD_CLIENT
@@ -74,8 +86,6 @@ public:
 #endif
 
     void HandleCollisions(Object* obj);
-    void AddObject(Object* obj);
-    void DestroyObject(ObjectID objectId);
     Time GetGameTime() const { return gameTime; }
 
     Object* GetObjectImpl(ObjectID id) {

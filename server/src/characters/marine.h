@@ -21,7 +21,7 @@ public:
             game.AddObject(rifle);
             PickupWeapon(rifle);
 
-            zWeapon = new ArtilleryStrikeWeapon { game };
+            zWeapon = new ArtilleryStrike { game };
             game.AddObject(zWeapon);
             zWeapon->AttachToPlayer(this);
         #endif

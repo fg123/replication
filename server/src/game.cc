@@ -15,6 +15,7 @@ Game::Game() : nextId(1) {
 
 }
 
+#ifdef BUILD_SERVER
 Game::Game(std::string mapPath) : Game() {
     std::ifstream mapFile(mapPath);
     json obj;
@@ -37,6 +38,7 @@ Game::Game(std::string mapPath) : Game() {
         }
     }
 }
+#endif
 
 Game::~Game() {
     for (auto& t : gameObjects) {
@@ -54,24 +56,20 @@ void Game::Tick(Time time) {
     queuedCallsMutex.unlock();
 
 #ifdef BUILD_SERVER
-    bool hasNewObjects = !newObjects.empty();
-#endif
-
+    // New objects get queued in from HandleReplication and EnsureObjectExists
+    //   on the client, not through this set.
     for (auto& newObject : newObjects) {
         gameObjects[newObject->GetId()] = newObject;
+        RequestReplication(newObject->GetId());
     }
-
     newObjects.clear();
+#endif
 
     for (auto& object : gameObjects) {
         object.second->Tick(time);
     }
 
 #ifdef BUILD_SERVER
-    if (hasNewObjects) {
-        LOG_DEBUG("Has new objects!");
-        Replicate(time);
-    }
     for (auto& object : gameObjects) {
         if (!object.second->IsStatic() &&
             !IsPointInRect(killPlaneStart, killPlaneEnd - killPlaneStart,
@@ -84,7 +82,6 @@ void Game::Tick(Time time) {
             DestroyObject(object.second->GetId());
         }
     }
-#endif
 
     // OnDeath could potentially add more stuff to DeadObjects
     std::vector<ObjectID> deadObjectsThisTick;
@@ -102,7 +99,8 @@ void Game::Tick(Time time) {
         }
     }
 
-    // Don't clear dead objects until replicate has sent it out
+    Replicate(time);
+#endif
 }
 
 #ifdef BUILD_SERVER
@@ -131,7 +129,23 @@ void Game::InitialReplication(PlayerSocketData* data) {
     }
 }
 
+void Game::RequestReplication(ObjectID objectId) {
+    replicateNextTick.insert(objectId);
+}
+
+void Game::QueueAllDirtyForReplication(Time time) {
+    for (auto& object : gameObjects) {
+        if (object.second->IsDirty()) {
+            RequestReplication(object.first);
+        }
+    }
+}
+
 void Game::Replicate(Time time) {
+    if (replicateNextTick.empty()) return;
+
+    // LOG_DEBUG("Replicate (" << time << ") " << replicateNextTick.size() << " objects");
+
     json finalPacket;
     finalPacket["event"] = "r";
     for (auto& objectId : deadSinceLastReplicate) {
@@ -143,15 +157,15 @@ void Game::Replicate(Time time) {
 
     deadSinceLastReplicate.clear();
 
-    for (auto& object : gameObjects) {
-        if (object.second->IsDirty()) {
-            object.second->SetDirty(false);
+    for (auto& objectId : replicateNextTick) {
+        if (gameObjects.find(objectId) != gameObjects.end()) {
+            gameObjects[objectId]->SetDirty(false);
             json obj;
-            object.second->Serialize(obj);
-            //serialized.emplace(object.second, obj.dump());
+            gameObjects[objectId]->Serialize(obj);
             finalPacket["objs"].push_back(obj);
         }
     }
+    replicateNextTick.clear();
 
     std::scoped_lock<std::mutex> lock(playersSetMutex);
     for (auto& player : players) {
@@ -265,12 +279,8 @@ void Game::ChangeId(ObjectID oldId, ObjectID newId) {
     gameObjects.erase(oldId);
 }
 
+#ifdef BUILD_SERVER
 void Game::AddObject(Object* obj) {
-    // Client should never add object and wait for server to tell me
-#ifdef BUILD_CLIENT
-    LOG_ERROR("Don't call AddObject on the client!!");
-    throw std::runtime_error("Don't call AddObject on the client!!");
-#endif
     std::scoped_lock<std::mutex> lock(newObjectsMutex);
     ObjectID newId = RequestId();
     obj->SetId(newId);
@@ -279,10 +289,6 @@ void Game::AddObject(Object* obj) {
 }
 
 void Game::DestroyObject(ObjectID objectId) {
-#ifdef BUILD_CLIENT
-    LOG_ERROR("Don't call DestroyObject on the client!!");
-    throw std::runtime_error("Don't call DestroyObject on the client!!");
-#endif
     if (objectId == 0) {
         // Something has gone wrong
         LOG_ERROR("Tried to destroy object ID 0!");
@@ -296,7 +302,6 @@ void Game::DestroyObject(ObjectID objectId) {
     deadObjects.insert(objectId);
 }
 
-#ifdef BUILD_SERVER
 void Game::OnPlayerDead(PlayerObject* playerObject) {
     std::scoped_lock<std::mutex> lock(playersSetMutex);
     for (auto& p : players) {

@@ -55,7 +55,6 @@ module.exports = class ClientState {
 
     SendInputPacket(input) {
         if (this.localPlayerObjectId !== undefined) {
-            console.log("Sending Input", input);
             input.time = this.wasm._GetLastTickTime();
             const inputStr = JSON.stringify(input);
             if (this.webSocket.readyState === WebSocket.OPEN) {
@@ -103,7 +102,6 @@ module.exports = class ClientState {
 
         const tickInterval = this.wasm._GetTickInterval();
         setInterval(() => {
-            // To ensure fixed time step
             this.wasm._TickGame();
         }, tickInterval);
 
@@ -147,6 +145,7 @@ module.exports = class ClientState {
                 }
             }
         };
+
         this.webSocket.onmessage = (ev) => {
             if (SIMULATED_LAG !== 0) {
                 setTimeout(() => { handler(ev); }, SIMULATED_LAG / 2);
@@ -155,8 +154,6 @@ module.exports = class ClientState {
                 handler(ev);
             }
         };
-
-        this.Tick();
 
         window.addEventListener('keydown', e => {
             if (e.key === "Escape") {
@@ -219,22 +216,5 @@ module.exports = class ClientState {
     GetPlayerObject() {
         if (this.localPlayerObjectId === undefined) return undefined;
         return this.gameObjects[this.localPlayerObjectId];
-    }
-
-    Tick() {
-        const wasm = this.wasm;
-        Object.keys(this.gameObjects).forEach((k) => {
-            if (!wasm._IsObjectAlive(k)) {
-                delete this.gameObjects[k];
-                return;
-            }
-
-            const serializedString = wasm._GetObjectSerialized(k);
-            const jsonString = wasm.UTF8ToString(serializedString);
-            const serializedObject = JSON.parse(jsonString);
-            wasm._free(serializedString);
-            this.gameObjects[k] = serializedObject;
-        });
-        requestAnimationFrame(() => { this.Tick() });
     }
 };

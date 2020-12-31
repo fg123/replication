@@ -150,7 +150,7 @@ module.exports = {
             drawImage(context, image, obj.p.x, obj.p.y, (image.width), (image.height), angle);
         }
     },
-    "ArtilleryStrikeWeapon": {
+    "ArtilleryStrike": {
 
     },
     "DashAbility": {

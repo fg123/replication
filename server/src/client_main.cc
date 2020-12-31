@@ -6,6 +6,7 @@
 #include "objects/player.h"
 #include "object.h"
 #include "json/json.hpp"
+#include "perf.h"
 
 // We probably need to include all these so it registers
 #include "characters/marine.h"
@@ -120,6 +121,7 @@ extern "C" {
 
             // Calculate where the server is now
             uint64_t ticksSinceLastProcessed = object["ticks"];
+            // LOG_DEBUG("serverLastProcessedTime " << serverLastProcessedTime << " ticksSinceLastProcessed" << ticksSinceLastProcessed);
             Time serverCurrentTickTime = serverLastProcessedTime +
                 (ticksSinceLastProcessed * TickInterval);
 
@@ -158,14 +160,18 @@ extern "C" {
                 Time ending = std::max(serverCurrentTickTime + ping, lastTickTime);
 
                 // LOG_DEBUG("Bringing to present (" << serverLastProcessedTime << ") " << nextTick << " -> " << ending);
-                // LOG_DEBUG("Server Current Tick Time (" << serverCurrentTickTime << ") ");
+                // LOG_DEBUG("Bringing to present with " << (ending - nextTick) / TickInterval << " ticks!");
                 while (nextTick < ending) {
                     obj->Tick(nextTick);
                     nextTick += TickInterval;
                 }
             }
             // LOG_DEBUG("To Present Done!");
-            lastTickTime = nextTick - TickInterval;
+
+            // Make sure this is never negative!!!
+            if (nextTick > TickInterval) {
+                lastTickTime = nextTick - TickInterval;
+            }
 
             if (Object* obj = game.GetObject(localClientId)) {
                 Vector2 newPosition = obj->GetPosition();

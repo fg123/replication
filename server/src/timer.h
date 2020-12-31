@@ -5,6 +5,8 @@
 #include <functional>
 #include <vector>
 
+#include "perf.h"
+
 // For now otherwise it doesn't pass correctly
 using Time = uint64_t;
 
@@ -12,12 +14,17 @@ struct ScheduledCall {
     std::function<void(Time)> function;
     Time nextScheduled;
     Time interval;
+
+    Time lastRealtimeTick;
     bool shouldRepeat;
+
+    PerformanceBuffer<Time> performance { 100 };
 
     ScheduledCall(std::function<void(Time)> function, Time nextScheduled) :
         function(function),
         nextScheduled(nextScheduled),
         interval(0),
+        lastRealtimeTick(0),
         shouldRepeat(false) {}
 
     ScheduledCall(std::function<void(Time)> function, Time nextScheduled,
@@ -25,20 +32,22 @@ struct ScheduledCall {
         function(function),
         nextScheduled(nextScheduled),
         interval(interval),
+        lastRealtimeTick(0),
         shouldRepeat(true) {}
 };
 
 class Timer {
-    std::vector<ScheduledCall> schedule;
+    std::vector<ScheduledCall*> schedule;
 
     Time Now();
 public:
     Timer();
+    ~Timer();
 
     void Tick();
 
     void ScheduleCall(std::function<void(Time)> function, Time delay);
-    void ScheduleInterval(std::function<void(Time)> function, Time interval);
+    ScheduledCall* ScheduleInterval(std::function<void(Time)> function, Time interval);
 
 };
 

@@ -16,6 +16,20 @@ module.exports = class GameCanvas {
     }
 
     Draw() {
+        // Serialize all data back out.
+        Object.keys(this.clientState.gameObjects).forEach((k) => {
+            if (!this.clientState.wasm._IsObjectAlive(k)) {
+                delete this.clientState.gameObjects[k];
+                return;
+            }
+
+            const serializedString = this.clientState.wasm._GetObjectSerialized(k);
+            const jsonString = this.clientState.wasm.UTF8ToString(serializedString);
+            const serializedObject = JSON.parse(jsonString);
+            this.clientState.wasm._free(serializedString);
+            this.clientState.gameObjects[k] = serializedObject;
+        });
+
         this.canvas.width  = this.clientState.width;
         this.canvas.height = this.clientState.height;
         this.canvas.style.width  = this.clientState.width + 'px';

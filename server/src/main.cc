@@ -14,12 +14,11 @@
 static bool gameRunning = true;
 
 void GameLoop(Timer& gameTimer) {
-    static const int sleepRate = (int)(TickInterval / 2);
-    LOG_DEBUG("Tick Interval: " << TickInterval << " Sleep Time: " << sleepRate);
+    LOG_DEBUG("Tick Interval: " << TickInterval);
     while (gameRunning) {
         gameTimer.Tick();
         // Reduce CPU load
-        std::this_thread::sleep_for(std::chrono::milliseconds(sleepRate));
+        std::this_thread::yield();
     }
 }
 
@@ -32,10 +31,17 @@ int main(int argc, char** argv) {
     LOG_INFO("Loading Map " << mapPath);
 
     Game game { mapPath };
-    gameTimer.ScheduleInterval(std::bind(&Game::Tick, &game, std::placeholders::_1),
-            TickInterval);
+    ScheduledCall* gameTick = gameTimer.ScheduleInterval(
+        std::bind(&Game::Tick, &game, std::placeholders::_1),
+        TickInterval
+    );
+
+    gameTimer.ScheduleInterval([gameTick](Time time) {
+        LOG_INFO("Average Tick Interval: " << gameTick->performance.GetAverage());
+    }, 3000);
+
 #ifdef BUILD_SERVER
-    gameTimer.ScheduleInterval(std::bind(&Game::Replicate, &game, std::placeholders::_1),
+    gameTimer.ScheduleInterval(std::bind(&Game::QueueAllDirtyForReplication, &game, std::placeholders::_1),
         ReplicateInterval);
 #endif
 

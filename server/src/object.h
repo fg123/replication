@@ -22,9 +22,16 @@ std::unordered_map<std::string, ObjectConstructor>& GetClassLookup();
 
 template<class T>
 struct ObjectRegister {
-    ObjectRegister(const char* name) {
-        LOG_DEBUG("Auto Registering " << name);
-        GetClassLookup()[name] = T::Create;
+    ObjectRegister(const std::string& name) {
+        auto& ClassLookup = GetClassLookup();
+        if (ClassLookup.find(name) != ClassLookup.end()) {
+            return;
+        }
+        LOG_INFO("Auto Registering " << name);
+        if (name.size() > 20) {
+            LOG_WARN("Class name " << name << " more than 20 characters! Might not have SSO!");
+        }
+        ClassLookup[name] = T::Create;
     }
 };
 
@@ -53,6 +60,10 @@ protected:
     int z;
 
     Vector2 velocity;
+
+    Vector2 lastFramePosition;
+    Vector2 lastFrameVelocity;
+
 
     ObjectID id = 0;
     bool isDirty = true;

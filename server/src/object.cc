@@ -66,7 +66,15 @@ void Object::Tick(Time time) {
     if (std::abs(velocity.y) < EPSILON) {
         velocity.y = 0;
     }
-    SetDirty(true);
+
+    // We are dirty if velocity changed last frame
+    //    or position changed significantly
+    if (position - positionDelta != lastFramePosition || velocity != lastFrameVelocity) {
+        SetDirty(true);
+    }
+
+    lastFrameVelocity = velocity;
+    lastFramePosition = position;
 }
 
 void Object::ResolveCollision(const Vector2& difference) {
@@ -142,13 +150,17 @@ void Object::Serialize(json& obj) {
     obj["t"] = GetClass();
     position.Serialize(obj["p"]);
     velocity.Serialize(obj["v"]);
+    obj["z"] = z;
+
+// The below isn't really used for client rendering
+#ifdef BUILD_SERVER
     airFriction.Serialize(obj["af"]);
     obj["s"] = isStatic;
-    obj["z"] = z;
     obj["ig"] = isGrounded;
 
     obj["ta"] = tags;
     obj["ce"] = collideExclusion;
+#endif
 
     for (auto& collider : colliders) {
         json colliderObj;

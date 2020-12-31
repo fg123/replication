@@ -4,7 +4,7 @@
 class ArtilleryObject : public Object {
 public:
     CLASS_CREATE(ArtilleryObject)
-    
+
     ArtilleryObject(Game& game) : Object(game) {
         // Don't Collide with Weapons
         collideExclusion |= (uint64_t) Tag::WEAPON;
@@ -28,11 +28,11 @@ public:
 
 CLASS_REGISTER(ArtilleryObject);
 
-class ArtilleryStrikeWeapon : public WeaponObject {
+class ArtilleryStrike : public WeaponObject {
 public:
-    CLASS_CREATE(ArtilleryStrikeWeapon)
-    ArtilleryStrikeWeapon(Game& game) : ArtilleryStrikeWeapon(game, Vector2::Zero) {}
-    ArtilleryStrikeWeapon(Game& game, Vector2 position) : WeaponObject(game, position) {}
+    CLASS_CREATE(ArtilleryStrike)
+    ArtilleryStrike(Game& game) : ArtilleryStrike(game, Vector2::Zero) {}
+    ArtilleryStrike(Game& game, Vector2 position) : WeaponObject(game, position) {}
 
     virtual void Tick(Time time) override {
         WeaponObject::Tick(time);
@@ -41,11 +41,11 @@ public:
 
     virtual void Fire(Time time) override {
         WeaponObject::Fire(time);
-        
+
     }
     virtual void ReleaseFire(Time time) override {
         WeaponObject::ReleaseFire(time);
-            
+
     #ifdef BUILD_SERVER
         ArtilleryObject* proj = new ArtilleryObject(game);
         proj->SetPosition(Vector2(attachedTo->mousePosition.x, 10));
@@ -63,6 +63,6 @@ public:
     }
 };
 
-CLASS_REGISTER(ArtilleryStrikeWeapon);
+CLASS_REGISTER(ArtilleryStrike);
 
 #endif
