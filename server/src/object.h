@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "timer.h"
 #include "vector.h"
@@ -52,6 +53,7 @@ enum Tag : uint64_t {
 class Object : Replicable {
 protected:
     Game& game;
+
     // All are measured in the same units, velocity is in position units
     //   per second
     Vector2 position;
@@ -61,7 +63,6 @@ protected:
 
     Vector2 lastFramePosition;
     Vector2 lastFrameVelocity;
-
 
     ObjectID id = 0;
     bool isDirty = true;
@@ -74,6 +75,11 @@ protected:
     uint64_t collideExclusion = 0;
 
 public:
+    // For object hierarchy, this is all managed from the game, used for
+    //   knowing who ticks(). Parents tick their own children.
+    std::unordered_set<Object*> children;
+    Object* parent = nullptr;
+
     Vector2 airFriction;
 
 #ifdef BUILD_SERVER
@@ -81,8 +87,14 @@ public:
 #endif
 
 #ifdef BUILD_CLIENT
-    void SetLastTickTime(Time time) { lastTickTime = time; }
+    void SetLastTickTime(Time time) {
+        for (auto& child : children) {
+            child->SetLastTickTime(time);
+        }
+        lastTickTime = time;
+    }
 #endif
+
     Object(Game& game);
     virtual ~Object();
 

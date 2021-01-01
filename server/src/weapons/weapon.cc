@@ -26,6 +26,8 @@ void WeaponObject::AttachToPlayer(PlayerObject* player) {
     else if (player == attachedTo) {
         return;
     }
+    // Associate hierarchy
+    game.AssignParent(this, player);
     attachedTo = player;
     SetDirty(true);
     // No Collision
@@ -34,6 +36,7 @@ void WeaponObject::AttachToPlayer(PlayerObject* player) {
 }
 
 void WeaponObject::Detach() {
+    game.DetachParent(this);
     attachedTo = nullptr;
     SetVelocity(Vector2::Zero);
     collideExclusion &= ~(uint64_t)Tag::OBJECT;

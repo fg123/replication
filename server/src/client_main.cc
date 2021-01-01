@@ -124,9 +124,10 @@ extern "C" {
 
             for (auto& event : object["objs"].GetArray()) {
                 ObjectID ids = event["id"].GetUint();
-                replicateIds.insert(ids);
+                // replicateIds.insert(ids);
                 if (ids == localClientId) {
                     hasPlayerIn = true;
+                    replicateIds.insert(ids);
                 }
                 game.EnsureObjectExists(event);
             }

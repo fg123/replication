@@ -36,6 +36,10 @@ Object::~Object() {
 }
 
 void Object::Tick(Time time) {
+    // Tick my children
+    for (auto& child : children) {
+        child->Tick(time);
+    }
     // Always replicate for now
     if (isStatic) return;
 
@@ -201,6 +205,21 @@ void Object::Serialize(JSONWriter& obj) {
         obj.EndObject();
     }
     obj.EndArray();
+
+#ifdef BUILD_SERVER
+    if (parent) {
+        obj.Key("pa");
+        obj.Int(parent->GetId());
+    }
+    if (children.size() > 0) {
+        obj.Key("ch");
+        obj.StartArray();
+        for (auto& child : children) {
+            obj.Int(child->GetId());
+        }
+        obj.EndArray();
+    }
+#endif
 }
 
 void Object::ProcessReplication(json& object) {
@@ -241,5 +260,19 @@ void Object::ProcessReplication(json& object) {
             static_cast<CircleCollider*>(colliders[i])->ProcessReplication(colliderInfo);
         }
         i += 1;
+    }
+
+    if (object.HasMember("pa")) {
+        parent = game.GetObject(object["pa"].GetInt());
+    }
+    else {
+        parent = nullptr;
+    }
+
+    children.clear();
+    if (object.HasMember("ch")) {
+        for (json& value : object["ch"].GetArray()) {
+            children.insert(game.GetObject(value.GetInt()));
+        }
     }
 }

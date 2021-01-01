@@ -64,8 +64,14 @@ public:
 
     ~Game();
 
-    // Simulate a tick of physics, not everyone ticks every frame
+    // Simulate a tick of physics
     void Tick(Time time);
+
+    // Adds a child to the parent
+    void AssignParent(Object* child, Object* parent);
+
+    // Removes the child from the parent (and make it a root object)
+    void DetachParent(Object* child);
 
 #ifdef BUILD_SERVER
     // Replicate objects in replicateNextTick to clients

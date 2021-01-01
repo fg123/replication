@@ -49,6 +49,25 @@ Game::~Game() {
     }
 }
 
+void Game::AssignParent(Object* child, Object* parent) {
+    if (child->parent) {
+        LOG_INFO("Reassigning parent for " << child << " from " << child->parent << " to " << parent << "!");
+        DetachParent(child);
+    }
+    child->parent = parent;
+    parent->children.insert(child);
+}
+
+void Game::DetachParent(Object* child) {
+    if (!child->parent) {
+        return;
+    }
+    Object* parent = child->parent;
+    // TODO: assert has child
+    parent->children.erase(child);
+    child->parent = nullptr;
+}
+
 void Game::Tick(Time time) {
     gameTime = time;
     queuedCallsMutex.lock();
@@ -69,7 +88,10 @@ void Game::Tick(Time time) {
 #endif
 
     for (auto& object : gameObjects) {
-        object.second->Tick(time);
+        // Only tick on root objects
+        if (object.second->parent == nullptr) {
+            object.second->Tick(time);
+        }
     }
 
 #ifdef BUILD_SERVER
@@ -95,6 +117,9 @@ void Game::Tick(Time time) {
         if (gameObjects.find(objectId) != gameObjects.end()) {
             Object* object = gameObjects[objectId];
             LOG_DEBUG("Destroy Object (" << objectId << ") " << object->GetClass());
+
+            // Move an object into root before destroying
+            DetachParent(object);
             object->OnDeath();
             gameObjects.erase(objectId);
             deadSinceLastReplicate.insert(objectId);
