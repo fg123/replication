@@ -55,7 +55,8 @@ module.exports = class ClientState {
 
     SendInputPacket(input) {
         if (this.localPlayerObjectId !== undefined) {
-            input.time = this.wasm._GetLastTickTime();
+            input.time = this.wasm._GetLastTickTime() + this.wasm._GetTickInterval();
+            // console.log(input);
             const inputStr = JSON.stringify(input);
             if (this.webSocket.readyState === WebSocket.OPEN) {
                 this.SendData(inputStr);

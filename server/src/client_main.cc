@@ -13,6 +13,8 @@
 #include "characters/archer.h"
 #include "characters/hookman.h"
 
+static const size_t MAX_INPUT_EVENT_QUEUE = 300;
+
 extern "C" {
     /** Client Interface for the JS Front End */
 
@@ -94,6 +96,10 @@ extern "C" {
     void HandleLocalInput(ObjectID object, const char* input) {
         Object* obj = game.GetObject(object);
         if (obj) {
+            if (inputEvents.size() > MAX_INPUT_EVENT_QUEUE) {
+                LOG_WARN("Local input queue > " << MAX_INPUT_EVENT_QUEUE << ", server crashed?");
+                return;
+            }
             inputEvents.emplace_back();
             inputEvents.back().Parse(input);
             static_cast<PlayerObject*>(obj)->OnInput(inputEvents.back());
@@ -114,8 +120,12 @@ extern "C" {
 
             bool hasPlayerIn = false;
 
+            std::unordered_set<ObjectID> replicateIds;
+
             for (auto& event : object["objs"].GetArray()) {
-                if (event["id"].GetUint() == localClientId) {
+                ObjectID ids = event["id"].GetUint();
+                replicateIds.insert(ids);
+                if (ids == localClientId) {
                     hasPlayerIn = true;
                 }
                 game.EnsureObjectExists(event);
@@ -125,6 +135,8 @@ extern "C" {
                 game.ProcessReplication(event);
             }
 
+            // If the replication doesn't correct player position, we can't
+            //   assume we need to roll back.
             if (!hasPlayerIn) return;
 
             if (Object* obj = game.GetObject(localClientId)) {
@@ -142,7 +154,7 @@ extern "C" {
             // Delete inputs that the server has already processed (or that are too late?)
             size_t thingsToDelete = 0;
             for (;thingsToDelete < inputEvents.size(); thingsToDelete++) {
-                if (inputEvents[thingsToDelete]["time"].GetUint() > serverLastProcessedTime) break;
+                if (inputEvents[thingsToDelete]["time"].GetUint64() > serverLastProcessedTime) break;
             }
             inputEvents.erase(inputEvents.begin(), inputEvents.begin() + thingsToDelete);
 
@@ -152,6 +164,9 @@ extern "C" {
                 lastTickTime = serverCurrentTickTime;
                 game.RollbackTime(lastTickTime);
                 inputEvents.clear();
+            }
+            else if (lastTickTime < serverCurrentTickTime) {
+                LOG_WARN("Server faster than client! Last tick client: " << lastTickTime << " Server Current: " << serverCurrentTickTime);
             }
 
             // There's a chance here that the server has gone on faster than us, but has not
@@ -165,7 +180,13 @@ extern "C" {
             }
 
             if (Object* obj = game.GetObject(localClientId)) {
-                obj->SetLastTickTime(nextTick - TickInterval);
+                // obj->SetLastTickTime(nextTick - TickInterval);
+                for (ObjectID objId : replicateIds) {
+                    if (Object* replicateObj = game.GetObject(objId)) {
+                        replicateObj->SetLastTickTime(nextTick - TickInterval);
+                    }
+                }
+
                 for (auto& jsonEvent : inputEvents) {
                     // Queue into Buffer
                     static_cast<PlayerObject*>(obj)->OnInput(jsonEvent);
@@ -173,10 +194,15 @@ extern "C" {
 
                 Time ending = std::max(serverCurrentTickTime + ping, lastTickTime);
 
-                // LOG_DEBUG("Bringing to present (" << serverLastProcessedTime << ") " << nextTick << " -> " << ending);
+                // LOG_DEBUG("Bringing to present (" << serverLastProcessedTime << ", " << serverCurrentTickTime << ") " << nextTick << " -> " << ending);
                 // LOG_DEBUG("Bringing to present with " << (ending - nextTick) / TickInterval << " ticks!");
                 while (nextTick < ending) {
-                    obj->Tick(nextTick);
+                    // obj->Tick(nextTick);
+                    for (ObjectID objId : replicateIds) {
+                        if (Object* replicateObj = game.GetObject(objId)) {
+                            replicateObj->Tick(nextTick);
+                        }
+                    }
                     nextTick += TickInterval;
                 }
             }

@@ -61,8 +61,8 @@ int main(int argc, char** argv) {
             LOG_INFO("Connection Opened");
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
             data->ws = ws;
-            data->nextRespawnCharacter = "Marine";
-            PlayerObject* playerObject = new Marine(game, Vector2(100, 100));
+            data->nextRespawnCharacter = "Archer";
+            PlayerObject* playerObject = new Archer(game, Vector2(100, 100));
             data->playerObject = playerObject;
 
             game.AddPlayer(data, playerObject);
@@ -89,9 +89,7 @@ int main(int argc, char** argv) {
                 std::string charName { obj["char"].GetString(), obj["char"].GetStringLength() };
                 data->nextRespawnCharacter = charName;
                 LOG_DEBUG("Changing character to " << charName);
-                json result;
-                result["char-selected"].SetString(charName.c_str(), charName.length());
-                ws->send(DumpJSON(result), uWS::OpCode::TEXT);
+                ws->send("{\"char-selected\": \"" + charName + "\"}", uWS::OpCode::TEXT);
             }
             else {
                 data->playerObject->OnInput(obj);

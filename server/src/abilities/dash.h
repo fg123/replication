@@ -5,7 +5,7 @@
 #include "player.h"
 
 class DashAbility : public WeaponObject {
-    static const int DashAmount = 1800;
+    static const int DashAmount = 1300;
     Time lastDash = 0;
     Time timeSinceLastDash = 0;
     Time cooldown = 2000;
@@ -17,16 +17,20 @@ public:
 
     virtual void Tick(Time time) override {
         WeaponObject::Tick(time);
+        #ifdef BUILD_SERVER
         // Calculate cooldown
         timeSinceLastDash = time - lastDash;
 
         if (!attachedTo) {
-            throw "what the heck";
+            // Destroyed
+            return;
         }
+
         if (timeSinceLastDash > cooldown) {
             attachedTo->RemoveTag(Tag::NO_GRAVITY);
             attachedTo->airFriction.y = 1;
         }
+        #endif
     }
 
     virtual void Fire(Time time) override {
@@ -49,12 +53,13 @@ public:
         WeaponObject::Serialize(obj);
         // Replicating this desyncs the client side prediction of these
         //   abilities
-        // obj["tsld"] = timeSinceLastDash;
+        // obj.Key("tsld");
+        // obj.Uint64(timeSinceLastDash);
     }
 
     virtual void ProcessReplication(json& obj) override {
         WeaponObject::ProcessReplication(obj);
-        // timeSinceLastDash = obj["tsld"];
+        // timeSinceLastDash = obj["tsld"].GetUint64();
     }
 };
 

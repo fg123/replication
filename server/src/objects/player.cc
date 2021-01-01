@@ -81,17 +81,28 @@ void PlayerObject::PickupWeapon(WeaponObject* weapon) {
 
 void PlayerObject::Tick(Time time) {
     {
-        std::scoped_lock lock(socketDataMutex);
         #ifdef BUILD_SERVER
             Time clientTime = lastClientInputTime + (ticksSinceLastProcessed * TickInterval);
         #else
             Time clientTime = time;
         #endif
+
+        // if (!GetVelocity().IsZero()) {
+        //     LOG_DEBUG(clientTime << ": " << GetPosition());
+        // }
+
+        std::scoped_lock lock(socketDataMutex);
+
         while (inputBuffer.size() > 0) {
             JSONDocument& front = inputBuffer.front();
             Time firstTime = front["time"].GetUint();
             // LOG_DEBUG("First " << firstTime << " client Time " << clientTime);
-            if (firstTime <= clientTime) {
+            if (firstTime == clientTime) {
+                ProcessInputData(front);
+                inputBuffer.pop();
+            }
+            else if (firstTime < clientTime) {
+                LOG_DEBUG("Input in the past! " << firstTime << " < " << clientTime);
                 ProcessInputData(front);
                 inputBuffer.pop();
             }
@@ -122,7 +133,7 @@ void PlayerObject::Tick(Time time) {
         // velocity.y = -300;
     }
     SetVelocity(velocity);
-#ifdef BUILD_SERVER
+
     if (currentWeapon) {
         if (mouseState[LEFT_MOUSE_BUTTON]) {
             if (!lastMouseState[LEFT_MOUSE_BUTTON]) {
@@ -156,7 +167,7 @@ void PlayerObject::Tick(Time time) {
             zWeapon->ReleaseFire(time);
         }
     }
-#endif
+
     Object::Tick(time);
 
     const Vector2& position = GetPosition();
