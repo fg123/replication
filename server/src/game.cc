@@ -99,7 +99,6 @@ void Game::Tick(Time time) {
             gameObjects.erase(objectId);
             deadSinceLastReplicate.insert(objectId);
             delete object;
-            RequestReplication(objectId);
         }
     }
 

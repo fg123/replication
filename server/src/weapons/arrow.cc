@@ -44,9 +44,9 @@ void ArrowObject::Tick(Time time) {
         SetVelocity(savedVelocity);
     }
 #ifdef BUILD_SERVER
-    // if (timeLanded != 0 && timeSinceLanded > timeBeforeDie) {
-    //     game.DestroyObject(GetId());
-    // }
+    if (timeLanded != 0 && timeSinceLanded > timeBeforeDie) {
+        game.DestroyObject(GetId());
+    }
 #endif
 }
 

@@ -61,8 +61,8 @@ int main(int argc, char** argv) {
             LOG_INFO("Connection Opened");
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
             data->ws = ws;
-            data->nextRespawnCharacter = "Archer";
-            PlayerObject* playerObject = new Archer(game, Vector2(100, 100));
+            data->nextRespawnCharacter = "Marine";
+            PlayerObject* playerObject = new Marine(game, Vector2(100, 100));
             data->playerObject = playerObject;
 
             game.AddPlayer(data, playerObject);
