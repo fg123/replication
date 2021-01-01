@@ -27,7 +27,20 @@ module.exports = class GameCanvas {
             const jsonString = this.clientState.wasm.UTF8ToString(serializedString);
             const serializedObject = JSON.parse(jsonString);
             this.clientState.wasm._free(serializedString);
+            const oldClientP = this.clientState.gameObjects[k].client_p;
             this.clientState.gameObjects[k] = serializedObject;
+            this.clientState.gameObjects[k].client_p = serializedObject.p;
+            // if (oldClientP === undefined) {
+            //     this.clientState.gameObjects[k].client_p = this.clientState.gameObjects[k].p;
+            // }
+            // else {
+            //     // Interpolate towards
+            //     const final = this.clientState.gameObjects[k].p;
+            //     this.clientState.gameObjects[k].client_p = {
+            //         x: oldClientP.x + (final.x - oldClientP.x) / 5,
+            //         y: oldClientP.y + (final.y - oldClientP.y) / 5
+            //     };
+            // }
         });
 
         this.canvas.width  = this.clientState.width;

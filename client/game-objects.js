@@ -2,21 +2,21 @@ const { drawImage } = require('./draw-util');
 
 function drawPlayer(body, arm, context, resourceManager, obj) {
     const image = obj.v.x < 0 ? resourceManager.get(body + '-FLIPPED') : resourceManager.get(body);
-    drawImage(context, image, obj.p.x, obj.p.y, (image.width / 2), (image.height / 2));
+    drawImage(context, image, obj.client_p.x, obj.client_p.y, (image.width / 2), (image.height / 2));
     const armImage = resourceManager.get(arm);
-    drawImage(context, armImage, obj.p.x, obj.p.y + 7, (armImage.width / 2), (armImage.height / 2), obj.aa);
+    drawImage(context, armImage, obj.client_p.x, obj.client_p.y + 7, (armImage.width / 2), (armImage.height / 2), obj.aa);
 
     // Draw Health Bar
     context.fillStyle = "black";
     context.fillRect(
-        obj.p.x - 25,
-        obj.p.y - 50,
+        obj.client_p.x - 25,
+        obj.client_p.y - 50,
         50, 5
     );
     context.fillStyle = "green";
     context.fillRect(
-        obj.p.x - 25,
-        obj.p.y - 50,
+        obj.client_p.x - 25,
+        obj.client_p.y - 50,
         0.5 * obj.h, 5
     );
 }
@@ -27,14 +27,14 @@ module.exports = {
     "RectangleObject": {
         draw (context, resourceManager, obj, objects) {
             // context.fillStyle = "red";
-            // context.fillRect(obj.p.x, obj.p.y, obj.size.x, obj.size.y);
+            // context.fillRect(obj.client_p.x, obj.client_p.y, obj.size.x, obj.size.y);
         }
     },
     "CircleObject": {
         draw (context, resourceManager, obj, objects) {
             context.fillStyle = "blue";
             context.beginPath();
-            context.arc(obj.p.x, obj.p.y, obj.radius, 0, 2 * Math.PI);
+            context.arc(obj.client_p.x, obj.client_p.y, obj.radius, 0, 2 * Math.PI);
             context.fill();
         }
     },
@@ -42,7 +42,7 @@ module.exports = {
         draw (context, resourceManager, obj, objects) {
             context.fillStyle = "black";
             context.beginPath();
-            context.arc(obj.p.x, obj.p.y, 5, 0, 2 * Math.PI);
+            context.arc(obj.client_p.x, obj.client_p.y, 5, 0, 2 * Math.PI);
             context.fill();
         }
     },
@@ -50,7 +50,7 @@ module.exports = {
         draw (context, resourceManager, obj, objects) {
             context.fillStyle = "black";
             context.beginPath();
-            context.arc(obj.p.x, obj.p.y, 5, 0, 2 * Math.PI);
+            context.arc(obj.client_p.x, obj.client_p.y, 5, 0, 2 * Math.PI);
             context.fill();
 
             const owner = objects[obj.owner];
@@ -58,8 +58,8 @@ module.exports = {
                 context.strokeStyle = "black";
                 context.lineWidth = 3;
                 context.beginPath();
-                context.moveTo(obj.p.x, obj.p.y);
-                context.lineTo(owner.p.x, owner.p.y);
+                context.moveTo(obj.client_p.x, obj.client_p.y);
+                context.lineTo(owner.client_p.x, owner.client_p.y);
                 context.stroke();
             }
         }
@@ -67,14 +67,14 @@ module.exports = {
     "ArtilleryObject": {
         draw (context, resourceManager, obj, objects) {
             const image = resourceManager.get('artillery.png');
-            drawImage(context, image, obj.p.x, obj.p.y);
+            drawImage(context, image, obj.client_p.x, obj.client_p.y);
         }
     },
     "BulletObject": {
         draw (context, resourceManager, obj, objects) {
             context.fillStyle = "black";
             context.beginPath();
-            context.arc(obj.p.x, obj.p.y, 3, 0, 2 * Math.PI);
+            context.arc(obj.client_p.x, obj.client_p.y, 3, 0, 2 * Math.PI);
             context.fill();
         }
     },
@@ -83,9 +83,9 @@ module.exports = {
             context.strokeStyle = "black";
             context.lineWidth = 3;
             context.beginPath();
-            context.moveTo(obj.p.x, obj.p.y);
+            context.moveTo(obj.client_p.x, obj.client_p.y);
             const mag = Math.sqrt(Math.pow(obj.v.x, 2) + Math.pow(obj.v.y, 2))
-            context.lineTo(obj.p.x - (obj.v.x / mag) * 45, obj.p.y - (obj.v.y / mag) * 45)
+            context.lineTo(obj.client_p.x - (obj.v.x / mag) * 45, obj.client_p.y - (obj.v.y / mag) * 45)
             context.stroke();
         }
     },
@@ -102,7 +102,7 @@ module.exports = {
                 angle += playerAttach.aa;
             }
             const image = isFlip ? resourceManager.get('m4.png-FLIPPED') : resourceManager.get('m4.png');
-            drawImage(context, image, obj.p.x, obj.p.y, (image.width / 3), (image.height / 3), angle);
+            drawImage(context, image, obj.client_p.x, obj.client_p.y, (image.width / 3), (image.height / 3), angle);
         }
     },
     "PistolObject": {
@@ -118,7 +118,7 @@ module.exports = {
                 angle += playerAttach.aa;
             }
             const image = isFlip ? resourceManager.get('de.png-FLIPPED') : resourceManager.get('de.png');
-            drawImage(context, image, obj.p.x, obj.p.y, (image.width / 2), (image.height / 2), angle);
+            drawImage(context, image, obj.client_p.x, obj.client_p.y, (image.width / 2), (image.height / 2), angle);
         }
     },
     "BowObject": {
@@ -139,15 +139,15 @@ module.exports = {
                     context.lineWidth = 3;
                     context.strokeStyle = 'black';
                     context.beginPath();
-                    context.moveTo(obj.p.x, obj.p.y);
+                    context.moveTo(obj.client_p.x, obj.client_p.y);
                     const x = afv.x / 10;
                     const y = afv.y / 10;
-                    context.lineTo(obj.p.x + x, obj.p.y + y);
+                    context.lineTo(obj.client_p.x + x, obj.client_p.y + y);
                     context.stroke();
                 }
             }
             const image = isFlip ? resourceManager.get('bow.png-FLIPPED') : resourceManager.get('bow.png');
-            drawImage(context, image, obj.p.x, obj.p.y, (image.width), (image.height), angle);
+            drawImage(context, image, obj.client_p.x, obj.client_p.y, (image.width), (image.height), angle);
         }
     },
     "ArtilleryStrike": {
@@ -180,10 +180,10 @@ module.exports = {
                     context.lineWidth = 3;
                     context.strokeStyle = 'black';
                     context.beginPath();
-                    context.moveTo(obj.p.x, obj.p.y);
+                    context.moveTo(obj.client_p.x, obj.client_p.y);
                     const x = afv.x / 10;
                     const y = afv.y / 10;
-                    context.lineTo(obj.p.x + x, obj.p.y + y);
+                    context.lineTo(obj.client_p.x + x, obj.client_p.y + y);
                     context.stroke();
                 }
             }
