@@ -1,9 +1,9 @@
-FROM alpine:3.7
+FROM ubuntu:18.04
 
-RUN apk add --no-cache bash
+WORKDIR /app
 
 COPY . .
 
-RUN chmod +x /server/bin/game_server_prod
+RUN chmod +x server/bin/game_server_prod
 
-CMD ["/server/bin/game_server_prod"]
+CMD ["server/bin/game_server_prod"]
