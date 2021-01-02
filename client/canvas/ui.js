@@ -60,6 +60,28 @@ module.exports = class UICanvas {
         this.context.fillText(last, x + perfTracker.size + 24, y + 16 + height / 2);
     }
 
+    DrawWeapon(player, width, height) {
+        // Bottom Right
+        if (!player.w) return;
+        const weapon = this.clientState.GetObject(player.w);
+        if (weapon.blts === undefined) return;
+        const bullets = weapon.blts;
+        const magazines = weapon.mags;
+
+        this.context.fillStyle = "black";
+        this.context.fillRect(width - 250, height - 150, 200, 100);
+
+        this.context.font = "30px Prompt";
+        this.context.textBaseline = "middle";
+        this.context.textAlign = "center";
+        this.context.fillStyle = "white";
+        this.context.fillText(`${bullets}/${magazines}`, width - 150, height - 100);
+
+        this.context.fillStyle = "green";
+        const percentageReload = weapon.tsr / weapon.rlt;
+        this.context.fillRect(width - 250, height - 150, 200 * percentageReload, 20);
+    }
+
     Draw() {
         requestAnimationFrame(() => { this.Draw() });
 
@@ -78,7 +100,6 @@ module.exports = class UICanvas {
         this.canvas.style.height = height + 'px';
 
         const currentTime = Date.now();
-        const deltaTime = currentTime - this.lastDrawTime;
 
         this.context.fillStyle = "black";
         this.context.beginPath();
@@ -118,6 +139,10 @@ module.exports = class UICanvas {
         this.DrawGraph("HandleReplicate", this.clientState.performance.handleReplicateTime, 20, 60);
 
         this.DrawGraph("TickTime", this.clientState.performance.tickTime, 20, 140);
+
+
+        this.DrawWeapon(player, width, height);
+
         this.lastDrawTime = currentTime;
     }
 }

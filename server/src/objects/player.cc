@@ -8,6 +8,7 @@ static const int A_KEY = 65;
 static const int S_KEY = 83;
 static const int D_KEY = 68;
 static const int F_KEY = 70;
+static const int R_KEY = 82;
 static const int G_KEY = 71;
 static const int Q_KEY = 81;
 static const int Z_KEY = 90;
@@ -20,10 +21,11 @@ std::unordered_map<int, size_t> KEY_MAP = {
     { A_KEY, 2 },
     { F_KEY, 3 },
     { G_KEY, 4 },
-    { Q_KEY, 5 },
-    { Z_KEY, 6 },
-    { W_KEY, 7 },
-    { SPACE_KEY, 8 }
+    { R_KEY, 5 },
+    { Q_KEY, 6 },
+    { Z_KEY, 7 },
+    { W_KEY, 8 },
+    { SPACE_KEY, 9 }
 };
 
 PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector2::Zero) {
@@ -144,7 +146,13 @@ void PlayerObject::Tick(Time time) {
         else if (lastMouseState[LEFT_MOUSE_BUTTON]) {
             currentWeapon->ReleaseFire(time);
         }
+        if (keyboardState[KEY_MAP[R_KEY]]) {
+            if (!lastKeyboardState[KEY_MAP[R_KEY]]) {
+                currentWeapon->StartReload(time);
+            }
+        }
     }
+
     if (qWeapon) {
         if (keyboardState[KEY_MAP[Q_KEY]]) {
             if (!lastKeyboardState[KEY_MAP[Q_KEY]]) {
@@ -156,6 +164,7 @@ void PlayerObject::Tick(Time time) {
             qWeapon->ReleaseFire(time);
         }
     }
+
     if (zWeapon) {
         if (keyboardState[KEY_MAP[Z_KEY]]) {
             if (!lastKeyboardState[KEY_MAP[Z_KEY]]) {

@@ -229,6 +229,13 @@ module.exports = class ClientState {
         }
     }
 
+    GetObject(id) {
+        if (this.gameObjects[id]) {
+            return this.gameObjects[id];
+        }
+        return undefined;
+    }
+
     GetPlayerObject() {
         if (this.localPlayerObjectId === undefined) return undefined;
         return this.gameObjects[this.localPlayerObjectId];

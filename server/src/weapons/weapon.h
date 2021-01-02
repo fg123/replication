@@ -25,6 +25,8 @@ public:
     virtual void Fire(Time time) {}
     virtual void ReleaseFire(Time time) {}
 
+    virtual void StartReload(Time time) {}
+
     virtual void Tick(Time time) override;
     virtual void Serialize(JSONWriter& obj) override;
     virtual void ProcessReplication(json& obj) override;

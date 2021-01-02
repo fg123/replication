@@ -1,0 +1,38 @@
+#ifndef GUN_H
+#define GUN_H
+
+#include "weapon.h"
+#include "game.h"
+
+class GunBase : public WeaponObject {
+protected:
+    // Changable by underlying guns
+    double fireRate = 10;
+    int magazineSize;
+
+    int magazines;
+    int bullets;
+
+    int damage;
+
+    Time reloadTime;
+
+private:
+    Time nextFireTime = 0;
+    Time reloadStartTime = 0;
+
+    Time timeSinceReload = 0;
+
+public:
+    GunBase(Game& game) : GunBase(game, Vector2::Zero) {}
+    GunBase(Game& game, Vector2 position) : WeaponObject(game, position) {}
+
+    virtual void StartReload(Time time) override;
+
+    virtual void Tick(Time time) override;
+    virtual void Fire(Time time) override;
+    virtual void Serialize(JSONWriter& obj) override;
+    virtual void ProcessReplication(json& obj) override;
+};
+
+#endif

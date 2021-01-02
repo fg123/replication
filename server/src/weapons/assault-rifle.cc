@@ -1,20 +1,12 @@
 #include "assault-rifle.h"
-#include "bullet.h"
-#include "player.h"
 
-void AssaultRifleObject::Fire(Time time) {
-    if (time < nextFireTime) {
-        return;
-    }
-    nextFireTime = time + (1000.0 / fireRate);
-#ifdef BUILD_SERVER
-    BulletObject* bullet = new BulletObject(game);
-    bullet->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 70);
-    bullet->SetVelocity(attachedTo->GetAimDirection() * 2000.0);
-    game.AddObject(bullet);
-#endif
-}
-
-AssaultRifleObject::AssaultRifleObject(Game& game, Vector2 position) : WeaponObject(game, position) {
+AssaultRifleObject::AssaultRifleObject(Game& game, Vector2 position) : GunBase(game, position) {
     AddCollider(new RectangleCollider(this, Vector2(-26, -10), Vector2(74, 24)));
+
+    fireRate = 14;
+    magazineSize = 25;
+    magazines = 3;
+    bullets = magazineSize;
+    damage = 14;
+    reloadTime = 1000;
 }

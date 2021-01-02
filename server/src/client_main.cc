@@ -15,7 +15,7 @@
 #include "characters/archer.h"
 #include "characters/hookman.h"
 
-static const size_t MAX_INPUT_EVENT_QUEUE = 300;
+static const size_t MAX_INPUT_EVENT_QUEUE = 100;
 
 extern "C" {
     /** Client Interface for the JS Front End */
