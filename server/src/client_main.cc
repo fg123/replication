@@ -175,7 +175,7 @@ extern "C" {
                 LOG_WARN("Server faster than client! Last tick client: " << lastTickTime << " Server Current: " << serverCurrentTickTime);
                 // All inputs are non relevant anyway, shift client to present and just call it.
                 inputEvents.clear();
-                lastTickTime = (serverCurrentTickTime + ping) % TickInterval;
+                lastTickTime = ((serverCurrentTickTime + ping) / TickInterval) * TickInterval;
                 return;
             }
 
