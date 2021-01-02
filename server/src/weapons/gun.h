@@ -17,12 +17,16 @@ protected:
 
     Time reloadTime;
 
+    bool automaticFire = false;
+    double fireOffset;
+
 private:
     Time nextFireTime = 0;
     Time reloadStartTime = 0;
 
     Time timeSinceReload = 0;
 
+    void ActualFire(Time time);
 public:
     GunBase(Game& game) : GunBase(game, Vector2::Zero) {}
     GunBase(Game& game, Vector2 position) : WeaponObject(game, position) {}
@@ -30,6 +34,7 @@ public:
     virtual void StartReload(Time time) override;
 
     virtual void Tick(Time time) override;
+    virtual void StartFire(Time time) override;
     virtual void Fire(Time time) override;
     virtual void Serialize(JSONWriter& obj) override;
     virtual void ProcessReplication(json& obj) override;

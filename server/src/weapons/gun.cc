@@ -15,13 +15,28 @@ void GunBase::Tick(Time time) {
     if (reloadStartTime != 0 && time >= reloadStartTime + reloadTime) {
         reloadStartTime = 0;
         if (magazines > 0) {
+        #ifdef BUILD_SERVER
             magazines -= 1;
             bullets = magazineSize;
+            game.RequestReplication(GetId());
+        #endif
         }
     }
 }
 
 void GunBase::Fire(Time time) {
+    if (automaticFire) {
+        ActualFire(time);
+    }
+}
+
+void GunBase::StartFire(Time time) {
+    if (!automaticFire) {
+        ActualFire(time);
+    }
+}
+
+void GunBase::ActualFire(Time time) {
     if (time < nextFireTime) {
         // Firing cooldown
         return;
@@ -40,9 +55,8 @@ void GunBase::Fire(Time time) {
 #ifdef BUILD_SERVER
     bullets -= 1;
     nextFireTime = time + (1000.0 / fireRate);
-
     BulletObject* bullet = new BulletObject(game, damage);
-    bullet->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 70);
+    bullet->SetPosition(GetPosition() + attachedTo->GetAimDirection() * fireOffset);
     bullet->SetVelocity(attachedTo->GetAimDirection() * 2000.0);
     game.AddObject(bullet);
     game.RequestReplication(GetId());

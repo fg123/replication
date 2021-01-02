@@ -169,7 +169,12 @@ void Game::InitialReplication(PlayerSocketData* data) {
 }
 
 void Game::RequestReplication(ObjectID objectId) {
-    replicateNextTick.insert(objectId);
+    // Should replicate all parents too
+    Object* obj = gameObjects[objectId];
+    while (obj != nullptr) {
+        replicateNextTick.insert(obj->GetId());
+        obj = obj->parent;
+    }
 }
 
 void Game::QueueAllDirtyForReplication(Time time) {
