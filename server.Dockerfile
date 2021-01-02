@@ -2,7 +2,8 @@ FROM ubuntu:18.04
 
 WORKDIR /app
 
-COPY . .
+COPY server/bin server/bin
+COPY data data
 
 RUN chmod +x server/bin/game_server_prod
 
