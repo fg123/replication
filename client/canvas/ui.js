@@ -22,7 +22,45 @@ module.exports = class UICanvas {
         this.Draw();
     }
 
-    Draw() {    
+    DrawGraph(title, perfTracker, x, y) {
+        const min = Math.min(...perfTracker.buffer);
+        const max = Math.max(...perfTracker.buffer);
+        const height = 50;
+
+        this.context.strokeStyle = "black";
+        this.context.lineWidth = 1;
+        this.context.strokeRect(x + 20, y + 16, perfTracker.size, height);
+
+        this.context.textBaseline = "top";
+        this.context.fillStyle = "black";
+        this.context.fillText(title, x, y);
+
+        this.context.textAlign = "end";
+        this.context.textBaseline = "top";
+        this.context.fillStyle = "black";
+        this.context.fillText(max, x + 16, y + 16);
+
+        this.context.textBaseline = "bottom";
+        this.context.fillText(min, x + 16, y + 16 + height);
+
+        this.context.textAlign = "start";
+        this.context.beginPath();
+        this.context.lineWidth = 1;
+        this.context.moveTo(x + 20, y + 16);
+        let last = 0;
+        for (let i = 0; i < perfTracker.size; i++) {
+            const val = perfTracker.buffer[(perfTracker.next + i) % perfTracker.size];
+            const yVal = (val - min) / (max - min);
+            last = val;
+            this.context.lineTo(x + 20 + i, (y + 16 + height) - (yVal * height));
+        }
+        this.context.stroke();
+
+        this.context.textBaseline = "middle";
+        this.context.fillText(last, x + perfTracker.size + 24, y + 16 + height / 2);
+    }
+
+    Draw() {
         requestAnimationFrame(() => { this.Draw() });
 
         const thisFrameTime = (this.fps.thisLoop = Date.now()) - this.fps.lastLoop;
@@ -76,7 +114,10 @@ module.exports = class UICanvas {
         this.context.fillStyle = "black";
         this.context.fillText(`${Math.round(1000.0 / this.fps.frameTime)}FPS`, 20, 20);
         this.context.fillText(`${this.clientState.ping}ms`, 20, 40);
-        
+
+        this.DrawGraph("HandleReplicate", this.clientState.performance.handleReplicateTime, 20, 60);
+
+        this.DrawGraph("TickTime", this.clientState.performance.tickTime, 20, 140);
         this.lastDrawTime = currentTime;
     }
 }

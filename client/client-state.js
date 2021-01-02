@@ -1,4 +1,5 @@
 const Constants = require('./constants');
+const PerfTracker = require('./perf-tracker');
 
 const SIMULATED_LAG = Constants.isProduction ? 0 : 60;
 
@@ -35,6 +36,11 @@ module.exports = class ClientState {
 
         window.addEventListener('resize', resize);
         resize();
+
+        this.performance = {
+            handleReplicateTime: new PerfTracker(100),
+            tickTime: new PerfTracker(100)
+        };
     }
 
     ToHeapString(wasm, str) {
@@ -102,10 +108,15 @@ module.exports = class ClientState {
         }, 1000);
 
         const tickInterval = this.wasm._GetTickInterval();
+        let lastTick = Date.now();
         setInterval(() => {
+            const curr = Date.now();
+            this.performance.tickTime.pushValue(curr - lastTick);
+            lastTick = curr;
             this.wasm._TickGame();
         }, tickInterval);
 
+        let lastReplicate = Date.now();
         const handler = (ev) => {
             // console.log("WebSocket", ev.data);
             const event = JSON.parse(ev.data);
@@ -128,6 +139,9 @@ module.exports = class ClientState {
                 return;
             }
             else if (event["event"] == "r") {
+                const curr = Date.now();
+                this.performance.handleReplicateTime.pushValue(curr - lastReplicate);
+                lastReplicate = curr;
                 const heapString = this.ToHeapString(this.wasm, ev.data);
                 this.wasm._HandleReplicate(heapString);
                 this.wasm._free(heapString);

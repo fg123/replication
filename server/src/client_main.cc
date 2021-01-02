@@ -2,6 +2,8 @@
 
 #include "logging.h"
 
+#include <deque>
+
 #include "game.h"
 #include "objects/player.h"
 #include "object.h"
@@ -25,7 +27,7 @@ extern "C" {
     Game game;
 
     EMSCRIPTEN_KEEPALIVE
-    std::vector<JSONDocument> inputEvents;
+    std::deque<JSONDocument> inputEvents;
 
     EMSCRIPTEN_KEEPALIVE
     void SetLocalPlayerClient(ObjectID client) {
@@ -153,11 +155,14 @@ extern "C" {
                 (ticksSinceLastProcessed * TickInterval);
 
             // Delete inputs that the server has already processed (or that are too late?)
-            size_t thingsToDelete = 0;
-            for (;thingsToDelete < inputEvents.size(); thingsToDelete++) {
-                if (inputEvents[thingsToDelete]["time"].GetUint64() > serverLastProcessedTime) break;
+            while (!inputEvents.empty()) {
+                if (inputEvents.front()["time"].GetUint64() < serverLastProcessedTime) {
+                    inputEvents.pop_front();
+                }
+                else {
+                    break;
+                }
             }
-            inputEvents.erase(inputEvents.begin(), inputEvents.begin() + thingsToDelete);
 
             // Client too far ahead
             if (lastTickTime > serverCurrentTickTime + 1000) {
@@ -176,8 +181,8 @@ extern "C" {
 
             // Queue up inputs that the server hasn't processed yet
             Time nextTick = serverCurrentTickTime;
-            if (!inputEvents.empty() && inputEvents[0]["time"].GetUint64() < nextTick) {
-                nextTick = inputEvents[0]["time"].GetUint64();
+            if (!inputEvents.empty() && inputEvents.front()["time"].GetUint64() < nextTick) {
+                nextTick = inputEvents.front()["time"].GetUint64();
             }
 
             if (Object* obj = game.GetObject(localClientId)) {

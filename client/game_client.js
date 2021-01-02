@@ -5605,9 +5605,9 @@ var _inputEvents = Module["_inputEvents"] = 34440;
 
 var _localClientId = Module["_localClientId"] = 34268;
 
-var _ping = Module["_ping"] = 34464;
+var _ping = Module["_ping"] = 34472;
 
-var _lastTickTime = Module["_lastTickTime"] = 34456;
+var _lastTickTime = Module["_lastTickTime"] = 34464;
 
 function invoke_vii(index, a1, a2) {
  var sp = stackSave();
