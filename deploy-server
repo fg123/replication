@@ -1,7 +1,10 @@
 #!/bin/bash
 
+cd server && make server_prod
+cd ..
+
 cp server.Dockerfile Dockerfile
-make server_prod
+
 git add .
 git commit -m "Server Deploy"
 git push production-server
