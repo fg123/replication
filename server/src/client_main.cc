@@ -173,6 +173,10 @@ extern "C" {
             }
             else if (lastTickTime < serverCurrentTickTime) {
                 LOG_WARN("Server faster than client! Last tick client: " << lastTickTime << " Server Current: " << serverCurrentTickTime);
+                // All inputs are non relevant anyway, shift client to present and just call it.
+                inputEvents.clear();
+                lastTickTime = (serverCurrentTickTime + ping) % TickInterval;
+                return;
             }
 
             // There's a chance here that the server has gone on faster than us, but has not
