@@ -304,11 +304,11 @@ void PlayerObject::OnInput(const JSONDocument& obj) {
 }
 
 void PlayerObject::ProcessInputData(const JSONDocument& obj) {
-    if (obj["event"] != "mm") {
-        // Happens too often!
-        LOG_DEBUG("Process Input Data: [" << obj["time"].GetUint64()
-                    << "] " << obj["event"].GetString());
-    }
+    // if (obj["event"] != "mm") {
+    //     // Happens too often!
+    //     LOG_DEBUG("Process Input Data: [" << obj["time"].GetUint64()
+    //                 << "] " << obj["event"].GetString());
+    // }
     if (obj["event"] == "ku") {
         int key = obj["key"].GetInt();
         if (KEY_MAP.find(key) != KEY_MAP.end()) {
