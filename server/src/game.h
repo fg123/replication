@@ -25,6 +25,8 @@ struct PlayerSocketData {
     bool playerObjectDirty = true;
     bool isReady = false;
     std::string nextRespawnCharacter;
+
+    uWS::Loop* eventLoop;
 #endif
     PlayerObject* playerObject;
 };
@@ -82,6 +84,8 @@ public:
 
     void AddObject(Object* obj);
     void DestroyObject(ObjectID objectId);
+
+    void SendData(PlayerSocketData* player, std::string message);
 #endif
 
 #ifdef BUILD_CLIENT

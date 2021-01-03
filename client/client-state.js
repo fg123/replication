@@ -135,8 +135,8 @@ module.exports = class ClientState {
 
         let lastReplicate = Date.now();
         const handler = (ev) => {
-            // console.log("WebSocket", ev.data);
             const event = JSON.parse(ev.data);
+            console.log(event);
             if (event["playerLocalObjectId"] !== undefined) {
                 console.log("Player Local ID", event);
                 const id = event["playerLocalObjectId"];

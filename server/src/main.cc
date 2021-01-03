@@ -36,9 +36,9 @@ int main(int argc, char** argv) {
         TickInterval
     );
 
-    // gameTimer.ScheduleInterval([gameTick](Time time) {
-    //     LOG_INFO("Average Tick Interval: " << gameTick->performance.GetAverage());
-    // }, 3000);
+    gameTimer.ScheduleInterval([gameTick](Time time) {
+        LOG_INFO("Average Tick Interval: " << gameTick->performance.GetAverage());
+    }, 3000);
 
 #ifdef BUILD_SERVER
     gameTimer.ScheduleInterval(std::bind(&Game::QueueAllDirtyForReplication, &game, std::placeholders::_1),
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     uWS::App().get("/status", [](auto *res, auto */*req*/) {
 	    res->end("ok");
 	}).ws<PlayerSocketData>("/connect", {
-        .compression = uWS::SHARED_COMPRESSOR,
+        .compression = uWS::DEDICATED_COMPRESSOR_4KB,
         .maxPayloadLength = 16 * 1024,
         .idleTimeout = 30,
         .maxBackpressure = 1 * 1024 * 1024,
@@ -61,6 +61,7 @@ int main(int argc, char** argv) {
             LOG_INFO("Connection Opened");
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
             data->ws = ws;
+            data->eventLoop = uWS::Loop::get();
             data->nextRespawnCharacter = "Marine";
             PlayerObject* playerObject = new Marine(game, Vector2(100, 100));
             data->playerObject = playerObject;

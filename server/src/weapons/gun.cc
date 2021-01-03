@@ -64,7 +64,7 @@ void GunBase::ActualFire(Time time) {
 }
 
 void GunBase::StartReload(Time time) {
-    if (reloadStartTime == 0 && magazines > 0) {
+    if (reloadStartTime == 0 && magazines > 0 && bullets != magazineSize) {
         reloadStartTime = time;
     }
 }

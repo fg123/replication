@@ -140,6 +140,14 @@ void Game::Tick(Time time) {
         ticks: ticks server has processed sicne that last input
     }
 */
+void Game::SendData(PlayerSocketData* player, std::string message) {
+    player->eventLoop->defer([player, message] () {
+        // LOG_DEBUG(message);
+        if (!player->ws->send(message, uWS::OpCode::TEXT)) {
+            LOG_ERROR("Could not send!");
+        }
+    });
+}
 
 void Game::InitialReplication(PlayerSocketData* data) {
     rapidjson::StringBuffer buffer;
@@ -163,9 +171,7 @@ void Game::InitialReplication(PlayerSocketData* data) {
     }
     writer.EndArray();
     writer.EndObject();
-    if (!data->ws->send(buffer.GetString(), uWS::OpCode::TEXT)) {
-        LOG_ERROR("Could not send!");
-    }
+    SendData(data, buffer.GetString());
 }
 
 void Game::RequestReplication(ObjectID objectId) {
@@ -244,9 +250,7 @@ void Game::Replicate(Time time) {
             writer2.RawValue(buffer.GetString(), buffer.GetSize(), rapidjson::kArrayType);
             writer2.EndObject();
 
-            if (!player->ws->send(output.GetString(), uWS::OpCode::TEXT)) {
-                LOG_ERROR("Send Error");
-            }
+            SendData(player, output.GetString());
         }
         if (player->playerObjectDirty) {
             if (player->playerObject->GetId() != 0) {
@@ -258,7 +262,7 @@ void Game::Replicate(Time time) {
             writer2.Key("playerLocalObjectId");
             writer2.Uint(player->playerObject->GetId());
             writer2.EndObject();
-            player->ws->send(output.GetString(), uWS::OpCode::TEXT);
+            SendData(player, output.GetString());
         }
     }
 }
