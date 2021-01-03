@@ -30,8 +30,14 @@ CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollide
         // LOG_DEBUG("Rectangle Size " << rect->size);
 
         // Clamp backwards to edge of rectangle
-        Vector2 cVel = -circle->GetOwner()->GetVelocity();
-        Vector2 lastFrame = circPosition + cVel; // Where we were last frame
+        Vector2 cVel = circle->GetOwner()->GetVelocity();
+        Vector2 rVel = rect->GetOwner()->GetVelocity();
+
+        // LastFrame should be where the circle was last frame:
+        //   circPosition - cVel
+        // But, if the rectangle is moving towards the circle instead (or both are moving)
+        //   this position won't be correct.
+        Vector2 lastFrame = circPosition - cVel + rVel; // Where we were last frame
 
         Vector2 topLeft = rectPosition - circle->radius;
         Vector2 topRight = rectPosition;

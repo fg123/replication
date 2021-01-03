@@ -122,14 +122,10 @@ extern "C" {
 
             bool hasPlayerIn = false;
 
-            std::unordered_set<ObjectID> replicateIds;
-
             for (auto& event : object["objs"].GetArray()) {
                 ObjectID ids = event["id"].GetUint();
-                // replicateIds.insert(ids);
                 if (ids == localClientId) {
                     hasPlayerIn = true;
-                    replicateIds.insert(ids);
                 }
                 game.EnsureObjectExists(event);
             }
@@ -150,13 +146,14 @@ extern "C" {
 
             // Calculate where the server is now
             uint64_t ticksSinceLastProcessed = object["ticks"].GetUint64();
-            // LOG_DEBUG("serverLastProcessedTime " << serverLastProcessedTime << " ticksSinceLastProcessed" << ticksSinceLastProcessed);
+            // LOG_DEBUG("ServerLastProcessedTime " << serverLastProcessedTime << " TicksSinceLastProcessed" << ticksSinceLastProcessed);
             Time serverCurrentTickTime = serverLastProcessedTime +
                 (ticksSinceLastProcessed * TickInterval);
 
             // Delete inputs that the server has already processed (or that are too late?)
             while (!inputEvents.empty()) {
-                if (inputEvents.front()["time"].GetUint64() < serverLastProcessedTime) {
+                Time inputTime = inputEvents.front()["time"].GetUint64();
+                if (inputTime <= serverLastProcessedTime) {
                     inputEvents.pop_front();
                 }
                 else {
@@ -186,16 +183,12 @@ extern "C" {
             // Queue up inputs that the server hasn't processed yet
             Time nextTick = serverCurrentTickTime;
             if (!inputEvents.empty() && inputEvents.front()["time"].GetUint64() < nextTick) {
+                LOG_WARN("Input rewind next tick not accurate here!");
                 nextTick = inputEvents.front()["time"].GetUint64();
             }
 
             if (Object* obj = game.GetObject(localClientId)) {
-                // obj->SetLastTickTime(nextTick - TickInterval);
-                for (ObjectID objId : replicateIds) {
-                    if (Object* replicateObj = game.GetObject(objId)) {
-                        replicateObj->SetLastTickTime(nextTick - TickInterval);
-                    }
-                }
+                obj->SetLastTickTime(nextTick - TickInterval);
 
                 for (auto& jsonEvent : inputEvents) {
                     // Queue into Buffer
@@ -207,12 +200,7 @@ extern "C" {
                 // LOG_DEBUG("Bringing to present (" << serverLastProcessedTime << ", " << serverCurrentTickTime << ") " << nextTick << " -> " << ending);
                 // LOG_DEBUG("Bringing to present with " << (ending - nextTick) / TickInterval << " ticks!");
                 while (nextTick < ending) {
-                    // obj->Tick(nextTick);
-                    for (ObjectID objId : replicateIds) {
-                        if (Object* replicateObj = game.GetObject(objId)) {
-                            replicateObj->Tick(nextTick);
-                        }
-                    }
+                    obj->Tick(nextTick);
                     nextTick += TickInterval;
                 }
             }

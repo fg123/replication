@@ -89,7 +89,7 @@ void PlayerObject::Tick(Time time) {
             Time clientTime = time;
         #endif
 
-        // if (!GetVelocity().IsZero()) {
+        // if (GetVelocity().Length() > 1.0) {
         //     LOG_DEBUG(clientTime << ": " << GetPosition());
         // }
 
@@ -104,7 +104,7 @@ void PlayerObject::Tick(Time time) {
                 inputBuffer.pop();
             }
             else if (firstTime < clientTime) {
-                LOG_DEBUG("Input in the past! " << firstTime << " < " << clientTime);
+                // LOG_DEBUG("Input in the past! " << firstTime << " < " << clientTime);
                 ProcessInputData(front);
                 inputBuffer.pop();
             }
@@ -304,6 +304,11 @@ void PlayerObject::OnInput(const JSONDocument& obj) {
 }
 
 void PlayerObject::ProcessInputData(const JSONDocument& obj) {
+    if (obj["event"] != "mm") {
+        // Happens too often!
+        LOG_DEBUG("Process Input Data: [" << obj["time"].GetUint64()
+                    << "] " << obj["event"].GetString());
+    }
     if (obj["event"] == "ku") {
         int key = obj["key"].GetInt();
         if (KEY_MAP.find(key) != KEY_MAP.end()) {

@@ -36,9 +36,9 @@ int main(int argc, char** argv) {
         TickInterval
     );
 
-    gameTimer.ScheduleInterval([gameTick](Time time) {
-        LOG_INFO("Average Tick Interval: " << gameTick->performance.GetAverage());
-    }, 3000);
+    // gameTimer.ScheduleInterval([gameTick](Time time) {
+    //     LOG_INFO("Average Tick Interval: " << gameTick->performance.GetAverage());
+    // }, 3000);
 
 #ifdef BUILD_SERVER
     gameTimer.ScheduleInterval(std::bind(&Game::QueueAllDirtyForReplication, &game, std::placeholders::_1),
