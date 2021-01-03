@@ -8,7 +8,7 @@
     "build-prod": "webpack --config webpack.prod.js",
     "start-client": "node client/serve.js",
     "dev": "concurrently --kill-others 'npm:watch-client' 'npm:build-dev'",
-    "prod-client": "NODE_ENV=production npm run build-prod && NODE_ENV=production npm run start-client"
+    "prod-client": "NODE_ENV=production npm run start-client"
   },
   "repository": {
     "type": "git",

@@ -1,8 +1,14 @@
 #!/bin/bash
 
+echo "Building Client WASM"
 cd server && make client_prod
 cd ..
 
+echo "Building Client NPM"
+npm install --production
+NODE_ENV=production npm run build-prod
+
+echo "Deploying to Git"
 cp client.Dockerfile Dockerfile
 git add .
 git commit -m "Client Deploy"
