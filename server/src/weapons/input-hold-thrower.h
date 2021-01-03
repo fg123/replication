@@ -76,6 +76,9 @@ public:
     }
 
     virtual void Fire(Time time) override {
+        // if (instantFire) {
+        //     fireHoldDownTime;
+        // }
         if (fireHoldDownTime == 0 && !instantFire && timeSinceLastThrow > cooldown) {
             fireHoldDownTime = time;
         }

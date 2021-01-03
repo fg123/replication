@@ -37,8 +37,8 @@ module.exports = class GameCanvas {
             //     // Interpolate towards
             //     const final = this.clientState.gameObjects[k].p;
             //     this.clientState.gameObjects[k].client_p = {
-            //         x: oldClientP.x + (final.x - oldClientP.x) / 5,
-            //         y: oldClientP.y + (final.y - oldClientP.y) / 5
+            //         x: oldClientP.x + (final.x - oldClientP.x) / 2,
+            //         y: oldClientP.y + (final.y - oldClientP.y) / 2
             //     };
             // }
         });
@@ -77,7 +77,7 @@ module.exports = class GameCanvas {
                 if (gameObjectLookup[obj.t].draw) {
                     gameObjectLookup[obj.t].draw(this.context,
                         this.clientState.resourceManager, obj,
-                        this.clientState.gameObjects);
+                        this.clientState);
                 }
             }
             else {

@@ -25,13 +25,13 @@ const characters = require('./characters');
 
 module.exports = {
     "RectangleObject": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             // context.fillStyle = "red";
             // context.fillRect(obj.client_p.x, obj.client_p.y, obj.size.x, obj.size.y);
         }
     },
     "CircleObject": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             context.fillStyle = "blue";
             context.beginPath();
             context.arc(obj.client_p.x, obj.client_p.y, obj.radius, 0, 2 * Math.PI);
@@ -39,7 +39,7 @@ module.exports = {
         }
     },
     "GrenadeObject": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             context.fillStyle = "black";
             context.beginPath();
             context.arc(obj.client_p.x, obj.client_p.y, 5, 0, 2 * Math.PI);
@@ -47,13 +47,13 @@ module.exports = {
         }
     },
     "HookObject": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             context.fillStyle = "black";
             context.beginPath();
             context.arc(obj.client_p.x, obj.client_p.y, 5, 0, 2 * Math.PI);
             context.fill();
 
-            const owner = objects[obj.owner];
+            const owner = clientState.gameObjects[obj.owner];
             if (owner) {
                 context.strokeStyle = "black";
                 context.lineWidth = 3;
@@ -65,13 +65,13 @@ module.exports = {
         }
     },
     "ArtilleryObject": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             const image = resourceManager.get('artillery.png');
             drawImage(context, image, obj.client_p.x, obj.client_p.y);
         }
     },
     "BulletObject": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             context.fillStyle = "black";
             context.beginPath();
             context.arc(obj.client_p.x, obj.client_p.y, 3, 0, 2 * Math.PI);
@@ -79,7 +79,7 @@ module.exports = {
         }
     },
     "ArrowObject": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             context.strokeStyle = "black";
             context.lineWidth = 3;
             context.beginPath();
@@ -90,10 +90,10 @@ module.exports = {
         }
     },
     "AssaultRifleObject": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             let isFlip = false;
             let angle = 0;
-            const playerAttach = objects[obj.attach];
+            const playerAttach = clientState.gameObjects[obj.attach];
             if (playerAttach) {
                 isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
                 if (isFlip) {
@@ -106,10 +106,10 @@ module.exports = {
         }
     },
     "PistolObject": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             let isFlip = false;
             let angle = 0;
-            const playerAttach = objects[obj.attach];
+            const playerAttach = clientState.gameObjects[obj.attach];
             if (playerAttach) {
                 isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
                 if (isFlip) {
@@ -122,10 +122,10 @@ module.exports = {
         }
     },
     "BowObject": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             let isFlip = false;
             let angle = 0;
-            const playerAttach = objects[obj.attach];
+            const playerAttach = clientState.gameObjects[obj.attach];
             if (playerAttach) {
                 isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
                 if (isFlip) {
@@ -134,16 +134,18 @@ module.exports = {
                 angle += playerAttach.aa;
 
                 // Charge up time (charging)
-                const afv = obj.afv;
-                if (afv.x !== 0 || afv.y !== 0) {
-                    context.lineWidth = 3;
-                    context.strokeStyle = 'black';
-                    context.beginPath();
-                    context.moveTo(obj.client_p.x, obj.client_p.y);
-                    const x = afv.x / 10;
-                    const y = afv.y / 10;
-                    context.lineTo(obj.client_p.x + x, obj.client_p.y + y);
-                    context.stroke();
+                if (clientState.localPlayerObjectId === obj.attach) {
+                    const afv = obj.afv;
+                    if (afv.x !== 0 || afv.y !== 0) {
+                        context.lineWidth = 3;
+                        context.strokeStyle = 'black';
+                        context.beginPath();
+                        context.moveTo(obj.client_p.x, obj.client_p.y);
+                        const x = afv.x / 10;
+                        const y = afv.y / 10;
+                        context.lineTo(obj.client_p.x + x, obj.client_p.y + y);
+                        context.stroke();
+                    }
                 }
             }
             const image = isFlip ? resourceManager.get('bow.png-FLIPPED') : resourceManager.get('bow.png');
@@ -163,10 +165,10 @@ module.exports = {
 
     },
     "GrenadeThrower": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             let isFlip = false;
             let angle = 0;
-            const playerAttach = objects[obj.attach];
+            const playerAttach = clientState.gameObjects[obj.attach];
             if (playerAttach) {
                 isFlip = Math.abs(playerAttach.aa) > (Math.PI / 2);
                 if (isFlip) {
@@ -174,36 +176,38 @@ module.exports = {
                 }
                 angle += playerAttach.aa;
 
-                // Charge up time (charging)
-                const afv = obj.afv;
-                if (afv.x !== 0 || afv.y !== 0) {
-                    context.lineWidth = 3;
-                    context.strokeStyle = 'black';
-                    context.beginPath();
-                    context.moveTo(obj.client_p.x, obj.client_p.y);
-                    const x = afv.x / 10;
-                    const y = afv.y / 10;
-                    context.lineTo(obj.client_p.x + x, obj.client_p.y + y);
-                    context.stroke();
+                if (clientState.localPlayerObjectId === obj.attach) {
+                    // Charge up time (charging)
+                    const afv = obj.afv;
+                    if (afv.x !== 0 || afv.y !== 0) {
+                        context.lineWidth = 3;
+                        context.strokeStyle = 'black';
+                        context.beginPath();
+                        context.moveTo(obj.client_p.x, obj.client_p.y);
+                        const x = afv.x / 10;
+                        const y = afv.y / 10;
+                        context.lineTo(obj.client_p.x + x, obj.client_p.y + y);
+                        context.stroke();
+                    }
                 }
             }
         }
     },
     "Marine": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             const r = characters["Marine"].resources;
             // console.log("DrawMarine!", obj.p);
             drawPlayer(r.base, r.arm, context, resourceManager, obj);
         }
     },
     "Archer": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             const r = characters["Archer"].resources;
             drawPlayer(r.base, r.arm, context, resourceManager, obj);
         }
     },
     "Hookman": {
-        draw (context, resourceManager, obj, objects) {
+        draw (context, resourceManager, obj, clientState) {
             const r = characters["Hookman"].resources;
             drawPlayer(r.base, r.arm, context, resourceManager, obj);
         }

@@ -2,7 +2,7 @@
 #include "game.h"
 #include "player.h"
 
-BulletObject::BulletObject(Game& game, int damage) : Object(game), damage(0) {
+BulletObject::BulletObject(Game& game, int damage) : Object(game), damage(damage) {
     // Don't Collide with Weapons
     collideExclusion |= (uint64_t) Tag::WEAPON;
     SetTag(Tag::NO_GRAVITY);
