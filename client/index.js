@@ -33,4 +33,8 @@ Client().then((instance) => {
             });
         });
     };
+    webSocket.onclose = function(e) {
+        alert("Server disconnected! Press OK to reload and reconnect.");
+        window.location.reload();
+    };
 }).catch(error => console.error(error));

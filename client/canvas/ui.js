@@ -23,6 +23,8 @@ module.exports = class UICanvas {
     }
 
     DrawGraph(title, perfTracker, x, y) {
+        this.context.font = "13px Prompt"
+
         const min = Math.min(...perfTracker.buffer);
         const max = Math.max(...perfTracker.buffer);
         const height = 50;
@@ -134,7 +136,8 @@ module.exports = class UICanvas {
         this.context.textBaseline = "hanging";
         this.context.fillStyle = "black";
         this.context.fillText(`${Math.round(1000.0 / this.fps.frameTime)}FPS`, 20, 20);
-        this.context.fillText(`${this.clientState.ping}ms`, 20, 40);
+        const ping = this.clientState.ping;
+        this.context.fillText(`${ping > 999 ? ">999" : ping}ms`, 20, 40);
 
         this.DrawGraph("HandleReplicate", this.clientState.performance.handleReplicateTime, 20, 60);
 

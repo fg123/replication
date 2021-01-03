@@ -52,7 +52,7 @@ module.exports = class ClientState {
 
     SendCharacterSelection(selection) {
         console.log("Changing selection", selection);
-        this.webSocket.send(JSON.stringify(
+        this.SendData(JSON.stringify(
             {
                 "event":"setchar",
                 "char": selection
@@ -82,11 +82,15 @@ module.exports = class ClientState {
     SendData(data) {
         if (SIMULATED_LAG !== 0) {
             setTimeout(() => {
-                this.webSocket.send(data);
+                if (this.webSocket.readyState === WebSocket.OPEN) {
+                    this.webSocket.send(data);
+                }
             }, SIMULATED_LAG / 2);
         }
         else {
-            this.webSocket.send(data);
+            if (this.webSocket.readyState === WebSocket.OPEN) {
+                this.webSocket.send(data);
+            }
         }
     }
 
@@ -98,13 +102,26 @@ module.exports = class ClientState {
             "time": rdyTick
         }));
 
+        // This is 0 if it gets acknowledged
+        let lastHeartbeatAcked = 0;
         setInterval(() => {
             // Heartbeat Send (for ping)
+            if (lastHeartbeatAcked !== 0) {
+                // Last one didn't get acked! >1000 ping = close
+                this.ping = Date.now() - lastHeartbeatAcked;
+                // console.log("Last heartbeat didn't get acked! Closing socket.");
+                // console.log(this.webSocket);
+                // this.webSocket.terminate();
+                // console.log(this.webSocket);
+                return;
+            }
+            const currTime = Date.now();
             const hb = {
                 event: "hb",
-                time: Date.now()
+                time: currTime
             };
             this.SendData(JSON.stringify(hb));
+            lastHeartbeatAcked = currTime;
         }, 1000);
 
         const tickInterval = this.wasm._GetTickInterval();
@@ -134,6 +151,7 @@ module.exports = class ClientState {
                 return;
             }
             else if (event["event"] == "hb") {
+                lastHeartbeatAcked = 0;
                 this.ping = (Date.now() - event.time);
                 this.wasm._SetPing(this.ping);
                 return;

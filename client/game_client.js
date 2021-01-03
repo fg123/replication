@@ -5599,15 +5599,15 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 34400;
+var _game = Module["_game"] = 34384;
 
-var _inputEvents = Module["_inputEvents"] = 34568;
+var _inputEvents = Module["_inputEvents"] = 34552;
 
-var _localClientId = Module["_localClientId"] = 34396;
+var _localClientId = Module["_localClientId"] = 34380;
 
-var _ping = Module["_ping"] = 34600;
+var _ping = Module["_ping"] = 34584;
 
-var _lastTickTime = Module["_lastTickTime"] = 34592;
+var _lastTickTime = Module["_lastTickTime"] = 34576;
 
 function invoke_vii(index, a1, a2) {
  var sp = stackSave();

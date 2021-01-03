@@ -163,10 +163,11 @@ extern "C" {
 
             // Client too far ahead
             if (lastTickTime > serverCurrentTickTime + 1000) {
-                LOG_DEBUG("Client ahead by " << lastTickTime - serverCurrentTickTime << ", resetting!");
+                LOG_WARN("Client ahead by " << lastTickTime - serverCurrentTickTime << ", resetting!");
                 lastTickTime = serverCurrentTickTime;
                 game.RollbackTime(lastTickTime);
                 inputEvents.clear();
+                return;
             }
             else if (lastTickTime < serverCurrentTickTime) {
                 LOG_WARN("Server faster than client! Last tick client: " << lastTickTime << " Server Current: " << serverCurrentTickTime);
