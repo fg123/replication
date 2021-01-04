@@ -56,18 +56,21 @@ protected:
 
     // All are measured in the same units, velocity is in position units
     //   per second
-    Vector2 position;
-    int z;
+    REPLICATED(Vector2, position, "p");
 
-    Vector2 velocity;
+    REPLICATED(int, z, "z");
+
+    REPLICATED(Vector2, velocity, "v");
 
     Vector2 lastFramePosition;
     Vector2 lastFrameVelocity;
 
-    ObjectID id = 0;
-    bool isDirty = true;
-    bool isStatic = false;
-    bool isGrounded = false;
+    REPLICATED(ObjectID, id, "id");
+
+    bool isDirty;
+    REPLICATED(bool, isStatic, "s");
+    REPLICATED(bool, isGrounded, "ig");
+
     Time lastTickTime = 0;
 
     std::vector<Collider*> colliders;
@@ -80,7 +83,7 @@ public:
     std::unordered_set<Object*> children;
     Object* parent = nullptr;
 
-    Vector2 airFriction;
+    REPLICATED(Vector2, airFriction, "af");
 
 #ifdef BUILD_SERVER
     size_t replicateSoftCounter = 0;

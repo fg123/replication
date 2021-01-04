@@ -26,8 +26,15 @@ Time Object::DeltaTime(Time currentTime) {
     return delta;
 }
 
-Object::Object(Game& game) : game(game), airFriction(0.97, 1) {
-}
+Object::Object(Game& game) :
+    game(game),
+    z(0),
+    id(0),
+    isDirty(true),
+    isStatic(false),
+    isGrounded(false),
+    airFriction(0.97, 1)
+{}
 
 Object::~Object() {
     for (auto& collider : colliders) {
@@ -150,37 +157,18 @@ void Object::SetIsStatic(bool isStatic) {
 }
 
 void Object::Serialize(JSONWriter& obj) {
-    obj.Key("id");
-    obj.Uint(id);
+    Replicable::Serialize(obj);
 
     obj.Key("t");
     obj.String(GetClass());
 
-    obj.Key("p");
-    obj.StartObject();
-    position.Serialize(obj);
-    obj.EndObject();
-
-    obj.Key("v");
-    obj.StartObject();
-    velocity.Serialize(obj);
-    obj.EndObject();
-
-    obj.Key("z");
-    obj.Int(z);
-
 // The below isn't really used for client rendering
 #ifdef BUILD_SERVER
-    obj.Key("af");
-    obj.StartObject();
-    airFriction.Serialize(obj);
-    obj.EndObject();
+    // obj.Key("s");
+    // obj.Bool(isStatic);
 
-    obj.Key("s");
-    obj.Bool(isStatic);
-
-    obj.Key("ig");
-    obj.Bool(isGrounded);
+    // obj.Key("ig");
+    // obj.Bool(isGrounded);
 
     obj.Key("ta");
     obj.Uint64(tags);
@@ -223,14 +211,13 @@ void Object::Serialize(JSONWriter& obj) {
 }
 
 void Object::ProcessReplication(json& object) {
-    position.ProcessReplication(object["p"]);
-    velocity.ProcessReplication(object["v"]);
-    airFriction.ProcessReplication(object["af"]);
+    Replicable::ProcessReplication(object);
 
-    SetIsStatic(object["s"].GetBool());
-    z = object["z"].GetInt();
+    // SetIsStatic(object["s"].GetBool());
+    // z = object["z"].GetInt();
+    // isGrounded = object["ig"].GetBool();
+
     tags = object["ta"].GetUint64();
-    isGrounded = object["ig"].GetBool();
     collideExclusion = object["ce"].GetUint64();
 
     if (colliders.size() != object["c"].GetArray().Size()) {
