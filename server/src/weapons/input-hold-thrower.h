@@ -35,21 +35,27 @@ class InputHoldThrower : public WeaponObject {
 
     Time fireHoldDownTime = 0;
     Time chargeUpTime = 0;
-    Vector2 arrowFireVel;
+
+    REPLICATED(Vector2, arrowFireVel, "afv");
 
     Time lastThrow = 0;
-    Time timeSinceLastThrow = 0;
+
+    REPLICATED_D(Time, timeSinceLastThrow, "tslt", 0);
+
 protected:
     // Customizable by inheritor
     Time maxHoldDown = 1000;
     double powerMin = 100;
     double powerMax = 1500;
-    bool instantFire = false;
+
+    REPLICATED_D(bool, instantFire, "inst", false);
+
     Time cooldown = 200;
 
 public:
     InputHoldThrower(Game& game) : InputHoldThrower(game, Vector2::Zero) {}
-    InputHoldThrower(Game& game, Vector2 position) : WeaponObject(game, position) {}
+    InputHoldThrower(Game& game, Vector2 position) :
+        WeaponObject(game, position) {}
 
     virtual void Tick(Time time) override {
         WeaponObject::Tick(time);
@@ -101,26 +107,6 @@ public:
             fireHoldDownTime = 0;
             FireProjectile(time);
         }
-    }
-
-    virtual void Serialize(JSONWriter& obj) override {
-        WeaponObject::Serialize(obj);
-        obj.Key("afv");
-        obj.StartObject();
-        arrowFireVel.Serialize(obj);
-        obj.EndObject();
-
-        obj.Key("tslt");
-        obj.Uint64(timeSinceLastThrow);
-        obj.Key("inst");
-        obj.Bool(instantFire);
-    }
-
-    virtual void ProcessReplication(json& obj) override {
-        WeaponObject::ProcessReplication(obj);
-        arrowFireVel.ProcessReplication(obj["afv"]);
-        timeSinceLastThrow = obj["tslt"].GetUint64();
-        instantFire = obj["inst"].GetBool();
     }
 };
 

@@ -1,6 +1,8 @@
 #include "game.h"
 #include "logging.h"
 
+#include "object.h"
+#include "vector.h"
 #include "objects/player.h"
 #include "objects/rectangle.h"
 #include "characters/archer.h"
@@ -10,6 +12,9 @@
 #include <fstream>
 
 static const double TILE_SIZE = 48;
+
+Vector2 killPlaneStart = { -3000, -2000 };
+Vector2 killPlaneEnd = { 3000, 2000 };
 
 Game::Game() : nextId(1) {
 
@@ -431,7 +436,7 @@ void Game::RemovePlayer(PlayerSocketData* data) {
 }
 #endif
 
-void Game::GetUnitsInRange(Vector2 position, double range,
+void Game::GetUnitsInRange(const Vector2& position, double range,
     bool includeBoundingBox, std::vector<RangeQueryResult>& results) {
 
     CircleCollider collider { position, range };
@@ -449,4 +454,20 @@ void Game::GetUnitsInRange(Vector2 position, double range,
             results.emplace_back(obj, actualRange);
         }
     }
+}
+
+
+CollisionResult Game::CheckLineSegmentCollide(const Vector2& start,
+    const Vector2& end, uint64_t includeTags) {
+    CollisionResult result;
+    for (auto& object : gameObjects) {
+        if (((uint64_t)object.second->GetTags() & includeTags) != 0) {
+            CollisionResult r = object.second->CollidesWith(start, end);
+            if (r.isColliding) {
+                r.collidedWith = object.second;
+                return r;
+            }
+        }
+    }
+    return CollisionResult{};
 }

@@ -89,11 +89,11 @@ module.exports = class GameCanvas {
                     this.context.strokeStyle = "purple";
                     this.context.lineWidth = 2;
                     if (collider.t === 0) {
-                        this.context.strokeRect(obj.p.x + collider.p.x, obj.p.y + collider.p.y, collider.size.x, collider.size.y);
+                        this.context.strokeRect(obj.p.x + collider.p.x, obj.p.y + collider.p.y, collider.s.x, collider.s.y);
                     }
                     else if (collider.t === 1) {
                         this.context.beginPath();
-                        this.context.arc(obj.p.x + collider.p.x, obj.p.y + collider.p.y, collider.radius, 0, 2 * Math.PI);
+                        this.context.arc(obj.p.x + collider.p.x, obj.p.y + collider.p.y, collider.r, 0, 2 * Math.PI);
                         this.context.stroke();
                     }
                 }

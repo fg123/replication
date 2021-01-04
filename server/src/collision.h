@@ -2,6 +2,7 @@
 #define COLLISION_H
 
 #include "vector.h"
+#include "replicable.h"
 #include "json/json.hpp"
 
 class Object;
@@ -15,7 +16,8 @@ struct CollisionResult {
 struct Collider : Replicable {
     // Attached to a game object with position offset
     Object* owner;
-    Vector2 position;
+    REPLICATED(Vector2, position, "p");
+
 public:
     Collider(Object* owner, Vector2 position) : owner(owner), position(position) { }
     virtual ~Collider() { }
@@ -24,41 +26,32 @@ public:
     virtual CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) = 0;
     Vector2 GetPosition();
     Object* GetOwner() { return owner; }
+    virtual void Serialize(JSONWriter& obj) override {
+        Replicable::Serialize(obj);
+        obj.Key("t");
+        obj.Int(GetType());
+    }
 };
 
 struct RectangleCollider : public Collider {
-    Vector2 size;
+    REPLICATED(Vector2, size, "s");
+
     RectangleCollider(Object* owner, Vector2 position, Vector2 size) : Collider(owner, position),
         size(size) {}
     virtual int GetType() override { return 0; }
     CollisionResult CollidesWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) override;
-    virtual void Serialize(JSONWriter& obj) override {
-        obj.Key("size");
-        obj.StartObject();
-        size.Serialize(obj);
-        obj.EndObject();
-    }
-    virtual void ProcessReplication(json& obj) override {
-        size.ProcessReplication(obj["size"]);
-    }
 };
 
 struct CircleCollider : public Collider {
-    double radius;
+    REPLICATED(double, radius, "r");
+
     CircleCollider(Vector2 position, double radius) : CircleCollider(nullptr, position, radius) {}
     CircleCollider(Object* owner, Vector2 position, double radius) : Collider(owner, position),
             radius(radius) {}
     virtual int GetType() override { return 1; }
     CollisionResult CollidesWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) override;
-    virtual void Serialize(JSONWriter& obj) override {
-        obj.Key("radius");
-        obj.Double(radius);
-    }
-    virtual void ProcessReplication(json& obj) override {
-        radius = obj["radius"].GetDouble();
-    }
 };
 
 inline bool IsPointInRect(const Vector2& RectPosition, const Vector2& RectSize, const Vector2& Point) {

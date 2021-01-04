@@ -46,7 +46,7 @@ client_prod: $(CLIENT_OBJ)
 	$(CXX) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
 %.wo: %.cc
-	em++ $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
+	em++ $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -g4 -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
 
 $(USOCKET)/uSockets.a:
 	$(MAKE) $(USOCKET)

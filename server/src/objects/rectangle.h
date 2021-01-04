@@ -5,7 +5,7 @@
 #include "json/json.hpp"
 
 class RectangleObject : public Object {
-    Vector2 size;
+    REPLICATED(Vector2, size, "s");
 public:
     CLASS_CREATE(RectangleObject)
 
@@ -15,19 +15,6 @@ public:
         this->size = size;
         SetPosition(position);
         AddCollider(new RectangleCollider(this, Vector2::Zero, size));
-    }
-
-    virtual void Serialize(JSONWriter& obj) override {
-        Object::Serialize(obj);
-        obj.Key("size");
-        obj.StartObject();
-        size.Serialize(obj);
-        obj.EndObject();
-    }
-
-    virtual void ProcessReplication(json& obj) override {
-        Object::ProcessReplication(obj);
-        size.ProcessReplication(obj["size"]);
     }
 };
 

@@ -200,17 +200,13 @@ void PlayerObject::Tick(Time time) {
 }
 
 void PlayerObject::Serialize(JSONWriter& obj) {
+    // LOG_DEBUG("Player Object Serialize - Start");
     Object::Serialize(obj);
     obj.Key("h");
     obj.Int(health);
 
     obj.Key("aa");
     obj.Double(aimAngle);
-
-    obj.Key("mp");
-    obj.StartObject();
-    mousePosition.Serialize(obj);
-    obj.EndObject();
 
     if (currentWeapon) {
         obj.Key("w");
@@ -230,6 +226,7 @@ void PlayerObject::Serialize(JSONWriter& obj) {
         obj.Bool(kb);
     }
     obj.EndArray();
+    // LOG_DEBUG("Player Object Serialize - End");
 }
 
 void PlayerObject::ProcessReplication(json& obj) {
@@ -242,7 +239,6 @@ void PlayerObject::ProcessReplication(json& obj) {
     }
     health = obj["h"].GetInt();
     aimAngle = obj["aa"].GetDouble();
-    mousePosition.ProcessReplication(obj["mp"]);
     if (obj.HasMember("w")) {
         currentWeapon = game.GetObject<WeaponObject>(obj["w"].GetUint());
     }

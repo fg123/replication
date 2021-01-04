@@ -4,13 +4,6 @@
 
 const Vector2 Vector2::Zero;
 
-void Vector2::Serialize(JSONWriter& obj) {
-    obj.Key("x");
-	obj.Double(x);
-	obj.Key("y");
-    obj.Double(y);
-}
-
 Vector2& Vector2::Normalize() {
     double norm = Length();
 	if (norm == 0) {
@@ -27,11 +20,6 @@ Vector2& Vector2::Normalize() {
 Vector2 Vector2::Normalize() const {
     double norm = Length();
     return Vector2(x / norm, y / norm);
-}
-
-void Vector2::ProcessReplication(json& obj) {
-    x = obj["x"].GetDouble();
-    y = obj["y"].GetDouble();
 }
 
 bool AllEqual(bool a, bool b, bool c, bool d) {

@@ -40,7 +40,7 @@ public:
     std::array<bool, 5> mouseState {};
     std::array<bool, 5> lastMouseState {};
 
-    Vector2 mousePosition;
+    REPLICATED(Vector2, mousePosition, "mp");
 
     PlayerObject(Game& game);
     PlayerObject(Game& game, Vector2 position);

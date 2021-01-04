@@ -4,14 +4,12 @@
 #include <cmath>
 #include <ostream>
 
-#include "replicable.h"
-
 template<class T>
 constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
     return (v < lo) ? lo : (hi < v) ? hi : v;
 }
 
-struct Vector2 : Replicable {
+struct Vector2 {
     double x;
     double y;
 
@@ -51,10 +49,6 @@ struct Vector2 : Replicable {
     static inline double CrossProduct(const Vector2 & a, const Vector2 & b) {
         return a.x * b.y - a.y * b.x;
     }
-
-    virtual void Serialize(JSONWriter& obj) override;
-
-    virtual void ProcessReplication(json& obj) override;
 
     Vector2& Normalize();
     Vector2 Normalize() const;

@@ -11,62 +11,82 @@
 #include <sstream>
 #include <functional>
 #include <unordered_map>
+#include <type_traits>
 
 using json = rapidjson::Value;
 using JSONWriter = rapidjson::Writer<rapidjson::StringBuffer>;
 using JSONDocument = rapidjson::Document;
 
 struct ReplicationEntry {
-    std::function<void(JSONWriter& obj)> Serialize;
-    std::function<void(json& obj)> ProcessReplication;
+    std::function<void(void*, JSONWriter& obj)> Serialize;
+    std::function<void(void*, json& obj)> ProcessReplication;
+
+    ReplicationEntry() = delete;
+    ReplicationEntry(
+        std::function<void(void*, JSONWriter& obj)> serialize,
+        std::function<void(void*, json& obj)> processReplication
+    ) : Serialize(serialize), ProcessReplication(processReplication) {}
 };
 
 class Replicable {
 public:
-    std::unordered_map<const char*, ReplicationEntry> entries;
+    std::unordered_map<std::string, ReplicationEntry> entries;
 
     virtual ~Replicable() {}
     virtual void Serialize(JSONWriter& obj) {
         for (auto& a : entries) {
-            a.second.Serialize(obj);
+            a.second.Serialize(this, obj);
         }
     }
 
     virtual void ProcessReplication(json& obj) {
         for (auto& a : entries) {
-            a.second.ProcessReplication(obj);
+            // LOG_DEBUG("Call Start " << a.first);
+            a.second.ProcessReplication(this, obj);
+            // LOG_DEBUG("Call End " << a.first);
         }
     }
 };
 
-template<class T>
+template<typename T>
 class ReplicatedRegister {
 public:
     ReplicatedRegister(
-        std::unordered_map<const char*, ReplicationEntry>& entries,
+        std::unordered_map<std::string, ReplicationEntry>& entries,
         const char* repAlias,
-        const std::function<void(JSONWriter& obj)>& serialize,
-        const std::function<void(json& obj)> processReplication
+        std::function<void(void*, JSONWriter& obj)> serialize,
+        std::function<void(void*, json& obj)> processReplication
     ) {
-        if (entries.find(repAlias) != entries.end()) {
+        std::string alias {repAlias};
+        if (entries.find(alias) != entries.end()) {
             LOG_ERROR("Replicated register \"" << repAlias << "\" is already assigned to a different field!");
             return;
         }
-        entries[repAlias].Serialize = serialize;
-        entries[repAlias].ProcessReplication = processReplication;
+        entries.emplace(alias, ReplicationEntry { serialize, processReplication });
     }
 };
 
-#define REPLICATED(type, name, repAlias)                    \
-    type name;                                              \
-    ReplicatedRegister<type> name##__ {                     \
+#define REPLICATED(type, name, repAlias)  \
+    type name;                            \
+    REPLICATED_IMPL(type, name, repAlias)
+
+#define REPLICATED_D(type, name, repAlias, defaultValue)    \
+    type name = defaultValue;                               \
+    REPLICATED_IMPL(type, name, repAlias)
+
+#define REPLICATED_IMPL(repType, name, repAlias)               \
+    ReplicatedRegister<repType> name##__ {              \
         entries,                                            \
         repAlias,                                           \
-        [this](JSONWriter& obj) { SerializeDispatch(name, repAlias, obj); },   \
-        [this](json& obj) { ProcessReplicationDispatch(name, repAlias, obj); } \
+        [](void* _this, JSONWriter& obj) {                  \
+            SerializeDispatch(static_cast<decltype(this)>(_this)->name, repAlias, obj); \
+        },                                                    \
+        [](void* _this, json& obj) { \
+            ProcessReplicationDispatch(static_cast<decltype(this)>(_this)->name, repAlias, obj);  \
+        } \
     };
 
-inline std::string DumpJSON(json& value) {
+inline std::string DumpJSON(const json& value) {
     std::ostringstream stream;
     rapidjson::OStreamWrapper rapidStream(stream);
     rapidjson::Writer<rapidjson::OStreamWrapper> writer(rapidStream);
@@ -84,6 +104,10 @@ void SerializeDispatch(T& object, const char* key, JSONWriter& obj) {
 
 template<class T>
 void ProcessReplicationDispatch(T& object, const char* key, json& obj) {
+    if (!obj.HasMember(key)) {
+        LOG_ERROR("Missing " << key << " in: " << DumpJSON(obj));
+        throw std::runtime_error("Missing key in JSON object!");
+    }
     object.ProcessReplication(obj[key]);
 }
 
@@ -131,5 +155,34 @@ inline void ProcessReplicationDispatch(uint64_t& object, const char* key, json& 
     object = obj[key].GetUint64();
 }
 
+template<>
+inline void SerializeDispatch(double& object, const char* key, JSONWriter& obj) {
+    obj.Key(key);
+    obj.Double(object);
+}
 
+template<>
+inline void ProcessReplicationDispatch(double& object, const char* key, json& obj) {
+    object = obj[key].GetDouble();
+}
+
+// Specialize Vector2 because replicable is an expensive base class due to
+//   registration of members. Vector2s often get created and destroyed quick
+//   so we shouldn't have that overhead.
+template<>
+inline void SerializeDispatch(Vector2& object, const char* key, JSONWriter& obj) {
+    obj.Key(key);
+    obj.StartObject();
+    obj.Key("x");
+    obj.Double(object.x);
+    obj.Key("y");
+    obj.Double(object.y);
+    obj.EndObject();
+}
+
+template<>
+inline void ProcessReplicationDispatch(Vector2& object, const char* key, json& obj) {
+    object.x = obj[key]["x"].GetDouble();
+    object.y = obj[key]["y"].GetDouble();
+}
 #endif

@@ -9,6 +9,7 @@
 #include "vector.h"
 #include "collision.h"
 #include "logging.h"
+#include "replicable.h"
 
 // This must be 32 bit because client side JS only supports 32 bit
 using ObjectID = uint32_t;
@@ -50,7 +51,7 @@ enum Tag : uint64_t {
     NO_KILLPLANE    = 0b0000000000000100000
 };
 
-class Object : Replicable {
+class Object : public Replicable {
 protected:
     Game& game;
 
@@ -74,8 +75,8 @@ protected:
     Time lastTickTime = 0;
 
     std::vector<Collider*> colliders;
-    uint64_t tags = (uint64_t)Tag::OBJECT;
-    uint64_t collideExclusion = 0;
+    REPLICATED(uint64_t, tags, "ta");
+    REPLICATED(uint64_t, collideExclusion, "ce");
 
 public:
     // For object hierarchy, this is all managed from the game, used for

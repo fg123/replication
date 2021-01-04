@@ -33,6 +33,8 @@ Object::Object(Game& game) :
     isDirty(true),
     isStatic(false),
     isGrounded(false),
+    tags((uint64_t)Tag::OBJECT),
+    collideExclusion(0),
     airFriction(0.97, 1)
 {}
 
@@ -162,33 +164,11 @@ void Object::Serialize(JSONWriter& obj) {
     obj.Key("t");
     obj.String(GetClass());
 
-// The below isn't really used for client rendering
-#ifdef BUILD_SERVER
-    // obj.Key("s");
-    // obj.Bool(isStatic);
-
-    // obj.Key("ig");
-    // obj.Bool(isGrounded);
-
-    obj.Key("ta");
-    obj.Uint64(tags);
-
-    obj.Key("ce");
-    obj.Uint64(collideExclusion);
-#endif
-
     obj.Key("c");
     obj.StartArray();
+    // LOG_DEBUG("Colliders:");
     for (auto& collider : colliders) {
         obj.StartObject();
-        obj.Key("p");
-        obj.StartObject();
-        collider->position.Serialize(obj);
-        obj.EndObject();
-
-        obj.Key("t");
-        obj.Int(collider->GetType());
-
         collider->Serialize(obj);
         obj.EndObject();
     }
@@ -213,22 +193,21 @@ void Object::Serialize(JSONWriter& obj) {
 void Object::ProcessReplication(json& object) {
     Replicable::ProcessReplication(object);
 
-    // SetIsStatic(object["s"].GetBool());
-    // z = object["z"].GetInt();
-    // isGrounded = object["ig"].GetBool();
-
-    tags = object["ta"].GetUint64();
-    collideExclusion = object["ce"].GetUint64();
-
+    // LOG_DEBUG(DumpJSON(object["c"]));
     if (colliders.size() != object["c"].GetArray().Size()) {
+        // LOG_WARN("Clearing colliders");
         for (auto& collider : colliders) {
             delete collider;
         }
         colliders.clear();
     }
+
+    // LOG_BREADCRUMB();
     if (colliders.empty()) {
         // Make some
+        // LOG_WARN("Making colliders");
         for (json& colliderInfo : object["c"].GetArray()) {
+            // LOG_DEBUG(DumpJSON(colliderInfo));
             if (colliderInfo["t"].GetInt() == 0) {
                 AddCollider(new RectangleCollider(this, Vector2::Zero, Vector2::Zero));
             }
@@ -237,25 +216,27 @@ void Object::ProcessReplication(json& object) {
             }
         }
     }
+    // LOG_BREADCRUMB();
     size_t i = 0;
     for (json& colliderInfo : object["c"].GetArray()) {
-        colliders[i]->position.ProcessReplication(colliderInfo["p"]);
-        if (colliderInfo["t"].GetInt() == 0) {
-            static_cast<RectangleCollider*>(colliders[i])->ProcessReplication(colliderInfo);
-        }
-        else if (colliderInfo["t"].GetInt() == 1) {
-            static_cast<CircleCollider*>(colliders[i])->ProcessReplication(colliderInfo);
-        }
+        // LOG_BREADCRUMB();
+        // LOG_DEBUG(object["c"].GetArray().Size());
+        // LOG_DEBUG(DumpJSON(colliderInfo));
+        colliders[i]->ProcessReplication(colliderInfo);
+        // LOG_BREADCRUMB();
         i += 1;
+        if (i >= colliders.size()) {
+            break;
+        }
     }
-
+    // LOG_BREADCRUMB();
     if (object.HasMember("pa")) {
         parent = game.GetObject(object["pa"].GetInt());
     }
     else {
         parent = nullptr;
     }
-
+    // LOG_BREADCRUMB();
     children.clear();
     if (object.HasMember("ch")) {
         for (json& value : object["ch"].GetArray()) {
