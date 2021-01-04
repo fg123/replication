@@ -46,7 +46,7 @@ protected:
     // Customizable by inheritor
     Time maxHoldDown = 1000;
     double powerMin = 100;
-    double powerMax = 1500;
+    double powerMax = 2000;
 
     REPLICATED_D(bool, instantFire, "inst", false);
 
