@@ -99,6 +99,12 @@ module.exports = class GameCanvas {
                 }
             }
         });
+
+        Object.keys(this.clientState.animations).forEach(k => {
+            if (!this.clientState.animations[k].draw(this.context)) {
+                delete this.clientState.animations[k];
+            }
+        });
         this.context.translate(cameraTranslation.x, cameraTranslation.y);
 
         this.clientState.SendMouseMoveEvent();

@@ -21,5 +21,6 @@ module.exports = {
         flipDirection: true
     },
     "map1Tiles.png": {},
-    "artillery.png": {}
+    "artillery.png": {},
+    "exploding.png": {}
 };

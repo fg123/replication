@@ -11,7 +11,7 @@ CLIENT_DEPS = $(CLIENT_OBJ:%.wo=%.wd)
 HEADERS = $(shell find src/ -name "*.h") Makefile
 USOCKET = $(SRC_DIR)/uWebSocket/uSocket
 
-CPPFLAGS = -std=c++17 -Wall -I $(SRC_DIR) -I $(USOCKET)/src -I $(SRC_DIR)/objects
+CPPFLAGS = -std=c++17 -Wall -I $(SRC_DIR) -I $(USOCKET)/src -I $(SRC_DIR)/objects -I $(SRC_DIR)/animations
 LDLIBS = -L/usr/lib
 SERVER_DEBUG = -g
 SERVER_PROD = -O2

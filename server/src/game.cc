@@ -133,6 +133,7 @@ void Game::Tick(Time time) {
     }
 
     Replicate(time);
+    ReplicateAnimations(time);
 #endif
 }
 
@@ -144,6 +145,11 @@ void Game::Tick(Time time) {
         time: client timestamp of last input.
         ticks: ticks server has processed sicne that last input
     }
+  A Animation packet:
+    {
+        event: "a",
+        objs: [ list of animations ]
+    }
 */
 void Game::SendData(PlayerSocketData* player, std::string message) {
     player->eventLoop->defer([player, message] () {
@@ -152,6 +158,36 @@ void Game::SendData(PlayerSocketData* player, std::string message) {
             LOG_ERROR("Could not send!");
         }
     });
+}
+
+void Game::ReplicateAnimations(Time time) {
+    if (animationPackets.empty()) return;
+
+    rapidjson::StringBuffer output;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(output);
+    writer.StartObject();
+
+    writer.Key("event");
+    writer.String("a");
+    writer.Key("objs");
+    writer.StartArray();
+    for (auto& animation : animationPackets) {
+        animation->Serialize(writer);
+        delete animation;
+    }
+    animationPackets.clear();
+    writer.EndArray();
+    writer.EndObject();
+
+    std::string outputData { output.GetString() };
+    for (auto& player : players) {
+        /*for (auto& object : serialized) {
+            player->ws->send(object.second, uWS::OpCode::TEXT);
+        }*/
+        if (!player->isReady) continue;
+        if (!player->hasInitialReplication) continue;
+        SendData(player, outputData);
+    }
 }
 
 void Game::InitialReplication(PlayerSocketData* data) {

@@ -1,6 +1,8 @@
 const Constants = require('./constants');
 const PerfTracker = require('./perf-tracker');
 
+const animations = require('./animations');
+
 const SIMULATED_LAG = Constants.isProduction ? 0 : 60;
 
 module.exports = class ClientState {
@@ -10,6 +12,9 @@ module.exports = class ClientState {
         this.resourceManager = resourceManager;
         this.mapImage = mapImage;
         this.gameObjects = {};
+        this.animations = {};
+        this.nextAnimationKey = 1;
+
         this.showColliders = false;
         this.localPlayerObjectId = undefined;
         this.isPaused = false;
@@ -150,13 +155,13 @@ module.exports = class ClientState {
                 }
                 return;
             }
-            else if (event["event"] == "hb") {
+            else if (event["event"] === "hb") {
                 lastHeartbeatAcked = 0;
                 this.ping = (Date.now() - event.time);
                 this.wasm._SetPing(this.ping);
                 return;
             }
-            else if (event["event"] == "r") {
+            else if (event["event"] === "r") {
                 const curr = Date.now();
                 this.performance.handleReplicateTime.pushValue(curr - lastReplicate);
                 lastReplicate = curr;
@@ -168,6 +173,19 @@ module.exports = class ClientState {
                         if (this.gameObjects[obj.id] === undefined) {
                             // New Object
                             this.gameObjects[obj.id] = { id: obj.id };
+                        }
+                    });
+                }
+            }
+            else if (event["event"] === "a") {
+                if (event["objs"]) {
+                    event["objs"].forEach(obj => {
+                        if (animations[obj.k]) {
+                            const constructor = animations[obj.k];
+                            this.animations[this.nextAnimationKey++] = new constructor(obj, this.resourceManager);
+                        }
+                        else {
+                            console.error(obj.k, "is not a valid animation key!");
                         }
                     });
                 }

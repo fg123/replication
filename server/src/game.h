@@ -4,6 +4,8 @@
 #include "object.h"
 #include "timer.h"
 
+#include "animation.h"
+
 #ifdef BUILD_SERVER
 #include "uWebSocket/App.h"
 #endif
@@ -43,6 +45,9 @@ class Game {
     std::mutex playersSetMutex;
 
 #ifdef BUILD_SERVER
+    // Notifies client of any animations
+    std::vector<Animation*> animationPackets;
+
     std::unordered_set<ObjectID> deadObjects;
     std::unordered_set<ObjectID> deadSinceLastReplicate;
 
@@ -75,6 +80,8 @@ public:
 #ifdef BUILD_SERVER
     // Replicate objects in replicateNextTick to clients
     void Replicate(Time time);
+
+    void ReplicateAnimations(Time time);
     void RequestReplication(ObjectID objectId);
     void QueueAllDirtyForReplication(Time time);
     void InitialReplication(PlayerSocketData* data);
@@ -83,6 +90,11 @@ public:
     void DestroyObject(ObjectID objectId);
 
     void SendData(PlayerSocketData* player, std::string message);
+
+    void QueueAnimation(Animation* animation) {
+        // Make a copy of the animation packet
+        animationPackets.push_back(animation);
+    }
 #endif
 
 #ifdef BUILD_CLIENT

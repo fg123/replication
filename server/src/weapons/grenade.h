@@ -7,8 +7,10 @@ class GrenadeObject : public ThrownProjectile {
     bool isPrimed = false;
     Time startTickingTime = 0;
     Time tickTimeDiff = 0;
-
     Time tickBeforeExplode = 500;
+
+    int damage = 40;
+    int damageRange = 50;
 
 public:
     CLASS_CREATE(GrenadeObject)

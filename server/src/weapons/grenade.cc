@@ -1,5 +1,6 @@
 #include "grenade.h"
 #include "game.h"
+#include "explode.h"
 
 GrenadeObject::GrenadeObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
@@ -37,14 +38,17 @@ void GrenadeObject::Tick(Time time) {
 void GrenadeObject::Explode() {
     // IMPLEMENT EXPLODE, scale damage as required
     std::vector<Game::RangeQueryResult> results;
-    game.GetUnitsInRange(position, 200, false, results);
+    game.GetUnitsInRange(position, damageRange, false, results);
 
-    // for (auto& result : results) {
-    //     // Flat Damage for now
-    //     result.first->Damage
-    // }
+    for (auto& result : results) {
+        // Flat Damage for now
+        if (result.first->IsTagged(Tag::PLAYER)) {
+            static_cast<PlayerObject*>(result.first)->DealDamage(damage);
+        }
+    }
 #ifdef BUILD_SERVER
     game.DestroyObject(GetId());
+    game.QueueAnimation(new ExplodeAnimation(position, damageRange));
 #endif
 }
 
