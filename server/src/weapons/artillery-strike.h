@@ -48,38 +48,24 @@ public:
 
 CLASS_REGISTER(ArtilleryObject);
 
-class ArtilleryStrike : public WeaponObject {
+class ArtilleryStrike : public WeaponWithCooldown {
 public:
     CLASS_CREATE(ArtilleryStrike)
     ArtilleryStrike(Game& game) : ArtilleryStrike(game, Vector2::Zero) {}
-    ArtilleryStrike(Game& game, Vector2 position) : WeaponObject(game, position) {}
-
-    virtual void Tick(Time time) override {
-        WeaponObject::Tick(time);
-        // Calculate cooldown
+    ArtilleryStrike(Game& game, Vector2 position) : WeaponWithCooldown(game, position) {
+        cooldown = 10000;
     }
 
-    virtual void Fire(Time time) override {
-        WeaponObject::Fire(time);
-
-    }
     virtual void ReleaseFire(Time time) override {
-        WeaponObject::ReleaseFire(time);
+        WeaponWithCooldown::ReleaseFire(time);
 
+        if (IsOnCooldown()) return;
     #ifdef BUILD_SERVER
         ArtilleryObject* proj = new ArtilleryObject(game);
         proj->SetPosition(Vector2(attachedTo->mousePosition.x, 10));
         game.AddObject(proj);
     #endif
-
-    }
-
-    virtual void Serialize(JSONWriter& obj) override {
-        WeaponObject::Serialize(obj);
-    }
-
-    virtual void ProcessReplication(json& obj) override {
-        WeaponObject::ProcessReplication(obj);
+        CooldownStart(time);
     }
 };
 

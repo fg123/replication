@@ -29,7 +29,7 @@ public:
 };
 
 template <class Projectile>
-class InputHoldThrower : public WeaponObject {
+class InputHoldThrower : public WeaponWithCooldown {
     static_assert(std::is_base_of<ThrownProjectile, Projectile>::value,
         "Input Hold Thrower can only throw ThrownProjectiles");
 
@@ -50,15 +50,13 @@ protected:
 
     REPLICATED_D(bool, instantFire, "inst", false);
 
-    Time cooldown = 200;
-
 public:
     InputHoldThrower(Game& game) : InputHoldThrower(game, Vector2::Zero) {}
     InputHoldThrower(Game& game, Vector2 position) :
-        WeaponObject(game, position) {}
+        WeaponWithCooldown(game, position) {}
 
     virtual void Tick(Time time) override {
-        WeaponObject::Tick(time);
+        WeaponWithCooldown::Tick(time);
         if (attachedTo && fireHoldDownTime != 0) {
             chargeUpTime = std::min(time - fireHoldDownTime, maxHoldDown);
 
@@ -74,6 +72,7 @@ public:
     }
 
     virtual void StartFire(Time time) override {
+        if (IsOnCooldown()) return;
         if (instantFire && timeSinceLastThrow > cooldown) {
             double power = powerMax;
             arrowFireVel = attachedTo->GetAimDirection() * power;
@@ -82,10 +81,8 @@ public:
     }
 
     virtual void Fire(Time time) override {
-        // if (instantFire) {
-        //     fireHoldDownTime;
-        // }
         if (fireHoldDownTime == 0 && !instantFire && timeSinceLastThrow > cooldown) {
+            if (IsOnCooldown()) return;
             fireHoldDownTime = time;
         }
     }
@@ -99,11 +96,12 @@ public:
             game.AddObject(proj);
         #endif
         lastThrow = time;
+        CooldownStart(time);
     }
 
     virtual void ReleaseFire(Time time) override {
         WeaponObject::ReleaseFire(time);
-        if (!instantFire) {
+        if (!instantFire && fireHoldDownTime != 0) {
             fireHoldDownTime = 0;
             FireProjectile(time);
         }

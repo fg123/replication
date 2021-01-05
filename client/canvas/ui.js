@@ -1,7 +1,7 @@
 const gameObjectLookup = require('../game-objects');
 const Constants = require('../constants');
 const characters = require('../characters');
-const { drawImage } = require('../draw-util');
+const { drawImage, drawRoundedRectangle } = require('../draw-util');
 
 const FPS_FILTER_STRENGTH = 10;
 
@@ -71,7 +71,7 @@ module.exports = class UICanvas {
         const magazines = weapon.mags;
 
         this.context.fillStyle = "black";
-        this.context.fillRect(width - 250, height - 150, 200, 100);
+        drawRoundedRectangle(this.context, width - 250, height - 150, 200, 100, 10, true, false);
 
         this.context.font = "30px Prompt";
         this.context.textBaseline = "middle";
@@ -79,9 +79,51 @@ module.exports = class UICanvas {
         this.context.fillStyle = "white";
         this.context.fillText(`${bullets}/${magazines}`, width - 150, height - 100);
 
-        this.context.fillStyle = "green";
         const percentageReload = weapon.tsr / weapon.rlt;
-        this.context.fillRect(width - 250, height - 150, 200 * percentageReload, 20);
+        if (percentageReload > 0) {
+            this.context.fillStyle = "green";
+            drawRoundedRectangle(this.context, width - 250, height - 150, 200 * percentageReload, 20, 10, true, false);
+        }
+    }
+
+    DrawQ(player, width, height) {
+        if (!player.wq) {
+            return;
+        }
+        const qAbility = this.clientState.GetObject(player.wq);
+
+        this.context.fillStyle = "black";
+        drawRoundedRectangle(this.context, width - 350, height - 130, 80, 80, 10, true, false);
+
+        this.context.fillStyle = "white";
+        this.context.textBaseline = "middle";
+        this.context.textAlign = "center";
+        if (qAbility.cd !== undefined && qAbility.cd !== 0) {
+            this.context.font = "30px Prompt";
+            this.context.fillText(Math.ceil(qAbility.cd / 1000), width - 310, height - 100);
+        }
+        this.context.font = "16px Prompt";
+        this.context.fillText(`Q`, width - 310, height - 70);
+    }
+
+    DrawZ(player, width, height) {
+        if (!player.wz) {
+            return;
+        }
+        const zAbility = this.clientState.GetObject(player.wz);
+
+        this.context.fillStyle = "black";
+        drawRoundedRectangle(this.context, width / 2, height - 130, 80, 80, 10, true, false);
+
+        this.context.fillStyle = "white";
+        this.context.textBaseline = "middle";
+        this.context.textAlign = "center";
+        if (zAbility.cd !== undefined && zAbility.cd !== 0) {
+            this.context.font = "30px Prompt";
+            this.context.fillText(Math.ceil(zAbility.cd / 1000), width / 2 + 40, height - 100);
+        }
+        this.context.font = "16px Prompt";
+        this.context.fillText(`Z`, width / 2 + 40, height - 70);
     }
 
     Draw() {
@@ -143,8 +185,10 @@ module.exports = class UICanvas {
 
         this.DrawGraph("TickTime", this.clientState.performance.tickTime, 20, 140);
 
-
         this.DrawWeapon(player, width, height);
+
+        this.DrawQ(player, width, height);
+        this.DrawZ(player, width, height);
 
         this.lastDrawTime = currentTime;
     }

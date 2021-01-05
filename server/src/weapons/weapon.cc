@@ -6,7 +6,10 @@
 
 #include <exception>
 
-WeaponObject::WeaponObject(Game& game, Vector2 position) : WeaponObject(game) {
+WeaponObject::WeaponObject(Game& game, Vector2 position) : Object(game) {
+
+    z = 1;
+
     SetPosition(position);
     // No Colliders
     collideExclusion |= (uint64_t)Tag::PLAYER;
@@ -73,4 +76,26 @@ void WeaponObject::ProcessReplication(json& obj) {
     else {
         attachedTo = nullptr;
     }
+}
+
+
+void WeaponWithCooldown::Tick(Time time) {
+    WeaponObject::Tick(time);
+
+    // Let server dictate
+#ifdef BUILD_SERVER
+    // LOG_DEBUG("CD " << cooldown);
+    if (lastUseTime + cooldown < time) {
+        currentCooldown = 0;
+    }
+    else {
+        currentCooldown = (lastUseTime + cooldown) - time;
+        SetDirty(true);
+    }
+    // LOG_DEBUG("LUT: " << lastUseTime << " CD: " << currentCooldown);
+#endif
+}
+
+void WeaponWithCooldown::CooldownStart(Time time) {
+    lastUseTime = time;
 }

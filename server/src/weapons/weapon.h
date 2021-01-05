@@ -12,8 +12,7 @@ protected:
     PlayerObject* attachedTo = nullptr;
 
 public:
-    WeaponObject(Game& game) : Object(game) {
-        z = 1;
+    WeaponObject(Game& game) : WeaponObject(game, Vector2::Zero) {
     }
     WeaponObject(Game& game, Vector2 position);
 
@@ -33,4 +32,25 @@ public:
 
 };
 
+// Manages cooldown
+class WeaponWithCooldown : public WeaponObject {
+protected:
+    // Set by underlying class
+    Time cooldown = 0;
+
+
+private:
+    REPLICATED_D(Time, currentCooldown, "cd", 0);
+
+    Time lastUseTime = 0;
+
+public:
+    WeaponWithCooldown(Game& game) : WeaponWithCooldown(game, Vector2::Zero) {}
+    WeaponWithCooldown(Game& game, Vector2 position) : WeaponObject(game, position) {}
+
+    virtual void Tick(Time time) override;
+
+    bool IsOnCooldown() { return currentCooldown != 0; }
+    void CooldownStart(Time time);
+};
 #endif
