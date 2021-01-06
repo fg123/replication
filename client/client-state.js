@@ -26,7 +26,6 @@ module.exports = class ClientState {
         this.width = 0;
         this.height = 0;
 
-        this.lastMouseMoveSend = 0;
         this.rawMousePos = {
             x: 0,
             y: 0
@@ -254,15 +253,11 @@ module.exports = class ClientState {
     }
 
     SendMouseMoveEvent() {
-        const current = this.wasm._GetLastTickTime();
-        if (current - this.lastMouseMoveSend > 30 || current < this.lastMouseMoveSend) {
-            this.lastMouseMoveSend = current;
-            this.SendInputPacket({
-                event: "mm",
-                x: this.rawMousePos.x + this.cameraPos.x - (this.width / 2),
-                y: this.rawMousePos.y + this.cameraPos.y - (this.height / 2)
-            });
-        }
+        this.SendInputPacket({
+            event: "mm",
+            x: this.rawMousePos.x + this.cameraPos.x - (this.width / 2),
+            y: this.rawMousePos.y + this.cameraPos.y - (this.height / 2)
+        });
     }
 
     GetObject(id) {

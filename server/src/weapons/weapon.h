@@ -34,10 +34,9 @@ public:
 
 // Manages cooldown
 class WeaponWithCooldown : public WeaponObject {
-protected:
+public:
     // Set by underlying class
     Time cooldown = 0;
-
 
 private:
     REPLICATED_D(Time, currentCooldown, "cd", 0);
