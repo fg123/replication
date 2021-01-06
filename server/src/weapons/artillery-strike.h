@@ -12,8 +12,8 @@ public:
     CLASS_CREATE(ArtilleryObject)
 
     ArtilleryObject(Game& game) : Object(game) {
-        collideExclusion |= (uint64_t) Tag::WEAPON;
-        collideExclusion |= (uint64_t) Tag::PLAYER;
+        collisionExclusion |= (uint64_t) Tag::WEAPON;
+        collisionExclusion |= (uint64_t) Tag::PLAYER;
         AddCollider(new RectangleCollider(this, Vector2(-22, -57), Vector2(45, 114)));
     }
 
@@ -40,7 +40,7 @@ public:
         }
         if (result.collidedWith->IsStatic()) {
             SetIsStatic(true);
-            collideExclusion |= (uint64_t) Tag::PLAYER;
+            collisionExclusion |= (uint64_t) Tag::PLAYER;
             Explode();
         }
     }

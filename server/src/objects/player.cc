@@ -38,7 +38,7 @@ PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
     SetTag(Tag::PLAYER);
     SetPosition(position);
 
-    collideExclusion |= (uint64_t) Tag::PLAYER;
+    collisionExclusion |= (uint64_t) Tag::PLAYER;
 
     AddCollider(new CircleCollider(this, Vector2(0, -15), 15.0));
     AddCollider(new RectangleCollider(this, Vector2(-15, -5), Vector2(30, 33)));

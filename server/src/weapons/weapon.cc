@@ -12,7 +12,7 @@ WeaponObject::WeaponObject(Game& game, Vector2 position) : Object(game) {
 
     SetPosition(position);
     // No Colliders
-    collideExclusion |= (uint64_t)Tag::PLAYER;
+    collisionExclusion |= (uint64_t)Tag::PLAYER;
     SetTag(Tag::WEAPON);
     Detach();
 }
@@ -34,7 +34,7 @@ void WeaponObject::AttachToPlayer(PlayerObject* player) {
     attachedTo = player;
     SetDirty(true);
     // No Collision
-    collideExclusion |= (uint64_t)Tag::OBJECT;
+    collisionExclusion |= (uint64_t)Tag::OBJECT;
     SetTag(Tag::NO_KILLPLANE);
 }
 
@@ -42,7 +42,7 @@ void WeaponObject::Detach() {
     game.DetachParent(this);
     attachedTo = nullptr;
     SetVelocity(Vector2::Zero);
-    collideExclusion &= ~(uint64_t)Tag::OBJECT;
+    collisionExclusion &= ~(uint64_t)Tag::OBJECT;
     RemoveTag(Tag::NO_KILLPLANE);
     SetDirty(true);
 }

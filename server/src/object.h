@@ -75,8 +75,12 @@ protected:
     Time lastTickTime = 0;
 
     std::vector<Collider*> colliders;
+
+    // In default mode, every collision will occur and all hits are reported
+    //   to OnCollide
     REPLICATED(uint64_t, tags, "ta");
-    REPLICATED(uint64_t, collideExclusion, "ce");
+    REPLICATED(uint64_t, collisionExclusion, "ce");
+    REPLICATED(uint64_t, collisionReporting, "cr");
 
 public:
     // For object hierarchy, this is all managed from the game, used for
@@ -136,7 +140,8 @@ public:
     bool IsStatic() const { return isStatic; }
     void SetIsStatic(bool isStatic);
 
-    uint64_t IsCollideExcluded(uint64_t tags) { return collideExclusion & tags; }
+    uint64_t IsCollisionExcluded(uint64_t tags) { return collisionExclusion & tags; }
+    uint64_t ShouldReportCollision(uint64_t tags) { return collisionReporting & tags; }
     uint64_t GetTags() const { return tags; };
     void SetTag(Tag tag) { tags |= (uint64_t)tag; }
     void RemoveTag(Tag tag) { tags &= ~(uint64_t)tag; }

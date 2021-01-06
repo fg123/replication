@@ -46,7 +46,9 @@ Game::Game(std::string mapPath) : Game() {
             AddObject(floor);
         }
     }
-    // AddObject(new Dummy(*this, Vector2(600, 0)));
+#ifndef PRODUCTION
+    AddObject(new Dummy(*this, Vector2(600, 0)));
+#endif
 }
 #endif
 
@@ -369,13 +371,18 @@ void Game::HandleCollisions(Object* obj) {
     for (auto& object : gameObjects) {
         if (obj == object.second) continue;
 
+        bool shouldExclude = obj->IsCollisionExcluded(object.second->GetTags()) ||
+            object.second->IsCollisionExcluded(obj->GetTags());
+
+        bool shouldReport = obj->ShouldReportCollision(object.second->GetTags());
         // Check for Collision Exclusion
-        if (!(obj->IsCollideExcluded(object.second->GetTags()) ||
-            object.second->IsCollideExcluded(obj->GetTags()))) {
-            CollisionResult r = obj->CollidesWith(object.second);
-            if (r.isColliding) {
-                r.collidedWith = object.second;
+        CollisionResult r = obj->CollidesWith(object.second);
+        if (r.isColliding) {
+            r.collidedWith = object.second;
+            if (!shouldExclude) {
                 collisionResolution += r.collisionDifference;
+            }
+            if (shouldReport) {
                 obj->OnCollide(r);
             }
         }

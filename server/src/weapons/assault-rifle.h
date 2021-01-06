@@ -10,8 +10,6 @@ public:
 
     AssaultRifleObject(Game& game) : AssaultRifleObject(game, Vector2::Zero) {}
     AssaultRifleObject(Game& game, Vector2 position) : GunBase(game, position) {
-        AddCollider(new RectangleCollider(this, Vector2(-26, -10), Vector2(74, 24)));
-
         fireRate = 14;
         magazineSize = 25;
         magazines = 8;

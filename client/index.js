@@ -15,12 +15,13 @@ const uiContext = uiCanvas.getContext('2d');
 
 const localAddress = 'ws://' + location.hostname + ':8080/connect';
 const remoteAddress = "wss://replication-server.felixguo.me/connect";
+const connectAddress = Constants.isProduction ? remoteAddress : localAddress;
 
 console.log('Loading Game WASM');
 Client().then((instance) => {
     console.log(instance);
     console.log('Loading Web Socket');
-    const webSocket = new WebSocket(Constants.isProduction ? remoteAddress : localAddress);
+    const webSocket = new WebSocket(connectAddress);
     webSocket.onopen = function (event) {
         console.log('Loading Resource Manager');
         const resourceManager = new ResourceManager(() => {

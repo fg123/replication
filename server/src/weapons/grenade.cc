@@ -4,7 +4,7 @@
 
 GrenadeObject::GrenadeObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
-    collideExclusion |= (uint64_t) Tag::WEAPON;
+    collisionExclusion |= (uint64_t) Tag::WEAPON;
     AddCollider(new CircleCollider(this, Vector2(0, 0), 5.0));
     airFriction = Vector2(1, 1);
 }
@@ -18,7 +18,7 @@ void GrenadeObject::OnCollide(CollisionResult& result) {
         // Prime Grenade, once it lands it sticks
         isPrimed = true;
         SetIsStatic(true);
-        collideExclusion |= (uint64_t) Tag::PLAYER;
+        collisionExclusion |= (uint64_t) Tag::PLAYER;
     }
 }
 

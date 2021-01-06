@@ -11,8 +11,6 @@ public:
 
     PistolObject(Game& game) : PistolObject(game, Vector2::Zero) {}
     PistolObject(Game& game, Vector2 position) : GunBase(game, position) {
-        AddCollider(new RectangleCollider(this, Vector2(-26, -10), Vector2(60, 24)));
-
         fireRate = 3;
         magazineSize = 7;
         magazines = 8;

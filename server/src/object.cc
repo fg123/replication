@@ -34,7 +34,8 @@ Object::Object(Game& game) :
     isStatic(false),
     isGrounded(false),
     tags((uint64_t)Tag::OBJECT),
-    collideExclusion(0),
+    collisionExclusion(0),
+    collisionReporting(~0),
     airFriction(0.97, 1)
 {}
 

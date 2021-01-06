@@ -4,7 +4,6 @@
 #include "object.h"
 
 class BulletObject : public Object {
-    bool dead = false;
     int damage;
 
 public:

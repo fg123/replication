@@ -2,8 +2,8 @@
 
 HookObject::HookObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
-    collideExclusion |= (uint64_t) Tag::WEAPON;
-    collideExclusion |= (uint64_t) Tag::PLAYER;
+    collisionExclusion |= (uint64_t) Tag::WEAPON;
+    collisionExclusion |= (uint64_t) Tag::PLAYER;
     SetTag(Tag::NO_GRAVITY);
     AddCollider(new CircleCollider(this, Vector2(0, 0), 5.0));
     airFriction = Vector2(1, 1);
@@ -17,7 +17,7 @@ void HookObject::OnCollide(CollisionResult& result) {
     }
     if (result.collidedWith->IsStatic()) {
         SetIsStatic(true);
-        collideExclusion |= (uint64_t) Tag::PLAYER;
+        collisionExclusion |= (uint64_t) Tag::PLAYER;
     }
 }
 
