@@ -3,22 +3,18 @@
 #include "player.h"
 
 ArrowObject::ArrowObject(Game& game) : ThrownProjectile(game) {
-    // Don't Collide with Weapons
-    collisionExclusion |= (uint64_t) Tag::WEAPON;
+    collisionExclusion = (uint64_t) Tag::OBJECT;
     AddCollider(new CircleCollider(this, Vector2(0, 0), 3.0));
     airFriction = Vector2(1, 1);
 }
 
 void ArrowObject::OnCollide(CollisionResult& result) {
-    if (result.collidedWith->IsTagged(Tag::WEAPON)) {
-        // Ignore
-        return;
-    }
-
     // Check Player Hit
     if (!hitPlayer && result.collidedWith->IsTagged(Tag::PLAYER)) {
         hitPlayer = true;
+    #ifdef BUILD_SERVER
         static_cast<PlayerObject*>(result.collidedWith)->DealDamage(50);
+    #endif
         SetVelocity(Vector2::Zero);
     }
     else if (result.collidedWith->IsStatic() && !IsStatic()) {
@@ -44,15 +40,4 @@ void ArrowObject::Tick(Time time) {
         game.DestroyObject(GetId());
     }
 #endif
-}
-
-void ArrowObject::Serialize(JSONWriter& obj) {
-    ThrownProjectile::Serialize(obj);
-    obj.Key("hp");
-    obj.Bool(hitPlayer);
-}
-
-void ArrowObject::ProcessReplication(json& obj) {
-    ThrownProjectile::ProcessReplication(obj);
-    hitPlayer = obj["hp"].GetBool();
 }

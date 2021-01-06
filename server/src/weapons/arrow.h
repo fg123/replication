@@ -4,7 +4,7 @@
 #include "input-hold-thrower.h"
 
 class ArrowObject : public ThrownProjectile {
-    bool hitPlayer = false;
+    REPLICATED_D(bool, hitPlayer, "hp", false);
 
     Time timeLanded = 0;
     Time timeSinceLanded = 0;
@@ -20,8 +20,6 @@ public:
 
     virtual void OnCollide(CollisionResult& result) override;
     virtual void Tick(Time time) override;
-    virtual void Serialize(JSONWriter& obj) override;
-    virtual void ProcessReplication(json& obj) override;
 };
 
 CLASS_REGISTER(ArrowObject);
