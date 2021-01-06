@@ -17,12 +17,24 @@ static const double TILE_SIZE = 48;
 Vector2 killPlaneStart = { -3000, -2000 };
 Vector2 killPlaneEnd = { 3000, 2000 };
 
-Game::Game() : nextId(1) {
+Game::Game() : nextId(1), isProduction(false) {
 
 }
 
 #ifdef BUILD_SERVER
-Game::Game(std::string mapPath) : Game() {
+Game::Game(std::string mapPath, bool isProduction) : Game() {
+    this->isProduction = isProduction;
+
+    if (IsProduction()) {
+        LOG_INFO("==== PRODUCTION MODE ====");
+    }
+    else {
+        LOG_INFO("==== DEVELOPMENT MODE ====");
+        AddObject(new Dummy(*this, Vector2(600, 0)));
+    }
+
+    LOG_INFO("Loading Map " << mapPath);
+
     std::ifstream mapFile(mapPath);
 
     rapidjson::IStreamWrapper stream(mapFile);
@@ -46,9 +58,6 @@ Game::Game(std::string mapPath) : Game() {
             AddObject(floor);
         }
     }
-#ifndef PRODUCTION
-    AddObject(new Dummy(*this, Vector2(600, 0)));
-#endif
 }
 #endif
 

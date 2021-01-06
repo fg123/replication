@@ -14,7 +14,7 @@ USOCKET = $(SRC_DIR)/uWebSocket/uSocket
 CPPFLAGS = -std=c++17 -Wall -I $(SRC_DIR) -I $(USOCKET)/src -I $(SRC_DIR)/objects -I $(SRC_DIR)/animations
 LDLIBS = -L/usr/lib
 SERVER_DEBUG = -g
-SERVER_PROD = -O2 -DPRODUCTION
+SERVER_PROD = -O2
 SERVER_LDLIBS = $(LDLIBS) -L$(USOCKET) -lz -l:uSockets.a -lpthread
 WASM_DEBUG = -g4 -s ASSERTIONS=2 -s SAFE_HEAP=1 -s STACK_OVERFLOW_CHECK=1
 WASM_FLAGS = -s MODULARIZE \
@@ -28,7 +28,7 @@ server: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
 	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_DEBUG) -o bin/$(EXE)_server
 
-server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a CPPFLAGS += $(SERVER_PROD)
+server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
 	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o bin/$(EXE)_server_prod
 

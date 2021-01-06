@@ -35,6 +35,7 @@ struct PlayerSocketData {
 
 class Game {
     std::atomic<ObjectID> nextId;
+    bool isProduction;
 
     std::mutex queuedCallsMutex;
     std::vector<std::function<void(Game& game)>> queuedCalls;
@@ -64,7 +65,7 @@ public:
     Game();
 
 #ifdef BUILD_SERVER
-    Game(std::string mapPath);
+    Game(std::string mapPath, bool isProduction);
 #endif
 
     ~Game();
@@ -79,6 +80,8 @@ public:
     void DetachParent(Object* child);
 
 #ifdef BUILD_SERVER
+    bool IsProduction() const { return isProduction; }
+
     // Replicate objects in replicateNextTick to clients
     void Replicate(Time time);
 
