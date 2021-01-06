@@ -28,8 +28,7 @@ server: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
 	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_DEBUG) -o bin/$(EXE)_server
 
-server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a
-	CPPFLAGS += $(SERVER_PROD)
+server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a CPPFLAGS += $(SERVER_PROD)
 	mkdir -p bin
 	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o bin/$(EXE)_server_prod
 
