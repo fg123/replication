@@ -113,7 +113,8 @@ void Object::ResolveCollision(const Vector2& difference) {
 }
 
 void Object::OnCollide(CollisionResult& result) {
-    if (result.collidedWith->IsTagged(Tag::GROUND)) {
+    if (result.collidedWith->IsTagged(Tag::GROUND) &&
+        result.collisionDifference.y > 0) {
         isGrounded = true;
     }
 }
