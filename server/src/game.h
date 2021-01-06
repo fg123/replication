@@ -44,11 +44,12 @@ class Game {
     std::unordered_set<PlayerSocketData*> players;
     std::mutex playersSetMutex;
 
+    std::unordered_set<ObjectID> deadObjects;
+
 #ifdef BUILD_SERVER
     // Notifies client of any animations
     std::vector<Animation*> animationPackets;
 
-    std::unordered_set<ObjectID> deadObjects;
     std::unordered_set<ObjectID> deadSinceLastReplicate;
 
     std::mutex newObjectsMutex;
@@ -86,9 +87,6 @@ public:
     void QueueAllDirtyForReplication(Time time);
     void InitialReplication(PlayerSocketData* data);
 
-    void AddObject(Object* obj);
-    void DestroyObject(ObjectID objectId);
-
     void SendData(PlayerSocketData* player, std::string message);
 
     void QueueAnimation(Animation* animation) {
@@ -96,6 +94,9 @@ public:
         animationPackets.push_back(animation);
     }
 #endif
+
+    void AddObject(Object* obj);
+    void DestroyObject(ObjectID objectId);
 
 #ifdef BUILD_CLIENT
     void EnsureObjectExists(json& object);

@@ -2,6 +2,7 @@
 #include "collision.h"
 #include "game.h"
 #include "logging.h"
+#include "floating-text.h"
 
 static const int LEFT_MOUSE_BUTTON = 1;
 static const int A_KEY = 65;
@@ -287,11 +288,13 @@ void PlayerObject::OnCollide(CollisionResult& result) {
 void PlayerObject::DealDamage(int damage) {
     health -= damage;
 #ifdef BUILD_SERVER
+    game.QueueAnimation(new FloatingTextAnimation(GetPosition(), "-" + std::to_string(damage), "red"));
     if (health <= 0) {
         ObjectID id = GetId();
         game.DestroyObject(id);
     }
 #endif
+    OnTakeDamage(damage);
 }
 
 void PlayerObject::OnInput(const JSONDocument& obj) {

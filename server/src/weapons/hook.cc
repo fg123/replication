@@ -3,6 +3,7 @@
 HookObject::HookObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
     collideExclusion |= (uint64_t) Tag::WEAPON;
+    collideExclusion = ~((uint64_t) Tag::GROUND);
     SetTag(Tag::NO_GRAVITY);
     AddCollider(new CircleCollider(this, Vector2(0, 0), 5.0));
     airFriction = Vector2(1, 1);

@@ -23,16 +23,17 @@ void BulletObject::OnCollide(CollisionResult& result) {
     }
 
     // Check Player Hit
+#ifdef BUILD_SERVER
     if (result.collidedWith->IsTagged(Tag::PLAYER)) {
         static_cast<PlayerObject*>(result.collidedWith)->DealDamage(damage);
     }
+#endif
 
     dead = true;
     SetIsStatic(true);
     collideExclusion |= (uint64_t)Tag::OBJECT;
-#ifdef BUILD_SERVER
+
     game.DestroyObject(GetId());
-#endif
 }
 
 void BulletObject::Serialize(JSONWriter& obj) {

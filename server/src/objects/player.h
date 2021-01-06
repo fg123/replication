@@ -61,6 +61,9 @@ public:
 
     void DealDamage(int damage);
 
+    // TODO: add damage source
+    virtual void OnTakeDamage(int damage) {};
+
     Vector2 GetAimDirection() const;
     Vector2 GetAttachmentPoint() const;
 };

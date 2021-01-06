@@ -20,7 +20,7 @@ public:
         damage = 45;
         reloadTime = 1000;
         automaticFire = false;
-        fireOffset = 50;
+        fireOffset = 10;
     }
 };
 

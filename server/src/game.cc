@@ -4,6 +4,7 @@
 #include "object.h"
 #include "vector.h"
 #include "objects/player.h"
+#include "characters/dummy.h"
 #include "objects/rectangle.h"
 #include "characters/archer.h"
 
@@ -45,6 +46,7 @@ Game::Game(std::string mapPath) : Game() {
             AddObject(floor);
         }
     }
+    // AddObject(new Dummy(*this, Vector2(600, 0)));
 }
 #endif
 
@@ -112,6 +114,7 @@ void Game::Tick(Time time) {
             DestroyObject(object.second->GetId());
         }
     }
+#endif
 
     // OnDeath could potentially add more stuff to DeadObjects
     std::vector<ObjectID> deadObjectsThisTick;
@@ -127,11 +130,13 @@ void Game::Tick(Time time) {
             DetachParent(object);
             object->OnDeath();
             gameObjects.erase(objectId);
+        #ifdef BUILD_SERVER
             deadSinceLastReplicate.insert(objectId);
+        #endif
             delete object;
         }
     }
-
+#ifdef BUILD_SERVER
     Replicate(time);
     ReplicateAnimations(time);
 #endif
@@ -392,16 +397,19 @@ void Game::ChangeId(ObjectID oldId, ObjectID newId) {
     gameObjects.erase(oldId);
 }
 
-#ifdef BUILD_SERVER
 void Game::AddObject(Object* obj) {
-    std::scoped_lock<std::mutex> lock(newObjectsMutex);
-    ObjectID newId = RequestId();
-    obj->SetId(newId);
-    LOG_DEBUG("Add Object " << obj);
-    newObjects.insert(obj);
+    // Client does not do anything
+    #ifdef BUILD_SERVER
+        std::scoped_lock<std::mutex> lock(newObjectsMutex);
+        ObjectID newId = RequestId();
+        obj->SetId(newId);
+        LOG_DEBUG("Add Object " << obj);
+        newObjects.insert(obj);
+    #endif
 }
 
 void Game::DestroyObject(ObjectID objectId) {
+    // Let the client destroy an object (hopefully server responds back with correct)
     if (objectId == 0) {
         // Something has gone wrong
         LOG_ERROR("Tried to destroy object ID 0!");
@@ -415,6 +423,8 @@ void Game::DestroyObject(ObjectID objectId) {
     deadObjects.insert(objectId);
 }
 
+
+#ifdef BUILD_SERVER
 void Game::OnPlayerDead(PlayerObject* playerObject) {
     std::scoped_lock<std::mutex> lock(playersSetMutex);
     for (auto& p : players) {

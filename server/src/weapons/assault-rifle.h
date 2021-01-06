@@ -19,7 +19,7 @@ public:
         damage = 14;
         reloadTime = 1000;
         automaticFire = true;
-        fireOffset = 70;
+        fireOffset = 10;
     }
 };
 

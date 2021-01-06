@@ -27,10 +27,6 @@ void ArrowObject::OnCollide(CollisionResult& result) {
         savedVelocity = GetVelocity();
         collideExclusion |= (uint64_t) Tag::PLAYER;
     }
-
-    // game.QueueNextTick([this](Game& game) {
-    //     game.DestroyObject(GetId());
-    // });
 }
 
 void ArrowObject::Tick(Time time) {

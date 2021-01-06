@@ -5594,15 +5594,15 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 53480;
+var _game = Module["_game"] = 53736;
 
-var _inputEvents = Module["_inputEvents"] = 53600;
+var _inputEvents = Module["_inputEvents"] = 53880;
 
-var _localClientId = Module["_localClientId"] = 53476;
+var _localClientId = Module["_localClientId"] = 53732;
 
-var _ping = Module["_ping"] = 53632;
+var _ping = Module["_ping"] = 53912;
 
-var _lastTickTime = Module["_lastTickTime"] = 53624;
+var _lastTickTime = Module["_lastTickTime"] = 53904;
 
 function invoke_ii(index, a1) {
  var sp = stackSave();
@@ -5703,6 +5703,17 @@ function invoke_iiii(index, a1, a2, a3) {
  }
 }
 
+function invoke_iiiii(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_i(index) {
  var sp = stackSave();
  try {
@@ -5740,17 +5751,6 @@ function invoke_viiiii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiii(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

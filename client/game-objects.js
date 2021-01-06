@@ -3,8 +3,12 @@ const { drawImage } = require('./draw-util');
 function drawPlayer(body, arm, context, resourceManager, obj) {
     const image = obj.v.x < 0 ? resourceManager.get(body + '-FLIPPED') : resourceManager.get(body);
     drawImage(context, image, obj.client_p.x, obj.client_p.y, (image.width / 2), (image.height / 2));
-    const armImage = resourceManager.get(arm);
-    drawImage(context, armImage, obj.client_p.x, obj.client_p.y + 7, (armImage.width / 2), (armImage.height / 2), obj.aa);
+
+    if (arm) {
+        const armImage = resourceManager.get(arm);
+        drawImage(context, armImage, obj.client_p.x, obj.client_p.y + 7,
+            (armImage.width / 2), (armImage.height / 2), obj.aa);
+    }
 
     // Draw Health Bar
     context.fillStyle = "black";
@@ -204,6 +208,12 @@ module.exports = {
         draw (context, resourceManager, obj, clientState) {
             const r = characters["Archer"].resources;
             drawPlayer(r.base, r.arm, context, resourceManager, obj);
+        }
+    },
+    "Dummy": {
+        draw (context, resourceManager, obj, clientState) {
+            const r = characters["Archer"].resources;
+            drawPlayer(r.base, undefined, context, resourceManager, obj);
         }
     },
     "Hookman": {
