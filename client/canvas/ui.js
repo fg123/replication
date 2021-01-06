@@ -176,11 +176,17 @@ module.exports = class UICanvas {
 
         this.context.font = "13px Prompt";
         this.context.textBaseline = "hanging";
+        this.context.textAlign = "left";
         this.context.fillStyle = "black";
         this.context.fillText(`${Math.round(1000.0 / this.fps.frameTime)}FPS`, 20, 20);
+
         const ping = this.clientState.ping;
         this.context.fillText(`${ping > 999 ? ">999" : ping}ms`, 20, 40);
 
+        this.context.textAlign = "right";
+        this.context.fillText(`${this.clientState.webSocket.url}`, width - 20, 20);
+
+        this.context.textAlign = "left";
         this.DrawGraph("HandleReplicate", this.clientState.performance.handleReplicateTime, 20, 60);
 
         this.DrawGraph("TickTime", this.clientState.performance.tickTime, 20, 140);
