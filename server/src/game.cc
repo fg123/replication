@@ -42,21 +42,47 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
     JSONDocument obj;
     obj.ParseStream(stream);
 
-    // Create collision for tiles in the map
+    // Create collision for tiles in the map, just do simple horizontal for now
+    size_t y = 0;
     json& tiles = obj["tiles"];
-    for (json& tile : tiles.GetArray()) {
-        if (tile.HasMember("collision")) {
-            double startX = tile["start"]["x"].GetDouble() * TILE_SIZE;
-            double startY = tile["start"]["y"].GetDouble() * TILE_SIZE;
-            double endX = (tile["end"]["x"].GetDouble() + 1) * TILE_SIZE;
-            double endY = (tile["end"]["y"].GetDouble() + 1) * TILE_SIZE;
+    for (json& row : tiles.GetArray()) {
+        size_t x = 0;
+        int lastX = -1;
+        for (json& tile : row.GetArray()) {
+            int tileNum = tile.GetInt();
+            if (tileNum == -1 && lastX != -1) {
+                // End a block
+                double startX = lastX * TILE_SIZE;
+                double startY = y * TILE_SIZE;
+                double endX = (x) * TILE_SIZE;
+                double endY = (y + 1) * TILE_SIZE;
+                RectangleObject* floor = new RectangleObject(*this, Vector2{
+                    startX, startY
+                }, Vector2{ endX - startX, endY - startY });
+                floor->SetIsStatic(true);
+                floor->SetTag(Tag::GROUND);
+                AddObject(floor);
+                lastX = -1;
+            }
+            else if (tileNum != -1 && lastX == -1) {
+                lastX = x;
+            }
+            x++;
+        }
+        if (lastX != -1) {
+            // Wrap up last one
+            double startX = lastX * TILE_SIZE;
+            double startY = y * TILE_SIZE;
+            double endX = (x) * TILE_SIZE;
+            double endY = (y + 1) * TILE_SIZE;
             RectangleObject* floor = new RectangleObject(*this, Vector2{
                 startX, startY
-            }, Vector2{endX - startX, endY - startY});
+            }, Vector2{ endX - startX, endY - startY });
             floor->SetIsStatic(true);
             floor->SetTag(Tag::GROUND);
             AddObject(floor);
         }
+        y++;
     }
 }
 #endif

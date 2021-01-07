@@ -74,6 +74,12 @@ module.exports = {
             drawImage(context, image, obj.client_p.x, obj.client_p.y);
         }
     },
+    "PortalObject": {
+        draw (context, resourceManager, obj, clientState) {
+            const image = resourceManager.get('portal.png');
+            drawImage(context, image, obj.client_p.x, obj.client_p.y);
+        }
+    },
     "BulletObject": {
         draw (context, resourceManager, obj, clientState) {
             context.fillStyle = "black";

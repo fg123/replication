@@ -1,0 +1,24 @@
+html, body {
+    margin: 0;
+    height: 100%;
+}
+
+div.wrapper {
+    display: flex;
+    width: 100%;
+    height: 100%;
+
+}
+
+div.map, div.tiles {
+    display: flex;
+    flex-direction: column;
+}
+
+div.map {
+    flex-grow: 1;
+}
+
+div.mapCanvasWrapper, div.tilesCanvasWrapper {
+    flex-grow: 1;
+}

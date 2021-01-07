@@ -25,7 +25,7 @@ void GameLoop(Timer& gameTimer) {
 int main(int argc, char** argv) {
     std::string mapPath = "../data/maps/map1.json";
     bool isProduction = false;
-    for (size_t i = 1; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         std::string arg { argv[i] };
         if (arg == "-p") {
             isProduction = true;

@@ -22,5 +22,6 @@ module.exports = {
     },
     "map1Tiles.png": {},
     "artillery.png": {},
-    "exploding.png": {}
+    "exploding.png": {},
+    "portal.png": {}
 };

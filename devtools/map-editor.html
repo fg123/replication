@@ -1,0 +1,31 @@
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link href="map-editor.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="wrapper">
+        <div class="map">
+            <div class="mapSelect">
+                <select class="mapSelector"></select>
+                <button id="save">Save to file</button>
+            </div>
+            <div class="mapCanvasWrapper">
+                <canvas class="mapCanvas"></canvas>
+            </div>
+        </div>
+        <div class="tiles">
+            <button id="noBrush">No Brush</button>
+            <div class="tilesCanvasWrapper">
+                <canvas class="tilesCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- <span id="status"></span>
+    Map image: <input type="file" id="map_image" onchange="loadMapImage(this)"><br>
+    Map JSON: <input type="file" id="map_json" onchange="loadMapJSON(this)"><br><br>
+    <canvas id="canvas" width="2000" height="1000"></canvas> -->
+    <script src="map-editor.js"></script>
+</body>
+</html>

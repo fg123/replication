@@ -4,9 +4,10 @@
 #include "player.h"
 #include "weapons/hook-thrower.h"
 #include "weapons/pistol.h"
+#include "abilities/portal.h"
 
 class Hookman : public PlayerObject {
-    
+
 public:
     CLASS_CREATE(Hookman)
     Hookman(Game& game) : Hookman(game, Vector2::Zero) {}
@@ -15,14 +16,14 @@ public:
             qWeapon = new HookThrower { game };
             game.AddObject(qWeapon);
             qWeapon->AttachToPlayer(this);
-            
+
             PistolObject* pistol = new PistolObject(game);
             game.AddObject(pistol);
             PickupWeapon(pistol);
 
-            // zWeapon = new ArrowChargeUpAbility { game };
-            // game.AddObject(zWeapon);
-            // zWeapon->AttachToPlayer(this);
+            zWeapon = new PortalAbility { game };
+            game.AddObject(zWeapon);
+            zWeapon->AttachToPlayer(this);
         #endif
     }
 };
