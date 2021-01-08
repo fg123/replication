@@ -1,10 +1,10 @@
-FROM mhart/alpine-node:15.4.0
+FROM ubuntu:18.04
 
-RUN apk add --no-cache bash
-
-ADD package.json /app/
 WORKDIR /app
-RUN npm install --production
 
-COPY . .
-CMD ["npm", "run", "prod-client"]
+COPY server/bin server/bin
+COPY data data
+
+RUN chmod +x server/bin/game_server_prod
+
+CMD ["server/bin/game_server_prod", "data/maps/map1.json", "-p"]
