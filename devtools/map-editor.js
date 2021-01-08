@@ -91,6 +91,7 @@ $("#noBrush").click(e => {
 });
 
 $("#save").click(e => {
+    equalizeTiles();
     axios.post("/data/maps/save", {
         file: loadedMapName,
         data: mapJson
@@ -101,9 +102,33 @@ $("#save").click(e => {
     });
 });
 
+function equalizeTiles() {
+    let max = 0;
+    for (let i = 0; i < mapJson.tiles.length; i++) {
+        max = Math.max(max, mapJson.tiles[i].length);
+    }
+    for (let i = 0; i < mapJson.tiles.length; i++) {
+        while (mapJson.tiles[i].length < max) {
+            mapJson.tiles[i].push(-1);
+        }
+    }
+}
+
 function addNew() {
-    const x = Math.round(Math.floor((mouseoverX) / TILE_SIZE));
-    const y = Math.round(Math.floor((mouseoverY) / TILE_SIZE));
+    let x = Math.round(Math.floor((mouseoverX) / TILE_SIZE));
+    let y = Math.round(Math.floor((mouseoverY) / TILE_SIZE));
+    while (y < 0) {
+        mapJson.tiles.unshift([]);
+        y += 1;
+    }
+    if (x < 0) {
+        mapJson.tiles.forEach(row => {
+            for (let i = 0; i < -x; i++) {
+                row.unshift(-1);
+            }
+        });
+        x = 0;
+    }
     if (mapJson.tiles[y] === undefined) {
         mapJson.tiles[y] = [];
     }
@@ -162,6 +187,9 @@ function draw() {
     const tiles = mapJson.tiles;
     for (let y = 0; y < tiles.length; y++) {
         for (let x = 0; x < tiles[y].length; x++) {
+            if (tiles[y][x] === null) {
+                tiles[y][x] = -1;
+            }
             let sx = (tiles[y][x] * TILE_SIZE) % tilemap.width;
             let sy = Math.floor((tiles[y][x] * TILE_SIZE) / tilemap.width) * TILE_SIZE;
             context.drawImage(tilemap, sx, sy, TILE_SIZE, TILE_SIZE,

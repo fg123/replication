@@ -119,11 +119,11 @@ void PlayerObject::Tick(Time time) {
     Vector2 velocity = GetVelocity();
 
     if (keyboardState[KEY_MAP[A_KEY]]) {
-        velocity.x = -300;
+        velocity.x = -500;
     }
 
     if (keyboardState[KEY_MAP[D_KEY]]) {
-        velocity.x = 300;
+        velocity.x = 500;
     }
     // if (keyboardState[G_KEY]) {
     //     DropWeapon();

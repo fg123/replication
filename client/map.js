@@ -17,7 +17,6 @@ function createMap(mapPath, resourceManager, callback) {
             for (let x = 0; x < tiles[y].length; x++) {
                 let sx = (tiles[y][x] * TILE_SIZE) % tilemap.width;
                 let sy = Math.floor((tiles[y][x] * TILE_SIZE) / tilemap.width) * TILE_SIZE;
-                console.log(sx, sy);
                 context.drawImage(tilemap, sx, sy, TILE_SIZE, TILE_SIZE,
                     x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
             }

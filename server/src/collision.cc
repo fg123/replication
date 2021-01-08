@@ -10,6 +10,26 @@ Vector2 Collider::GetPosition() {
     }
 }
 
+bool RectangleAndCircleCollidePotential(RectangleCollider* rect, CircleCollider* circle) {
+    Vector2 rectPosition = rect->GetPosition();
+    Vector2 circPosition = circle->GetPosition();
+
+    // Circle entirely to the left of rect
+    if (circPosition.x + circle->radius < rectPosition.x) return false;
+
+    // Circle entirely to the right of rect
+    if (circPosition.x - circle->radius > rectPosition.x + rect->size.x) return false;
+
+    // Circle entirely to the top of rect
+    if (circPosition.y + circle->radius < rectPosition.y) return false;
+
+    // Circle entirely to the right of rect
+    if (circPosition.y - circle->radius > rectPosition.y + rect->size.y) return false;
+
+    // Do a more detailed check
+    return true;
+}
+
 CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollider* circle) {
     Vector2 rectPosition = rect->GetPosition();
     Vector2 circPosition = circle->GetPosition();
@@ -191,4 +211,24 @@ CollisionResult RectangleCollider::CollidesWith(const Vector2& p1, const Vector2
 CollisionResult CircleCollider::CollidesWith(const Vector2& p1, const Vector2& p2) {
     // TODO:
     return CollisionResult();
+}
+
+bool RectangleCollider::CollidePotentialWith(Collider* other) {
+    if (other->GetType() == 0) {
+        // Just do the collide check for rect / rect
+        return CollidesWith(other).isColliding;
+    }
+    else {
+        return RectangleAndCircleCollidePotential(this, static_cast<CircleCollider*>(other));
+    }
+}
+
+bool CircleCollider::CollidePotentialWith(Collider* other) {
+    if (other->GetType() == 1) {
+        // Just do the collide check for circ / circ
+        return CollidesWith(other).isColliding;
+    }
+    else {
+        return RectangleAndCircleCollidePotential(static_cast<RectangleCollider*>(other), this);
+    }
 }

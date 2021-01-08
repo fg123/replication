@@ -77,20 +77,28 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
+    bool IsObjectDirty(ObjectID objectId) {
+        Object* obj = game.GetObject(objectId);
+        return obj->IsDirty();
+    }
+
+    EMSCRIPTEN_KEEPALIVE
     const char* GetObjectSerialized(ObjectID objectId) {
         Object* obj = game.GetObject(objectId);
         rapidjson::StringBuffer buffer;
+        buffer.Reserve(350);
         rapidjson::Writer writer(buffer);
 
         writer.StartObject();
         obj->Serialize(writer);
         writer.EndObject();
 
-        std::string s { buffer.GetString() };
-        size_t length = s.size() + 1;
+        size_t length = buffer.GetSize() + 1;
         char* writable = new char[length];
-        std::copy(s.begin(), s.end(), writable);
+        std::copy_n(buffer.GetString(), length, writable);
         writable[length - 1] = 0;
+
+        obj->SetDirty(false);
         return writable;
     }
 

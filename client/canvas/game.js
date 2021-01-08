@@ -23,13 +23,15 @@ module.exports = class GameCanvas {
                 return;
             }
 
-            const serializedString = this.clientState.wasm._GetObjectSerialized(k);
-            const jsonString = this.clientState.wasm.UTF8ToString(serializedString);
-            const serializedObject = JSON.parse(jsonString);
-            this.clientState.wasm._free(serializedString);
-            const oldClientP = this.clientState.gameObjects[k].client_p;
-            this.clientState.gameObjects[k] = serializedObject;
-            this.clientState.gameObjects[k].client_p = serializedObject.p;
+            if (this.clientState.wasm._IsObjectDirty(k)) {
+                const serializedString = this.clientState.wasm._GetObjectSerialized(k);
+                const jsonString = this.clientState.wasm.UTF8ToString(serializedString);
+                const serializedObject = JSON.parse(jsonString);
+                this.clientState.wasm._free(serializedString);
+                const oldClientP = this.clientState.gameObjects[k].client_p;
+                this.clientState.gameObjects[k] = serializedObject;
+                this.clientState.gameObjects[k].client_p = serializedObject.p;
+            }
             // if (oldClientP === undefined) {
             //     this.clientState.gameObjects[k].client_p = this.clientState.gameObjects[k].p;
             // }

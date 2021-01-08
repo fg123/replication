@@ -22,6 +22,11 @@ public:
     Collider(Object* owner, Vector2 position) : owner(owner), position(position) { }
     virtual ~Collider() { }
     virtual int GetType() = 0;
+
+    // A quick range check to eliminate collisions to check
+    virtual bool CollidePotentialWith(Collider* other) = 0;
+
+    // Detailed collision
     virtual CollisionResult CollidesWith(Collider* other) = 0;
     virtual CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) = 0;
     Vector2 GetPosition();
@@ -40,6 +45,7 @@ struct RectangleCollider : public Collider {
         size(size) {}
     virtual int GetType() override { return 0; }
     CollisionResult CollidesWith(Collider* other) override;
+    bool CollidePotentialWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) override;
 };
 
@@ -51,6 +57,7 @@ struct CircleCollider : public Collider {
             radius(radius) {}
     virtual int GetType() override { return 1; }
     CollisionResult CollidesWith(Collider* other) override;
+    bool CollidePotentialWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2) override;
 };
 

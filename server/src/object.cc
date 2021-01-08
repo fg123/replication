@@ -81,11 +81,18 @@ void Object::Tick(Time time) {
         velocity.y = 0;
     }
 
+#ifdef BUILD_SERVER
     // We are dirty if velocity changed last frame
     //    or position changed significantly
     if (position - positionDelta != lastFramePosition || velocity != lastFrameVelocity) {
         SetDirty(true);
     }
+#endif
+#ifdef BUILD_CLIENT
+    // Always set dirty for client because we want client
+    //   GetObjectSerialized to work properly
+    SetDirty(true);
+#endif
 
     lastFrameVelocity = velocity;
     lastFramePosition = position;
@@ -123,6 +130,8 @@ void Object::OnCollide(CollisionResult& result) {
 CollisionResult Object::CollidesWith(Collider* other) {
     CollisionResult finalResult;
     for (auto& collider: colliders) {
+        // Collider vs collider, do sanity check first
+        if (!collider->CollidePotentialWith(other)) continue;
         CollisionResult r = collider->CollidesWith(other);
         if (r.isColliding) {
             finalResult.isColliding = true;
@@ -133,6 +142,9 @@ CollisionResult Object::CollidesWith(Collider* other) {
 }
 
 CollisionResult Object::CollidesWith(Object* other) {
+    if (GetColliderCount() == 0) {
+        return CollisionResult();
+    }
     // Add up all the collisions
     CollisionResult finalResult;
     for (auto& colliderOther: other->colliders) {
@@ -245,4 +257,5 @@ void Object::ProcessReplication(json& object) {
             children.insert(game.GetObject(value.GetInt()));
         }
     }
+    SetDirty(true);
 }

@@ -5,7 +5,7 @@
 #include "json/json.hpp"
 
 class RectangleObject : public Object {
-    REPLICATED(Vector2, size, "size");
+    REPLICATED(Vector2, size, "si");
 public:
     CLASS_CREATE(RectangleObject)
 

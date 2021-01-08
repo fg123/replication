@@ -5526,6 +5526,8 @@ var _TickGame = Module["_TickGame"] = createExportWrapper("TickGame");
 
 var _IsObjectAlive = Module["_IsObjectAlive"] = createExportWrapper("IsObjectAlive");
 
+var _IsObjectDirty = Module["_IsObjectDirty"] = createExportWrapper("IsObjectDirty");
+
 var _GetObjectSerialized = Module["_GetObjectSerialized"] = createExportWrapper("GetObjectSerialized");
 
 var _HandleLocalInput = Module["_HandleLocalInput"] = createExportWrapper("HandleLocalInput");

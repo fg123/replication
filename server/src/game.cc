@@ -15,7 +15,7 @@
 static const double TILE_SIZE = 48;
 
 Vector2 killPlaneStart = { -3000, -2000 };
-Vector2 killPlaneEnd = { 3000, 2000 };
+Vector2 killPlaneEnd = { 5000, 5000 };
 
 Game::Game() : nextId(1), isProduction(false) {
 
@@ -58,7 +58,7 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
                 double endY = (y + 1) * TILE_SIZE;
                 RectangleObject* floor = new RectangleObject(*this, Vector2{
                     startX, startY
-                }, Vector2{ endX - startX, endY - startY });
+                }, Vector2 { endX - startX, endY - startY });
                 floor->SetIsStatic(true);
                 floor->SetTag(Tag::GROUND);
                 AddObject(floor);
