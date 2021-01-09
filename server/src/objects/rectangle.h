@@ -5,8 +5,9 @@
 #include "json/json.hpp"
 
 class RectangleObject : public Object {
-    REPLICATED(Vector2, size, "si");
 public:
+    REPLICATED(Vector2, size, "si");
+
     CLASS_CREATE(RectangleObject)
 
     RectangleObject(Game& game) : Object(game) {}
@@ -15,6 +16,11 @@ public:
         this->size = size;
         SetPosition(position);
         AddCollider(new RectangleCollider(this, Vector2::Zero, size));
+    }
+
+    void ExtendYBy(double d) {
+        size.y += d;
+        static_cast<RectangleCollider*>(colliders[0])->size.y += d;
     }
 };
 

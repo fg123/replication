@@ -44,27 +44,51 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
 
     // Create collision for tiles in the map, just do simple horizontal for now
     size_t y = 0;
+    std::unordered_set<int> excluded;
+    json& excludedTiles = obj["noCollide"];
+    excluded.insert(-1);
+    for (json& i : excludedTiles.GetArray()) {
+        excluded.insert(i.GetInt());
+    }
     json& tiles = obj["tiles"];
+
+    std::unordered_map<size_t, RectangleObject*> singleBlocks;
     for (json& row : tiles.GetArray()) {
         size_t x = 0;
         int lastX = -1;
+        std::unordered_map<size_t, RectangleObject*> singleBlocksLastRow = singleBlocks;
+        singleBlocks.clear();
+
         for (json& tile : row.GetArray()) {
             int tileNum = tile.GetInt();
-            if (tileNum == -1 && lastX != -1) {
+            bool hasCollision = excluded.find(tileNum) == excluded.end();
+
+            if (!hasCollision && lastX != -1) {
                 // End a block
                 double startX = lastX * TILE_SIZE;
                 double startY = y * TILE_SIZE;
                 double endX = (x) * TILE_SIZE;
                 double endY = (y + 1) * TILE_SIZE;
-                RectangleObject* floor = new RectangleObject(*this, Vector2{
-                    startX, startY
-                }, Vector2 { endX - startX, endY - startY });
-                floor->SetIsStatic(true);
-                floor->SetTag(Tag::GROUND);
-                AddObject(floor);
+                bool isSingle = x - lastX == 1;
+                if (isSingle && singleBlocksLastRow.find(lastX) != singleBlocksLastRow.end()) {
+                    // Extend last block
+                    singleBlocksLastRow[lastX]->ExtendYBy(TILE_SIZE);
+                    singleBlocks[lastX] = singleBlocksLastRow[lastX];
+                }
+                else {
+                    RectangleObject* floor = new RectangleObject(*this, Vector2{
+                        startX, startY
+                    }, Vector2 { endX - startX, endY - startY });
+                    floor->SetIsStatic(true);
+                    floor->SetTag(Tag::GROUND);
+                    AddObject(floor);
+                    if (isSingle) {
+                        singleBlocks[lastX] = floor;
+                    }
+                }
                 lastX = -1;
             }
-            else if (tileNum != -1 && lastX == -1) {
+            else if (hasCollision && lastX == -1) {
                 lastX = x;
             }
             x++;
