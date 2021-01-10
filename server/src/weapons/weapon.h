@@ -52,4 +52,5 @@ public:
     bool IsOnCooldown() { return currentCooldown != 0; }
     void CooldownStart(Time time);
 };
+
 #endif

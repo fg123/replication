@@ -1,5 +1,20 @@
 const { drawImage } = require('./draw-util');
 
+function drawHealthbar(context, obj, color = "green") {
+     // Draw Health Bar
+     context.fillStyle = "black";
+     context.fillRect(
+         obj.client_p.x - 25,
+         obj.client_p.y - 50,
+         50, 5
+     );
+     context.fillStyle = color;
+     context.fillRect(
+         obj.client_p.x - 25,
+         obj.client_p.y - 50,
+         0.5 * obj.h, 5
+     );
+}
 function drawPlayer(body, arm, context, resourceManager, obj) {
     const image = obj.v.x < 0 ? resourceManager.get(body + '-FLIPPED') : resourceManager.get(body);
     drawImage(context, image, obj.client_p.x, obj.client_p.y, (image.width / 2), (image.height / 2));
@@ -10,19 +25,7 @@ function drawPlayer(body, arm, context, resourceManager, obj) {
             (armImage.width / 2), (armImage.height / 2), obj.aa);
     }
 
-    // Draw Health Bar
-    context.fillStyle = "black";
-    context.fillRect(
-        obj.client_p.x - 25,
-        obj.client_p.y - 50,
-        50, 5
-    );
-    context.fillStyle = "green";
-    context.fillRect(
-        obj.client_p.x - 25,
-        obj.client_p.y - 50,
-        0.5 * obj.h, 5
-    );
+    drawHealthbar(context, obj);
 }
 
 const characters = require('./characters');
@@ -78,6 +81,7 @@ module.exports = {
         draw (context, resourceManager, obj, clientState) {
             const image = resourceManager.get('portal.png');
             drawImage(context, image, obj.client_p.x, obj.client_p.y);
+            drawHealthbar(context, obj, "dodgerblue");
         }
     },
     "BulletObject": {
@@ -174,6 +178,26 @@ module.exports = {
     "HookThrower": {
 
     },
+    "BombCreator": {
+        draw (context, resourceManager, obj, clientState) {
+            const playerAttach = clientState.gameObjects[obj.attach];
+            if (playerAttach) {
+                context.globalAlpha = 0.2;
+                context.strokeStyle = "red";
+                context.lineWidth = 3;
+                context.beginPath();
+                context.arc(playerAttach.client_p.x, playerAttach.client_p.y, obj.dr, 0, 2 * Math.PI);
+                context.stroke();
+                context.globalAlpha = 1;
+            }
+        }
+    },
+    "PortalAbility": {
+
+    },
+    "BombExploder": {
+
+    },
     "GrenadeThrower": {
         draw (context, resourceManager, obj, clientState) {
             let isFlip = false;
@@ -226,6 +250,18 @@ module.exports = {
         draw (context, resourceManager, obj, clientState) {
             const r = characters["Hookman"].resources;
             drawPlayer(r.base, r.arm, context, resourceManager, obj);
+        }
+    },
+    "Bombmaker": {
+        draw (context, resourceManager, obj, clientState) {
+            const r = characters["Bombmaker"].resources;
+            drawPlayer(r.base, r.arm, context, resourceManager, obj);
+        }
+    },
+    "Bomb": {
+        draw (context, resourceManager, obj, clientState) {
+            const image = resourceManager.get('bomb.png');
+            drawImage(context, image, obj.client_p.x, obj.client_p.y);
         }
     }
 };

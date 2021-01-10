@@ -17,12 +17,11 @@ protected:
     // in Radians
     double aimAngle = 0;
 
+    Time canPickupTime = 0;
+public:
     WeaponObject* currentWeapon = nullptr;
     WeaponObject* qWeapon = nullptr;
     WeaponObject* zWeapon = nullptr;
-
-    Time canPickupTime = 0;
-public:
 
     std::mutex socketDataMutex;
 
@@ -34,8 +33,8 @@ public:
     // Ticks since we processed the last client input frame
     Time ticksSinceLastProcessed = 0;
 
-    std::array<bool, 10> keyboardState {};
-    std::array<bool, 10> lastKeyboardState {};
+    std::array<bool, 11> keyboardState {};
+    std::array<bool, 11> lastKeyboardState {};
 
     std::array<bool, 5> mouseState {};
     std::array<bool, 5> lastMouseState {};

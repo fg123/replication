@@ -14,6 +14,7 @@ static const int G_KEY = 71;
 static const int Q_KEY = 81;
 static const int Z_KEY = 90;
 static const int W_KEY = 87;
+static const int K_KEY = 75;
 static const int SPACE_KEY = 32;
 
 std::unordered_map<int, size_t> KEY_MAP = {
@@ -26,7 +27,8 @@ std::unordered_map<int, size_t> KEY_MAP = {
     { Q_KEY, 6 },
     { Z_KEY, 7 },
     { W_KEY, 8 },
-    { SPACE_KEY, 9 }
+    { SPACE_KEY, 9 },
+    { K_KEY, 10 }
 };
 
 PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector2::Zero) {
@@ -121,7 +123,11 @@ void PlayerObject::Tick(Time time) {
     if (keyboardState[KEY_MAP[A_KEY]]) {
         velocity.x = -500;
     }
-
+    if (keyboardState[KEY_MAP[K_KEY]]) {
+        if (!lastKeyboardState[KEY_MAP[K_KEY]]) {
+            DealDamage(100);
+        }
+    }
     if (keyboardState[KEY_MAP[D_KEY]]) {
         velocity.x = 500;
     }

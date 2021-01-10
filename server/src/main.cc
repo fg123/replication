@@ -3,6 +3,7 @@
 #include "characters/marine.h"
 #include "characters/archer.h"
 #include "characters/hookman.h"
+#include "characters/bombmaker.h"
 #include "logging.h"
 
 #include <thread>

@@ -14,6 +14,7 @@
 #include "characters/marine.h"
 #include "characters/archer.h"
 #include "characters/hookman.h"
+#include "characters/bombmaker.h"
 
 static const size_t MAX_INPUT_EVENT_QUEUE = 100;
 

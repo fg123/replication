@@ -11,8 +11,12 @@ class PortalObject : public Object {
     Time cooldown = 500;
     bool canUse = false;
 
+    Time timeCreated = 0;
+    Time timeLasting = 20000;
+
+    REPLICATED_D(int, hp, "h", 0);
+
 public:
-    std::vector<Vector2> positions;
     PortalObject* otherPortal = nullptr;
 
     CLASS_CREATE(PortalObject);
@@ -29,6 +33,21 @@ public:
     virtual void Tick(Time time) override {
         Object::Tick(time);
         canUse = time > lastUse + cooldown;
+
+    #ifdef BUILD_SERVER
+        if (timeCreated == 0 && otherPortal) {
+            timeCreated = time;
+        }
+        else if (timeCreated != 0) {
+            if (time < timeCreated + timeLasting) {
+                hp = ((double)((timeCreated + timeLasting) - time) / (double) timeLasting) * 100;
+                SetDirty(true);
+            }
+            else {
+                game.DestroyObject(GetId());
+            }
+        }
+    #endif
     }
 
     virtual void OnCollide(CollisionResult& result) override {
@@ -44,6 +63,7 @@ public:
             }
         #endif
     }
+
     virtual void Serialize(JSONWriter& obj) override {
         Object::Serialize(obj);
         if (otherPortal) {
@@ -51,6 +71,7 @@ public:
             obj.Uint(otherPortal->GetId());
         }
     }
+
     virtual void ProcessReplication(json& obj) override {
         Object::ProcessReplication(obj);
         if (obj.HasMember("op")) {
@@ -67,8 +88,6 @@ CLASS_REGISTER(PortalObject);
 class PortalAbility : public WeaponWithCooldown {
     REPLICATED_D(bool, currentlyPortaling, "cp", false);
 
-    std::vector<Vector2> positions;
-
     PortalObject* firstPortal = nullptr;
 public:
     CLASS_CREATE(PortalAbility)
@@ -79,9 +98,6 @@ public:
 
     virtual void Tick(Time time) override {
         WeaponWithCooldown::Tick(time);
-        if (currentlyPortaling) {
-            positions.push_back(attachedTo->GetPosition());
-        }
     }
 
     virtual void StartFire(Time time) override {
@@ -94,15 +110,10 @@ public:
             PortalObject* secondPortal = new PortalObject(game, attachedTo->GetPosition());
             secondPortal->otherPortal = firstPortal;
             firstPortal->otherPortal = secondPortal;
-            firstPortal->positions = positions;
-            secondPortal->positions = positions;
-            std::reverse(secondPortal->positions.begin(),
-                secondPortal->positions.end());
 
             game.AddObject(secondPortal);
             currentlyPortaling = false;
             firstPortal = nullptr;
-            positions.clear();
             CooldownStart(time);
         }
         else {

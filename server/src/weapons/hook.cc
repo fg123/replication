@@ -32,7 +32,8 @@ void HookObject::Tick(Time time) {
     else if (IsStatic()) {
         Vector2 position = firedBy->GetAttachedTo()->GetPosition();
         Vector2 velocity = firedBy->GetAttachedTo()->GetVelocity();
-        Vector2 direction = (GetPosition() - position).Normalize();
+        // Make regular direction twice as powerful as the aiming pull
+        Vector2 direction = (GetPosition() - position).Normalize() * 5;
         Vector2 aimDirection = firedBy->GetAttachedTo()->GetAimDirection();
         velocity = (direction + aimDirection).Normalize() * 1000;
         firedBy->GetAttachedTo()->SetVelocity(velocity);

@@ -16,5 +16,11 @@ module.exports = {
             base: "hookman.png",
             arm: "hookmanArm.png"
         }
+    },
+    "Bombmaker": {
+        resources: {
+            base: "bombmaker.png",
+            arm: "bombmakerArm.png"
+        }
     }
 }

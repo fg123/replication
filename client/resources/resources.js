@@ -11,6 +11,10 @@ module.exports = {
         flipDirection: true
     },
     'hookmanArm.png': {},
+    'bombmaker.png': {
+        flipDirection: true
+    },
+    'bombmakerArm.png': {},
     'm4.png': {
         flipDirection: true
     },
@@ -22,6 +26,7 @@ module.exports = {
     },
     "map1Tiles.png": {},
     "artillery.png": {},
+    "bomb.png": {},
     "exploding.png": {},
     "portal.png": {}
 };
