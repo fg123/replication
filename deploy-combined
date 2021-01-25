@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo "Building Server Binary"
+cd server && make server_prod
+cd ..
+
+echo "Building Client WASM"
+cd server && make client_prod
+cd ..
+
+echo "Building Client NPM"
+NODE_ENV=production npm run build-prod
+
+echo "Deploying to Git"
+cp combined.Dockerfile Dockerfile
+git add .
+git commit -m "Deploy both"
+git push production-server
