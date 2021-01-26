@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:15.4.0
+FROM node:12.20.1-stretch
 
 RUN apk add --no-cache bash
 
