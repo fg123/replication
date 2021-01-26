@@ -1,4 +1,4 @@
-FROM node:12.20.1-stretch
+FROM mhart/alpine-node:15.4.0
 
 RUN apk add --no-cache bash
 
@@ -7,7 +7,4 @@ WORKDIR /app
 RUN npm install --production
 
 COPY . .
-
-RUN chmod +x server/bin/game_server_prod
-
-CMD ["npm", "run", "run-both"]
+CMD ["npm", "run", "prod-client"]
