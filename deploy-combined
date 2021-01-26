@@ -15,4 +15,4 @@ echo "Deploying to Git"
 cp combined.Dockerfile Dockerfile
 git add .
 git commit -m "Deploy both"
-git push production-server
+git push production-client

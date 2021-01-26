@@ -14,7 +14,7 @@ const uiCanvas = document.getElementById('ui');
 const uiContext = uiCanvas.getContext('2d');
 
 const localAddress = 'ws://' + location.hostname + ':8080/connect';
-const remoteAddress = "wss://replication-server.felixguo.me/connect";
+const remoteAddress = "wss://replication-server.felixguo.me:8080/connect";
 const connectAddress = Constants.isProduction ? remoteAddress : localAddress;
 
 console.log('Loading Game WASM');
