@@ -10,7 +10,7 @@ COPY . .
 
 RUN chmod +x server/bin/game_server_prod
 
+CMD ["npm", "run", "run-both"]
+
 EXPOSE 80
 EXPOSE 8080
-
-CMD ["npm", "run", "run-both"]
