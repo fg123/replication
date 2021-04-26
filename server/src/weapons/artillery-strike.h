@@ -51,7 +51,7 @@ CLASS_REGISTER(ArtilleryObject);
 class ArtilleryStrike : public WeaponWithCooldown {
 public:
     CLASS_CREATE(ArtilleryStrike)
-    ArtilleryStrike(Game& game) : ArtilleryStrike(game, Vector2::Zero) {}
+    ArtilleryStrike(Game& game) : ArtilleryStrike(game, Vector2()) {}
     ArtilleryStrike(Game& game, Vector2 position) : WeaponWithCooldown(game, position) {
         cooldown = 10000;
     }

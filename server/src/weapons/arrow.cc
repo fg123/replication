@@ -15,7 +15,7 @@ void ArrowObject::OnCollide(CollisionResult& result) {
     #ifdef BUILD_SERVER
         static_cast<PlayerObject*>(result.collidedWith)->DealDamage(50);
     #endif
-        SetVelocity(Vector2::Zero);
+        SetVelocity(Vector2());
     }
     else if (result.collidedWith->IsStatic() && !IsStatic()) {
         LOG_DEBUG("Setting to Static");

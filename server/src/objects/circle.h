@@ -15,7 +15,7 @@ public:
         this->radius = radius;
         SetPosition(position);
 
-        AddCollider(new CircleCollider(this, Vector2::Zero, radius));
+        AddCollider(new CircleCollider(this, Vector2(), radius));
     }
 
     virtual void Serialize(JSONWriter& obj) override {

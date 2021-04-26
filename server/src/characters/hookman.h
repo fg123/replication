@@ -10,7 +10,7 @@ class Hookman : public PlayerObject {
 
 public:
     CLASS_CREATE(Hookman)
-    Hookman(Game& game) : Hookman(game, Vector2::Zero) {}
+    Hookman(Game& game) : Hookman(game, Vector2()) {}
     Hookman(Game& game, Vector2 position) : PlayerObject(game, position) {
         #ifdef BUILD_SERVER
             qWeapon = new HookThrower { game };

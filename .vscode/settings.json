@@ -72,7 +72,8 @@
         "xlocmes": "cpp",
         "regex": "cpp",
         "sstream": "cpp",
-        "xlocbuf": "cpp"
+        "xlocbuf": "cpp",
+        "cstdarg": "cpp"
     },
     "files.exclude": {
         "**/.git": true,

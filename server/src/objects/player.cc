@@ -31,7 +31,7 @@ std::unordered_map<int, size_t> KEY_MAP = {
     { K_KEY, 10 }
 };
 
-PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector2::Zero) {
+PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector2()) {
 }
 
 PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
@@ -352,5 +352,5 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
 }
 
 Vector2 PlayerObject::GetAttachmentPoint() const {
-    return GetPosition() + GetAimDirection().Normalize() * 20.0;
+    return GetPosition() + glm::normalize(GetAimDirection()) * 20.0;
 }

@@ -93,7 +93,7 @@ CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollide
 
     // get difference vector between both centers
     Vector2 difference = circPosition - rectCenter;
-    Vector2 clamped = difference.Clamp(-rectHalf, rectHalf);
+    Vector2 clamped = glm::clamp(difference, -rectHalf, rectHalf);
 
     // add clamped value to AABB_center and we get the value of box closest to circle
     Vector2 closest = rectCenter + clamped;
@@ -101,9 +101,9 @@ CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollide
     // LOG_DEBUG("Difference " << closest << " " << circPosition);
     difference = closest - circPosition;
     // Difference should point away from the rectangle.
-    double differenceLength = difference.Length();
+    double differenceLength = glm::length(difference);
 
-    difference.Normalize();
+    difference = glm::normalize(difference);
 
     double overlapRange = circle->radius - differenceLength;
 
@@ -170,13 +170,12 @@ CollisionResult CircleCollider::CollidesWith(Collider* other) {
     if (other->GetType() == 1) {
         // Trust the RTTI
         CircleCollider* otherCirc = static_cast<CircleCollider*>(other);
-        double distance = GetPosition().Distance(otherCirc->GetPosition());
+        double distance = glm::distance(GetPosition(), otherCirc->GetPosition());
         double radii = (radius + otherCirc->radius);
         CollisionResult r;
         r.isColliding = distance < radii;
         if (r.isColliding) {
-            Vector2 difference = (otherCirc->GetPosition() - GetPosition());
-            difference.Normalize();
+            Vector2 difference = glm::normalize(otherCirc->GetPosition() - GetPosition());
             r.collisionDifference = difference * (radii - distance);
         }
         return r;

@@ -41,7 +41,7 @@ void WeaponObject::AttachToPlayer(PlayerObject* player) {
 void WeaponObject::Detach() {
     game.DetachParent(this);
     attachedTo = nullptr;
-    SetVelocity(Vector2::Zero);
+    SetVelocity(Vector2());
     collisionExclusion &= ~(uint64_t)Tag::OBJECT;
     RemoveTag(Tag::NO_KILLPLANE);
     SetDirty(true);

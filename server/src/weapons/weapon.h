@@ -12,7 +12,7 @@ protected:
     PlayerObject* attachedTo = nullptr;
 
 public:
-    WeaponObject(Game& game) : WeaponObject(game, Vector2::Zero) {
+    WeaponObject(Game& game) : WeaponObject(game, Vector2()) {
     }
     WeaponObject(Game& game, Vector2 position);
 
@@ -44,7 +44,7 @@ private:
     Time lastUseTime = 0;
 
 public:
-    WeaponWithCooldown(Game& game) : WeaponWithCooldown(game, Vector2::Zero) {}
+    WeaponWithCooldown(Game& game) : WeaponWithCooldown(game, Vector2()) {}
     WeaponWithCooldown(Game& game, Vector2 position) : WeaponObject(game, position) {}
 
     virtual void Tick(Time time) override;

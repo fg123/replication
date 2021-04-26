@@ -7,16 +7,16 @@
 #include "weapons/bow.h"
 
 class Archer : public PlayerObject {
-    
+
 public:
     CLASS_CREATE(Archer)
-    Archer(Game& game) : Archer(game, Vector2::Zero) {}
+    Archer(Game& game) : Archer(game, Vector2()) {}
     Archer(Game& game, Vector2 position) : PlayerObject(game, position) {
         #ifdef BUILD_SERVER
             qWeapon = new DashAbility { game };
             game.AddObject(qWeapon);
             qWeapon->AttachToPlayer(this);
-        
+
             BowObject* bow = new BowObject(game);
             game.AddObject(bow);
             PickupWeapon(bow);

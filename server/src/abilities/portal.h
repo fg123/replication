@@ -20,7 +20,7 @@ public:
     PortalObject* otherPortal = nullptr;
 
     CLASS_CREATE(PortalObject);
-    PortalObject(Game& game) : PortalObject(game, Vector2::Zero) {}
+    PortalObject(Game& game) : PortalObject(game, Vector2()) {}
     PortalObject(Game& game, Vector2 position) : Object(game) {
         // Don't affect anyone's position in game
         collisionExclusion |= (uint64_t) Tag::OBJECT;
@@ -91,7 +91,7 @@ class PortalAbility : public WeaponWithCooldown {
     PortalObject* firstPortal = nullptr;
 public:
     CLASS_CREATE(PortalAbility)
-    PortalAbility(Game& game) : PortalAbility(game, Vector2::Zero) {}
+    PortalAbility(Game& game) : PortalAbility(game, Vector2()) {}
     PortalAbility(Game& game, Vector2 position) : WeaponWithCooldown(game, position) {
         cooldown = 10000;
     }

@@ -222,10 +222,10 @@ void Object::ProcessReplication(json& object) {
         for (json& colliderInfo : object["c"].GetArray()) {
             // LOG_DEBUG(DumpJSON(colliderInfo));
             if (colliderInfo["t"].GetInt() == 0) {
-                AddCollider(new RectangleCollider(this, Vector2::Zero, Vector2::Zero));
+                AddCollider(new RectangleCollider(this, Vector2(), Vector2()));
             }
             else if (colliderInfo["t"].GetInt() == 1) {
-                AddCollider(new CircleCollider(this, Vector2::Zero, 0));
+                AddCollider(new CircleCollider(this, Vector2(), 0));
             }
         }
     }

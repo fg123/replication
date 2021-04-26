@@ -555,7 +555,7 @@ void Game::GetUnitsInRange(const Vector2& position, double range,
 
     for (auto& pair : gameObjects) {
         Object* obj = pair.second;
-        double actualRange = position.Distance(obj->GetPosition());
+        double actualRange = glm::distance(position, obj->GetPosition());
         if (includeBoundingBox) {
             CollisionResult result = obj->CollidesWith(&collider);
             if (result.isColliding) {

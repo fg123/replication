@@ -2,26 +2,6 @@
 #include "json/json.hpp"
 #include "logging.h"
 
-const Vector2 Vector2::Zero;
-
-Vector2& Vector2::Normalize() {
-    double norm = Length();
-	if (norm == 0) {
-		x = 0;
-		y = 0;
-	}
-	else {
-		x /= norm;
-		y /= norm;
-	}
-    return *this;
-}
-
-Vector2 Vector2::Normalize() const {
-    double norm = Length();
-    return Vector2(x / norm, y / norm);
-}
-
 bool AllEqual(bool a, bool b, bool c, bool d) {
     // Yuck
     return a == b && a == c && a == d;

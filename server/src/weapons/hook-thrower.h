@@ -9,7 +9,7 @@ class HookThrower : public InputHoldThrower<HookObject> {
 public:
     CLASS_CREATE(HookThrower)
 
-    HookThrower(Game& game) : HookThrower(game, Vector2::Zero) {}
+    HookThrower(Game& game) : HookThrower(game, Vector2()) {}
     HookThrower(Game& game, Vector2 position) : InputHoldThrower<HookObject>(game, position) {
         instantFire = true;
         cooldown = 2000;

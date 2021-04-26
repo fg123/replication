@@ -25,7 +25,7 @@ void HookObject::Tick(Time time) {
     ThrownProjectile::Tick(time);
     bool isDead = false;
     if (!IsStatic() &&
-        firedBy->GetAttachedTo()->GetPosition().Distance(GetPosition()) > 500) {
+        glm::distance(firedBy->GetAttachedTo()->GetPosition(), GetPosition()) > 500) {
         isDead = true;
 
     }
@@ -33,21 +33,21 @@ void HookObject::Tick(Time time) {
         Vector2 position = firedBy->GetAttachedTo()->GetPosition();
         Vector2 velocity = firedBy->GetAttachedTo()->GetVelocity();
         // Make regular direction twice as powerful as the aiming pull
-        Vector2 direction = (GetPosition() - position).Normalize() * 5;
+        Vector2 direction = glm::normalize(GetPosition() - position) * 5.0;
         Vector2 aimDirection = firedBy->GetAttachedTo()->GetAimDirection();
-        velocity = (direction + aimDirection).Normalize() * 1000;
+        velocity = glm::normalize(direction + aimDirection) * 1000.0;
         firedBy->GetAttachedTo()->SetVelocity(velocity);
         hasForceBeenApplied = true;
 
         // TODO: Cut off the rope if it intersects map object
-        CollisionResult r = game.CheckLineSegmentCollide(position + direction * 10,
-            GetPosition() - (direction * 10), (uint64_t)Tag::GROUND);
+        CollisionResult r = game.CheckLineSegmentCollide(position + direction * 10.0,
+            GetPosition() - (direction * 10.0), (uint64_t)Tag::GROUND);
         if (r.isColliding) {
             isDead = true;
         }
     }
     if (hasForceBeenApplied &&
-        firedBy->GetAttachedTo()->GetPosition().Distance(GetPosition()) < 100) {
+        glm::distance(firedBy->GetAttachedTo()->GetPosition(), GetPosition()) < 100) {
         isDead = true;
     }
 #ifdef BUILD_SERVER

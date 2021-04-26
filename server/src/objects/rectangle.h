@@ -15,7 +15,7 @@ public:
          RectangleObject(game) {
         this->size = size;
         SetPosition(position);
-        AddCollider(new RectangleCollider(this, Vector2::Zero, size));
+        AddCollider(new RectangleCollider(this, Vector2(), size));
     }
 
     void ExtendYBy(double d) {

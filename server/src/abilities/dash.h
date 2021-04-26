@@ -13,7 +13,7 @@ class DashAbility : public WeaponWithCooldown {
 
 public:
     CLASS_CREATE(DashAbility)
-    DashAbility(Game& game) : DashAbility(game, Vector2::Zero) {}
+    DashAbility(Game& game) : DashAbility(game, Vector2()) {}
     DashAbility(Game& game, Vector2 position) : WeaponWithCooldown(game, position) {
         cooldown = 2000;
     }

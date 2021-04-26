@@ -7,7 +7,7 @@ class Dummy : public PlayerObject {
 
 public:
     CLASS_CREATE(Dummy)
-    Dummy(Game& game) : Dummy(game, Vector2::Zero) {}
+    Dummy(Game& game) : Dummy(game, Vector2()) {}
     Dummy(Game& game, Vector2 position) : PlayerObject(game, position) {
     }
 

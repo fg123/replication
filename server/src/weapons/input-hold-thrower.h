@@ -51,7 +51,7 @@ protected:
     REPLICATED_D(bool, instantFire, "inst", false);
 
 public:
-    InputHoldThrower(Game& game) : InputHoldThrower(game, Vector2::Zero) {}
+    InputHoldThrower(Game& game) : InputHoldThrower(game, Vector2()) {}
     InputHoldThrower(Game& game, Vector2 position) :
         WeaponWithCooldown(game, position) {}
 
@@ -66,7 +66,7 @@ public:
         }
         else {
             chargeUpTime = 0;
-            arrowFireVel = Vector2::Zero;
+            arrowFireVel = Vector2();
         }
         timeSinceLastThrow = time - lastThrow;
     }
