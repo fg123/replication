@@ -121,7 +121,7 @@ extern "C" {
     void HandleReplicate(const char* input) {
         // LOG_DEBUG("Handle Replicate");
         try {
-            Vector2 oldPosition, serverPosition;
+            Vector3 oldPosition, serverPosition;
             if (Object* obj = game.GetObject(localClientId)) {
                 // LOG_DEBUG("OldPosition Tick Time" << lastTickTime);
                 oldPosition = obj->GetPosition();
@@ -222,9 +222,9 @@ extern "C" {
             }
 
             if (Object* obj = game.GetObject(localClientId)) {
-                Vector2 newPosition = obj->GetPosition();
-                Vector2 difference = (newPosition - oldPosition);
-                if (difference.Length() > 5.0) {
+                Vector3 newPosition = obj->GetPosition();
+                Vector3 difference = (newPosition - oldPosition);
+                if (glm::length(difference) > 5.0) {
                     LOG_DEBUG("Server Position Desync: " << newPosition << " - " << oldPosition << " = " << (newPosition - oldPosition));
                 }
             }

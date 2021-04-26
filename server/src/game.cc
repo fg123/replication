@@ -14,8 +14,8 @@
 
 static const double TILE_SIZE = 48;
 
-Vector2 killPlaneStart = { -3000, -2000 };
-Vector2 killPlaneEnd = { 5000, 5000 };
+Vector3 killPlaneStart = { -3000, -2000, 0 };
+Vector3 killPlaneEnd = { 5000, 5000, 0 };
 
 Game::Game() : nextId(1), isProduction(false) {
 
@@ -30,7 +30,7 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
     }
     else {
         LOG_INFO("==== DEVELOPMENT MODE ====");
-        AddObject(new Dummy(*this, Vector2(600, 0)));
+        // AddObject(new Dummy(*this, Vector3(600, 0, 0)));
     }
 
     LOG_INFO("Loading Map " << mapPath);
@@ -76,9 +76,9 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
                     singleBlocks[lastX] = singleBlocksLastRow[lastX];
                 }
                 else {
-                    RectangleObject* floor = new RectangleObject(*this, Vector2{
-                        startX, startY
-                    }, Vector2 { endX - startX, endY - startY });
+                    RectangleObject* floor = new RectangleObject(*this, Vector3{
+                        startX, startY, 0
+                    }, Vector3 { endX - startX, endY - startY, 0 });
                     floor->SetIsStatic(true);
                     floor->SetTag(Tag::GROUND);
                     AddObject(floor);
@@ -99,9 +99,9 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
             double startY = y * TILE_SIZE;
             double endX = (x) * TILE_SIZE;
             double endY = (y + 1) * TILE_SIZE;
-            RectangleObject* floor = new RectangleObject(*this, Vector2{
-                startX, startY
-            }, Vector2{ endX - startX, endY - startY });
+            RectangleObject* floor = new RectangleObject(*this, Vector3{
+                startX, startY, 0
+            }, Vector3{ endX - startX, endY - startY, 0 });
             floor->SetIsStatic(true);
             floor->SetTag(Tag::GROUND);
             AddObject(floor);
@@ -426,7 +426,7 @@ void Game::ProcessReplication(json& object) {
 #endif
 
 void Game::HandleCollisions(Object* obj) {
-    Vector2 collisionResolution;
+    Vector3 collisionResolution;
     for (auto& object : gameObjects) {
         if (obj == object.second) continue;
 
@@ -446,6 +446,7 @@ void Game::HandleCollisions(Object* obj) {
             }
         }
     }
+    // LOG_DEBUG(collisionResolution);
     obj->ResolveCollision(collisionResolution);
 }
 
@@ -505,7 +506,7 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
                 p->nextRespawnCharacter = "Archer";
             }
             Object* obj = GetClassLookup()[p->nextRespawnCharacter](*this);
-            obj->SetPosition(Vector2(200, 0));
+            obj->SetPosition(Vector3(200, 0, 0));
 
             static_cast<PlayerObject*>(obj)->lastClientInputTime = playerObject->lastClientInputTime;
             static_cast<PlayerObject*>(obj)->ticksSinceLastProcessed = playerObject->ticksSinceLastProcessed;
@@ -548,7 +549,7 @@ void Game::RemovePlayer(PlayerSocketData* data) {
 }
 #endif
 
-void Game::GetUnitsInRange(const Vector2& position, double range,
+void Game::GetUnitsInRange(const Vector3& position, double range,
     bool includeBoundingBox, std::vector<RangeQueryResult>& results) {
 
     CircleCollider collider { position, range };
@@ -569,8 +570,8 @@ void Game::GetUnitsInRange(const Vector2& position, double range,
 }
 
 
-CollisionResult Game::CheckLineSegmentCollide(const Vector2& start,
-    const Vector2& end, uint64_t includeTags) {
+CollisionResult Game::CheckLineSegmentCollide(const Vector3& start,
+    const Vector3& end, uint64_t includeTags) {
     CollisionResult result;
     for (auto& object : gameObjects) {
         if (((uint64_t)object.second->GetTags() & includeTags) != 0) {

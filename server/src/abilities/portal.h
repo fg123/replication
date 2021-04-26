@@ -20,14 +20,14 @@ public:
     PortalObject* otherPortal = nullptr;
 
     CLASS_CREATE(PortalObject);
-    PortalObject(Game& game) : PortalObject(game, Vector2()) {}
-    PortalObject(Game& game, Vector2 position) : Object(game) {
+    PortalObject(Game& game) : PortalObject(game, Vector3()) {}
+    PortalObject(Game& game, Vector3 position) : Object(game) {
         // Don't affect anyone's position in game
         collisionExclusion |= (uint64_t) Tag::OBJECT;
 
         SetTag(Tag::NO_GRAVITY);
         SetPosition(position);
-        AddCollider(new RectangleCollider(this, Vector2(-18, -38), Vector2(37, 76)));
+        AddCollider(new RectangleCollider(this, Vector3(-18, -38, 0), Vector3(37, 76, 0)));
     }
 
     virtual void Tick(Time time) override {
@@ -91,8 +91,8 @@ class PortalAbility : public WeaponWithCooldown {
     PortalObject* firstPortal = nullptr;
 public:
     CLASS_CREATE(PortalAbility)
-    PortalAbility(Game& game) : PortalAbility(game, Vector2()) {}
-    PortalAbility(Game& game, Vector2 position) : WeaponWithCooldown(game, position) {
+    PortalAbility(Game& game) : PortalAbility(game, Vector3()) {}
+    PortalAbility(Game& game, Vector3 position) : WeaponWithCooldown(game, position) {
         cooldown = 10000;
     }
 

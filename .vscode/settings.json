@@ -85,6 +85,7 @@
         "**/*.wd": true,
         "**/*.o": true,
         "**/*.wo": true,
+        "**/lib/**": true
     },
     "files.trimTrailingWhitespace": true
 }

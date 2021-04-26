@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
             data->ws = ws;
             data->eventLoop = uWS::Loop::get();
             data->nextRespawnCharacter = "Marine";
-            PlayerObject* playerObject = new Marine(game, Vector2(100, 100));
+            PlayerObject* playerObject = new Marine(game, Vector3(100, 100, 0));
             data->playerObject = playerObject;
 
             game.AddPlayer(data, playerObject);

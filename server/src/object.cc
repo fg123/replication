@@ -36,7 +36,7 @@ Object::Object(Game& game) :
     tags((uint64_t)Tag::OBJECT),
     collisionExclusion(0),
     collisionReporting(~0),
-    airFriction(0.97, 1)
+    airFriction(0.97, 1, 0)
 {}
 
 Object::~Object() {
@@ -66,9 +66,11 @@ void Object::Tick(Time time) {
         velocity.y += GRAVITY * timeFactor;
     }
 
-    velocity *= airFriction;
+    velocity.x *= airFriction.x;
+    velocity.y *= airFriction.y;
+    velocity.z *= airFriction.z;
 
-    Vector2 positionDelta = GetVelocity() * timeFactor;
+    Vector3 positionDelta = GetVelocity() * timeFactor;
     position += positionDelta;
 
     isGrounded = false;
@@ -98,13 +100,15 @@ void Object::Tick(Time time) {
     lastFramePosition = position;
 }
 
-void Object::ResolveCollision(const Vector2& difference) {
+void Object::ResolveCollision(const Vector3& difference) {
     // if (isStatic) return;
     // TODO: this collision difference really should be negated
     if (std::isnan(difference.x) || std::isnan(difference.y)) {
         LOG_ERROR("ResolveCollision has nan difference " << difference);
         throw std::runtime_error("ResolveCollision has nan difference!");
     }
+
+    // LOG_DEBUG("Difference " << difference << " " << velocity);
     position -= difference;
     // We had to adjust the collision in a certain direction.
     // If the velocity does not match the direction of resolution, do nothing
@@ -112,6 +116,7 @@ void Object::ResolveCollision(const Vector2& difference) {
     // This is kinda wonky and unintuitive because you decided to do -=
     //   collisionDifference, changing it around requires changing the
     //   calculations for collisionDifference in the collision subroutines
+
     if (SameSign(difference.x, velocity.x)) {
         velocity.x = 0;
     }
@@ -156,7 +161,7 @@ CollisionResult Object::CollidesWith(Object* other) {
     return finalResult;
 }
 
-CollisionResult Object::CollidesWith(const Vector2& p1, const Vector2& p2) {
+CollisionResult Object::CollidesWith(const Vector3& p1, const Vector3& p2) {
     for (auto& collider: colliders) {
         CollisionResult r = collider->CollidesWith(p1, p2);
         if (r.isColliding) {
@@ -222,10 +227,10 @@ void Object::ProcessReplication(json& object) {
         for (json& colliderInfo : object["c"].GetArray()) {
             // LOG_DEBUG(DumpJSON(colliderInfo));
             if (colliderInfo["t"].GetInt() == 0) {
-                AddCollider(new RectangleCollider(this, Vector2(), Vector2()));
+                AddCollider(new RectangleCollider(this, Vector3(), Vector3()));
             }
             else if (colliderInfo["t"].GetInt() == 1) {
-                AddCollider(new CircleCollider(this, Vector2(), 0));
+                AddCollider(new CircleCollider(this, Vector3(), 0));
             }
         }
     }

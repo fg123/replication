@@ -345,6 +345,21 @@ if (!Object.getOwnPropertyDescriptor(Module["ready"], "__get_timezone")) {
  });
 }
 
+if (!Object.getOwnPropertyDescriptor(Module["ready"], "___cxa_find_matching_catch")) {
+ Object.defineProperty(Module["ready"], "___cxa_find_matching_catch", {
+  configurable: true,
+  get: function() {
+   abort("You are getting ___cxa_find_matching_catch on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+ Object.defineProperty(Module["ready"], "___cxa_find_matching_catch", {
+  configurable: true,
+  set: function() {
+   abort("You are setting ___cxa_find_matching_catch on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
+  }
+ });
+}
+
 if (!Object.getOwnPropertyDescriptor(Module["ready"], "onRuntimeInitialized")) {
  Object.defineProperty(Module["ready"], "onRuntimeInitialized", {
   configurable: true,
@@ -5468,6 +5483,8 @@ var asmLibraryArg = {
  "fd_write": _fd_write,
  "getTempRet0": _getTempRet0,
  "invoke_ddi": invoke_ddi,
+ "invoke_di": invoke_di,
+ "invoke_dii": invoke_dii,
  "invoke_diii": invoke_diii,
  "invoke_fiii": invoke_fiii,
  "invoke_i": invoke_i,
@@ -5477,7 +5494,6 @@ var asmLibraryArg = {
  "invoke_iiii": invoke_iiii,
  "invoke_iiiid": invoke_iiiid,
  "invoke_iiiii": invoke_iiiii,
- "invoke_iiiiid": invoke_iiiiid,
  "invoke_iiiiii": invoke_iiiiii,
  "invoke_iiiiiii": invoke_iiiiiii,
  "invoke_iiiiiiii": invoke_iiiiiiii,
@@ -5596,15 +5612,15 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 58224;
+var _game = Module["_game"] = 58272;
 
-var _inputEvents = Module["_inputEvents"] = 58368;
+var _inputEvents = Module["_inputEvents"] = 58416;
 
-var _localClientId = Module["_localClientId"] = 58220;
+var _localClientId = Module["_localClientId"] = 58264;
 
-var _ping = Module["_ping"] = 58400;
+var _ping = Module["_ping"] = 58448;
 
-var _lastTickTime = Module["_lastTickTime"] = 58392;
+var _lastTickTime = Module["_lastTickTime"] = 58440;
 
 function invoke_ii(index, a1) {
  var sp = stackSave();
@@ -5727,6 +5743,17 @@ function invoke_i(index) {
  }
 }
 
+function invoke_dii(index, a1, a2) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
@@ -5782,6 +5809,17 @@ function invoke_viidii(index, a1, a2, a3, a4, a5) {
  }
 }
 
+function invoke_di(index, a1) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_ddi(index, a1, a2) {
  var sp = stackSave();
  try {
@@ -5797,17 +5835,6 @@ function invoke_iid(index, a1, a2) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1, a2);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiid(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

@@ -5,8 +5,8 @@ HookObject::HookObject(Game& game) : ThrownProjectile(game) {
     collisionExclusion |= (uint64_t) Tag::WEAPON;
     collisionExclusion |= (uint64_t) Tag::PLAYER;
     SetTag(Tag::NO_GRAVITY);
-    AddCollider(new CircleCollider(this, Vector2(0, 0), 5.0));
-    airFriction = Vector2(1, 1);
+    AddCollider(new CircleCollider(this, Vector3(0, 0, 0), 5.0));
+    airFriction = Vector3(1, 1, 0);
 }
 
 
@@ -30,11 +30,11 @@ void HookObject::Tick(Time time) {
 
     }
     else if (IsStatic()) {
-        Vector2 position = firedBy->GetAttachedTo()->GetPosition();
-        Vector2 velocity = firedBy->GetAttachedTo()->GetVelocity();
+        Vector3 position = firedBy->GetAttachedTo()->GetPosition();
+        Vector3 velocity = firedBy->GetAttachedTo()->GetVelocity();
         // Make regular direction twice as powerful as the aiming pull
-        Vector2 direction = glm::normalize(GetPosition() - position) * 5.0;
-        Vector2 aimDirection = firedBy->GetAttachedTo()->GetAimDirection();
+        Vector3 direction = glm::normalize(GetPosition() - position) * 5.0;
+        Vector3 aimDirection = firedBy->GetAttachedTo()->GetAimDirection();
         velocity = glm::normalize(direction + aimDirection) * 1000.0;
         firedBy->GetAttachedTo()->SetVelocity(velocity);
         hasForceBeenApplied = true;

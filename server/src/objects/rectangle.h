@@ -6,16 +6,16 @@
 
 class RectangleObject : public Object {
 public:
-    REPLICATED(Vector2, size, "si");
+    REPLICATED(Vector3, size, "si");
 
     CLASS_CREATE(RectangleObject)
 
     RectangleObject(Game& game) : Object(game) {}
-    RectangleObject(Game& game, Vector2 position, Vector2 size) :
+    RectangleObject(Game& game, Vector3 position, Vector3 size) :
          RectangleObject(game) {
         this->size = size;
         SetPosition(position);
-        AddCollider(new RectangleCollider(this, Vector2(), size));
+        AddCollider(new RectangleCollider(this, Vector3(), size));
     }
 
     void ExtendYBy(double d) {

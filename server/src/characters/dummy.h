@@ -7,8 +7,8 @@ class Dummy : public PlayerObject {
 
 public:
     CLASS_CREATE(Dummy)
-    Dummy(Game& game) : Dummy(game, Vector2()) {}
-    Dummy(Game& game, Vector2 position) : PlayerObject(game, position) {
+    Dummy(Game& game) : Dummy(game, Vector3()) {}
+    Dummy(Game& game, Vector3 position) : PlayerObject(game, position) {
     }
 
     virtual void OnTakeDamage(int damage) override {

@@ -57,14 +57,14 @@ protected:
 
     // All are measured in the same units, velocity is in position units
     //   per second
-    REPLICATED(Vector2, position, "p");
+    REPLICATED(Vector3, position, "p");
 
     REPLICATED(int, z, "z");
 
-    REPLICATED(Vector2, velocity, "v");
+    REPLICATED(Vector3, velocity, "v");
 
-    Vector2 lastFramePosition;
-    Vector2 lastFrameVelocity;
+    Vector3 lastFramePosition;
+    Vector3 lastFrameVelocity;
 
     REPLICATED(ObjectID, id, "id");
 
@@ -88,7 +88,7 @@ public:
     std::unordered_set<Object*> children;
     Object* parent = nullptr;
 
-    REPLICATED(Vector2, airFriction, "af");
+    REPLICATED(Vector3, airFriction, "af");
 
 #ifdef BUILD_SERVER
     size_t replicateSoftCounter = 0;
@@ -111,13 +111,13 @@ public:
 
     virtual void OnDeath() {}
 
-    void ResolveCollision(const Vector2& difference);
+    void ResolveCollision(const Vector3& difference);
 
     size_t GetColliderCount() const { return colliders.size(); }
 
     CollisionResult CollidesWith(Collider* other);
     CollisionResult CollidesWith(Object* other);
-    CollisionResult CollidesWith(const Vector2& p1, const Vector2& p2);
+    CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2);
 
     void AddCollider(Collider* col) { colliders.push_back(col); }
     ObjectID GetId() const { return id; }
@@ -131,11 +131,11 @@ public:
     virtual void Serialize(JSONWriter& obj) override;
     void ProcessReplication(json& object) override;
 
-    const Vector2& GetPosition() const { return position; }
-    virtual Vector2 GetVelocity() { return velocity; }
+    const Vector3& GetPosition() const { return position; }
+    virtual Vector3 GetVelocity() { return velocity; }
 
-    void SetPosition(const Vector2& in) { position = in; }
-    void SetVelocity(const Vector2& in) { velocity = in; }
+    void SetPosition(const Vector3& in) { position = in; }
+    void SetVelocity(const Vector3& in) { velocity = in; }
 
     bool IsStatic() const { return isStatic; }
     void SetIsStatic(bool isStatic);

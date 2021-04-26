@@ -13,8 +13,8 @@ class DashAbility : public WeaponWithCooldown {
 
 public:
     CLASS_CREATE(DashAbility)
-    DashAbility(Game& game) : DashAbility(game, Vector2()) {}
-    DashAbility(Game& game, Vector2 position) : WeaponWithCooldown(game, position) {
+    DashAbility(Game& game) : DashAbility(game, Vector3()) {}
+    DashAbility(Game& game, Vector3 position) : WeaponWithCooldown(game, position) {
         cooldown = 2000;
     }
 
@@ -40,7 +40,7 @@ public:
         CooldownStart(time);
         lastDash = time;
 
-        Vector2 velocity = attachedTo->GetVelocity();
+        Vector3 velocity = attachedTo->GetVelocity();
         velocity.y = -DashAmount;
 
         attachedTo->SetVelocity(velocity);

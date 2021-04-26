@@ -28,8 +28,8 @@ private:
 
     void ActualFire(Time time);
 public:
-    GunBase(Game& game) : GunBase(game, Vector2()) {}
-    GunBase(Game& game, Vector2 position) : WeaponObject(game, position) {}
+    GunBase(Game& game) : GunBase(game, Vector3()) {}
+    GunBase(Game& game, Vector3 position) : WeaponObject(game, position) {}
 
     virtual void StartReload(Time time) override;
 

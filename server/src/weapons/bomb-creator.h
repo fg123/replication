@@ -10,10 +10,10 @@ class Bomb : public Object {
 
 public:
     CLASS_CREATE(Bomb);
-    Bomb(Game& game) : Bomb(game, Vector2()) {}
-    Bomb(Game& game, Vector2 position) : Object(game) {
+    Bomb(Game& game) : Bomb(game, Vector3()) {}
+    Bomb(Game& game, Vector3 position) : Object(game) {
         SetPosition(position);
-        AddCollider(new CircleCollider(this, Vector2(0, 0), 24));
+        AddCollider(new CircleCollider(this, Vector3(), 24));
         collisionExclusion |= (uint64_t) Tag::PLAYER;
     }
 
@@ -44,8 +44,8 @@ class BombCreator : public WeaponWithCooldown {
 
 public:
     CLASS_CREATE(BombCreator)
-    BombCreator(Game& game) : BombCreator(game, Vector2()) {}
-    BombCreator(Game& game, Vector2 position) : WeaponWithCooldown(game, position) {
+    BombCreator(Game& game) : BombCreator(game, Vector3()) {}
+    BombCreator(Game& game, Vector3 position) : WeaponWithCooldown(game, position) {
         cooldown = 5000;
     }
 
@@ -58,8 +58,8 @@ public:
 #ifdef BUILD_SERVER
     virtual void StartFire(Time time) override {
         if (IsOnCooldown()) return;
-        if (glm::distance(attachedTo->mousePosition, attachedTo->GetPosition()) < dropRange) {
-            Bomb* bomb = new Bomb(game, attachedTo->mousePosition);
+        if (glm::distance(Vector3(attachedTo->mousePosition, 0), attachedTo->GetPosition()) < dropRange) {
+            Bomb* bomb = new Bomb(game, Vector3(attachedTo->mousePosition, 0));
             bombs.push_back(bomb);
             game.AddObject(bomb);
             CooldownStart(time);
@@ -80,8 +80,8 @@ CLASS_REGISTER(BombCreator);
 class BombExploder : public WeaponWithCooldown {
 public:
     CLASS_CREATE(BombExploder)
-    BombExploder(Game& game) : BombExploder(game, Vector2()) {}
-    BombExploder(Game& game, Vector2 position) : WeaponWithCooldown(game, position) {
+    BombExploder(Game& game) : BombExploder(game, Vector3()) {}
+    BombExploder(Game& game, Vector3 position) : WeaponWithCooldown(game, position) {
         cooldown = 10000;
     }
 

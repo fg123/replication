@@ -8,8 +8,8 @@ class AssaultRifleObject : public GunBase {
 public:
     CLASS_CREATE(AssaultRifleObject)
 
-    AssaultRifleObject(Game& game) : AssaultRifleObject(game, Vector2()) {}
-    AssaultRifleObject(Game& game, Vector2 position) : GunBase(game, position) {
+    AssaultRifleObject(Game& game) : AssaultRifleObject(game, Vector3()) {}
+    AssaultRifleObject(Game& game, Vector3 position) : GunBase(game, position) {
         fireRate = 14;
         magazineSize = 25;
         magazines = 8;

@@ -9,7 +9,7 @@ class ArrowObject : public ThrownProjectile {
     Time timeLanded = 0;
     Time timeSinceLanded = 0;
 
-    Vector2 savedVelocity;
+    Vector3 savedVelocity;
 
     static const Time timeBeforeDie = 3000;
 

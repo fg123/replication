@@ -14,7 +14,7 @@ public:
     ArtilleryObject(Game& game) : Object(game) {
         collisionExclusion |= (uint64_t) Tag::WEAPON;
         collisionExclusion |= (uint64_t) Tag::PLAYER;
-        AddCollider(new RectangleCollider(this, Vector2(-22, -57), Vector2(45, 114)));
+        AddCollider(new RectangleCollider(this, Vector3(-22, -57, 0), Vector3(45, 114, 0)));
     }
 
     void Explode() {
@@ -51,8 +51,8 @@ CLASS_REGISTER(ArtilleryObject);
 class ArtilleryStrike : public WeaponWithCooldown {
 public:
     CLASS_CREATE(ArtilleryStrike)
-    ArtilleryStrike(Game& game) : ArtilleryStrike(game, Vector2()) {}
-    ArtilleryStrike(Game& game, Vector2 position) : WeaponWithCooldown(game, position) {
+    ArtilleryStrike(Game& game) : ArtilleryStrike(game, Vector3()) {}
+    ArtilleryStrike(Game& game, Vector3 position) : WeaponWithCooldown(game, position) {
         cooldown = 10000;
     }
 
@@ -62,7 +62,7 @@ public:
         if (IsOnCooldown()) return;
     #ifdef BUILD_SERVER
         ArtilleryObject* proj = new ArtilleryObject(game);
-        proj->SetPosition(Vector2(attachedTo->mousePosition.x, 10));
+        proj->SetPosition(Vector3(attachedTo->mousePosition.x, 10, 0));
         game.AddObject(proj);
     #endif
         CooldownStart(time);

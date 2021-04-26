@@ -13,8 +13,8 @@ class ArrowChargeUpAbility : public WeaponObject {
 
 public:
     CLASS_CREATE(ArrowChargeUpAbility)
-    ArrowChargeUpAbility(Game& game) : ArrowChargeUpAbility(game, Vector2()) {}
-    ArrowChargeUpAbility(Game& game, Vector2 position) : WeaponObject(game, position) {}
+    ArrowChargeUpAbility(Game& game) : ArrowChargeUpAbility(game, Vector3()) {}
+    ArrowChargeUpAbility(Game& game, Vector3 position) : WeaponObject(game, position) {}
 
     virtual void Tick(Time time) override {
         WeaponObject::Tick(time);

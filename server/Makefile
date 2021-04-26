@@ -9,9 +9,11 @@ CLIENT_OBJ = $(CLIENT_SRC:%.cc=%.wo)
 SERVER_DEPS = $(SERVER_OBJ:%.o=%.d)
 CLIENT_DEPS = $(CLIENT_OBJ:%.wo=%.wd)
 HEADERS = $(shell find src/ -name "*.h") Makefile
-USOCKET = $(SRC_DIR)/uWebSocket/uSocket
 
-CPPFLAGS = -std=c++17 -Wall -I $(SRC_DIR) -I $(USOCKET)/src -I $(SRC_DIR)/objects -I $(SRC_DIR)/animations
+USOCKET = $(SRC_DIR)/uWebSocket/uSocket
+LIBASSIMP = lib/assimp-4.1.0/lib/libassimp.a
+
+CPPFLAGS = -std=c++17 -Wall -I $(SRC_DIR) -I $(USOCKET)/src -I $(SRC_DIR)/objects -I $(SRC_DIR)/animations -Wno-class-memaccess
 LDLIBS = -L/usr/lib
 SERVER_DEBUG = -g
 SERVER_PROD = -O2
@@ -24,20 +26,20 @@ WASM_FLAGS = -s MODULARIZE \
 
 all: server client
 
-server: $(SERVER_OBJ) $(USOCKET)/uSockets.a
+server: $(SERVER_OBJ) $(USOCKET)/uSockets.a $(LIBASSIMP)
 	mkdir -p bin
 	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_DEBUG) -o bin/$(EXE)_server
 
-server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a
+server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a $(LIBASSIMP)
 	mkdir -p bin
 	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o bin/$(EXE)_server_prod
 
-client: $(CLIENT_OBJ)
+client: $(CLIENT_OBJ) $(LIBASSIMP)
 	em++ $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) -o bin/$(EXE)_client.js
 	cp bin/$(EXE)_client.wasm ../client/dist/
 	cp bin/$(EXE)_client.js ../client/
 
-client_prod: $(CLIENT_OBJ)
+client_prod: $(CLIENT_OBJ) $(LIBASSIMP)
 	em++ -O2 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) -o bin/$(EXE)_client_prod.js
 	cp bin/$(EXE)_client_prod.wasm ../client/dist/
 	cp bin/$(EXE)_client_prod.js ../client/
@@ -50,6 +52,9 @@ client_prod: $(CLIENT_OBJ)
 
 $(USOCKET)/uSockets.a:
 	$(MAKE) $(USOCKET)
+
+$(LIBASSIMP):
+	lib/build-libs.sh
 
 -include $(SERVER_DEPS)
 

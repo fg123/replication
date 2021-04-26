@@ -9,8 +9,8 @@ class Bombmaker : public PlayerObject {
 
 public:
     CLASS_CREATE(Bombmaker)
-    Bombmaker(Game& game) : Bombmaker(game, Vector2()) {}
-    Bombmaker(Game& game, Vector2 position) : PlayerObject(game, position) {
+    Bombmaker(Game& game) : Bombmaker(game, Vector3()) {}
+    Bombmaker(Game& game, Vector3 position) : PlayerObject(game, position) {
         #ifdef BUILD_SERVER
             qWeapon = new BombCreator { game };
             game.AddObject(qWeapon);

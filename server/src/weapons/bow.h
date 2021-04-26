@@ -9,8 +9,8 @@ class BowObject : public InputHoldThrower<ArrowObject> {
 public:
     CLASS_CREATE(BowObject)
 
-    BowObject(Game& game) : BowObject(game, Vector2()) {}
-    BowObject(Game& game, Vector2 position) : InputHoldThrower<ArrowObject>(game, position) {
+    BowObject(Game& game) : BowObject(game, Vector3()) {}
+    BowObject(Game& game, Vector3 position) : InputHoldThrower<ArrowObject>(game, position) {
         cooldown = 500;
     }
 

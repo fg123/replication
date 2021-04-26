@@ -36,7 +36,7 @@ class InputHoldThrower : public WeaponWithCooldown {
     Time fireHoldDownTime = 0;
     Time chargeUpTime = 0;
 
-    REPLICATED(Vector2, arrowFireVel, "afv");
+    REPLICATED(Vector3, arrowFireVel, "afv");
 
     Time lastThrow = 0;
 
@@ -51,8 +51,8 @@ protected:
     REPLICATED_D(bool, instantFire, "inst", false);
 
 public:
-    InputHoldThrower(Game& game) : InputHoldThrower(game, Vector2()) {}
-    InputHoldThrower(Game& game, Vector2 position) :
+    InputHoldThrower(Game& game) : InputHoldThrower(game, Vector3()) {}
+    InputHoldThrower(Game& game, Vector3 position) :
         WeaponWithCooldown(game, position) {}
 
     virtual void Tick(Time time) override {
@@ -66,7 +66,7 @@ public:
         }
         else {
             chargeUpTime = 0;
-            arrowFireVel = Vector2();
+            arrowFireVel = Vector3();
         }
         timeSinceLastThrow = time - lastThrow;
     }

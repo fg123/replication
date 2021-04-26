@@ -13,8 +13,8 @@ constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
 using Vector2 = glm::dvec2;
 using Vector3 = glm::dvec3;
 
-bool AreLineSegmentsIntersecting(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2);
-bool LineSegmentsIntersectPoint(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2, Vector2& result);
+bool AreLineSegmentsIntersecting(const Vector3& p1, const Vector3& p2, const Vector3& q1, const Vector3& q2);
+bool LineSegmentsIntersectPoint(const Vector3& p1, const Vector3& p2, const Vector3& q1, const Vector3& q2, Vector3& result);
 
 template<typename T>
 inline bool SameSign(T a, T b) {

@@ -9,8 +9,8 @@ class GrenadeThrower : public InputHoldThrower<GrenadeObject> {
 public:
     CLASS_CREATE(GrenadeThrower)
 
-    GrenadeThrower(Game& game) : GrenadeThrower(game, Vector2()) {}
-    GrenadeThrower(Game& game, Vector2 position) : InputHoldThrower<GrenadeObject>(game, position) {
+    GrenadeThrower(Game& game) : GrenadeThrower(game, Vector3()) {}
+    GrenadeThrower(Game& game, Vector3 position) : InputHoldThrower<GrenadeObject>(game, position) {
         cooldown = 2000;
     }
 };

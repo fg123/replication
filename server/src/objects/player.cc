@@ -31,10 +31,10 @@ std::unordered_map<int, size_t> KEY_MAP = {
     { K_KEY, 10 }
 };
 
-PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector2()) {
+PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector3()) {
 }
 
-PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
+PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game) {
     airFriction.x = 0.8;
 
     SetTag(Tag::PLAYER);
@@ -42,8 +42,8 @@ PlayerObject::PlayerObject(Game& game, Vector2 position) : Object(game) {
 
     collisionExclusion |= (uint64_t) Tag::PLAYER;
 
-    AddCollider(new CircleCollider(this, Vector2(0, -15), 15.0));
-    AddCollider(new RectangleCollider(this, Vector2(-15, -5), Vector2(30, 33)));
+    AddCollider(new CircleCollider(this, Vector3(0, -15, 0), 15.0));
+    AddCollider(new RectangleCollider(this, Vector3(-15, -5, 0), Vector3(30, 33, 0)));
 }
 
 void PlayerObject::OnDeath() {
@@ -77,8 +77,8 @@ PlayerObject::~PlayerObject() {
 
 }
 
-Vector2 PlayerObject::GetAimDirection() const {
-    return Vector2(std::cos(aimAngle), std::sin(aimAngle));
+Vector3 PlayerObject::GetAimDirection() const {
+    return Vector3(std::cos(aimAngle), std::sin(aimAngle), 0);
 }
 
 void PlayerObject::PickupWeapon(WeaponObject* weapon) {
@@ -94,7 +94,7 @@ void PlayerObject::Tick(Time time) {
             Time clientTime = time;
         #endif
 
-        // if (GetVelocity().Length() > 1.0) {
+        // if (glm::length(GetVelocity()) > 1.0) {
         //     LOG_DEBUG(clientTime << ": " << GetPosition());
         // }
 
@@ -118,7 +118,7 @@ void PlayerObject::Tick(Time time) {
             }
         }
     }
-    Vector2 velocity = GetVelocity();
+    Vector3 velocity = GetVelocity();
 
     if (keyboardState[KEY_MAP[A_KEY]]) {
         velocity.x = -500;
@@ -187,7 +187,7 @@ void PlayerObject::Tick(Time time) {
 
     Object::Tick(time);
 
-    const Vector2& position = GetPosition();
+    const Vector3& position = GetPosition();
     aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
 
     if (currentWeapon) {
@@ -288,6 +288,7 @@ void PlayerObject::OnCollide(CollisionResult& result) {
             PickupWeapon(static_cast<WeaponObject*>(result.collidedWith));
         }
     }
+    // LOG_DEBUG("Collided with " << result.collidedWith->GetClass());
     Object::OnCollide(result);
 }
 
@@ -351,6 +352,6 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
     #endif
 }
 
-Vector2 PlayerObject::GetAttachmentPoint() const {
+Vector3 PlayerObject::GetAttachmentPoint() const {
     return GetPosition() + glm::normalize(GetAimDirection()) * 20.0;
 }

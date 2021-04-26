@@ -10,3 +10,10 @@ server/bin/game_client*
 
 // JS
 node_modules/
+
+// Static Libraries
+*.a
+*.so*
+
+// Assimp Binaries
+server/lib/assimp-4.1.0/bin

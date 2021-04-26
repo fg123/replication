@@ -10,8 +10,8 @@ class Archer : public PlayerObject {
 
 public:
     CLASS_CREATE(Archer)
-    Archer(Game& game) : Archer(game, Vector2()) {}
-    Archer(Game& game, Vector2 position) : PlayerObject(game, position) {
+    Archer(Game& game) : Archer(game, Vector3()) {}
+    Archer(Game& game, Vector3 position) : PlayerObject(game, position) {
         #ifdef BUILD_SERVER
             qWeapon = new DashAbility { game };
             game.AddObject(qWeapon);

@@ -7,6 +7,8 @@
 #include <ctime>
 #include <iomanip>
 
+#include "glm.h"
+
 static std::time_t time_now = std::time(nullptr);
 
 class _Log {

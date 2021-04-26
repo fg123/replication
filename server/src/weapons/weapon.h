@@ -12,9 +12,9 @@ protected:
     PlayerObject* attachedTo = nullptr;
 
 public:
-    WeaponObject(Game& game) : WeaponObject(game, Vector2()) {
+    WeaponObject(Game& game) : WeaponObject(game, Vector3()) {
     }
-    WeaponObject(Game& game, Vector2 position);
+    WeaponObject(Game& game, Vector3 position);
 
     PlayerObject* GetAttachedTo() { return attachedTo; }
     void AttachToPlayer(PlayerObject* player);
@@ -44,8 +44,8 @@ private:
     Time lastUseTime = 0;
 
 public:
-    WeaponWithCooldown(Game& game) : WeaponWithCooldown(game, Vector2()) {}
-    WeaponWithCooldown(Game& game, Vector2 position) : WeaponObject(game, position) {}
+    WeaponWithCooldown(Game& game) : WeaponWithCooldown(game, Vector3()) {}
+    WeaponWithCooldown(Game& game, Vector3 position) : WeaponObject(game, position) {}
 
     virtual void Tick(Time time) override;
 

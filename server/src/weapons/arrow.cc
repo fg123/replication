@@ -4,8 +4,8 @@
 
 ArrowObject::ArrowObject(Game& game) : ThrownProjectile(game) {
     collisionExclusion = (uint64_t) Tag::OBJECT;
-    AddCollider(new CircleCollider(this, Vector2(0, 0), 3.0));
-    airFriction = Vector2(1, 1);
+    AddCollider(new CircleCollider(this, Vector3(), 3.0));
+    airFriction = Vector3(1, 1, 0);
 }
 
 void ArrowObject::OnCollide(CollisionResult& result) {
@@ -15,7 +15,7 @@ void ArrowObject::OnCollide(CollisionResult& result) {
     #ifdef BUILD_SERVER
         static_cast<PlayerObject*>(result.collidedWith)->DealDamage(50);
     #endif
-        SetVelocity(Vector2());
+        SetVelocity(Vector3());
     }
     else if (result.collidedWith->IsStatic() && !IsStatic()) {
         LOG_DEBUG("Setting to Static");

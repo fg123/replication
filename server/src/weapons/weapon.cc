@@ -6,7 +6,7 @@
 
 #include <exception>
 
-WeaponObject::WeaponObject(Game& game, Vector2 position) : Object(game) {
+WeaponObject::WeaponObject(Game& game, Vector3 position) : Object(game) {
 
     z = 1;
 
@@ -41,7 +41,7 @@ void WeaponObject::AttachToPlayer(PlayerObject* player) {
 void WeaponObject::Detach() {
     game.DetachParent(this);
     attachedTo = nullptr;
-    SetVelocity(Vector2());
+    SetVelocity(Vector3());
     collisionExclusion &= ~(uint64_t)Tag::OBJECT;
     RemoveTag(Tag::NO_KILLPLANE);
     SetDirty(true);

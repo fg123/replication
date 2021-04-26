@@ -187,6 +187,26 @@ inline void ProcessReplicationDispatch(Vector2& object, const char* key, json& o
 }
 
 template<>
+inline void SerializeDispatch(Vector3& object, const char* key, JSONWriter& obj) {
+    obj.Key(key);
+    obj.StartObject();
+    obj.Key("x");
+    obj.Double(object.x);
+    obj.Key("y");
+    obj.Double(object.y);
+    obj.Key("z");
+    obj.Double(object.z);
+    obj.EndObject();
+}
+
+template<>
+inline void ProcessReplicationDispatch(Vector3& object, const char* key, json& obj) {
+    object.x = obj[key]["x"].GetDouble();
+    object.y = obj[key]["y"].GetDouble();
+    object.z = obj[key]["z"].GetDouble();
+}
+
+template<>
 inline void SerializeDispatch(std::string& object, const char* key, JSONWriter& obj) {
     obj.Key(key);
     obj.String(object.c_str());

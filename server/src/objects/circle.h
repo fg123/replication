@@ -10,12 +10,12 @@ public:
     CLASS_CREATE(CircleObject)
 
     CircleObject(Game& game) : Object(game) {}
-    CircleObject(Game& game, Vector2 position, double radius) :
+    CircleObject(Game& game, Vector3 position, double radius) :
         CircleObject(game) {
         this->radius = radius;
         SetPosition(position);
 
-        AddCollider(new CircleCollider(this, Vector2(), radius));
+        AddCollider(new CircleCollider(this, Vector3(), radius));
     }
 
     virtual void Serialize(JSONWriter& obj) override {

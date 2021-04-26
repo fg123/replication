@@ -29,8 +29,8 @@ bool WithinBounds(const double& x, const double& a, const double& b) {
 	return std::min(a, b) <= x && x <= std::max(a, b);
 }
 
-bool LineSegmentsIntersectPoint(const Vector2& p1, const Vector2& p2,
-	const Vector2& q1, const Vector2& q2, Vector2& result) {
+bool LineSegmentsIntersectPoint(const Vector3& p1, const Vector3& p2,
+	const Vector3& q1, const Vector3& q2, Vector3& result) {
 	// LOG_DEBUG("Check line segment intersection: " << p1 << " " << p2);
 	// LOG_DEBUG("Line 2: " << q1 << " " << q2);
 	// Line 1
@@ -56,7 +56,7 @@ bool LineSegmentsIntersectPoint(const Vector2& p1, const Vector2& p2,
         double y = (a1 * c2 - a2 * c1) / determinant;
 		// Check point is within bounds for both line segments
 
-		// LOG_DEBUG("Intersection: " << Vector2(x, y));
+		// LOG_DEBUG("Intersection: " << Vector3(x, y));
 		if (
 			WithinBounds(x, p1.x, p2.x) &&
 			WithinBounds(y, p1.y, p2.y) &&
@@ -71,7 +71,7 @@ bool LineSegmentsIntersectPoint(const Vector2& p1, const Vector2& p2,
 	return false;
 }
 
-bool AreLineSegmentsIntersecting(const Vector2& p1, const Vector2& p2, const Vector2& q1, const Vector2& q2) {
-	Vector2 result;
+bool AreLineSegmentsIntersecting(const Vector3& p1, const Vector3& p2, const Vector3& q1, const Vector3& q2) {
+	Vector3 result;
 	return LineSegmentsIntersectPoint(p1, p2, q1, q1, result);
 }

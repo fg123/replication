@@ -42,7 +42,7 @@ public:
     REPLICATED(Vector2, mousePosition, "mp");
 
     PlayerObject(Game& game);
-    PlayerObject(Game& game, Vector2 position);
+    PlayerObject(Game& game, Vector3 position);
     ~PlayerObject();
 
     virtual void OnDeath() override;
@@ -63,8 +63,8 @@ public:
     // TODO: add damage source
     virtual void OnTakeDamage(int damage) {};
 
-    Vector2 GetAimDirection() const;
-    Vector2 GetAttachmentPoint() const;
+    Vector3 GetAimDirection() const;
+    Vector3 GetAttachmentPoint() const;
 };
 
 

@@ -5,11 +5,11 @@
 #include "vector.h"
 
 struct FloatingTextAnimation : public Animation {
-    Vector2 position;
+    Vector3 position;
     std::string text;
     std::string color;
 
-    FloatingTextAnimation(Vector2 position, std::string text, std::string color)
+    FloatingTextAnimation(Vector3 position, std::string text, std::string color)
         : position(position), text(text), color(color) { }
 
     virtual const char* GetKey() override { return "FloatingText"; }

@@ -5,8 +5,8 @@
 GrenadeObject::GrenadeObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
     collisionExclusion |= (uint64_t) Tag::WEAPON;
-    AddCollider(new CircleCollider(this, Vector2(0, 0), 5.0));
-    airFriction = Vector2(1, 1);
+    AddCollider(new CircleCollider(this, Vector3(), 5.0));
+    airFriction = Vector3(1, 1, 0);
 }
 
 void GrenadeObject::OnCollide(CollisionResult& result) {

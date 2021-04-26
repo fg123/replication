@@ -5,10 +5,10 @@
 #include "vector.h"
 
 struct ExplodeAnimation : public Animation {
-    Vector2 position;
+    Vector3 position;
     double size;
 
-    ExplodeAnimation(Vector2 position, double size)
+    ExplodeAnimation(Vector3 position, double size)
         : position(position), size(size) { }
     virtual const char* GetKey() override { return "Explode"; }
     virtual void SerializeData(JSONWriter& obj) override {

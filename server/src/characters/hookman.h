@@ -10,8 +10,8 @@ class Hookman : public PlayerObject {
 
 public:
     CLASS_CREATE(Hookman)
-    Hookman(Game& game) : Hookman(game, Vector2()) {}
-    Hookman(Game& game, Vector2 position) : PlayerObject(game, position) {
+    Hookman(Game& game) : Hookman(game, Vector3()) {}
+    Hookman(Game& game, Vector3 position) : PlayerObject(game, position) {
         #ifdef BUILD_SERVER
             qWeapon = new HookThrower { game };
             game.AddObject(qWeapon);
