@@ -38,6 +38,7 @@ public:
     }
 };
 
+// Deprecated 2D Colliders
 struct RectangleCollider : public Collider {
     REPLICATED(Vector3, size, "s");
 
@@ -49,6 +50,7 @@ struct RectangleCollider : public Collider {
     CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
 };
 
+// Deprecated 2D Colliders
 struct CircleCollider : public Collider {
     REPLICATED(double, radius, "r");
 
@@ -66,5 +68,29 @@ inline bool IsPointInRect(const Vector3& RectPosition, const Vector3& RectSize, 
         (Point.x > RectPosition.x && Point.x < RectPosition.x + RectSize.x) &&
         (Point.y > RectPosition.y && Point.y < RectPosition.y + RectSize.y);
 }
+
+struct AABBCollider : public Collider {
+    REPLICATED(Vector3, size, "s");
+
+    AABBCollider(Object* owner, Vector3 position, Vector3 size) : Collider(owner, position),
+        size(size) {}
+    virtual int GetType() override { return 2; }
+    CollisionResult CollidesWith(Collider* other) override;
+    bool CollidePotentialWith(Collider* other) override;
+    CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
+};
+
+// Deprecated 2D Colliders
+struct SphereCollider : public Collider {
+    REPLICATED(double, radius, "r");
+
+    SphereCollider(Vector3 position, double radius) : SphereCollider(nullptr, position, radius) {}
+    SphereCollider(Object* owner, Vector3 position, double radius) : Collider(owner, position),
+            radius(radius) {}
+    virtual int GetType() override { return 3; }
+    CollisionResult CollidesWith(Collider* other) override;
+    bool CollidePotentialWith(Collider* other) override;
+    CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
+};
 
 #endif

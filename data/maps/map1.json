@@ -1,5 +1,9 @@
 {
  "tilemap": "map1Tiles.png",
+ "models": [
+    "island.obj",
+    "cube.obj"
+ ],
  "noCollide": [20],
  "tiles": [
   [

@@ -183,13 +183,17 @@ module.exports = class UICanvas {
         const ping = this.clientState.ping;
         this.context.fillText(`${ping > 999 ? ">999" : ping}ms`, 20, 40);
 
+        this.context.fillText(`Camera Position (${JSON.stringify(this.clientState.cameraPos)})`, 20, 60);
+        this.context.fillText(`Camera Rotation (${JSON.stringify(this.clientState.cameraRot)})`, 20, 80);
+
         this.context.textAlign = "right";
         this.context.fillText(`${this.clientState.webSocket.url}`, width - 20, 20);
 
         this.context.textAlign = "left";
-        this.DrawGraph("HandleReplicate", this.clientState.performance.handleReplicateTime, 20, 60);
+        this.DrawGraph("HandleReplicate", this.clientState.performance.handleReplicateTime, 20, 100);
 
-        this.DrawGraph("TickTime", this.clientState.performance.tickTime, 20, 140);
+        this.DrawGraph("TickTime", this.clientState.performance.tickTime, 20, 180);
+
 
         this.DrawWeapon(player, width, height);
 

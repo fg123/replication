@@ -18,6 +18,14 @@ protected:
     double aimAngle = 0;
 
     Time canPickupTime = 0;
+
+    // Yaw Pitch in degrees
+    REPLICATED(double, rotationYaw, "ry");
+    REPLICATED(double, rotationPitch, "rp");
+    REPLICATED(Vector3, lookDirection, "ld");
+
+    Vector3 inputVelocity;
+
 public:
     WeaponObject* currentWeapon = nullptr;
     WeaponObject* qWeapon = nullptr;
@@ -39,8 +47,6 @@ public:
     std::array<bool, 5> mouseState {};
     std::array<bool, 5> lastMouseState {};
 
-    REPLICATED(Vector2, mousePosition, "mp");
-
     PlayerObject(Game& game);
     PlayerObject(Game& game, Vector3 position);
     ~PlayerObject();
@@ -55,6 +61,7 @@ public:
     void ProcessInputData(const JSONDocument& obj);
 
     WeaponObject* GetWeapon() { return currentWeapon; }
+    virtual Vector3 GetVelocity() override { return velocity + inputVelocity; }
     void PickupWeapon(WeaponObject* weapon);
     void DropWeapon();
 

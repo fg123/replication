@@ -73,7 +73,10 @@
         "regex": "cpp",
         "sstream": "cpp",
         "xlocbuf": "cpp",
-        "cstdarg": "cpp"
+        "cstdarg": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "stack": "cpp"
     },
     "files.exclude": {
         "**/.git": true,
@@ -85,7 +88,6 @@
         "**/*.wd": true,
         "**/*.o": true,
         "**/*.wo": true,
-        "**/lib/**": true
     },
     "files.trimTrailingWhitespace": true
 }

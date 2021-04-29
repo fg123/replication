@@ -6,6 +6,7 @@
 #include "json/rapidjson/istreamwrapper.h"
 #include "json/rapidjson/writer.h"
 
+#include "vector.h"
 #include "logging.h"
 
 #include <sstream>
@@ -79,10 +80,12 @@ public:
         entries,                                            \
         repAlias,                                           \
         [](void* _this, JSONWriter& obj) {                  \
-            SerializeDispatch(static_cast<decltype(this)>(_this)->name, repAlias, obj); \
+            obj.Key(repAlias);              \
+            SerializeDispatch(static_cast<decltype(this)>(_this)->name, obj); \
         },                                                    \
         [](void* _this, json& obj) { \
-            ProcessReplicationDispatch(static_cast<decltype(this)>(_this)->name, repAlias, obj);  \
+            CheckMemberExists(obj, repAlias); \
+            ProcessReplicationDispatch(static_cast<decltype(this)>(_this)->name, obj[repAlias]);  \
         } \
     };
 
@@ -94,84 +97,101 @@ inline std::string DumpJSON(const json& value) {
     return stream.str();
 }
 
+inline void CheckMemberExists(const json& obj, const char* key) {
+    if (!obj.HasMember(key)) {
+        LOG_ERROR("Missing " << key << " in: " << DumpJSON(obj));
+        throw std::runtime_error("Missing key in JSON object!");
+    }
+}
+
 template<class T>
-void SerializeDispatch(T& object, const char* key, JSONWriter& obj) {
-    obj.Key(key);
+void SerializeDispatch(T& object, JSONWriter& obj) {
     obj.StartObject();
     object.Serialize(obj);
     obj.EndObject();
 }
 
 template<class T>
-void ProcessReplicationDispatch(T& object, const char* key, json& obj) {
-    if (!obj.HasMember(key)) {
-        LOG_ERROR("Missing " << key << " in: " << DumpJSON(obj));
-        throw std::runtime_error("Missing key in JSON object!");
+void ProcessReplicationDispatch(T& object, json& obj) {
+    object.ProcessReplication(obj);
+}
+
+template<class T>
+void SerializeDispatch(std::vector<T>& object, JSONWriter& obj) {
+    obj.StartArray();
+    for (auto& t : object) {
+        // NULL key
+        SerializeDispatch<T>(t, obj);
     }
-    object.ProcessReplication(obj[key]);
+    obj.EndArray();
+}
+
+template<class T>
+void ProcessReplicationDispatch(std::vector<T>& object, json& obj) {
+    auto arr = obj.GetArray();
+    object.clear();
+    object.resize(arr.Size());
+    size_t i = 0;
+    for (auto& a : arr) {
+        ProcessReplicationDispatch<T>(object[i++], a);
+    }
 }
 
 template<>
-inline void SerializeDispatch(int& object, const char* key, JSONWriter& obj) {
-    obj.Key(key);
+inline void SerializeDispatch(int& object, JSONWriter& obj) {
     obj.Int(object);
 }
 
 template<>
-inline void ProcessReplicationDispatch(int& object, const char* key, json& obj) {
-    object = obj[key].GetInt();
+inline void ProcessReplicationDispatch(int& object, json& obj) {
+    object = obj.GetInt();
 }
 
 template<>
-inline void SerializeDispatch(bool& object, const char* key, JSONWriter& obj) {
-    obj.Key(key);
+inline void SerializeDispatch(bool& object, JSONWriter& obj) {
     obj.Bool(object);
 }
 
 template<>
-inline void ProcessReplicationDispatch(bool& object, const char* key, json& obj) {
-    object = obj[key].GetBool();
+inline void ProcessReplicationDispatch(bool& object, json& obj) {
+    object = obj.GetBool();
 }
 
 template<>
-inline void SerializeDispatch(uint32_t& object, const char* key, JSONWriter& obj) {
-    obj.Key(key);
+inline void SerializeDispatch(uint32_t& object, JSONWriter& obj) {
     obj.Uint(object);
 }
 
 template<>
-inline void ProcessReplicationDispatch(uint32_t& object, const char* key, json& obj) {
-    object = obj[key].GetUint();
+inline void ProcessReplicationDispatch(uint32_t& object, json& obj) {
+    object = obj.GetUint();
 }
 
 template<>
-inline void SerializeDispatch(uint64_t& object, const char* key, JSONWriter& obj) {
-    obj.Key(key);
+inline void SerializeDispatch(uint64_t& object, JSONWriter& obj) {
     obj.Uint64(object);
 }
 
 template<>
-inline void ProcessReplicationDispatch(uint64_t& object, const char* key, json& obj) {
-    object = obj[key].GetUint64();
+inline void ProcessReplicationDispatch(uint64_t& object, json& obj) {
+    object = obj.GetUint64();
 }
 
 template<>
-inline void SerializeDispatch(double& object, const char* key, JSONWriter& obj) {
-    obj.Key(key);
+inline void SerializeDispatch(double& object, JSONWriter& obj) {
     obj.Double(object);
 }
 
 template<>
-inline void ProcessReplicationDispatch(double& object, const char* key, json& obj) {
-    object = obj[key].GetDouble();
+inline void ProcessReplicationDispatch(double& object, json& obj) {
+    object = obj.GetDouble();
 }
 
 // Specialize Vector2 because replicable is an expensive base class due to
 //   registration of members. Vector2s often get created and destroyed quick
 //   so we shouldn't have that overhead.
 template<>
-inline void SerializeDispatch(Vector2& object, const char* key, JSONWriter& obj) {
-    obj.Key(key);
+inline void SerializeDispatch(Vector2& object, JSONWriter& obj) {
     obj.StartObject();
     obj.Key("x");
     obj.Double(object.x);
@@ -181,14 +201,13 @@ inline void SerializeDispatch(Vector2& object, const char* key, JSONWriter& obj)
 }
 
 template<>
-inline void ProcessReplicationDispatch(Vector2& object, const char* key, json& obj) {
-    object.x = obj[key]["x"].GetDouble();
-    object.y = obj[key]["y"].GetDouble();
+inline void ProcessReplicationDispatch(Vector2& object, json& obj) {
+    object.x = obj["x"].GetDouble();
+    object.y = obj["y"].GetDouble();
 }
 
 template<>
-inline void SerializeDispatch(Vector3& object, const char* key, JSONWriter& obj) {
-    obj.Key(key);
+inline void SerializeDispatch(Vector3& object, JSONWriter& obj) {
     obj.StartObject();
     obj.Key("x");
     obj.Double(object.x);
@@ -200,20 +219,41 @@ inline void SerializeDispatch(Vector3& object, const char* key, JSONWriter& obj)
 }
 
 template<>
-inline void ProcessReplicationDispatch(Vector3& object, const char* key, json& obj) {
-    object.x = obj[key]["x"].GetDouble();
-    object.y = obj[key]["y"].GetDouble();
-    object.z = obj[key]["z"].GetDouble();
+inline void ProcessReplicationDispatch(Vector3& object, json& obj) {
+    object.x = obj["x"].GetDouble();
+    object.y = obj["y"].GetDouble();
+    object.z = obj["z"].GetDouble();
 }
 
 template<>
-inline void SerializeDispatch(std::string& object, const char* key, JSONWriter& obj) {
-    obj.Key(key);
+inline void SerializeDispatch(Quaternion& object, JSONWriter& obj) {
+    obj.StartObject();
+    obj.Key("x");
+    obj.Double(object.x);
+    obj.Key("y");
+    obj.Double(object.y);
+    obj.Key("z");
+    obj.Double(object.z);
+    obj.Key("w");
+    obj.Double(object.w);
+    obj.EndObject();
+}
+
+template<>
+inline void ProcessReplicationDispatch(Quaternion& object, json& obj) {
+    object.x = obj["x"].GetDouble();
+    object.y = obj["y"].GetDouble();
+    object.z = obj["z"].GetDouble();
+    object.w = obj["w"].GetDouble();
+}
+
+template<>
+inline void SerializeDispatch(std::string& object, JSONWriter& obj) {
     obj.String(object.c_str());
 }
 
 template<>
-inline void ProcessReplicationDispatch(std::string& object, const char* key, json& obj) {
-    object = obj[key].GetString();
+inline void ProcessReplicationDispatch(std::string& object, json& obj) {
+    object = obj.GetString();
 }
 #endif

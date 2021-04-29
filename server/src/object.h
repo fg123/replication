@@ -10,6 +10,7 @@
 #include "collision.h"
 #include "logging.h"
 #include "replicable.h"
+#include "model.h"
 
 // This must be 32 bit because client side JS only supports 32 bit
 using ObjectID = uint32_t;
@@ -59,6 +60,10 @@ protected:
     //   per second
     REPLICATED(Vector3, position, "p");
 
+    REPLICATED(Quaternion, rotation, "r");
+
+    REPLICATED(Vector3, scale, "sc");
+
     REPLICATED(int, z, "z");
 
     REPLICATED(Vector3, velocity, "v");
@@ -81,6 +86,8 @@ protected:
     REPLICATED(uint64_t, tags, "ta");
     REPLICATED(uint64_t, collisionExclusion, "ce");
     REPLICATED(uint64_t, collisionReporting, "cr");
+
+    Model* model = nullptr;
 
 public:
     // For object hierarchy, this is all managed from the game, used for
@@ -128,13 +135,16 @@ public:
     void SetDirty(bool dirty) { isDirty = dirty; }
 
     virtual const char* GetClass() const = 0;
+
     virtual void Serialize(JSONWriter& obj) override;
     void ProcessReplication(json& object) override;
 
     const Vector3& GetPosition() const { return position; }
+    const Vector3& GetScale() const { return scale; }
     virtual Vector3 GetVelocity() { return velocity; }
 
     void SetPosition(const Vector3& in) { position = in; }
+    void SetScale(const Vector3& in) { scale = in; }
     void SetVelocity(const Vector3& in) { velocity = in; }
 
     bool IsStatic() const { return isStatic; }
@@ -149,7 +159,28 @@ public:
     bool IsGrounded() const { return isGrounded; }
 
     virtual void OnCollide(CollisionResult& result);
+
+#ifdef BUILD_SERVER
+    // Server-Only can change model, rely on replication to client
+    void SetModel(Model* newModel) {
+        model = newModel;
+        isDirty = true;
+    }
+#endif
 };
+
+// Non abstract Object
+class GameObject : public Object {
+public:
+    CLASS_CREATE(GameObject);
+
+    GameObject(Game& game) : Object(game) {}
+    GameObject(Game& game, const Vector3& position) : GameObject(game) {
+        SetPosition(position);
+    }
+};
+
+CLASS_REGISTER(GameObject);
 
 inline std::ostream& operator<<(std::ostream& os, const Object* obj) {
     if (!obj) {

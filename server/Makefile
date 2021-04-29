@@ -11,35 +11,43 @@ CLIENT_DEPS = $(CLIENT_OBJ:%.wo=%.wd)
 HEADERS = $(shell find src/ -name "*.h") Makefile
 
 USOCKET = $(SRC_DIR)/uWebSocket/uSocket
-LIBASSIMP = lib/assimp-4.1.0/lib/libassimp.a
+# LIBASSIMP = lib/assimp-4.1.0/lib/cc-libassimp.a lib/assimp-4.1.0/lib/libIrrXml.a
+# EMLIBASSIMP = lib/assimp-4.1.0/lib/em-libassimp.a lib/assimp-4.1.0/lib/libIrrXml.a
 
-CPPFLAGS = -std=c++17 -Wall -I $(SRC_DIR) -I $(USOCKET)/src -I $(SRC_DIR)/objects -I $(SRC_DIR)/animations -Wno-class-memaccess
+CPPFLAGS = -std=c++17 -Wall -Wno-class-memaccess\
+	-I $(SRC_DIR) \
+	-I $(USOCKET)/src \
+	-I $(SRC_DIR)/objects \
+	-I $(SRC_DIR)/animations \
+# -I lib/assimp-4.1.0/include
+
 LDLIBS = -L/usr/lib
 SERVER_DEBUG = -g
 SERVER_PROD = -O2
-SERVER_LDLIBS = $(LDLIBS) -L$(USOCKET) -lz -l:uSockets.a -lpthread
+SERVER_LDLIBS = $(LDLIBS) -lz -lpthread
 WASM_DEBUG = -g4 -s ASSERTIONS=2 -s SAFE_HEAP=1 -s STACK_OVERFLOW_CHECK=1
 WASM_FLAGS = -s MODULARIZE \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
 	-s ALLOW_MEMORY_GROWTH=1 \
-	-s DISABLE_EXCEPTION_CATCHING=0
+	-s DISABLE_EXCEPTION_CATCHING=0 \
+	-s INITIAL_MEMORY=128MB
 
 all: server client
 
-server: $(SERVER_OBJ) $(USOCKET)/uSockets.a $(LIBASSIMP)
+server: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
 	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_DEBUG) -o bin/$(EXE)_server
 
-server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a $(LIBASSIMP)
+server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
 	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o bin/$(EXE)_server_prod
 
-client: $(CLIENT_OBJ) $(LIBASSIMP)
+client: $(CLIENT_OBJ)
 	em++ $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) -o bin/$(EXE)_client.js
 	cp bin/$(EXE)_client.wasm ../client/dist/
 	cp bin/$(EXE)_client.js ../client/
 
-client_prod: $(CLIENT_OBJ) $(LIBASSIMP)
+client_prod: $(CLIENT_OBJ)
 	em++ -O2 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) -o bin/$(EXE)_client_prod.js
 	cp bin/$(EXE)_client_prod.wasm ../client/dist/
 	cp bin/$(EXE)_client_prod.js ../client/

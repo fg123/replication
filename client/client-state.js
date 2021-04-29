@@ -6,11 +6,10 @@ const animations = require('./animations');
 const SIMULATED_LAG = Constants.isProduction ? 0 : 60;
 
 module.exports = class ClientState {
-    constructor(webSocket, wasm, resourceManager, mapImage) {
+    constructor(webSocket, wasm, resourceManager) {
         this.webSocket = webSocket;
         this.wasm = wasm;
         this.resourceManager = resourceManager;
-        this.mapImage = mapImage;
         this.gameObjects = {};
         this.animations = {};
         this.nextAnimationKey = 1;
@@ -26,7 +25,14 @@ module.exports = class ClientState {
         this.width = 0;
         this.height = 0;
 
+        this.models = [];
+
         this.rawMousePos = {
+            x: 0,
+            y: 0
+        };
+
+        this.mouseMovement = {
             x: 0,
             y: 0
         };
@@ -36,7 +42,8 @@ module.exports = class ClientState {
             this.height = window.innerHeight;
         };
 
-        this.cameraPos = { x: 0, y: 0 };
+        this.cameraPos = { x: 0, y: 0, z: 0 };
+        this.cameraRot = { x: 0, y: 0, z: 1 };
 
         window.addEventListener('resize', resize);
         resize();
@@ -175,6 +182,10 @@ module.exports = class ClientState {
                         }
                     });
                 }
+                if (event["models"]) {
+                    this.models = event["models"];
+                    console.log(ev.data);
+                }
             }
             else if (event["event"] === "a") {
                 if (event["objs"]) {
@@ -231,6 +242,8 @@ module.exports = class ClientState {
         window.addEventListener('mousemove', e => {
             this.rawMousePos.x = e.pageX;
             this.rawMousePos.y = e.pageY;
+            this.mouseMovement.x += e.movementX;
+            this.mouseMovement.y += e.movementY;
         });
 
         window.addEventListener('mousedown', e => {
@@ -253,11 +266,17 @@ module.exports = class ClientState {
     }
 
     SendMouseMoveEvent() {
+        if (this.mouseMovement.x === 0 &&
+            this.mouseMovement.y === 0) {
+            return;
+        }
         this.SendInputPacket({
             event: "mm",
-            x: this.rawMousePos.x + this.cameraPos.x - (this.width / 2),
-            y: this.rawMousePos.y + this.cameraPos.y - (this.height / 2)
+            x: this.mouseMovement.x,
+            y: this.mouseMovement.y
         });
+        this.mouseMovement.x = 0;
+        this.mouseMovement.y = 0;
     }
 
     GetObject(id) {

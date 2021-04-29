@@ -345,21 +345,6 @@ if (!Object.getOwnPropertyDescriptor(Module["ready"], "__get_timezone")) {
  });
 }
 
-if (!Object.getOwnPropertyDescriptor(Module["ready"], "___cxa_find_matching_catch")) {
- Object.defineProperty(Module["ready"], "___cxa_find_matching_catch", {
-  configurable: true,
-  get: function() {
-   abort("You are getting ___cxa_find_matching_catch on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
-  }
- });
- Object.defineProperty(Module["ready"], "___cxa_find_matching_catch", {
-  configurable: true,
-  set: function() {
-   abort("You are setting ___cxa_find_matching_catch on the Promise object, instead of the instance. Use .then() to get called back with the instance, see the MODULARIZE docs in src/settings.js");
-  }
- });
-}
-
 if (!Object.getOwnPropertyDescriptor(Module["ready"], "onRuntimeInitialized")) {
  Object.defineProperty(Module["ready"], "onRuntimeInitialized", {
   configurable: true,
@@ -1405,7 +1390,7 @@ var TOTAL_STACK = 5242880;
 
 if (Module["TOTAL_STACK"]) assert(TOTAL_STACK === Module["TOTAL_STACK"], "the stack size can no longer be determined at runtime");
 
-var INITIAL_MEMORY = Module["INITIAL_MEMORY"] || 16777216;
+var INITIAL_MEMORY = Module["INITIAL_MEMORY"] || 134217728;
 
 if (!Object.getOwnPropertyDescriptor(Module, "INITIAL_MEMORY")) Object.defineProperty(Module, "INITIAL_MEMORY", {
  configurable: true,
@@ -1420,7 +1405,7 @@ assert(typeof Int32Array !== "undefined" && typeof Float64Array !== "undefined" 
 
 assert(!Module["wasmMemory"], "Use of `wasmMemory` detected.  Use -s IMPORTED_MEMORY to define wasmMemory externally");
 
-assert(INITIAL_MEMORY == 16777216, "Detected runtime INITIAL_MEMORY setting.  Use -s IMPORTED_MEMORY to define wasmMemory dynamically");
+assert(INITIAL_MEMORY == 134217728, "Detected runtime INITIAL_MEMORY setting.  Use -s IMPORTED_MEMORY to define wasmMemory dynamically");
 
 var wasmTable;
 
@@ -5528,6 +5513,8 @@ var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__w
 
 var _free = Module["_free"] = createExportWrapper("free");
 
+var _fflush = Module["_fflush"] = createExportWrapper("fflush");
+
 var _malloc = Module["_malloc"] = createExportWrapper("malloc");
 
 var _SetLocalPlayerClient = Module["_SetLocalPlayerClient"] = createExportWrapper("SetLocalPlayerClient");
@@ -5551,8 +5538,6 @@ var _HandleLocalInput = Module["_HandleLocalInput"] = createExportWrapper("Handl
 var _HandleReplicate = Module["_HandleReplicate"] = createExportWrapper("HandleReplicate");
 
 var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
-
-var _fflush = Module["_fflush"] = createExportWrapper("fflush");
 
 var __get_tzname = Module["__get_tzname"] = createExportWrapper("_get_tzname");
 
@@ -5596,13 +5581,13 @@ var _emscripten_get_sbrk_ptr = Module["_emscripten_get_sbrk_ptr"] = createExport
 
 var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
 
+var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
+
 var dynCall_ji = Module["dynCall_ji"] = createExportWrapper("dynCall_ji");
 
 var dynCall_iij = Module["dynCall_iij"] = createExportWrapper("dynCall_iij");
 
 var dynCall_iiiiij = Module["dynCall_iiiiij"] = createExportWrapper("dynCall_iiiiij");
-
-var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
 
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 
@@ -5612,15 +5597,26 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 58272;
+var _game = Module["_game"] = 70648;
 
-var _inputEvents = Module["_inputEvents"] = 58416;
+var _inputEvents = Module["_inputEvents"] = 70808;
 
-var _localClientId = Module["_localClientId"] = 58264;
+var _localClientId = Module["_localClientId"] = 70640;
 
-var _ping = Module["_ping"] = 58448;
+var _ping = Module["_ping"] = 70840;
 
-var _lastTickTime = Module["_lastTickTime"] = 58440;
+var _lastTickTime = Module["_lastTickTime"] = 70832;
+
+function invoke_iii(index, a1, a2) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
 
 function invoke_ii(index, a1) {
  var sp = stackSave();
@@ -5648,17 +5644,6 @@ function invoke_viii(index, a1, a2, a3) {
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iii(index, a1, a2) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -5721,6 +5706,17 @@ function invoke_iiii(index, a1, a2, a3) {
  }
 }
 
+function invoke_viiiii(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_iiiii(index, a1, a2, a3, a4) {
  var sp = stackSave();
  try {
@@ -5769,17 +5765,6 @@ function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3, a4);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiiii(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

@@ -2,6 +2,10 @@
 #include "json/json.hpp"
 #include "logging.h"
 
+const Vector3 Vector::Up(0, 1, 0);
+const Vector3 Vector::Forward(0, 0, 1);
+const Vector3 Vector::Left(1, 0, 0);
+
 bool AllEqual(bool a, bool b, bool c, bool d) {
     // Yuck
     return a == b && a == c && a == d;

@@ -58,12 +58,12 @@ public:
 #ifdef BUILD_SERVER
     virtual void StartFire(Time time) override {
         if (IsOnCooldown()) return;
-        if (glm::distance(Vector3(attachedTo->mousePosition, 0), attachedTo->GetPosition()) < dropRange) {
-            Bomb* bomb = new Bomb(game, Vector3(attachedTo->mousePosition, 0));
-            bombs.push_back(bomb);
-            game.AddObject(bomb);
-            CooldownStart(time);
-        }
+        // if (glm::distance(Vector3(attachedTo->mousePosition, 0), attachedTo->GetPosition()) < dropRange) {
+        //     // Bomb* bomb = new Bomb(game, Vector3(attachedTo->mousePosition, 0));
+        //     bombs.push_back(bomb);
+        //     game.AddObject(bomb);
+        //     CooldownStart(time);
+        // }
     }
 
     void ExplodeAll() {

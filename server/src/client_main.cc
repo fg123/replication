@@ -129,8 +129,16 @@ extern "C" {
             JSONDocument object;
             object.Parse(input);
 
-            bool hasPlayerIn = false;
+            if (object.HasMember("models")) {
+                // Initial Replication of Models
+                for (auto& model : object["models"].GetArray()) {
+                    // Don't Replicate the actual internals
+                    Model* m = game.CreateNewModel();//->ProcessReplication(model);
+                    m->id = model["id"].GetUint();
+                }
+            }
 
+            bool hasPlayerIn = false;
             for (auto& event : object["objs"].GetArray()) {
                 ObjectID ids = event["id"].GetUint();
                 if (ids == localClientId) {

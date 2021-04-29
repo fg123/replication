@@ -15,9 +15,12 @@ struct FloatingTextAnimation : public Animation {
     virtual const char* GetKey() override { return "FloatingText"; }
 
     virtual void SerializeData(JSONWriter& obj) override {
-        SerializeDispatch(position, "p", obj);
-        SerializeDispatch(text, "t", obj);
-        SerializeDispatch(color, "c", obj);
+        obj.Key("p");
+        SerializeDispatch(position, obj);
+        obj.Key("t");
+        SerializeDispatch(text, obj);
+        obj.Key("c");
+        SerializeDispatch(color, obj);
     }
 };
 

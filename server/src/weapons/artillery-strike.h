@@ -62,7 +62,7 @@ public:
         if (IsOnCooldown()) return;
     #ifdef BUILD_SERVER
         ArtilleryObject* proj = new ArtilleryObject(game);
-        proj->SetPosition(Vector3(attachedTo->mousePosition.x, 10, 0));
+        // proj->SetPosition(Vector3(attachedTo->mousePosition.x, 10, 0));
         game.AddObject(proj);
     #endif
         CooldownStart(time);

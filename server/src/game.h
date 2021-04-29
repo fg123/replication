@@ -61,11 +61,20 @@ class Game {
 
     Time gameTime;
 
+    ModelManager modelManager;
 public:
     Game();
 
 #ifdef BUILD_SERVER
     Game(std::string mapPath, bool isProduction);
+#endif
+
+#ifdef BUILD_CLIENT
+    Model* CreateNewModel() {
+        Model* model = new Model;
+        modelManager.models.push_back(model);
+        return model;
+    }
 #endif
 
     ~Game();
@@ -120,6 +129,10 @@ public:
     template<class T = Object>
     T* GetObject(ObjectID id) {
         return static_cast<T*>(GetObjectImpl(id));
+    }
+
+    Model* GetModel(ModelID id) {
+        return modelManager.GetModel(id);
     }
 
     ObjectID RequestId();

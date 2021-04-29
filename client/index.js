@@ -1,14 +1,16 @@
 const Constants = require('./constants');
 const ResourceManager = require('./resource-manager');
 const Client = require(Constants.isProduction ? './game_client_prod' : './game_client');
-const { createMap } = require('./map');
 const ClientState = require('./client-state');
 const GameCanvas = require('./canvas/game');
 const UICanvas = require('./canvas/ui');
 const EscapeMenu = require('./canvas/escape-menu');
 
 const gameCanvas = document.getElementById('game');
-const gameContext = gameCanvas.getContext('2d');
+const gameContext = gameCanvas.getContext("webgl2", {
+    antialias: true,
+    alpha: false
+});
 
 const uiCanvas = document.getElementById('ui');
 const uiContext = uiCanvas.getContext('2d');
@@ -25,13 +27,11 @@ Client().then((instance) => {
     webSocket.onopen = function (event) {
         console.log('Loading Resource Manager');
         const resourceManager = new ResourceManager(() => {
-            createMap("data/maps/map1.json", resourceManager, (mapImage) => {
-                console.log('Starting Game');
-                const clientState = new ClientState(webSocket, instance, resourceManager, mapImage);
-                new GameCanvas(clientState, gameCanvas, gameContext);
-                new UICanvas(clientState, uiCanvas, uiContext);
-                new EscapeMenu(clientState, document.getElementById('escapeMenu'));
-            });
+            console.log('Starting Game');
+            const clientState = new ClientState(webSocket, instance, resourceManager);
+            new GameCanvas(clientState, gameCanvas, gameContext);
+            new UICanvas(clientState, uiCanvas, uiContext);
+            new EscapeMenu(clientState, document.getElementById('escapeMenu'));
         });
     };
     webSocket.onclose = function(e) {

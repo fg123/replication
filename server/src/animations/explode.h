@@ -12,8 +12,10 @@ struct ExplodeAnimation : public Animation {
         : position(position), size(size) { }
     virtual const char* GetKey() override { return "Explode"; }
     virtual void SerializeData(JSONWriter& obj) override {
-        SerializeDispatch(position, "p", obj);
-        SerializeDispatch(size, "s", obj);
+        obj.Key("p");
+        SerializeDispatch(position, obj);
+        obj.Key("s");
+        SerializeDispatch(size, obj);
     }
 };
 

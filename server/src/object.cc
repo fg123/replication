@@ -3,7 +3,7 @@
 
 #include "json/json.hpp"
 
-static const double GRAVITY = 3000;
+static const double GRAVITY = 300;
 static const double EPSILON = 10e-20;
 
 std::unordered_map<std::string, ObjectConstructor>& GetClassLookup() {
@@ -28,6 +28,8 @@ Time Object::DeltaTime(Time currentTime) {
 
 Object::Object(Game& game) :
     game(game),
+    rotation(),
+    scale(1, 1, 1),
     z(0),
     id(0),
     isDirty(true),
@@ -36,7 +38,7 @@ Object::Object(Game& game) :
     tags((uint64_t)Tag::OBJECT),
     collisionExclusion(0),
     collisionReporting(~0),
-    airFriction(0.97, 1, 0)
+    airFriction(0.8, 0.8, 0.8)
 {}
 
 Object::~Object() {
@@ -63,7 +65,7 @@ void Object::Tick(Time time) {
     double timeFactor = delta / 1000.0;
 
     if (!isStatic && GetColliderCount() > 0 && !IsTagged(Tag::NO_GRAVITY)) {
-        velocity.y += GRAVITY * timeFactor;
+        velocity.y -= GRAVITY * timeFactor;
     }
 
     velocity.x *= airFriction.x;
@@ -82,11 +84,15 @@ void Object::Tick(Time time) {
     if (std::abs(velocity.y) < EPSILON) {
         velocity.y = 0;
     }
+    if (std::abs(velocity.z) < EPSILON) {
+        velocity.z = 0;
+    }
 
 #ifdef BUILD_SERVER
     // We are dirty if velocity changed last frame
     //    or position changed significantly
-    if (position - positionDelta != lastFramePosition || velocity != lastFrameVelocity) {
+    if (position - positionDelta != lastFramePosition ||
+        GetVelocity() != lastFrameVelocity) {
         SetDirty(true);
     }
 #endif
@@ -96,7 +102,7 @@ void Object::Tick(Time time) {
     SetDirty(true);
 #endif
 
-    lastFrameVelocity = velocity;
+    lastFrameVelocity = GetVelocity();
     lastFramePosition = position;
 }
 
@@ -122,6 +128,9 @@ void Object::ResolveCollision(const Vector3& difference) {
     }
     if (SameSign(difference.y, velocity.y)) {
         velocity.y = 0;
+    }
+    if (SameSign(difference.z, velocity.z)) {
+        velocity.z = 0;
     }
 }
 
@@ -206,6 +215,22 @@ void Object::Serialize(JSONWriter& obj) {
         obj.EndArray();
     }
 #endif
+    if (model) {
+        obj.Key("m");
+        obj.Int(model->GetId());
+    }
+#ifdef BUILD_CLIENT
+    // Calculate a transformed matrix for drawing purposes
+    glm::dmat4 transform = glm::translate(position) * glm::toMat4(rotation) * glm::scale(scale);
+
+    obj.Key("transform");
+    obj.StartArray();
+    const double* vptr = glm::value_ptr(transform);
+    for (size_t i = 0; i < 16; i++) {
+        obj.Double(vptr[i]);
+    }
+    obj.EndArray();
+#endif
 }
 
 void Object::ProcessReplication(json& object) {
@@ -231,6 +256,12 @@ void Object::ProcessReplication(json& object) {
             }
             else if (colliderInfo["t"].GetInt() == 1) {
                 AddCollider(new CircleCollider(this, Vector3(), 0));
+            }
+            else if (colliderInfo["t"].GetInt() == 2) {
+                AddCollider(new AABBCollider(this, Vector3(), Vector3()));
+            }
+            else if (colliderInfo["t"].GetInt() == 3) {
+                AddCollider(new SphereCollider(this, Vector3(), 0));
             }
         }
     }
@@ -260,6 +291,12 @@ void Object::ProcessReplication(json& object) {
         for (json& value : object["ch"].GetArray()) {
             children.insert(game.GetObject(value.GetInt()));
         }
+    }
+    if (object.HasMember("m")) {
+        model = game.GetModel(object["m"].GetInt());
+    }
+    else {
+        model = nullptr;
     }
     SetDirty(true);
 }

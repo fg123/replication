@@ -35,15 +35,20 @@ PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector3()) {
 }
 
 PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game) {
-    airFriction.x = 0.8;
-
     SetTag(Tag::PLAYER);
+    // SetTag(Tag::NO_GRAVITY);
+
     SetPosition(position);
 
     collisionExclusion |= (uint64_t) Tag::PLAYER;
 
-    AddCollider(new CircleCollider(this, Vector3(0, -15, 0), 15.0));
-    AddCollider(new RectangleCollider(this, Vector3(-15, -5, 0), Vector3(30, 33, 0)));
+    // AddCollider(new CircleCollider(this, Vector3(0, -15, 0), 15.0));
+    #ifdef BUILD_SERVER
+    SetModel(game.GetModel(1));
+    #endif
+    SetScale(Vector3(1, 2, 1));
+
+    AddCollider(new AABBCollider(this, Vector3(-0.5, -1, -0.5), Vector3(1, 2, 1)));
 }
 
 void PlayerObject::OnDeath() {
@@ -118,77 +123,97 @@ void PlayerObject::Tick(Time time) {
             }
         }
     }
-    Vector3 velocity = GetVelocity();
+    Vector3 leftRightComponent;
+    Vector3 forwardBackwardComponent;
 
+    bool hasMovement = false;
     if (keyboardState[KEY_MAP[A_KEY]]) {
-        velocity.x = -500;
+        leftRightComponent = Vector::Left * rotation;
+        hasMovement = true;
     }
+    if (keyboardState[KEY_MAP[D_KEY]]) {
+        leftRightComponent = -Vector::Left * rotation;
+        hasMovement = true;
+    }
+    if (keyboardState[KEY_MAP[W_KEY]]) {
+        forwardBackwardComponent = Vector::Forward * rotation;
+        hasMovement = true;
+    }
+    if (keyboardState[KEY_MAP[S_KEY]]) {
+        forwardBackwardComponent = -Vector::Forward * rotation;
+        hasMovement = true;
+    }
+
+    // TODO: move speed
+    if (hasMovement) {
+        inputVelocity = glm::normalize(leftRightComponent + forwardBackwardComponent) * 10.0;
+    }
+    else {
+        inputVelocity = Vector3();
+    }
+
     if (keyboardState[KEY_MAP[K_KEY]]) {
         if (!lastKeyboardState[KEY_MAP[K_KEY]]) {
             DealDamage(100);
         }
     }
-    if (keyboardState[KEY_MAP[D_KEY]]) {
-        velocity.x = 500;
-    }
     // if (keyboardState[G_KEY]) {
     //     DropWeapon();
     // }
-    if (keyboardState[KEY_MAP[W_KEY]] || keyboardState[KEY_MAP[SPACE_KEY]]) {
+    if (keyboardState[KEY_MAP[SPACE_KEY]] && !lastMouseState[KEY_MAP[SPACE_KEY]]) {
         // Can only jump if touching ground
         if (IsGrounded()) {
             // LOG_DEBUG("Applying Jump");
-            velocity.y = -600;
+            velocity.y += 100;
         }
         // velocity.y = -300;
     }
-    SetVelocity(velocity);
 
-    if (currentWeapon) {
-        if (mouseState[LEFT_MOUSE_BUTTON]) {
-            if (!lastMouseState[LEFT_MOUSE_BUTTON]) {
-                currentWeapon->StartFire(time);
-            }
-            currentWeapon->Fire(time);
-        }
-        else if (lastMouseState[LEFT_MOUSE_BUTTON]) {
-            currentWeapon->ReleaseFire(time);
-        }
-        if (keyboardState[KEY_MAP[R_KEY]]) {
-            if (!lastKeyboardState[KEY_MAP[R_KEY]]) {
-                currentWeapon->StartReload(time);
-            }
-        }
-    }
+    // if (currentWeapon) {
+    //     if (mouseState[LEFT_MOUSE_BUTTON]) {
+    //         if (!lastMouseState[LEFT_MOUSE_BUTTON]) {
+    //             currentWeapon->StartFire(time);
+    //         }
+    //         currentWeapon->Fire(time);
+    //     }
+    //     else if (lastMouseState[LEFT_MOUSE_BUTTON]) {
+    //         currentWeapon->ReleaseFire(time);
+    //     }
+    //     if (keyboardState[KEY_MAP[R_KEY]]) {
+    //         if (!lastKeyboardState[KEY_MAP[R_KEY]]) {
+    //             currentWeapon->StartReload(time);
+    //         }
+    //     }
+    // }
 
-    if (qWeapon) {
-        if (keyboardState[KEY_MAP[Q_KEY]]) {
-            if (!lastKeyboardState[KEY_MAP[Q_KEY]]) {
-                qWeapon->StartFire(time);
-            }
-            qWeapon->Fire(time);
-        }
-        else if (lastKeyboardState[KEY_MAP[Q_KEY]]) {
-            qWeapon->ReleaseFire(time);
-        }
-    }
+    // if (qWeapon) {
+    //     if (keyboardState[KEY_MAP[Q_KEY]]) {
+    //         if (!lastKeyboardState[KEY_MAP[Q_KEY]]) {
+    //             qWeapon->StartFire(time);
+    //         }
+    //         qWeapon->Fire(time);
+    //     }
+    //     else if (lastKeyboardState[KEY_MAP[Q_KEY]]) {
+    //         qWeapon->ReleaseFire(time);
+    //     }
+    // }
 
-    if (zWeapon) {
-        if (keyboardState[KEY_MAP[Z_KEY]]) {
-            if (!lastKeyboardState[KEY_MAP[Z_KEY]]) {
-                zWeapon->StartFire(time);
-            }
-            zWeapon->Fire(time);
-        }
-        else if (lastKeyboardState[KEY_MAP[Z_KEY]]) {
-            zWeapon->ReleaseFire(time);
-        }
-    }
+    // if (zWeapon) {
+    //     if (keyboardState[KEY_MAP[Z_KEY]]) {
+    //         if (!lastKeyboardState[KEY_MAP[Z_KEY]]) {
+    //             zWeapon->StartFire(time);
+    //         }
+    //         zWeapon->Fire(time);
+    //     }
+    //     else if (lastKeyboardState[KEY_MAP[Z_KEY]]) {
+    //         zWeapon->ReleaseFire(time);
+    //     }
+    // }
 
     Object::Tick(time);
 
-    const Vector3& position = GetPosition();
-    aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
+    // const Vector3& position = GetPosition();
+    // aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
 
     if (currentWeapon) {
         currentWeapon->SetPosition(GetAttachmentPoint());
@@ -202,9 +227,13 @@ void PlayerObject::Tick(Time time) {
         qWeapon->SetPosition(GetAttachmentPoint());
     }
 
+    lookDirection = glm::normalize(Vector::Forward * rotation);
+
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;
     ticksSinceLastProcessed += 1;
+    isDirty = true;
+    LOG_DEBUG("Position: " << position << " Velocity: " << GetVelocity());
 }
 
 void PlayerObject::Serialize(JSONWriter& obj) {
@@ -329,8 +358,16 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
         }
     }
     else if (obj["event"] == "mm") {
-        mousePosition.x = obj["x"].GetDouble();
-        mousePosition.y = obj["y"].GetDouble();
+        double moveX = obj["x"].GetDouble();
+        double moveY = obj["y"].GetDouble();
+        rotationYaw += moveX / 10;
+        rotationPitch -= moveY / 10;
+        rotationPitch = glm::clamp(rotationPitch, -89.0, 89.0);
+        glm::dmat4 matrix;
+        matrix = glm::rotate(matrix, glm::radians(rotationYaw), Vector::Up);
+        matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
+
+        rotation = glm::quat_cast(matrix);
     }
     else if (obj["event"] == "md") {
         int button = obj["button"].GetInt();
