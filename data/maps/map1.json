@@ -4,6 +4,10 @@
     "ShootingRange.obj",
     "cube.obj"
  ],
+ "lights": [
+    [10, 10, 10, 1, 1, 1],
+    [-10, 10, -10, 1, 1, 1]
+ ],
  "noCollide": [20],
  "tiles": [
   [

@@ -78,6 +78,21 @@ GLuint CreateProgram(std::vector<GLuint> shaders) {
     return program;
 }
 
+GLint GetAttributeLocation(GLuint program, const std::string& attrName) {
+    GLint result = glGetAttribLocation(program, attrName.c_str());
+    if (result < 0) {
+        LOG_ERROR("Could not find attribute " << attrName);
+    }
+    return result;
+}
+
+GLint GetUniformLocation(GLuint program, const std::string& uniName) {
+    GLint result = glGetUniformLocation(program, uniName.c_str());
+    if (result < 0) {
+        LOG_ERROR("Could not find uniform " << uniName);
+    }
+    return result;
+}
 
 void ClientGL::SetupGL() {
     // Download Shaders
@@ -85,27 +100,26 @@ void ClientGL::SetupGL() {
     std::string fragmentShaderData = LoadURL("shaders/FragmentShader.frag");
     GLuint vertexShader = CreateShader(vertexShaderData, GL_VERTEX_SHADER);
     GLuint fragmentShader = CreateShader(fragmentShaderData, GL_FRAGMENT_SHADER);
-    GLuint program = CreateProgram({ vertexShader, fragmentShader });
+    program = CreateProgram({ vertexShader, fragmentShader });
     glUseProgram(program);
 
-    positionAttributeLocation = glGetAttribLocation(program, "v_position");
-    if (positionAttributeLocation < 0) {
-        LOG_ERROR("Could not find positionAttributeLocation " << positionAttributeLocation);
-    }
-    normalAttributeLocation = glGetAttribLocation(program, "v_normal");
-    if (normalAttributeLocation < 0) {
-        LOG_ERROR("Could not find normalAttributeLocation " << normalAttributeLocation);
-    }
+    positionAttributeLocation = GetAttributeLocation(program, "v_position");
+    normalAttributeLocation = GetAttributeLocation(program, "v_normal");
+    textureCoordsAttributeLocation = GetAttributeLocation(program, "v_texCoords");
 
-    textureCoordsAttributeLocation = glGetAttribLocation(program, "v_texCoords");
-    if (textureCoordsAttributeLocation < 0) {
-        LOG_ERROR("Could not find textureCoordsAttributeLocation " << textureCoordsAttributeLocation);
-    }
+    uniformProj = GetUniformLocation(program, "u_Projection");
+    uniformView = GetUniformLocation(program, "u_View");
+    uniformModel = GetUniformLocation(program, "u_Model");
+    uniformViewerPosition = GetUniformLocation(program, "u_ViewerPos");
+    uniformNumLights = GetUniformLocation(program, "u_NumLights");
 
-    uniformProj = glGetUniformLocation(program, "Projection");
-    uniformView = glGetUniformLocation(program, "View");
-    uniformModel = glGetUniformLocation(program, "Model");
-    // uniformResolution = glGetUniformLocation(program, "Resolution");
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.Ka"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.Kd"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.Ks"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.Ns"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.Ni"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.d"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.illum"));
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -127,7 +141,6 @@ void ClientGL::Draw(int width, int height) {
     if (!hasModelsBeenReplicated) return;
     // LOG_DEBUG("Draw " << width << " " << height);
     glViewport(0, 0, width, height);
-    // glUniform2f(uniformResolution, (float) width, (float) height);
 
     glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -137,6 +150,9 @@ void ClientGL::Draw(int width, int height) {
         cameraRotation = localPlayer->GetLookDirection();
         // LOG_DEBUG(cameraPosition);
     }
+
+    glUniform3fv(uniformViewerPosition, 1, glm::value_ptr(cameraPosition));
+
     Matrix4 viewMat = glm::lookAt(cameraPosition,
         cameraPosition + cameraRotation, Vector::Up);
     Matrix4 projMat = glm::perspective(
@@ -150,11 +166,21 @@ void ClientGL::Draw(int width, int height) {
 
     for (auto& gameObjectPair : game.GetGameObjects()) {
         Object* obj = gameObjectPair.second;
-        Matrix4 transform = obj->GetTransform();
-        // LOG_DEBUG(transform);
-        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(transform));
         if (Model* model = obj->GetModel()) {
+            // Set Model Transform
+            Matrix4 transform = obj->GetTransform();
+            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(transform));
+
             for (auto& mesh : model->meshes) {
+                // Set Mesh Material
+                glUniform3fv(uniformMaterial[0], 1, glm::value_ptr(mesh.material.Ka));
+                glUniform3fv(uniformMaterial[1], 1, glm::value_ptr(mesh.material.Kd));
+                glUniform3fv(uniformMaterial[2], 1, glm::value_ptr(mesh.material.Ks));
+                glUniform1f (uniformMaterial[3], mesh.material.Ns);
+                glUniform1f (uniformMaterial[4], mesh.material.Ni);
+                glUniform1f (uniformMaterial[5], mesh.material.d);
+                glUniform1i (uniformMaterial[6], mesh.material.illum);
+
                 // LOG_DEBUG(meshRenderInfo[&mesh].vao << " " << meshRenderInfo[&mesh].iboCount);
                 glBindVertexArray(meshRenderInfo[&mesh].vao);
                 glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -174,16 +200,6 @@ void ClientGL::OnModelsReplicated() {
             glGenVertexArrays(1, &meshRenderInfo[meshp].vao);
             glBindVertexArray(meshRenderInfo[meshp].vao);
 
-            // GLfloat* buffer = new GLfloat[6 * mesh.vertices.size()];
-            // size_t i = 0;
-            // for (auto& vert : mesh.vertices) {
-            //     buffer[i++] = vert.position.x;
-            //     buffer[i++] = vert.position.y;
-            //     buffer[i++] = vert.position.z;
-            //     buffer[i++] = vert.normal.x;
-            //     buffer[i++] = vert.normal.y;
-            //     buffer[i++] = vert.normal.z;
-            // }
             glGenBuffers(1, &meshRenderInfo[meshp].vbo);
             glBindBuffer(GL_ARRAY_BUFFER, meshRenderInfo[meshp].vbo);
             glBufferData(GL_ARRAY_BUFFER,
@@ -210,6 +226,18 @@ void ClientGL::OnModelsReplicated() {
                 mesh.indices.data(), GL_STATIC_DRAW);
             meshRenderInfo[meshp].iboCount = mesh.indices.size();
         }
+    }
+
+    // Load Lights Into Shader
+    auto& lights = game.GetModelManager().lights;
+    int numLights = lights.size();
+    LOG_DEBUG("Loading " << numLights << " into uniform");
+    glUniform1i(uniformNumLights, numLights);
+    for (int i = 0; i < numLights; i++) {
+        GLint lightPosition = GetUniformLocation(program, "u_Lights[" + std::to_string(i) + "].position");
+        GLint lightColor = GetUniformLocation(program, "u_Lights[" + std::to_string(i) + "].color");
+        glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
+        glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
     }
     hasModelsBeenReplicated = true;
 }

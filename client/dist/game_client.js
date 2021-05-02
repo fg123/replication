@@ -155,86 +155,81 @@ Module.expectedDataFileDownloads++;
   "files": [ {
    "filename": "/maps/map1.json",
    "start": 0,
-   "end": 36761,
+   "end": 36833,
    "audio": 0
   }, {
    "filename": "/maps/map1.json.bak",
-   "start": 36761,
-   "end": 81901,
+   "start": 36833,
+   "end": 81973,
    "audio": 0
   }, {
    "filename": "/maps/Player.blend",
-   "start": 81901,
-   "end": 855081,
+   "start": 81973,
+   "end": 855153,
    "audio": 0
   }, {
    "filename": "/maps/Player.blend1",
-   "start": 855081,
-   "end": 1628261,
+   "start": 855153,
+   "end": 1628333,
    "audio": 0
   }, {
    "filename": "/maps/ShootingRange.blend",
-   "start": 1628261,
-   "end": 2440421,
+   "start": 1628333,
+   "end": 2444749,
    "audio": 0
   }, {
    "filename": "/maps/ShootingRange.blend1",
-   "start": 2440421,
-   "end": 3235345,
-   "audio": 0
-  }, {
-   "filename": "/maps/ShootingRange.mtl",
-   "start": 3235345,
-   "end": 3235666,
-   "audio": 0
-  }, {
-   "filename": "/maps/ShootingRange.obj",
-   "start": 3235666,
-   "end": 3242081,
+   "start": 2444749,
+   "end": 3261165,
    "audio": 0
   }, {
    "filename": "/models/cube.obj",
-   "start": 3242081,
-   "end": 3242622,
+   "start": 3261165,
+   "end": 3261706,
    "audio": 0
   }, {
    "filename": "/models/island.obj",
-   "start": 3242622,
-   "end": 4675196,
+   "start": 3261706,
+   "end": 4694280,
    "audio": 0
   }, {
    "filename": "/models/player.mtl",
-   "start": 4675196,
-   "end": 4675433,
+   "start": 4694280,
+   "end": 4694517,
    "audio": 0
   }, {
    "filename": "/models/player.obj",
-   "start": 4675433,
-   "end": 4676357,
+   "start": 4694517,
+   "end": 4695441,
+   "audio": 0
+  }, {
+   "filename": "/models/ShootingRange.mtl",
+   "start": 4695441,
+   "end": 4695762,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.obj",
-   "start": 4676357,
-   "end": 4682693,
+   "start": 4695762,
+   "end": 4702177,
    "audio": 0
   }, {
    "filename": "/models/suzanne.obj",
-   "start": 4682693,
-   "end": 4761449,
+   "start": 4702177,
+   "end": 4780933,
    "audio": 0
   }, {
    "filename": "/shaders/FragmentShader.frag",
-   "start": 4761449,
-   "end": 4762309,
+   "start": 4780933,
+   "end": 4783116,
    "audio": 0
   }, {
    "filename": "/shaders/VertexShader.vert",
-   "start": 4762309,
-   "end": 4762914,
+   "start": 4783116,
+   "end": 4783712,
    "audio": 0
   } ],
-  "remote_package_size": 4762914,
-  "package_uuid": "fe7d25fb-ce30-4e38-b93f-6a9108611c0b"
+  "remote_package_size": 4783712,
+  "package_uuid": "88695aff-bf52-41a2-8365-c3546f3282dc"
  });
 })();
 
@@ -5589,6 +5584,18 @@ function _glShaderSource(shader, count, string, length) {
  GLctx.shaderSource(GL.shaders[shader], source);
 }
 
+function _glUniform1f(location, v0) {
+ GLctx.uniform1f(GL.uniforms[location], v0);
+}
+
+function _glUniform1i(location, v0) {
+ GLctx.uniform1i(GL.uniforms[location], v0);
+}
+
+function _glUniform3fv(location, count, value) {
+ GLctx.uniform3fv(GL.uniforms[location], HEAPF32, value >> 2, count * 3);
+}
+
 function _glUniformMatrix4fv(location, count, transpose, value) {
  GLctx.uniformMatrix4fv(GL.uniforms[location], !!transpose, HEAPF32, value >> 2, count * 16);
 }
@@ -6072,6 +6079,9 @@ var asmLibraryArg = {
  "glGetUniformLocation": _glGetUniformLocation,
  "glLinkProgram": _glLinkProgram,
  "glShaderSource": _glShaderSource,
+ "glUniform1f": _glUniform1f,
+ "glUniform1i": _glUniform1i,
+ "glUniform3fv": _glUniform3fv,
  "glUniformMatrix4fv": _glUniformMatrix4fv,
  "glUseProgram": _glUseProgram,
  "glVertexAttribPointer": _glVertexAttribPointer,
@@ -6210,15 +6220,15 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 80368;
+var _game = Module["_game"] = 80784;
 
-var _clientGl = Module["_clientGl"] = 80528;
+var _clientGl = Module["_clientGl"] = 80960;
 
-var _inputEvents = Module["_inputEvents"] = 80624;
+var _inputEvents = Module["_inputEvents"] = 81076;
 
-var _ping = Module["_ping"] = 80656;
+var _ping = Module["_ping"] = 81112;
 
-var _lastTickTime = Module["_lastTickTime"] = 80648;
+var _lastTickTime = Module["_lastTickTime"] = 81104;
 
 function invoke_iii(index, a1, a2) {
  var sp = stackSave();

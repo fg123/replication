@@ -120,6 +120,11 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
         }
         modelManager.LoadModel(modelName, modelPath, modelStream);
     }
+    for (json& lightJson : obj["lights"].GetArray()) {
+        // Light is an array that is serializable to Light
+        Light& light = modelManager.lights.emplace_back();
+        ProcessReplicationDispatch(light, lightJson);
+    }
 
     // Models[0] is always the base map
 
@@ -318,6 +323,9 @@ void Game::InitialReplication(PlayerSocketData* data) {
         writer.EndObject();
     }
     writer.EndArray();
+
+    writer.Key("lights");
+    SerializeDispatch(modelManager.lights, writer);
     writer.EndObject();
     SendData(data, buffer.GetString());
 }

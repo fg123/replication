@@ -22,15 +22,22 @@ class ClientGL {
 
     std::string canvasSelector;
 
+    // Shader Program
+    GLuint program;
+
     // Attribute Locations
     GLint positionAttributeLocation;
     GLint normalAttributeLocation;
     GLint textureCoordsAttributeLocation;
 
+    // Uniforms
     GLint uniformProj;
     GLint uniformView;
     GLint uniformModel;
-    GLint uniformResolution;
+    GLint uniformViewerPosition;
+    GLint uniformNumLights;
+
+    std::vector<GLint> uniformMaterial;
 
     Vector3 cameraPosition;
     Vector3 cameraRotation;

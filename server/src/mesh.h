@@ -43,6 +43,33 @@ inline void ProcessReplicationDispatch(Vertex& object, json& obj) {
     object.texCoords.y = obj[7].GetDouble();
 }
 
+struct Light {
+    Vector3 position;
+    Vector3 color;
+};
+
+template<>
+inline void SerializeDispatch(Light& object, JSONWriter& obj) {
+    obj.StartArray();
+    obj.Double(object.position.x);
+    obj.Double(object.position.y);
+    obj.Double(object.position.z);
+    obj.Double(object.color.x);
+    obj.Double(object.color.y);
+    obj.Double(object.color.z);
+    obj.EndArray();
+}
+
+template<>
+inline void ProcessReplicationDispatch(Light& object, json& obj) {
+    object.position.x = obj[0].GetDouble();
+    object.position.y = obj[1].GetDouble();
+    object.position.z = obj[2].GetDouble();
+    object.color.x = obj[3].GetDouble();
+    object.color.y = obj[4].GetDouble();
+    object.color.z = obj[5].GetDouble();
+}
+
 struct Material : public Replicable {
     // Material Name
     REPLICATED(std::string, name, "name");
@@ -53,11 +80,11 @@ struct Material : public Replicable {
     // Specular Color
     REPLICATED(Vector3, Ks, "Ks");
     // Specular Exponent
-    REPLICATED(double, Ns, "Ns");
+    REPLICATED(float, Ns, "Ns");
     // Optical Density
-    REPLICATED(double, Ni, "Ni");
+    REPLICATED(float, Ni, "Ni");
     // Dissolve
-    REPLICATED(double, d, "d");
+    REPLICATED(float, d, "d");
     // Illumination
     REPLICATED(int, illum, "illum");
     // Ambient Texture Map

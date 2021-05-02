@@ -22,6 +22,7 @@ public:
 class ModelManager {
 public:
     std::vector<Model*> models;
+    std::vector<Light> lights;
 
     Model* GetModel(ModelID id) {
         if (id >= models.size()) {

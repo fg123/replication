@@ -144,6 +144,12 @@ extern "C" {
                     // Don't Replicate the actual internals
                     game.CreateNewModel()->ProcessReplication(model);
                 }
+                if (object.HasMember("lights")) {
+                    for (auto& lightJson : object["lights"].GetArray()) {
+                        Light& light = game.GetModelManager().lights.emplace_back();
+                        ProcessReplicationDispatch(light, lightJson);
+                    }
+                }
                 clientGl.OnModelsReplicated();
             }
 

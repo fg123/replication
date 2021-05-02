@@ -62,6 +62,7 @@ class Game {
     Time gameTime;
 
     ModelManager modelManager;
+
 public:
     Game();
 
