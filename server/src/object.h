@@ -58,6 +58,13 @@ protected:
 
     // All are measured in the same units, velocity is in position units
     //   per second
+
+#ifdef BUILD_CLIENT
+    // For Client-Side Interpolation
+    Vector3 clientPosition;
+    bool clientPositionSet = false;
+#endif
+
     REPLICATED(Vector3, position, "p");
 
     REPLICATED(Quaternion, rotation, "r");
@@ -167,6 +174,15 @@ public:
         isDirty = true;
     }
 #endif
+#ifdef BUILD_CLIENT
+    const Matrix4 GetTransform() {
+        return glm::translate(clientPosition) * glm::toMat4(rotation) * glm::scale(scale);
+    }
+    const Vector3& GetClientPosition() const { return clientPosition; }
+#endif
+    Model* GetModel() {
+        return model;
+    }
 };
 
 // Non abstract Object

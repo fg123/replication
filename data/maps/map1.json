@@ -1,7 +1,7 @@
 {
  "tilemap": "map1Tiles.png",
  "models": [
-    "island.obj",
+    "ShootingRange.obj",
     "cube.obj"
  ],
  "noCollide": [20],

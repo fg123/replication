@@ -35,12 +35,21 @@
 //     }
 // }
 
+template<typename T>
+Vector3 ToVec3(const T& vec) {
+    return { vec.X, vec.Y, vec.Z };
+}
+
+template<typename T>
+Vector2 ToVec2(const T& vec) {
+    return { vec.X, vec.Y };
+}
+
 ModelID ModelManager::LoadModel(const std::string& name, const std::string& path, std::istream& stream) {
     LOG_INFO("Loading Model " << name);
 
     objl::Loader loader;
     loader.LoadStream(path, stream);
-
 
     Model* model = new Model;
     ModelID id = models.size();
@@ -53,10 +62,25 @@ ModelID ModelManager::LoadModel(const std::string& name, const std::string& path
         mesh.indices = loadedMesh.Indices;
         for (auto& loadedVertex : loadedMesh.Vertices) {
             Vertex& vertex = mesh.vertices.emplace_back();
-            vertex.position = { loadedVertex.Position.X, loadedVertex.Position.Y, loadedVertex.Position.Z };
-            vertex.normal = { loadedVertex.Normal.X, loadedVertex.Normal.Y, loadedVertex.Normal.Z };
-            vertex.texCoords = { loadedVertex.TextureCoordinate.X, loadedVertex.TextureCoordinate.Y };
+            vertex.position = ToVec3(loadedVertex.Position);
+            vertex.normal = ToVec3(loadedVertex.Normal);
+            vertex.texCoords = ToVec2(loadedVertex.TextureCoordinate);
         }
+
+        mesh.material.name = loadedMesh.MeshMaterial.name;
+        mesh.material.Ka = ToVec3(loadedMesh.MeshMaterial.Ka);
+        mesh.material.Kd = ToVec3(loadedMesh.MeshMaterial.Kd);
+        mesh.material.Ks = ToVec3(loadedMesh.MeshMaterial.Ks);
+        mesh.material.Ns = loadedMesh.MeshMaterial.Ns;
+        mesh.material.Ni = loadedMesh.MeshMaterial.Ni;
+        mesh.material.d = loadedMesh.MeshMaterial.d;
+        mesh.material.illum = loadedMesh.MeshMaterial.illum;
+        mesh.material.map_Ka = loadedMesh.MeshMaterial.map_Ka;
+        mesh.material.map_Kd = loadedMesh.MeshMaterial.map_Kd;
+        mesh.material.map_Ks = loadedMesh.MeshMaterial.map_Ks;
+        mesh.material.map_Ns = loadedMesh.MeshMaterial.map_Ns;
+        mesh.material.map_d = loadedMesh.MeshMaterial.map_d;
+        mesh.material.map_bump = loadedMesh.MeshMaterial.map_bump;
     }
 
     // Assimp::Importer importer;

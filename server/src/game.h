@@ -115,6 +115,9 @@ public:
     void ProcessReplication(json& incObject);
 
     void RollbackTime(Time time);
+
+    ObjectID localPlayerId = -1;
+    PlayerObject* GetLocalPlayer();
 #endif
 
     void HandleCollisions(Object* obj);
@@ -129,6 +132,14 @@ public:
     template<class T = Object>
     T* GetObject(ObjectID id) {
         return static_cast<T*>(GetObjectImpl(id));
+    }
+
+    const std::unordered_map<ObjectID, Object*>& GetGameObjects() const {
+        return gameObjects;
+    }
+
+    ModelManager& GetModelManager() {
+        return modelManager;
     }
 
     Model* GetModel(ModelID id) {

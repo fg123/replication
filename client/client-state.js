@@ -3,7 +3,7 @@ const PerfTracker = require('./perf-tracker');
 
 const animations = require('./animations');
 
-const SIMULATED_LAG = Constants.isProduction ? 0 : 60;
+const SIMULATED_LAG = Constants.isProduction ? 0 : 30;
 
 module.exports = class ClientState {
     constructor(webSocket, wasm, resourceManager) {
@@ -184,7 +184,7 @@ module.exports = class ClientState {
                 }
                 if (event["models"]) {
                     this.models = event["models"];
-                    console.log(ev.data);
+                    // console.log(ev.data);
                 }
             }
             else if (event["event"] === "a") {

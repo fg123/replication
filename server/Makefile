@@ -1,8 +1,8 @@
 EXE = game
 SRC_DIR = src
-SRC = $(shell find src/ -name "*.cc" | grep -v "main")
+SRC = $(shell find src/ -name "*.cc" | grep -v "main" | grep -v "client")
 SERVER_SRC = $(SRC) src/main.cc
-CLIENT_SRC = $(SRC) src/client_main.cc
+CLIENT_SRC = $(SRC) src/client_main.cc src/client_gl.cc
 SERVER_OBJ = $(SERVER_SRC:%.cc=%.o)
 # Use .wo for webassembly
 CLIENT_OBJ = $(CLIENT_SRC:%.cc=%.wo)
@@ -14,7 +14,7 @@ USOCKET = $(SRC_DIR)/uWebSocket/uSocket
 # LIBASSIMP = lib/assimp-4.1.0/lib/cc-libassimp.a lib/assimp-4.1.0/lib/libIrrXml.a
 # EMLIBASSIMP = lib/assimp-4.1.0/lib/em-libassimp.a lib/assimp-4.1.0/lib/libIrrXml.a
 
-CPPFLAGS = -std=c++17 -Wall -Wno-class-memaccess\
+CPPFLAGS = -std=c++17 -Wall \
 	-I $(SRC_DIR) \
 	-I $(USOCKET)/src \
 	-I $(SRC_DIR)/objects \
@@ -26,34 +26,41 @@ SERVER_DEBUG = -g
 SERVER_PROD = -O2
 SERVER_LDLIBS = $(LDLIBS) -lz -lpthread
 WASM_DEBUG = -g4 -s ASSERTIONS=2 -s SAFE_HEAP=1 -s STACK_OVERFLOW_CHECK=1
-WASM_FLAGS = -s MODULARIZE \
+WASM_FLAGS = \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s DISABLE_EXCEPTION_CATCHING=0 \
-	-s INITIAL_MEMORY=128MB
+	-s INITIAL_MEMORY=128MB \
+	-s MIN_WEBGL_VERSION=2 \
+	-s MAX_WEBGL_VERSION=2 \
+	--source-map-base http://localhost:8000/
+
+GCC_FLAGS = -Wno-class-memaccess -fmax-errors=5
 
 all: server client
 
 server: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
-	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_DEBUG) -o bin/$(EXE)_server
+	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_DEBUG) -o bin/$(EXE)_server
 
 server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
-	$(CXX) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o bin/$(EXE)_server_prod
+	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o bin/$(EXE)_server_prod
 
 client: $(CLIENT_OBJ)
-	em++ $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) -o bin/$(EXE)_client.js
+	em++ $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) -o bin/$(EXE)_client.js \
+		--preload-file ../data@/
 	cp bin/$(EXE)_client.wasm ../client/dist/
-	cp bin/$(EXE)_client.js ../client/
+	cp bin/$(EXE)_client.js ../client/dist/
+	cp bin/$(EXE)_client.data ../client/dist/
 
 client_prod: $(CLIENT_OBJ)
-	em++ -O2 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) -o bin/$(EXE)_client_prod.js
+	em++ -O3 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) -o bin/$(EXE)_client_prod.js
 	cp bin/$(EXE)_client_prod.wasm ../client/dist/
-	cp bin/$(EXE)_client_prod.js ../client/
+	cp bin/$(EXE)_client_prod.js ../client/dist/
 
 %.o: %.cc
-	$(CXX) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
+	$(CXX) $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
 %.wo: %.cc
 	em++ $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -g4 -MMD -MF $(<:%.cc=%.wd) -c $< -o $@

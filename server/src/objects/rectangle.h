@@ -18,7 +18,7 @@ public:
         AddCollider(new RectangleCollider(this, Vector3(), size));
     }
 
-    void ExtendYBy(double d) {
+    void ExtendYBy(float d) {
         size.y += d;
         static_cast<RectangleCollider*>(colliders[0])->size.y += d;
     }

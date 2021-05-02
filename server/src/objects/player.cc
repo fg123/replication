@@ -43,12 +43,14 @@ PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game) {
     collisionExclusion |= (uint64_t) Tag::PLAYER;
 
     // AddCollider(new CircleCollider(this, Vector3(0, -15, 0), 15.0));
-    #ifdef BUILD_SERVER
+
+#ifdef BUILD_SERVER
     SetModel(game.GetModel(1));
-    #endif
+#endif
+
     SetScale(Vector3(1, 2, 1));
 
-    AddCollider(new AABBCollider(this, Vector3(-0.5, -1, -0.5), Vector3(1, 2, 1)));
+    AddCollider(new AABBCollider(this, Vector3(-0.5, -2, 0.5), Vector3(1, 2, 1)));
 }
 
 void PlayerObject::OnDeath() {
@@ -99,8 +101,8 @@ void PlayerObject::Tick(Time time) {
             Time clientTime = time;
         #endif
 
-        // if (glm::length(GetVelocity()) > 1.0) {
-        //     LOG_DEBUG(clientTime << ": " << GetPosition());
+        // if (glm::length(GetVelocity()) > 0.01) {
+        //     LOG_DEBUG(clientTime << ": " << GetPosition() << " v " << GetVelocity());
         // }
 
         std::scoped_lock lock(socketDataMutex);
@@ -146,7 +148,7 @@ void PlayerObject::Tick(Time time) {
 
     // TODO: move speed
     if (hasMovement) {
-        inputVelocity = glm::normalize(leftRightComponent + forwardBackwardComponent) * 10.0;
+        inputVelocity = glm::normalize(leftRightComponent + forwardBackwardComponent) * 10.0f;
     }
     else {
         inputVelocity = Vector3();
@@ -160,11 +162,11 @@ void PlayerObject::Tick(Time time) {
     // if (keyboardState[G_KEY]) {
     //     DropWeapon();
     // }
-    if (keyboardState[KEY_MAP[SPACE_KEY]] && !lastMouseState[KEY_MAP[SPACE_KEY]]) {
+    if (keyboardState[KEY_MAP[SPACE_KEY]] && !lastKeyboardState[KEY_MAP[SPACE_KEY]]) {
         // Can only jump if touching ground
         if (IsGrounded()) {
             // LOG_DEBUG("Applying Jump");
-            velocity.y += 100;
+            velocity.y = 10;
         }
         // velocity.y = -300;
     }
@@ -233,7 +235,7 @@ void PlayerObject::Tick(Time time) {
     lastKeyboardState = keyboardState;
     ticksSinceLastProcessed += 1;
     isDirty = true;
-    LOG_DEBUG("Position: " << position << " Velocity: " << GetVelocity());
+    // LOG_DEBUG("Position: " << position << " Velocity: " << GetVelocity());
 }
 
 void PlayerObject::Serialize(JSONWriter& obj) {
@@ -305,7 +307,7 @@ void PlayerObject::DropWeapon()  {
     if (currentWeapon) {
         // Throw Weapon
         currentWeapon->Detach();
-        currentWeapon->SetVelocity(GetAimDirection() * 500.0);
+        currentWeapon->SetVelocity(GetAimDirection() * 500.0f);
         currentWeapon = nullptr;
         canPickupTime = game.GetGameTime() + 500;
     }
@@ -362,8 +364,8 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
         double moveY = obj["y"].GetDouble();
         rotationYaw += moveX / 10;
         rotationPitch -= moveY / 10;
-        rotationPitch = glm::clamp(rotationPitch, -89.0, 89.0);
-        glm::dmat4 matrix;
+        rotationPitch = glm::clamp(rotationPitch, -89.f, 89.f);
+        Matrix4 matrix;
         matrix = glm::rotate(matrix, glm::radians(rotationYaw), Vector::Up);
         matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
 
@@ -390,5 +392,5 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
 }
 
 Vector3 PlayerObject::GetAttachmentPoint() const {
-    return GetPosition() + glm::normalize(GetAimDirection()) * 20.0;
+    return GetPosition() + glm::normalize(GetAimDirection()) * 20.0f;
 }

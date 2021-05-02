@@ -3,6 +3,7 @@
 #include "logging.h"
 
 #include <deque>
+#include <atomic>
 
 #include "game.h"
 #include "objects/player.h"
@@ -10,29 +11,31 @@
 #include "json/json.hpp"
 #include "perf.h"
 
+#include "client_gl.h"
+
 // We probably need to include all these so it registers
 #include "characters/marine.h"
 #include "characters/archer.h"
 #include "characters/hookman.h"
 #include "characters/bombmaker.h"
 
-static const size_t MAX_INPUT_EVENT_QUEUE = 100;
+static const size_t MAX_INPUT_EVENT_QUEUE = 256;
 
 extern "C" {
     /** Client Interface for the JS Front End */
 
     EMSCRIPTEN_KEEPALIVE
-    ObjectID localClientId;
+    Game game;
 
     EMSCRIPTEN_KEEPALIVE
-    Game game;
+    ClientGL clientGl(game, "#game");
 
     EMSCRIPTEN_KEEPALIVE
     std::deque<JSONDocument> inputEvents;
 
     EMSCRIPTEN_KEEPALIVE
     void SetLocalPlayerClient(ObjectID client) {
-        localClientId = client;
+        game.localPlayerId = client;
     }
 
     EMSCRIPTEN_KEEPALIVE
@@ -54,6 +57,12 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     Time GetLastTickTime() {
         return lastTickTime;
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    void SetupClientContext() {
+        clientGl.SetupContext();
+        clientGl.SetupGL();
     }
 
     EMSCRIPTEN_KEEPALIVE
@@ -122,7 +131,7 @@ extern "C" {
         // LOG_DEBUG("Handle Replicate");
         try {
             Vector3 oldPosition, serverPosition;
-            if (Object* obj = game.GetObject(localClientId)) {
+            if (Object* obj = game.GetLocalPlayer()) {
                 // LOG_DEBUG("OldPosition Tick Time" << lastTickTime);
                 oldPosition = obj->GetPosition();
             }
@@ -133,15 +142,15 @@ extern "C" {
                 // Initial Replication of Models
                 for (auto& model : object["models"].GetArray()) {
                     // Don't Replicate the actual internals
-                    Model* m = game.CreateNewModel();//->ProcessReplication(model);
-                    m->id = model["id"].GetUint();
+                    game.CreateNewModel()->ProcessReplication(model);
                 }
+                clientGl.OnModelsReplicated();
             }
 
             bool hasPlayerIn = false;
             for (auto& event : object["objs"].GetArray()) {
                 ObjectID ids = event["id"].GetUint();
-                if (ids == localClientId) {
+                if (ids == game.localPlayerId) {
                     hasPlayerIn = true;
                 }
                 game.EnsureObjectExists(event);
@@ -155,7 +164,7 @@ extern "C" {
             //   assume we need to roll back.
             if (!hasPlayerIn) return;
 
-            if (Object* obj = game.GetObject(localClientId)) {
+            if (Object* obj = game.GetLocalPlayer()) {
                 serverPosition = obj->GetPosition();
             }
 
@@ -205,7 +214,7 @@ extern "C" {
                 nextTick = inputEvents.front()["time"].GetUint64();
             }
 
-            if (Object* obj = game.GetObject(localClientId)) {
+            if (Object* obj = game.GetLocalPlayer()) {
                 obj->SetLastTickTime(nextTick - TickInterval);
 
                 for (auto& jsonEvent : inputEvents) {
@@ -229,7 +238,7 @@ extern "C" {
                 lastTickTime = nextTick - TickInterval;
             }
 
-            if (Object* obj = game.GetObject(localClientId)) {
+            if (Object* obj = game.GetLocalPlayer()) {
                 Vector3 newPosition = obj->GetPosition();
                 Vector3 difference = (newPosition - oldPosition);
                 if (glm::length(difference) > 5.0) {
@@ -243,5 +252,10 @@ extern "C" {
             LOG_ERROR(input);
             throw;
         }
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    void Draw(int width, int height) {
+        clientGl.Draw(width, height);
     }
 }

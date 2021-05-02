@@ -187,6 +187,16 @@ inline void ProcessReplicationDispatch(double& object, json& obj) {
     object = obj.GetDouble();
 }
 
+template<>
+inline void SerializeDispatch(float& object, JSONWriter& obj) {
+    obj.Double(object);
+}
+
+template<>
+inline void ProcessReplicationDispatch(float& object, json& obj) {
+    object = (float) obj.GetDouble();
+}
+
 // Specialize Vector2 because replicable is an expensive base class due to
 //   registration of members. Vector2s often get created and destroyed quick
 //   so we shouldn't have that overhead.

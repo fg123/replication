@@ -4,12 +4,14 @@ precision highp float;
 
 in vec3 FragmentNormal;
 in vec3 FragmentPos;
+in vec2 FragmentTexCoords;
 
 out vec4 OutputColor;
 
 
 void main() {
     // Just set the output to a constant reddish-purple
+
     vec3 color = vec3(0.9, 0.9, 0.9);
     vec3 lightPos = vec3(-10, 10, -10);
     vec3 lightPos2 = vec3(10, 10, 10);
@@ -22,5 +24,7 @@ void main() {
     vec3 lightDir2 = normalize(lightPos2 - FragmentPos);
     float lightAngle2 = max(dot(FragmentNormal, lightDir2), 0.0);
     vec3 diffuse2 = (lightAngle2 * lightColor);
-    OutputColor = vec4((vec3(0.1, 0.1, 0.1) + diffuse + diffuse2) * color, 1);
+    OutputColor = vec4((vec3(0.1, 0.1, 0.1) + diffuse + diffuse2) * color + (FragmentTexCoords.x * 0.0001), 1);
+
+    // OutputColor = vec4(0.9, 0.9, 0.9, 1);
 }

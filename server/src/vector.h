@@ -10,9 +10,10 @@ constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
     return (v < lo) ? lo : (hi < v) ? hi : v;
 }
 
-using Vector2 = glm::dvec2;
-using Vector3 = glm::dvec3;
-using Quaternion = glm::dquat;
+using Vector2 = glm::vec2;
+using Vector3 = glm::vec3;
+using Matrix4 = glm::mat4;
+using Quaternion = glm::quat;
 
 struct Vector {
     const static Vector3 Up;

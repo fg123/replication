@@ -120,22 +120,17 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
         }
         modelManager.LoadModel(modelName, modelPath, modelStream);
     }
-    GameObject* cube = new GameObject(*this, Vector3());
-    cube->AddCollider(new AABBCollider(cube, Vector3(-100, -10, -100), Vector3(200, 15.1825, 200)));
-    cube->SetTag(Tag::NO_GRAVITY);
-    cube->SetIsStatic(true);
-    cube->SetTag(Tag::GROUND);
-    cube->SetModel(modelManager.GetModel(0));
 
-    GameObject* cube2 = new GameObject(*this, Vector3());
-    cube2->AddCollider(new AABBCollider(cube2, Vector3(-0.5, -0.5, -0.5), Vector3(1, 1, 1)));
-    // cube2->SetScale(Vector3(10, 10, 10));
-    cube2->SetPosition(Vector3(0, 7, 0));
-    // cube2->SetIsStatic(true);
-    cube2->SetModel(modelManager.GetModel(1));
+    // Models[0] is always the base map
 
-    AddObject(cube);
-    AddObject(cube2);
+    GameObject* baseMap = new GameObject(*this, Vector3());
+    baseMap->SetTag(Tag::NO_GRAVITY);
+    baseMap->SetIsStatic(true);
+    baseMap->SetTag(Tag::GROUND);
+    baseMap->SetModel(modelManager.GetModel(0));
+    GenerateAABBCollidersFromModel(baseMap);
+
+    AddObject(baseMap);
 }
 #endif
 
@@ -144,6 +139,14 @@ Game::~Game() {
         delete t.second;
     }
 }
+
+#ifdef BUILD_CLIENT
+
+PlayerObject* Game::GetLocalPlayer() {
+    return GetObject<PlayerObject>(localPlayerId);
+}
+
+#endif
 
 void Game::AssignParent(Object* child, Object* parent) {
     if (child->parent) {

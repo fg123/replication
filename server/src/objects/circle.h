@@ -5,12 +5,12 @@
 #include "json/json.hpp"
 
 class CircleObject : public Object {
-    double radius;
+    float radius;
 public:
     CLASS_CREATE(CircleObject)
 
     CircleObject(Game& game) : Object(game) {}
-    CircleObject(Game& game, Vector3 position, double radius) :
+    CircleObject(Game& game, Vector3 position, float radius) :
         CircleObject(game) {
         this->radius = radius;
         SetPosition(position);
@@ -26,7 +26,7 @@ public:
 
     virtual void ProcessReplication(json& obj) override {
         Object::ProcessReplication(obj);
-        radius = obj["radius"].GetDouble();
+        radius = (float) obj["radius"].GetDouble();
     }
 };
 

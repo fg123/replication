@@ -100,11 +100,11 @@ CollisionResult AABBAndSphereCollide(AABBCollider* rect, SphereCollider* circle)
     // LOG_DEBUG("Difference " << closest << " " << circPosition);
     difference = closest - circPosition;
     // Difference should point away from the rectangle.
-    double differenceLength = glm::length(difference);
+    float differenceLength = glm::length(difference);
 
     difference = glm::normalize(difference);
 
-    double overlapRange = circle->radius - differenceLength;
+    float overlapRange = circle->radius - differenceLength;
 
     CollisionResult r;
     r.isColliding = overlapRange > 0;
@@ -122,19 +122,19 @@ CollisionResult AABBCollider::CollidesWith(Collider* other) {
         Vector3 position = GetPosition();
         Vector3 otherPos = otherRect->GetPosition();
 
-        double x1 = position.x;
-        double x2 = otherPos.x;
-        double y1 = position.y;
-        double y2 = otherPos.y;
-        double z1 = position.z;
-        double z2 = otherPos.z;
+        float x1 = position.x;
+        float x2 = otherPos.x;
+        float y1 = position.y;
+        float y2 = otherPos.y;
+        float z1 = position.z;
+        float z2 = otherPos.z;
 
-        double w1 = size.x;
-        double w2 = otherRect->size.x;
-        double h1 = size.y;
-        double h2 = otherRect->size.y;
-        double d1 = size.z;
-        double d2 = otherRect->size.z;
+        float w1 = size.x;
+        float w2 = otherRect->size.x;
+        float h1 = size.y;
+        float h2 = otherRect->size.y;
+        float d1 = size.z;
+        float d2 = otherRect->size.z;
 
         bool leftCollide = (x1 < x2 + w2);
         bool rightCollide = (x1 + w1 > x2);
@@ -195,8 +195,8 @@ CollisionResult SphereCollider::CollidesWith(Collider* other) {
     if (other->GetType() == 3) {
         // Trust the RTTI
         CircleCollider* otherCirc = static_cast<CircleCollider*>(other);
-        double distance = glm::distance(GetPosition(), otherCirc->GetPosition());
-        double radii = (radius + otherCirc->radius);
+        float distance = glm::distance(GetPosition(), otherCirc->GetPosition());
+        float radii = (radius + otherCirc->radius);
         CollisionResult r;
         r.isColliding = distance < radii;
         if (r.isColliding) {

@@ -15,13 +15,13 @@ protected:
     int health = 100;
 
     // in Radians
-    double aimAngle = 0;
+    float aimAngle = 0;
 
     Time canPickupTime = 0;
 
     // Yaw Pitch in degrees
-    REPLICATED(double, rotationYaw, "ry");
-    REPLICATED(double, rotationPitch, "rp");
+    REPLICATED(float, rotationYaw, "ry");
+    REPLICATED(float, rotationPitch, "rp");
     REPLICATED(Vector3, lookDirection, "ld");
 
     Vector3 inputVelocity;
@@ -72,6 +72,9 @@ public:
 
     Vector3 GetAimDirection() const;
     Vector3 GetAttachmentPoint() const;
+
+    const Vector3& GetLookDirection() const { return lookDirection; }
+
 };
 
 

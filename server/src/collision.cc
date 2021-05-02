@@ -10,6 +10,26 @@ Vector3 Collider::GetPosition() {
     }
 }
 
+void GenerateAABBCollidersFromModel(Object* obj) {
+    // Each Mesh Becomes a Collider
+    LOG_DEBUG("Generating Map Colliders");
+    Model* model = obj->GetModel();
+    if (model) {
+        for (Mesh& mesh : model->meshes) {
+            if (!mesh.vertices.empty()) {
+                Vector3 min = mesh.vertices[0].position;
+                Vector3 max = mesh.vertices[0].position;
+                for (size_t i = 1; i < mesh.vertices.size(); i++) {
+                    min = glm::min(min, mesh.vertices[i].position);
+                    max = glm::max(max, mesh.vertices[i].position);
+                }
+                LOG_DEBUG("Collider: " << min << " Size " << max - min);
+                obj->AddCollider(new AABBCollider(obj, min, max - min));
+            }
+        }
+    }
+}
+
 bool RectangleAndCircleCollidePotential(RectangleCollider* rect, CircleCollider* circle) {
     Vector3 rectPosition = rect->GetPosition();
     Vector3 circPosition = circle->GetPosition();
@@ -102,11 +122,11 @@ CollisionResult RectangleAndCircleCollide(RectangleCollider* rect, CircleCollide
     // LOG_DEBUG("Difference " << closest << " " << circPosition);
     difference = closest - circPosition;
     // Difference should point away from the rectangle.
-    double differenceLength = glm::length(difference);
+    float differenceLength = glm::length(difference);
 
     difference = glm::normalize(difference);
 
-    double overlapRange = circle->radius - differenceLength;
+    float overlapRange = circle->radius - differenceLength;
 
     CollisionResult r;
     r.isColliding = overlapRange > 0;
@@ -123,22 +143,22 @@ CollisionResult RectangleCollider::CollidesWith(Collider* other) {
         RectangleCollider* otherRect = static_cast<RectangleCollider*>(other);
         Vector3 position = GetPosition();
         Vector3 otherPos = otherRect->GetPosition();
-        double x1 = position.x;
-        double x2 = otherPos.x;
-        double y1 = position.y;
-        double y2 = otherPos.y;
-        double w1 = size.x;
-        double w2 = otherRect->size.x;
-        double h1 = size.y;
-        double h2 = otherRect->size.y;
+        float x1 = position.x;
+        float x2 = otherPos.x;
+        float y1 = position.y;
+        float y2 = otherPos.y;
+        float w1 = size.x;
+        float w2 = otherRect->size.x;
+        float h1 = size.y;
+        float h2 = otherRect->size.y;
 
         bool leftCollide = (x1 < x2 + w2);
         bool rightCollide = (x1 + w1 > x2);
         bool topCollide = (y1 < y2 + h2);
         bool bottomCollide = (y1 + h1 > y2);
 
-        Vector3 myCenter (x1 + w1 / 2.0, y1 + h1 / 2.0, 0);
-        Vector3 otherCenter (x2 + w2 / 2.0, y2 + h2 / 2.0, 0);
+        Vector3 myCenter (x1 + w1 / 2.0f, y1 + h1 / 2.0f, 0);
+        Vector3 otherCenter (x2 + w2 / 2.0f, y2 + h2 / 2.0f, 0);
 
         bool biasX = myCenter.x < otherCenter.x;
         bool biasY = myCenter.y < otherCenter.y;
@@ -172,8 +192,8 @@ CollisionResult CircleCollider::CollidesWith(Collider* other) {
     if (other->GetType() == 1) {
         // Trust the RTTI
         CircleCollider* otherCirc = static_cast<CircleCollider*>(other);
-        double distance = glm::distance(GetPosition(), otherCirc->GetPosition());
-        double radii = (radius + otherCirc->radius);
+        float distance = glm::distance(GetPosition(), otherCirc->GetPosition());
+        float radii = (radius + otherCirc->radius);
         CollisionResult r;
         r.isColliding = distance < radii;
         if (r.isColliding) {

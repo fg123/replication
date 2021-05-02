@@ -7,7 +7,7 @@
 class GunBase : public WeaponObject {
 protected:
     // Changable by underlying guns
-    double fireRate = 10;
+    float fireRate = 10;
     int magazineSize;
 
     int magazines;
@@ -18,7 +18,7 @@ protected:
     Time reloadTime;
 
     bool automaticFire = false;
-    double fireOffset;
+    float fireOffset;
 
 private:
     Time nextFireTime = 0;

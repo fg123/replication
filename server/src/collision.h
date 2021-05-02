@@ -52,7 +52,7 @@ struct RectangleCollider : public Collider {
 
 // Deprecated 2D Colliders
 struct CircleCollider : public Collider {
-    REPLICATED(double, radius, "r");
+    REPLICATED(float, radius, "r");
 
     CircleCollider(Vector3 position, double radius) : CircleCollider(nullptr, position, radius) {}
     CircleCollider(Object* owner, Vector3 position, double radius) : Collider(owner, position),
@@ -82,7 +82,7 @@ struct AABBCollider : public Collider {
 
 // Deprecated 2D Colliders
 struct SphereCollider : public Collider {
-    REPLICATED(double, radius, "r");
+    REPLICATED(float, radius, "r");
 
     SphereCollider(Vector3 position, double radius) : SphereCollider(nullptr, position, radius) {}
     SphereCollider(Object* owner, Vector3 position, double radius) : Collider(owner, position),
@@ -92,5 +92,7 @@ struct SphereCollider : public Collider {
     bool CollidePotentialWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
 };
+
+void GenerateAABBCollidersFromModel(Object* obj);
 
 #endif

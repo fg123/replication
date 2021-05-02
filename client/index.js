@@ -1,16 +1,11 @@
 const Constants = require('./constants');
 const ResourceManager = require('./resource-manager');
-const Client = require(Constants.isProduction ? './game_client_prod' : './game_client');
 const ClientState = require('./client-state');
 const GameCanvas = require('./canvas/game');
 const UICanvas = require('./canvas/ui');
 const EscapeMenu = require('./canvas/escape-menu');
 
 const gameCanvas = document.getElementById('game');
-const gameContext = gameCanvas.getContext("webgl2", {
-    antialias: true,
-    alpha: false
-});
 
 const uiCanvas = document.getElementById('ui');
 const uiContext = uiCanvas.getContext('2d');
@@ -20,7 +15,19 @@ const remoteAddress = "wss://replication-server.felixguo.me/connect";
 const connectAddress = Constants.isProduction ? remoteAddress : localAddress;
 
 console.log('Loading Game WASM');
-Client().then((instance) => {
+
+window.Module = {
+    print (text) {
+        console.log(text);
+    },
+    printErr(text) {
+        console.error(text);
+    },
+    canvas: document.getElementById('game')
+};
+
+window.Module['onRuntimeInitialized'] = function() {
+    const instance = window.Module;
     console.log(instance);
     console.log('Loading Web Socket');
     const webSocket = new WebSocket(connectAddress);
@@ -29,7 +36,7 @@ Client().then((instance) => {
         const resourceManager = new ResourceManager(() => {
             console.log('Starting Game');
             const clientState = new ClientState(webSocket, instance, resourceManager);
-            new GameCanvas(clientState, gameCanvas, gameContext);
+            new GameCanvas(clientState, gameCanvas);
             new UICanvas(clientState, uiCanvas, uiContext);
             new EscapeMenu(clientState, document.getElementById('escapeMenu'));
         });
@@ -38,4 +45,4 @@ Client().then((instance) => {
         alert("Server disconnected! Press OK to reload and reconnect.");
         window.location.reload();
     };
-}).catch(error => console.error(error));
+};

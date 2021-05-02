@@ -3,7 +3,7 @@
 
 #include "json/json.hpp"
 
-static const double GRAVITY = 300;
+static const double GRAVITY = 30;
 static const double EPSILON = 10e-20;
 
 std::unordered_map<std::string, ObjectConstructor>& GetClassLookup() {
@@ -62,15 +62,15 @@ void Object::Tick(Time time) {
     //     LOG_DEBUG(delta);
     // }
     // Apply Physics
-    double timeFactor = delta / 1000.0;
+    float timeFactor = delta / 1000.0;
 
     if (!isStatic && GetColliderCount() > 0 && !IsTagged(Tag::NO_GRAVITY)) {
         velocity.y -= GRAVITY * timeFactor;
     }
 
-    velocity.x *= airFriction.x;
-    velocity.y *= airFriction.y;
-    velocity.z *= airFriction.z;
+    // velocity.x *= airFriction.x;
+    // velocity.y *= airFriction.y;
+    // velocity.z *= airFriction.z;
 
     Vector3 positionDelta = GetVelocity() * timeFactor;
     position += positionDelta;
@@ -97,12 +97,15 @@ void Object::Tick(Time time) {
     }
 #endif
 #ifdef BUILD_CLIENT
+    // Interpolate Over
+    clientPosition += (position - clientPosition) / 2.0f;
+
     // Always set dirty for client because we want client
     //   GetObjectSerialized to work properly
     SetDirty(true);
 #endif
 
-    lastFrameVelocity = GetVelocity();
+    lastFrameVelocity = velocity;
     lastFramePosition = position;
 }
 
@@ -219,18 +222,6 @@ void Object::Serialize(JSONWriter& obj) {
         obj.Key("m");
         obj.Int(model->GetId());
     }
-#ifdef BUILD_CLIENT
-    // Calculate a transformed matrix for drawing purposes
-    glm::dmat4 transform = glm::translate(position) * glm::toMat4(rotation) * glm::scale(scale);
-
-    obj.Key("transform");
-    obj.StartArray();
-    const double* vptr = glm::value_ptr(transform);
-    for (size_t i = 0; i < 16; i++) {
-        obj.Double(vptr[i]);
-    }
-    obj.EndArray();
-#endif
 }
 
 void Object::ProcessReplication(json& object) {
@@ -298,5 +289,11 @@ void Object::ProcessReplication(json& object) {
     else {
         model = nullptr;
     }
+#ifdef BUILD_CLIENT
+    if (!clientPositionSet) {
+        clientPosition = position;
+        clientPositionSet = true;
+    }
+#endif
     SetDirty(true);
 }

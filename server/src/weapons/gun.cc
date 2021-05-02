@@ -57,7 +57,7 @@ void GunBase::ActualFire(Time time) {
     nextFireTime = time + (1000.0 / fireRate);
     BulletObject* bullet = new BulletObject(game, damage);
     bullet->SetPosition(GetPosition() + attachedTo->GetAimDirection() * fireOffset);
-    bullet->SetVelocity(attachedTo->GetAimDirection() * 2000.0);
+    bullet->SetVelocity(attachedTo->GetAimDirection() * 2000.f);
     game.AddObject(bullet);
     game.RequestReplication(GetId());
 #endif

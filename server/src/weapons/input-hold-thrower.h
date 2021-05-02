@@ -45,8 +45,8 @@ class InputHoldThrower : public WeaponWithCooldown {
 protected:
     // Customizable by inheritor
     Time maxHoldDown = 1000;
-    double powerMin = 100;
-    double powerMax = 2000;
+    float powerMin = 100;
+    float powerMax = 2000;
 
     REPLICATED_D(bool, instantFire, "inst", false);
 
@@ -61,7 +61,7 @@ public:
             chargeUpTime = std::min(time - fireHoldDownTime, maxHoldDown);
 
             // 2 seconds max for charge up
-            double power = (((double) chargeUpTime / (double) maxHoldDown) * (powerMax - powerMin)) + powerMin;
+            float power = (((float) chargeUpTime / (float) maxHoldDown) * (powerMax - powerMin)) + powerMin;
             arrowFireVel = attachedTo->GetAimDirection() * power;
         }
         else {
@@ -74,7 +74,7 @@ public:
     virtual void StartFire(Time time) override {
         if (IsOnCooldown()) return;
         if (instantFire && timeSinceLastThrow > cooldown) {
-            double power = powerMax;
+            float power = powerMax;
             arrowFireVel = attachedTo->GetAimDirection() * power;
             FireProjectile(time);
         }
@@ -91,7 +91,7 @@ public:
         #ifdef BUILD_SERVER
             Projectile* proj = new Projectile(game);
             proj->SetFiredBy(this);
-            proj->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 15.0);
+            proj->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 15.0f);
             proj->SetVelocity(arrowFireVel);
             game.AddObject(proj);
         #endif
