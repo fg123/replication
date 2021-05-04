@@ -7,8 +7,14 @@ BulletObject::BulletObject(Game& game, int damage) : Object(game), damage(damage
     collisionExclusion = (uint64_t) Tag::OBJECT;
 
     SetTag(Tag::NO_GRAVITY);
-    AddCollider(new CircleCollider(this, Vector3(), 3.0));
-    airFriction = Vector3(1, 1, 0);
+
+#ifdef BUILD_SERVER
+    SetModel(game.GetModel("Bullet.obj"));
+    GenerateAABBCollidersFromModel(this);
+#endif
+
+    //AddCollider(new CircleCollider(this, Vector3(), 3.0));
+    airFriction = Vector3(1, 1, 1);
 }
 
 BulletObject::BulletObject(Game& game) : BulletObject(game, 0) {

@@ -7,9 +7,6 @@
 #include <exception>
 
 WeaponObject::WeaponObject(Game& game, Vector3 position) : Object(game) {
-
-    z = 1;
-
     SetPosition(position);
     // No Colliders
     collisionExclusion |= (uint64_t)Tag::PLAYER;
@@ -51,9 +48,9 @@ void WeaponObject::Tick(Time time) {
     Object::Tick(time);
     if (attachedTo) {
         // Attached!
-        // SetPosition(attachedTo->GetAttachmentPoint());
+        SetPosition(attachedTo->GetAttachmentPoint());
         SetTag(Tag::NO_GRAVITY);
-        // SetVelocity(attachedTo->GetVelocity());
+        SetVelocity(attachedTo->GetVelocity());
     }
     else {
         RemoveTag(Tag::NO_GRAVITY);

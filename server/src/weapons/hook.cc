@@ -34,7 +34,7 @@ void HookObject::Tick(Time time) {
         Vector3 velocity = firedBy->GetAttachedTo()->GetVelocity();
         // Make regular direction twice as powerful as the aiming pull
         Vector3 direction = glm::normalize(GetPosition() - position) * 5.0f;
-        Vector3 aimDirection = firedBy->GetAttachedTo()->GetAimDirection();
+        Vector3 aimDirection = firedBy->GetAttachedTo()->GetLookDirection();
         velocity = glm::normalize(direction + aimDirection) * 1000.0f;
         firedBy->GetAttachedTo()->SetVelocity(velocity);
         hasForceBeenApplied = true;

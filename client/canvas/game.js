@@ -142,6 +142,15 @@ module.exports = class GameCanvas {
         //     }
         // }
         // Serialize all data back out.
+        if (this.clientState.localPlayerObjectId !== undefined) {
+            const serializedString = this.clientState.wasm._GetObjectSerialized(
+                this.clientState.localPlayerObjectId
+            );
+            const jsonString = this.clientState.wasm.UTF8ToString(serializedString);
+            const serializedObject = JSON.parse(jsonString);
+            this.clientState.wasm._free(serializedString);
+            this.clientState.localPlayerObject = serializedObject;
+        }
         // Object.keys(this.clientState.gameObjects).forEach((k) => {
         //     if (!this.clientState.wasm._IsObjectAlive(k)) {
         //         delete this.clientState.gameObjects[k];
@@ -173,17 +182,17 @@ module.exports = class GameCanvas {
         // this.gl.clearColor(135 / 255, 206 / 255, 235 / 255, 1);
         // this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-        // if (this.clientState.localPlayerObjectId) {
-        //     if (this.clientState.gameObjects[this.clientState.localPlayerObjectId]) {
-        //         this.clientState.cameraPos.x = this.clientState.gameObjects[this.clientState.localPlayerObjectId].client_p.x;
-        //         this.clientState.cameraPos.y = this.clientState.gameObjects[this.clientState.localPlayerObjectId].client_p.y;
-        //         this.clientState.cameraPos.z = this.clientState.gameObjects[this.clientState.localPlayerObjectId].client_p.z;
+        if (this.clientState.localPlayerObjectId) {
+            if (this.clientState.localPlayerObject) {
+                this.clientState.cameraPos.x = this.clientState.localPlayerObject.client_p.x;
+                this.clientState.cameraPos.y = this.clientState.localPlayerObject.client_p.y;
+                this.clientState.cameraPos.z = this.clientState.localPlayerObject.client_p.z;
 
-        //         this.clientState.cameraRot.x = this.clientState.gameObjects[this.clientState.localPlayerObjectId].ld.x;
-        //         this.clientState.cameraRot.y = this.clientState.gameObjects[this.clientState.localPlayerObjectId].ld.y;
-        //         this.clientState.cameraRot.z = this.clientState.gameObjects[this.clientState.localPlayerObjectId].ld.z;
-        //     }
-        // }
+                this.clientState.cameraRot.x = this.clientState.localPlayerObject.ld.x;
+                this.clientState.cameraRot.y = this.clientState.localPlayerObject.ld.y;
+                this.clientState.cameraRot.z = this.clientState.localPlayerObject.ld.z;
+            }
+        }
 
         // console.log("Here");
         // if (this.rotate === undefined) {

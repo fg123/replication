@@ -21,6 +21,9 @@
 
 static const size_t MAX_INPUT_EVENT_QUEUE = 256;
 
+static const bool CLIENT_ONLY = false;
+static bool hasInitialReplication = false;
+
 extern "C" {
     /** Client Interface for the JS Front End */
 
@@ -116,19 +119,36 @@ extern "C" {
     void HandleLocalInput(ObjectID object, const char* input) {
         Object* obj = game.GetObject(object);
         if (obj) {
-            if (inputEvents.size() > MAX_INPUT_EVENT_QUEUE) {
-                LOG_WARN("Local input queue > " << MAX_INPUT_EVENT_QUEUE << ", server crashed?");
-                return;
+            if (!CLIENT_ONLY) {
+                if (inputEvents.size() > MAX_INPUT_EVENT_QUEUE) {
+                    LOG_WARN("Local input queue > " << MAX_INPUT_EVENT_QUEUE << ", server crashed?");
+                    return;
+                }
+                inputEvents.emplace_back();
+                inputEvents.back().Parse(input);
+                static_cast<PlayerObject*>(obj)->OnInput(inputEvents.back());
             }
-            inputEvents.emplace_back();
-            inputEvents.back().Parse(input);
-            static_cast<PlayerObject*>(obj)->OnInput(inputEvents.back());
+            else {
+                JSONDocument doc;
+                doc.Parse(input);
+                static_cast<PlayerObject*>(obj)->OnInput(doc);
+            }
         }
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    void LoadMap(const char* map) {
+        game.LoadMap(map);
+        clientGl.OnModelsReplicated();
     }
 
     EMSCRIPTEN_KEEPALIVE
     void HandleReplicate(const char* input) {
         // LOG_DEBUG("Handle Replicate");
+        if (hasInitialReplication && CLIENT_ONLY) {
+            return;
+        }
+        hasInitialReplication = true;
         try {
             Vector3 oldPosition, serverPosition;
             if (Object* obj = game.GetLocalPlayer()) {
@@ -138,20 +158,20 @@ extern "C" {
             JSONDocument object;
             object.Parse(input);
 
-            if (object.HasMember("models")) {
-                // Initial Replication of Models
-                for (auto& model : object["models"].GetArray()) {
-                    // Don't Replicate the actual internals
-                    game.CreateNewModel()->ProcessReplication(model);
-                }
-                if (object.HasMember("lights")) {
-                    for (auto& lightJson : object["lights"].GetArray()) {
-                        Light& light = game.GetModelManager().lights.emplace_back();
-                        ProcessReplicationDispatch(light, lightJson);
-                    }
-                }
-                clientGl.OnModelsReplicated();
-            }
+            // if (object.HasMember("models")) {
+            //     // Initial Replication of Models
+            //     for (auto& model : object["models"].GetArray()) {
+            //         // Don't Replicate the actual internals
+            //         game.CreateNewModel()->ProcessReplication(model);
+            //     }
+            //     if (object.HasMember("lights")) {
+            //         for (auto& lightJson : object["lights"].GetArray()) {
+            //             Light& light = game.GetModelManager().lights.emplace_back();
+            //             ProcessReplicationDispatch(light, lightJson);
+            //         }
+            //     }
+            //     clientGl.OnModelsReplicated();
+            // }
 
             bool hasPlayerIn = false;
             for (auto& event : object["objs"].GetArray()) {
@@ -247,8 +267,8 @@ extern "C" {
             if (Object* obj = game.GetLocalPlayer()) {
                 Vector3 newPosition = obj->GetPosition();
                 Vector3 difference = (newPosition - oldPosition);
-                if (glm::length(difference) > 5.0) {
-                    LOG_DEBUG("Server Position Desync: " << newPosition << " - " << oldPosition << " = " << (newPosition - oldPosition));
+                if (glm::length(difference) > 0.01) {
+                    LOG_WARN("Server Position Desync: " << newPosition << " - " << oldPosition << " = " << (newPosition - oldPosition));
                 }
             }
         } catch(std::exception& e) {

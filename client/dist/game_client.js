@@ -92,6 +92,7 @@ Module.expectedDataFileDownloads++;
    Module["FS_createPath"]("/", "maps", true, true);
    Module["FS_createPath"]("/", "models", true, true);
    Module["FS_createPath"]("/", "shaders", true, true);
+   Module["FS_createPath"]("/", "source", true, true);
    function DataRequest(start, end, audio) {
     this.start = start;
     this.end = end;
@@ -155,81 +156,136 @@ Module.expectedDataFileDownloads++;
   "files": [ {
    "filename": "/maps/map1.json",
    "start": 0,
-   "end": 36833,
+   "end": 36888,
    "audio": 0
   }, {
    "filename": "/maps/map1.json.bak",
-   "start": 36833,
-   "end": 81973,
+   "start": 36888,
+   "end": 82028,
    "audio": 0
   }, {
-   "filename": "/maps/Player.blend",
-   "start": 81973,
-   "end": 855153,
+   "filename": "/models/Bullet.mtl",
+   "start": 82028,
+   "end": 82269,
    "audio": 0
   }, {
-   "filename": "/maps/Player.blend1",
-   "start": 855153,
-   "end": 1628333,
-   "audio": 0
-  }, {
-   "filename": "/maps/ShootingRange.blend",
-   "start": 1628333,
-   "end": 2444749,
-   "audio": 0
-  }, {
-   "filename": "/maps/ShootingRange.blend1",
-   "start": 2444749,
-   "end": 3261165,
+   "filename": "/models/Bullet.obj",
+   "start": 82269,
+   "end": 110540,
    "audio": 0
   }, {
    "filename": "/models/cube.obj",
-   "start": 3261165,
-   "end": 3261706,
+   "start": 110540,
+   "end": 111081,
    "audio": 0
   }, {
    "filename": "/models/island.obj",
-   "start": 3261706,
-   "end": 4694280,
+   "start": 111081,
+   "end": 1543655,
    "audio": 0
   }, {
-   "filename": "/models/player.mtl",
-   "start": 4694280,
-   "end": 4694517,
+   "filename": "/models/Pistol.mtl",
+   "start": 1543655,
+   "end": 1543893,
    "audio": 0
   }, {
-   "filename": "/models/player.obj",
-   "start": 4694517,
-   "end": 4695441,
+   "filename": "/models/Pistol.obj",
+   "start": 1543893,
+   "end": 1545944,
+   "audio": 0
+  }, {
+   "filename": "/models/Player.mtl",
+   "start": 1545944,
+   "end": 1546184,
+   "audio": 0
+  }, {
+   "filename": "/models/Player.obj",
+   "start": 1546184,
+   "end": 2318334,
+   "audio": 0
+  }, {
+   "filename": "/models/Rifle.mtl",
+   "start": 2318334,
+   "end": 2318570,
+   "audio": 0
+  }, {
+   "filename": "/models/Rifle.obj",
+   "start": 2318570,
+   "end": 2330907,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.mtl",
-   "start": 4695441,
-   "end": 4695762,
+   "start": 2330907,
+   "end": 2331228,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.obj",
-   "start": 4695762,
-   "end": 4702177,
+   "start": 2331228,
+   "end": 2337641,
    "audio": 0
   }, {
    "filename": "/models/suzanne.obj",
-   "start": 4702177,
-   "end": 4780933,
+   "start": 2337641,
+   "end": 2416397,
    "audio": 0
   }, {
    "filename": "/shaders/FragmentShader.frag",
-   "start": 4780933,
-   "end": 4783116,
+   "start": 2416397,
+   "end": 2418580,
    "audio": 0
   }, {
    "filename": "/shaders/VertexShader.vert",
-   "start": 4783116,
-   "end": 4783712,
+   "start": 2418580,
+   "end": 2419176,
+   "audio": 0
+  }, {
+   "filename": "/source/Bullet.blend",
+   "start": 2419176,
+   "end": 3246348,
+   "audio": 0
+  }, {
+   "filename": "/source/Bullet.blend1",
+   "start": 3246348,
+   "end": 4073520,
+   "audio": 0
+  }, {
+   "filename": "/source/Pistol.blend",
+   "start": 4073520,
+   "end": 4852116,
+   "audio": 0
+  }, {
+   "filename": "/source/Player.blend",
+   "start": 4852116,
+   "end": 6186744,
+   "audio": 0
+  }, {
+   "filename": "/source/Player.blend1",
+   "start": 6186744,
+   "end": 7521372,
+   "audio": 0
+  }, {
+   "filename": "/source/Rifle.blend",
+   "start": 7521372,
+   "end": 8324872,
+   "audio": 0
+  }, {
+   "filename": "/source/Rifle.blend1",
+   "start": 8324872,
+   "end": 9128372,
+   "audio": 0
+  }, {
+   "filename": "/source/ShootingRange.blend",
+   "start": 9128372,
+   "end": 9944808,
+   "audio": 0
+  }, {
+   "filename": "/source/ShootingRange.blend1",
+   "start": 9944808,
+   "end": 10761244,
    "audio": 0
   } ],
-  "remote_package_size": 4783712,
-  "package_uuid": "88695aff-bf52-41a2-8365-c3546f3282dc"
+  "remote_package_size": 10761244,
+  "package_uuid": "d573aaa7-9b40-4dd9-89a6-be8b42a2b652"
  });
 })();
 
@@ -6086,14 +6142,11 @@ var asmLibraryArg = {
  "glUseProgram": _glUseProgram,
  "glVertexAttribPointer": _glVertexAttribPointer,
  "glViewport": _glViewport,
- "invoke_ddi": invoke_ddi,
  "invoke_diii": invoke_diii,
- "invoke_fi": invoke_fi,
  "invoke_fii": invoke_fii,
  "invoke_fiii": invoke_fiii,
  "invoke_i": invoke_i,
  "invoke_ii": invoke_ii,
- "invoke_iid": invoke_iid,
  "invoke_iii": invoke_iii,
  "invoke_iiii": invoke_iiii,
  "invoke_iiiid": invoke_iiiid,
@@ -6106,7 +6159,6 @@ var asmLibraryArg = {
  "invoke_iiiiiiiiiiiii": invoke_iiiiiiiiiiiii,
  "invoke_iiiiij": invoke_iiiiij,
  "invoke_iij": invoke_iij,
- "invoke_ji": invoke_ji,
  "invoke_jiiii": invoke_jiiii,
  "invoke_v": invoke_v,
  "invoke_vi": invoke_vi,
@@ -6115,6 +6167,7 @@ var asmLibraryArg = {
  "invoke_viii": invoke_viii,
  "invoke_viiii": invoke_viiii,
  "invoke_viiiii": invoke_viiiii,
+ "invoke_viiiiii": invoke_viiiiii,
  "invoke_viiiiiii": invoke_viiiiiii,
  "invoke_viiiiiiiiii": invoke_viiiiiiiiii,
  "invoke_viiiiiiiiiiiiiii": invoke_viiiiiiiiiiiiiii,
@@ -6155,6 +6208,8 @@ var _IsObjectDirty = Module["_IsObjectDirty"] = createExportWrapper("IsObjectDir
 var _GetObjectSerialized = Module["_GetObjectSerialized"] = createExportWrapper("GetObjectSerialized");
 
 var _HandleLocalInput = Module["_HandleLocalInput"] = createExportWrapper("HandleLocalInput");
+
+var _LoadMap = Module["_LoadMap"] = createExportWrapper("LoadMap");
 
 var _HandleReplicate = Module["_HandleReplicate"] = createExportWrapper("HandleReplicate");
 
@@ -6206,8 +6261,6 @@ var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_vii
 
 var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
 
-var dynCall_ji = Module["dynCall_ji"] = createExportWrapper("dynCall_ji");
-
 var dynCall_iij = Module["dynCall_iij"] = createExportWrapper("dynCall_iij");
 
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
@@ -6220,31 +6273,20 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 80784;
+var _game = Module["_game"] = 83328;
 
-var _clientGl = Module["_clientGl"] = 80960;
+var _clientGl = Module["_clientGl"] = 83536;
 
-var _inputEvents = Module["_inputEvents"] = 81076;
+var _inputEvents = Module["_inputEvents"] = 83652;
 
-var _ping = Module["_ping"] = 81112;
+var _ping = Module["_ping"] = 83688;
 
-var _lastTickTime = Module["_lastTickTime"] = 81104;
+var _lastTickTime = Module["_lastTickTime"] = 83680;
 
 function invoke_iii(index, a1, a2) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1, a2);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viii(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6263,32 +6305,10 @@ function invoke_iiiii(index, a1, a2, a3, a4) {
  }
 }
 
-function invoke_ii(index, a1) {
+function invoke_viii(index, a1, a2, a3) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_vii(index, a1, a2) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2);
+  wasmTable.get(index)(a1, a2, a3);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6307,10 +6327,43 @@ function invoke_iiii(index, a1, a2, a3) {
  }
 }
 
-function invoke_viiii(index, a1, a2, a3, a4) {
+function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
-  wasmTable.get(index)(a1, a2, a3, a4);
+  return wasmTable.get(index)(a1, a2, a3, a4, a5);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_ii(index, a1) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_vii(index, a1, a2) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiii(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6362,10 +6415,21 @@ function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  }
 }
 
-function invoke_viiiii(index, a1, a2, a3, a4, a5) {
+function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();
  try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
+  wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiiii(index, a1, a2, a3, a4, a5, a6) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6410,39 +6474,6 @@ function invoke_viidii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_fi(index, a1) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_ddi(index, a1, a2) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iid(index, a1, a2) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6531,17 +6562,6 @@ function invoke_viiiiiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10,
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_ji(index, a1) {
- var sp = stackSave();
- try {
-  return dynCall_ji(index, a1);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

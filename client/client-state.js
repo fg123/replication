@@ -10,16 +10,16 @@ module.exports = class ClientState {
         this.webSocket = webSocket;
         this.wasm = wasm;
         this.resourceManager = resourceManager;
-        this.gameObjects = {};
         this.animations = {};
         this.nextAnimationKey = 1;
 
+        this.cachedObjects = {};
+
         this.showColliders = false;
         this.localPlayerObjectId = undefined;
+        this.localPlayerObject = undefined;
         this.isPaused = false;
         this.events = {};
-
-        this.StartGame();
 
         this.ping = 0;
         this.width = 0;
@@ -52,8 +52,107 @@ module.exports = class ClientState {
             handleReplicateTime: new PerfTracker(100),
             tickTime: new PerfTracker(100)
         };
+
+        this.SetupSocketHandler();
+
+        this.SendData(JSON.stringify({
+            event: "mapPath"
+        }));
     }
 
+    SetupSocketHandler() {
+        // This is 0 if it gets acknowledged
+        let lastHeartbeatAcked = 0;
+        setInterval(() => {
+            // Heartbeat Send (for ping)
+            if (lastHeartbeatAcked !== 0) {
+                // Last one didn't get acked! >1000 ping = close
+                this.ping = Date.now() - lastHeartbeatAcked;
+                // console.log("Last heartbeat didn't get acked! Closing socket.");
+                // console.log(this.webSocket);
+                // this.webSocket.terminate();
+                // console.log(this.webSocket);
+                return;
+            }
+            const currTime = Date.now();
+            const hb = {
+                event: "hb",
+                time: currTime
+            };
+            this.SendData(JSON.stringify(hb));
+            lastHeartbeatAcked = currTime;
+        }, 1000);
+
+        let lastReplicate = Date.now();
+        const handler = (ev) => {
+            // console.log(ev.data);
+            const event = JSON.parse(ev.data);
+            console.log(event);
+            if (event["playerLocalObjectId"] !== undefined) {
+                console.log("Player Local ID", event);
+                const id = event["playerLocalObjectId"];
+
+                this.wasm._SetLocalPlayerClient(id);
+                if (id === 0) {
+                    this.localPlayerObjectId = undefined;
+                }
+                else {
+                    this.localPlayerObjectId = id;
+                }
+                return;
+            }
+            else if (event["mapPath"] !== undefined) {
+                // We can actually start now
+                const heapString = this.ToHeapString(this.wasm, event["mapPath"]);
+                this.wasm._LoadMap(heapString);
+                this.wasm._free(heapString);
+
+                this.StartGame();
+            }
+            else if (event["event"] === "hb") {
+                lastHeartbeatAcked = 0;
+                this.ping = (Date.now() - event.time);
+                this.wasm._SetPing(this.ping);
+                return;
+            }
+            else if (event["event"] === "r") {
+                const curr = Date.now();
+                this.performance.handleReplicateTime.pushValue(curr - lastReplicate);
+                lastReplicate = curr;
+                const heapString = this.ToHeapString(this.wasm, ev.data);
+                this.wasm._HandleReplicate(heapString);
+                this.wasm._free(heapString);
+            }
+            else if (event["event"] === "a") {
+                if (event["objs"]) {
+                    event["objs"].forEach(obj => {
+                        if (animations[obj.k]) {
+                            const constructor = animations[obj.k];
+                            this.animations[this.nextAnimationKey++] = new constructor(obj, this.resourceManager);
+                        }
+                        else {
+                            console.error(obj.k, "is not a valid animation key!");
+                        }
+                    });
+                }
+            }
+            const allRegistered = Object.keys(this.events);
+            for (let i = 0; i < allRegistered.length; i++) {
+                if (event[allRegistered[i]]) {
+                    this.events[allRegistered[i]](event);
+                }
+            }
+        };
+
+        this.webSocket.onmessage = (ev) => {
+            if (SIMULATED_LAG !== 0) {
+                setTimeout(() => { handler(ev); }, SIMULATED_LAG / 2);
+            }
+            else {
+                handler(ev);
+            }
+        };
+    }
     ToHeapString(wasm, str) {
         const length = wasm.lengthBytesUTF8(str) + 1;
         const buffer = wasm._malloc(length);
@@ -113,28 +212,6 @@ module.exports = class ClientState {
             "time": rdyTick
         }));
 
-        // This is 0 if it gets acknowledged
-        let lastHeartbeatAcked = 0;
-        setInterval(() => {
-            // Heartbeat Send (for ping)
-            if (lastHeartbeatAcked !== 0) {
-                // Last one didn't get acked! >1000 ping = close
-                this.ping = Date.now() - lastHeartbeatAcked;
-                // console.log("Last heartbeat didn't get acked! Closing socket.");
-                // console.log(this.webSocket);
-                // this.webSocket.terminate();
-                // console.log(this.webSocket);
-                return;
-            }
-            const currTime = Date.now();
-            const hb = {
-                event: "hb",
-                time: currTime
-            };
-            this.SendData(JSON.stringify(hb));
-            lastHeartbeatAcked = currTime;
-        }, 1000);
-
         const tickInterval = this.wasm._GetTickInterval();
         let lastTick = Date.now();
         setInterval(() => {
@@ -144,78 +221,7 @@ module.exports = class ClientState {
             this.wasm._TickGame();
         }, tickInterval);
 
-        let lastReplicate = Date.now();
-        const handler = (ev) => {
-            const event = JSON.parse(ev.data);
-            console.log(event);
-            if (event["playerLocalObjectId"] !== undefined) {
-                console.log("Player Local ID", event);
-                const id = event["playerLocalObjectId"];
 
-                this.wasm._SetLocalPlayerClient(id);
-                if (id === 0) {
-                    this.localPlayerObjectId = undefined;
-                }
-                else {
-                    this.localPlayerObjectId = id;
-                }
-                return;
-            }
-            else if (event["event"] === "hb") {
-                lastHeartbeatAcked = 0;
-                this.ping = (Date.now() - event.time);
-                this.wasm._SetPing(this.ping);
-                return;
-            }
-            else if (event["event"] === "r") {
-                const curr = Date.now();
-                this.performance.handleReplicateTime.pushValue(curr - lastReplicate);
-                lastReplicate = curr;
-                const heapString = this.ToHeapString(this.wasm, ev.data);
-                this.wasm._HandleReplicate(heapString);
-                this.wasm._free(heapString);
-                if (event["objs"]) {
-                    event["objs"].forEach(obj => {
-                        if (this.gameObjects[obj.id] === undefined) {
-                            // New Object
-                            this.gameObjects[obj.id] = { id: obj.id };
-                        }
-                    });
-                }
-                if (event["models"]) {
-                    this.models = event["models"];
-                    // console.log(ev.data);
-                }
-            }
-            else if (event["event"] === "a") {
-                if (event["objs"]) {
-                    event["objs"].forEach(obj => {
-                        if (animations[obj.k]) {
-                            const constructor = animations[obj.k];
-                            this.animations[this.nextAnimationKey++] = new constructor(obj, this.resourceManager);
-                        }
-                        else {
-                            console.error(obj.k, "is not a valid animation key!");
-                        }
-                    });
-                }
-            }
-            const allRegistered = Object.keys(this.events);
-            for (let i = 0; i < allRegistered.length; i++) {
-                if (event[allRegistered[i]]) {
-                    this.events[allRegistered[i]](event);
-                }
-            }
-        };
-
-        this.webSocket.onmessage = (ev) => {
-            if (SIMULATED_LAG !== 0) {
-                setTimeout(() => { handler(ev); }, SIMULATED_LAG / 2);
-            }
-            else {
-                handler(ev);
-            }
-        };
 
         window.addEventListener('keydown', e => {
             if (e.key === "Escape") {
@@ -279,15 +285,23 @@ module.exports = class ClientState {
         this.mouseMovement.y = 0;
     }
 
-    GetObject(id) {
-        if (this.gameObjects[id]) {
-            return this.gameObjects[id];
-        }
-        return undefined;
+    GetPlayerObject() {
+        return this.localPlayerObject;
     }
 
-    GetPlayerObject() {
-        if (this.localPlayerObjectId === undefined) return undefined;
-        return this.gameObjects[this.localPlayerObjectId];
+    GetObject(id) {
+        if (!this.wasm._IsObjectAlive(id)) {
+            delete this.cachedObjects[id];
+            return undefined;
+        }
+        if (this.cachedObjects[id] === undefined ||
+            this.wasm._IsObjectDirty(id)) {
+            const serializedString = this.wasm._GetObjectSerialized(id);
+            const jsonString = this.wasm.UTF8ToString(serializedString);
+            const serializedObject = JSON.parse(jsonString);
+            this.wasm._free(serializedString);
+            this.cachedObjects[id] = serializedObject;
+        }
+        return this.cachedObjects[id];
     }
 };

@@ -69,9 +69,9 @@ protected:
 
     REPLICATED(Quaternion, rotation, "r");
 
-    REPLICATED(Vector3, scale, "sc");
+    REPLICATED(Vector3, lookDirection, "ld");
 
-    REPLICATED(int, z, "z");
+    REPLICATED(Vector3, scale, "sc");
 
     REPLICATED(Vector3, velocity, "v");
 
@@ -148,9 +148,12 @@ public:
 
     const Vector3& GetPosition() const { return position; }
     const Vector3& GetScale() const { return scale; }
+    const Quaternion& GetRotation() const { return rotation; }
     virtual Vector3 GetVelocity() { return velocity; }
+    const Vector3& GetLookDirection() const { return lookDirection; }
 
     void SetPosition(const Vector3& in) { position = in; }
+    void SetRotation(const Quaternion& in) { rotation = in; }
     void SetScale(const Vector3& in) { scale = in; }
     void SetVelocity(const Vector3& in) { velocity = in; }
 
@@ -174,12 +177,17 @@ public:
         isDirty = true;
     }
 #endif
+
 #ifdef BUILD_CLIENT
-    const Matrix4 GetTransform() {
-        return glm::translate(clientPosition) * glm::toMat4(rotation) * glm::scale(scale);
+    virtual const Matrix4 GetTransform() {
+        // Vector3 direction =
+        return glm::translate(clientPosition) *
+            glm::transpose(glm::toMat4(rotation)) *
+            glm::scale(scale);
     }
     const Vector3& GetClientPosition() const { return clientPosition; }
 #endif
+
     Model* GetModel() {
         return model;
     }

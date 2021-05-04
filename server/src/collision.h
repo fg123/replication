@@ -80,6 +80,13 @@ struct AABBCollider : public Collider {
     CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
 };
 
+inline bool IsPointInAABB(const Vector3& RectPosition, const Vector3& RectSize, const Vector3& Point) {
+    return
+        (Point.x > RectPosition.x && Point.x < RectPosition.x + RectSize.x) &&
+        (Point.y > RectPosition.y && Point.y < RectPosition.y + RectSize.y) &&
+        (Point.z > RectPosition.z && Point.z < RectPosition.z + RectSize.z);
+}
+
 // Deprecated 2D Colliders
 struct SphereCollider : public Collider {
     REPLICATED(float, radius, "r");

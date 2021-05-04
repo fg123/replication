@@ -2,7 +2,10 @@
  "tilemap": "map1Tiles.png",
  "models": [
     "ShootingRange.obj",
-    "cube.obj"
+    "Player.obj",
+    "Pistol.obj",
+    "Rifle.obj",
+    "Bullet.obj"
  ],
  "lights": [
     [10, 10, 10, 1, 1, 1],

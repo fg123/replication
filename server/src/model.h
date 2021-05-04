@@ -20,6 +20,8 @@ public:
 };
 
 class ModelManager {
+    std::unordered_map<std::string, Model*> modelMap;
+
 public:
     std::vector<Model*> models;
     std::vector<Light> lights;
@@ -32,5 +34,14 @@ public:
         return models[id];
     }
 
+    Model* GetModel(const std::string& name) {
+        if (modelMap.find(name) == modelMap.end()) {
+            LOG_ERROR("GetModel for non-existant name " << name);
+            return nullptr;
+        }
+        return modelMap[name];
+    }
+
     ModelID LoadModel(const std::string& name, const std::string& path, std::istream& stream);
+
 };

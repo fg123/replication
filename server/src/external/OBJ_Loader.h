@@ -667,6 +667,7 @@ namespace objl
 					// Load Materials
 					LoadMaterials(pathtomat);
 				}
+				// LOG_DEBUG("One Line");
 			}
 
 			#ifdef OBJL_CONSOLE_OUTPUT

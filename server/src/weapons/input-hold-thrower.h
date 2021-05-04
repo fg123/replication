@@ -62,7 +62,7 @@ public:
 
             // 2 seconds max for charge up
             float power = (((float) chargeUpTime / (float) maxHoldDown) * (powerMax - powerMin)) + powerMin;
-            arrowFireVel = attachedTo->GetAimDirection() * power;
+            arrowFireVel = attachedTo->GetLookDirection() * power;
         }
         else {
             chargeUpTime = 0;
@@ -75,7 +75,7 @@ public:
         if (IsOnCooldown()) return;
         if (instantFire && timeSinceLastThrow > cooldown) {
             float power = powerMax;
-            arrowFireVel = attachedTo->GetAimDirection() * power;
+            arrowFireVel = attachedTo->GetLookDirection() * power;
             FireProjectile(time);
         }
     }
@@ -91,7 +91,7 @@ public:
         #ifdef BUILD_SERVER
             Projectile* proj = new Projectile(game);
             proj->SetFiredBy(this);
-            proj->SetPosition(GetPosition() + attachedTo->GetAimDirection() * 15.0f);
+            proj->SetPosition(GetPosition() + attachedTo->GetLookDirection() * 15.0f);
             proj->SetVelocity(arrowFireVel);
             game.AddObject(proj);
         #endif

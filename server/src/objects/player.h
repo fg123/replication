@@ -14,15 +14,11 @@ class PlayerObject : public Object {
 protected:
     int health = 100;
 
-    // in Radians
-    float aimAngle = 0;
-
     Time canPickupTime = 0;
 
     // Yaw Pitch in degrees
-    REPLICATED(float, rotationYaw, "ry");
-    REPLICATED(float, rotationPitch, "rp");
-    REPLICATED(Vector3, lookDirection, "ld");
+    REPLICATED_D(float, rotationYaw, "ry", 0.0f);
+    REPLICATED_D(float, rotationPitch, "rp", 0.0f);
 
     Vector3 inputVelocity;
 
@@ -70,10 +66,14 @@ public:
     // TODO: add damage source
     virtual void OnTakeDamage(int damage) {};
 
-    Vector3 GetAimDirection() const;
     Vector3 GetAttachmentPoint() const;
 
-    const Vector3& GetLookDirection() const { return lookDirection; }
+    // #ifdef BUILD_CLIENT
+    // // Don't show rotation on client
+    // const Matrix4 GetTransform() override {
+    //     return glm::translate(clientPosition) * glm::scale(scale);
+    // }
+    // #endif
 
 };
 

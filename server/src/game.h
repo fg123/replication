@@ -33,6 +33,12 @@ struct PlayerSocketData {
     PlayerObject* playerObject;
 };
 
+#ifdef BUILD_SERVER
+    #define RESOURCE_PATH(path) (std::string("../data/") + path)
+#else
+    #define RESOURCE_PATH(path) (path)
+#endif
+
 class Game {
     std::atomic<ObjectID> nextId;
     bool isProduction;
@@ -46,6 +52,8 @@ class Game {
     std::mutex playersSetMutex;
 
     std::unordered_set<ObjectID> deadObjects;
+
+    std::string mapPath;
 
 #ifdef BUILD_SERVER
     // Notifies client of any animations
@@ -79,6 +87,9 @@ public:
 #endif
 
     ~Game();
+
+    // Load Map from JSON File, data-path
+    void LoadMap(std::string mapPath);
 
     // Simulate a tick of physics
     void Tick(Time time);
@@ -145,6 +156,10 @@ public:
 
     Model* GetModel(ModelID id) {
         return modelManager.GetModel(id);
+    }
+
+    Model* GetModel(const std::string modelName) {
+        return modelManager.GetModel(modelName);
     }
 
     ObjectID RequestId();

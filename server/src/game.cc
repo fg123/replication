@@ -15,7 +15,8 @@
 
 static const double TILE_SIZE = 48;
 
-double killPlaneY = -1000;
+Vector3 liveBoxStart(-1000, -100, -1000);
+Vector3 liveBoxSize(2000, 2000, 2000);
 
 Game::Game() : nextId(1), isProduction(false) {
 
@@ -24,15 +25,29 @@ Game::Game() : nextId(1), isProduction(false) {
 #ifdef BUILD_SERVER
 Game::Game(std::string mapPath, bool isProduction) : Game() {
     this->isProduction = isProduction;
+    this->mapPath = mapPath;
 
     if (IsProduction()) {
         LOG_INFO("==== PRODUCTION MODE ====");
     }
     else {
         LOG_INFO("==== DEVELOPMENT MODE ====");
-        // AddObject(new Dummy(*this, Vector3(600, 0, 0)));
     }
 
+    LoadMap(RESOURCE_PATH(mapPath));
+
+    // Models[0] is always the base map
+    GameObject* baseMap = new GameObject(*this, Vector3());
+    baseMap->SetTag(Tag::NO_GRAVITY);
+    baseMap->SetIsStatic(true);
+    baseMap->SetTag(Tag::GROUND);
+    baseMap->SetModel(modelManager.GetModel(0));
+    GenerateAABBCollidersFromModel(baseMap);
+    AddObject(baseMap);
+}
+#endif
+
+void Game::LoadMap(std::string mapPath) {
     LOG_INFO("Loading Map " << mapPath);
 
     std::ifstream mapFile(mapPath);
@@ -42,77 +57,10 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
     JSONDocument obj;
     obj.ParseStream(stream);
 
-    // Create collision for tiles in the map, just do simple horizontal for now
-    // size_t y = 0;
-    // std::unordered_set<int> excluded;
-    // json& excludedTiles = obj["noCollide"];
-    // excluded.insert(-1);
-    // for (json& i : excludedTiles.GetArray()) {
-    //     excluded.insert(i.GetInt());
-    // }
-    // json& tiles = obj["tiles"];
-
-    // std::unordered_map<size_t, RectangleObject*> singleBlocks;
-    // for (json& row : tiles.GetArray()) {
-    //     size_t x = 0;
-    //     int lastX = -1;
-    //     std::unordered_map<size_t, RectangleObject*> singleBlocksLastRow = singleBlocks;
-    //     singleBlocks.clear();
-
-    //     for (json& tile : row.GetArray()) {
-    //         int tileNum = tile.GetInt();
-    //         bool hasCollision = excluded.find(tileNum) == excluded.end();
-
-    //         if (!hasCollision && lastX != -1) {
-    //             // End a block
-    //             double startX = lastX * TILE_SIZE;
-    //             double startY = y * TILE_SIZE;
-    //             double endX = (x) * TILE_SIZE;
-    //             double endY = (y + 1) * TILE_SIZE;
-    //             bool isSingle = x - lastX == 1;
-    //             if (isSingle && singleBlocksLastRow.find(lastX) != singleBlocksLastRow.end()) {
-    //                 // Extend last block
-    //                 singleBlocksLastRow[lastX]->ExtendYBy(TILE_SIZE);
-    //                 singleBlocks[lastX] = singleBlocksLastRow[lastX];
-    //             }
-    //             else {
-    //                 RectangleObject* floor = new RectangleObject(*this, Vector3{
-    //                     startX, startY, 0
-    //                 }, Vector3 { endX - startX, endY - startY, 0 });
-    //                 floor->SetIsStatic(true);
-    //                 floor->SetTag(Tag::GROUND);
-    //                 AddObject(floor);
-    //                 if (isSingle) {
-    //                     singleBlocks[lastX] = floor;
-    //                 }
-    //             }
-    //             lastX = -1;
-    //         }
-    //         else if (hasCollision && lastX == -1) {
-    //             lastX = x;
-    //         }
-    //         x++;
-    //     }
-    //     if (lastX != -1) {
-    //         // Wrap up last one
-    //         double startX = lastX * TILE_SIZE;
-    //         double startY = y * TILE_SIZE;
-    //         double endX = (x) * TILE_SIZE;
-    //         double endY = (y + 1) * TILE_SIZE;
-    //         RectangleObject* floor = new RectangleObject(*this, Vector3{
-    //             startX, startY, 0
-    //         }, Vector3{ endX - startX, endY - startY, 0 });
-    //         floor->SetIsStatic(true);
-    //         floor->SetTag(Tag::GROUND);
-    //         AddObject(floor);
-    //     }
-    //     y++;
-    // }
-
     // Process Models
     for (json& model : obj["models"].GetArray()) {
         std::string modelName = model.GetString();
-        std::string modelPath = "../data/models/" + modelName;
+        std::string modelPath = RESOURCE_PATH("models/" + modelName);
         std::ifstream modelStream (modelPath);
         if (!modelStream.is_open()) {
             LOG_ERROR("Could not load model " + modelName);
@@ -125,19 +73,7 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
         Light& light = modelManager.lights.emplace_back();
         ProcessReplicationDispatch(light, lightJson);
     }
-
-    // Models[0] is always the base map
-
-    GameObject* baseMap = new GameObject(*this, Vector3());
-    baseMap->SetTag(Tag::NO_GRAVITY);
-    baseMap->SetIsStatic(true);
-    baseMap->SetTag(Tag::GROUND);
-    baseMap->SetModel(modelManager.GetModel(0));
-    GenerateAABBCollidersFromModel(baseMap);
-
-    AddObject(baseMap);
 }
-#endif
 
 Game::~Game() {
     for (auto& t : gameObjects) {
@@ -201,7 +137,7 @@ void Game::Tick(Time time) {
 #ifdef BUILD_SERVER
     for (auto& object : gameObjects) {
         if (!object.second->IsStatic() &&
-            object.second->GetPosition().y < killPlaneY &&
+            !IsPointInAABB(liveBoxStart, liveBoxSize, object.second->GetPosition()) &&
             !object.second->IsTagged(Tag::NO_KILLPLANE)) {
             // TODO: Deal damage instead of insta kill
             // You're out of the range
@@ -559,7 +495,7 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
                 p->nextRespawnCharacter = "Archer";
             }
             Object* obj = GetClassLookup()[p->nextRespawnCharacter](*this);
-            obj->SetPosition(Vector3(0, 0, 0));
+            obj->SetPosition(Vector3(0, 30, 0));
 
             static_cast<PlayerObject*>(obj)->lastClientInputTime = playerObject->lastClientInputTime;
             static_cast<PlayerObject*>(obj)->ticksSinceLastProcessed = playerObject->ticksSinceLastProcessed;

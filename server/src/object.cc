@@ -30,7 +30,6 @@ Object::Object(Game& game) :
     game(game),
     rotation(),
     scale(1, 1, 1),
-    z(0),
     id(0),
     isDirty(true),
     isStatic(false),

@@ -56,6 +56,8 @@ ModelID ModelManager::LoadModel(const std::string& name, const std::string& path
     model->id = id;
     models.push_back(model);
 
+    modelMap[name] = model;
+
     for (auto& loadedMesh : loader.LoadedMeshes) {
         Mesh& mesh = model->meshes.emplace_back();
         mesh.name = loadedMesh.MeshName;

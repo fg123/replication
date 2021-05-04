@@ -5,6 +5,12 @@
 void GunBase::Tick(Time time) {
     WeaponObject::Tick(time);
 
+    // Point Gun in same direction
+    if (attachedTo) {
+        // LOG_DEBUG("Rotation: " << rotation);
+        SetRotation(attachedTo->GetRotation());
+    }
+
     if (reloadStartTime != 0) {
         timeSinceReload = time - reloadStartTime;
     }
@@ -56,8 +62,8 @@ void GunBase::ActualFire(Time time) {
     bullets -= 1;
     nextFireTime = time + (1000.0 / fireRate);
     BulletObject* bullet = new BulletObject(game, damage);
-    bullet->SetPosition(GetPosition() + attachedTo->GetAimDirection() * fireOffset);
-    bullet->SetVelocity(attachedTo->GetAimDirection() * 2000.f);
+    bullet->SetPosition(GetPosition() + GetLookDirection());
+    bullet->SetVelocity(attachedTo->GetLookDirection() * 100.f);
     game.AddObject(bullet);
     game.RequestReplication(GetId());
 #endif

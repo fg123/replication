@@ -18,7 +18,12 @@ public:
         damage = 45;
         reloadTime = 1000;
         automaticFire = false;
-        fireOffset = 10;
+        fireOffset = 1;
+
+    #ifdef BUILD_SERVER
+        SetModel(game.GetModel("Pistol.obj"));
+    #endif
+
     }
 };
 

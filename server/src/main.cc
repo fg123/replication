@@ -24,7 +24,7 @@ void GameLoop(Timer& gameTimer) {
 }
 
 int main(int argc, char** argv) {
-    std::string mapPath = "../data/maps/map1.json";
+    std::string mapPath = "maps/map1.json";
     bool isProduction = false;
     for (int i = 1; i < argc; i++) {
         std::string arg { argv[i] };
@@ -76,23 +76,27 @@ int main(int argc, char** argv) {
 
             game.AddPlayer(data, playerObject);
         },
-        .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
+        .message = [&mapPath](auto *ws, std::string_view message, uWS::OpCode opCode) {
             PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
             if (!data->playerObject) {
                 // Next tick hasn't been scheduled yet
                 return;
             }
-            std::istringstream stream {std::string(message)};
+            std::istringstream stream { std::string(message) };
             rapidjson::IStreamWrapper wrap(stream);
 
             JSONDocument obj;
             obj.ParseStream(wrap);
-
+            LOG_DEBUG(message);
             if (obj["event"] == "rdy") {
                 data->isReady = true;
             }
             else if (obj["event"] == "hb") {
                 ws->send(message, uWS::OpCode::TEXT);
+            }
+            else if (obj["event"] == "mapPath") {
+                LOG_DEBUG("Sending Map Path");
+                ws->send("{\"mapPath\": \"" + mapPath + "\"}", uWS::OpCode::TEXT);
             }
             else if (obj["event"] == "setchar") {
                 std::string charName { obj["char"].GetString(), obj["char"].GetStringLength() };

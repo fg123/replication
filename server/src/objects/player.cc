@@ -45,12 +45,10 @@ PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game) {
     // AddCollider(new CircleCollider(this, Vector3(0, -15, 0), 15.0));
 
 #ifdef BUILD_SERVER
-    SetModel(game.GetModel(1));
+    SetModel(game.GetModel("Player.obj"));
+    GenerateAABBCollidersFromModel(this);
 #endif
-
-    SetScale(Vector3(1, 2, 1));
-
-    AddCollider(new AABBCollider(this, Vector3(-0.5, -2, 0.5), Vector3(1, 2, 1)));
+    SetScale(Vector3(1, 1, 1));
 }
 
 void PlayerObject::OnDeath() {
@@ -84,10 +82,6 @@ PlayerObject::~PlayerObject() {
 
 }
 
-Vector3 PlayerObject::GetAimDirection() const {
-    return Vector3(std::cos(aimAngle), std::sin(aimAngle), 0);
-}
-
 void PlayerObject::PickupWeapon(WeaponObject* weapon) {
     weapon->AttachToPlayer(this);
     currentWeapon = weapon;
@@ -102,7 +96,7 @@ void PlayerObject::Tick(Time time) {
         #endif
 
         // if (glm::length(GetVelocity()) > 0.01) {
-        //     LOG_DEBUG(clientTime << ": " << GetPosition() << " v " << GetVelocity());
+        //     LOG_DEBUG(clientTime << ": " << GetPosition());
         // }
 
         std::scoped_lock lock(socketDataMutex);
@@ -148,10 +142,15 @@ void PlayerObject::Tick(Time time) {
 
     // TODO: move speed
     if (hasMovement) {
+        leftRightComponent.y = 0;
+        forwardBackwardComponent.y = 0;
         inputVelocity = glm::normalize(leftRightComponent + forwardBackwardComponent) * 10.0f;
     }
     else {
-        inputVelocity = Vector3();
+        inputVelocity *= 0.5;
+        if (glm::length(inputVelocity) < 0.01) {
+            inputVelocity = Vector3(0);
+        }
     }
 
     if (keyboardState[KEY_MAP[K_KEY]]) {
@@ -162,7 +161,7 @@ void PlayerObject::Tick(Time time) {
     // if (keyboardState[G_KEY]) {
     //     DropWeapon();
     // }
-    if (keyboardState[KEY_MAP[SPACE_KEY]] && !lastKeyboardState[KEY_MAP[SPACE_KEY]]) {
+    if (keyboardState[KEY_MAP[SPACE_KEY]]) {
         // Can only jump if touching ground
         if (IsGrounded()) {
             // LOG_DEBUG("Applying Jump");
@@ -171,22 +170,22 @@ void PlayerObject::Tick(Time time) {
         // velocity.y = -300;
     }
 
-    // if (currentWeapon) {
-    //     if (mouseState[LEFT_MOUSE_BUTTON]) {
-    //         if (!lastMouseState[LEFT_MOUSE_BUTTON]) {
-    //             currentWeapon->StartFire(time);
-    //         }
-    //         currentWeapon->Fire(time);
-    //     }
-    //     else if (lastMouseState[LEFT_MOUSE_BUTTON]) {
-    //         currentWeapon->ReleaseFire(time);
-    //     }
-    //     if (keyboardState[KEY_MAP[R_KEY]]) {
-    //         if (!lastKeyboardState[KEY_MAP[R_KEY]]) {
-    //             currentWeapon->StartReload(time);
-    //         }
-    //     }
-    // }
+    if (currentWeapon) {
+        if (mouseState[LEFT_MOUSE_BUTTON]) {
+            if (!lastMouseState[LEFT_MOUSE_BUTTON]) {
+                currentWeapon->StartFire(time);
+            }
+            currentWeapon->Fire(time);
+        }
+        else if (lastMouseState[LEFT_MOUSE_BUTTON]) {
+            currentWeapon->ReleaseFire(time);
+        }
+        if (keyboardState[KEY_MAP[R_KEY]]) {
+            if (!lastKeyboardState[KEY_MAP[R_KEY]]) {
+                currentWeapon->StartReload(time);
+            }
+        }
+    }
 
     // if (qWeapon) {
     //     if (keyboardState[KEY_MAP[Q_KEY]]) {
@@ -244,9 +243,6 @@ void PlayerObject::Serialize(JSONWriter& obj) {
     obj.Key("h");
     obj.Int(health);
 
-    obj.Key("aa");
-    obj.Double(aimAngle);
-
     if (currentWeapon) {
         obj.Key("w");
         obj.Uint(currentWeapon->GetId());
@@ -265,6 +261,13 @@ void PlayerObject::Serialize(JSONWriter& obj) {
         obj.Bool(kb);
     }
     obj.EndArray();
+
+#ifdef BUILD_CLIENT
+    obj.Key("client_p");
+    Vector3 cp = GetClientPosition();
+    SerializeDispatch(cp, obj);
+#endif
+
     // LOG_DEBUG("Player Object Serialize - End");
 }
 
@@ -277,7 +280,7 @@ void PlayerObject::ProcessReplication(json& obj) {
         }
     }
     health = obj["h"].GetInt();
-    aimAngle = obj["aa"].GetDouble();
+
     if (obj.HasMember("w")) {
         currentWeapon = game.GetObject<WeaponObject>(obj["w"].GetUint());
     }
@@ -307,7 +310,7 @@ void PlayerObject::DropWeapon()  {
     if (currentWeapon) {
         // Throw Weapon
         currentWeapon->Detach();
-        currentWeapon->SetVelocity(GetAimDirection() * 500.0f);
+        currentWeapon->SetVelocity(GetLookDirection() * 500.0f);
         currentWeapon = nullptr;
         canPickupTime = game.GetGameTime() + 500;
     }
@@ -392,5 +395,11 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
 }
 
 Vector3 PlayerObject::GetAttachmentPoint() const {
-    return GetPosition() + glm::normalize(GetAimDirection()) * 20.0f;
+    Vector3 left = glm::normalize(Vector::Left * rotation);
+    Vector3 up = glm::normalize(Vector::Up * rotation);
+
+    return GetPosition()
+        - left * 0.5f
+        + lookDirection * 1.0f
+        - up * 0.2f;
 }

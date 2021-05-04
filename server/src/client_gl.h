@@ -47,8 +47,8 @@ class ClientGL {
     std::unordered_map<Mesh*, MeshRenderInfo> meshRenderInfo;
     bool hasModelsBeenReplicated = false;
 
-
     std::string LoadURL(const std::string& url);
+
 public:
     ClientGL(Game& game, const char* selector);
 
