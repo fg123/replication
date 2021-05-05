@@ -5,7 +5,8 @@
     "Player.obj",
     "Pistol.obj",
     "Rifle.obj",
-    "Bullet.obj"
+    "Bullet.obj",
+    "BulletTracer.obj"
  ],
  "lights": [
     [10, 10, 10, 1, 1, 1],

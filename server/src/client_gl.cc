@@ -106,6 +106,7 @@ void ClientGL::SetupGL() {
     positionAttributeLocation = GetAttributeLocation(program, "v_position");
     normalAttributeLocation = GetAttributeLocation(program, "v_normal");
     textureCoordsAttributeLocation = GetAttributeLocation(program, "v_texCoords");
+    tangentAttributeLocation = GetAttributeLocation(program, "v_tangent");
 
     uniformProj = GetUniformLocation(program, "u_Projection");
     uniformView = GetUniformLocation(program, "u_View");
@@ -120,6 +121,23 @@ void ClientGL::SetupGL() {
     uniformMaterial.push_back(GetUniformLocation(program, "u_Material.Ni"));
     uniformMaterial.push_back(GetUniformLocation(program, "u_Material.d"));
     uniformMaterial.push_back(GetUniformLocation(program, "u_Material.illum"));
+
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.hasKaMap"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.hasKdMap"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.hasKsMap"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.hasNsMap"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.hasdMap"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.hasBumpMap"));
+    uniformMaterial.push_back(GetUniformLocation(program, "u_Material.hasReflMap"));
+
+    // Setup Texture Unit Ids
+    glUniform1i(GetUniformLocation(program, "u_map_Ka"), 0);
+    glUniform1i(GetUniformLocation(program, "u_map_Kd"), 1);
+    glUniform1i(GetUniformLocation(program, "u_map_Ks"), 2);
+    glUniform1i(GetUniformLocation(program, "u_map_Ns"), 3);
+    glUniform1i(GetUniformLocation(program, "u_map_d"), 4);
+    glUniform1i(GetUniformLocation(program, "u_map_bump"), 5);
+    glUniform1i(GetUniformLocation(program, "u_map_refl"), 6);
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -181,6 +199,45 @@ void ClientGL::Draw(int width, int height) {
                 glUniform1f (uniformMaterial[5], mesh.material.d);
                 glUniform1i (uniformMaterial[6], mesh.material.illum);
 
+                // Texture Booleans
+                glUniform1i (uniformMaterial[7], mesh.material.map_Ka != nullptr);
+                glUniform1i (uniformMaterial[8], mesh.material.map_Kd != nullptr);
+                glUniform1i (uniformMaterial[9], mesh.material.map_Ks != nullptr);
+                glUniform1i (uniformMaterial[10], mesh.material.map_Ns != nullptr);
+                glUniform1i (uniformMaterial[11], mesh.material.map_d != nullptr);
+                glUniform1i (uniformMaterial[12], mesh.material.map_bump != nullptr);
+                glUniform1i (uniformMaterial[13], mesh.material.map_refl != nullptr);
+
+                // Actual Textures, the units are previously mapped
+                if (mesh.material.map_Ka) {
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, textureGLInfo[mesh.material.map_Ka]);
+                }
+                if (mesh.material.map_Kd) {
+                    glActiveTexture(GL_TEXTURE1);
+                    glBindTexture(GL_TEXTURE_2D, textureGLInfo[mesh.material.map_Kd]);
+                }
+                if (mesh.material.map_Ks) {
+                    glActiveTexture(GL_TEXTURE2);
+                    glBindTexture(GL_TEXTURE_2D, textureGLInfo[mesh.material.map_Ks]);
+                }
+                if (mesh.material.map_Ns) {
+                    glActiveTexture(GL_TEXTURE3);
+                    glBindTexture(GL_TEXTURE_2D, textureGLInfo[mesh.material.map_Ns]);
+                }
+                if (mesh.material.map_d) {
+                    glActiveTexture(GL_TEXTURE4);
+                    glBindTexture(GL_TEXTURE_2D, textureGLInfo[mesh.material.map_d]);
+                }
+                if (mesh.material.map_bump) {
+                    glActiveTexture(GL_TEXTURE5);
+                    glBindTexture(GL_TEXTURE_2D, textureGLInfo[mesh.material.map_bump]);
+                }
+                if (mesh.material.map_refl) {
+                    glActiveTexture(GL_TEXTURE6);
+                    glBindTexture(GL_TEXTURE_2D, textureGLInfo[mesh.material.map_refl]);
+                }
+
                 // LOG_DEBUG(meshRenderInfo[&mesh].vao << " " << meshRenderInfo[&mesh].iboCount);
                 glBindVertexArray(meshRenderInfo[&mesh].vao);
                 glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -196,6 +253,7 @@ void ClientGL::OnModelsReplicated() {
     ModelManager& modelManager = game.GetModelManager();
     for (auto& model : modelManager.models) {
         for (auto& mesh : model->meshes) {
+            // Load Mesh Data
             Mesh* meshp = &mesh;
             glGenVertexArrays(1, &meshRenderInfo[meshp].vao);
             glBindVertexArray(meshRenderInfo[meshp].vao);
@@ -219,6 +277,10 @@ void ClientGL::OnModelsReplicated() {
                 2, GL_FLOAT, false, sizeof(Vertex), (const void*)offsetof(Vertex, texCoords));
             glEnableVertexAttribArray(textureCoordsAttributeLocation);
 
+            glVertexAttribPointer(tangentAttributeLocation,
+                3, GL_FLOAT, false, sizeof(Vertex), (const void*)offsetof(Vertex, tangent));
+            glEnableVertexAttribArray(tangentAttributeLocation);
+
             glGenBuffers(1, &meshRenderInfo[meshp].ibo);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshRenderInfo[meshp].ibo);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER,
@@ -239,5 +301,27 @@ void ClientGL::OnModelsReplicated() {
         glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
         glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
     }
+
+    // Load Textures into Shaders
+    for (auto& texturePair : game.GetModelManager().textures) {
+        Texture* tex = texturePair.second;
+        GLuint texId;
+        glGenTextures(1, &texId);
+        glBindTexture(GL_TEXTURE_2D, texId);
+
+        // Texture Settings
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex->width, tex->height, 0, GL_RGB, GL_UNSIGNED_BYTE, tex->data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        game.GetModelManager().MarkTextureLoaded(tex);
+
+        textureGLInfo[tex] = texId;
+    }
+
     hasModelsBeenReplicated = true;
 }

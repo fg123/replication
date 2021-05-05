@@ -15,39 +15,13 @@ struct Vertex {
     Vector3 position;
     Vector3 normal;
     Vector2 texCoords;
+    Vector3 tangent;
 };
-
-template<>
-inline void SerializeDispatch(Vertex& object, JSONWriter& obj) {
-    obj.StartArray();
-    obj.Double(object.position.x);
-    obj.Double(object.position.y);
-    obj.Double(object.position.z);
-    obj.Double(object.normal.x);
-    obj.Double(object.normal.y);
-    obj.Double(object.normal.z);
-    obj.Double(object.texCoords.x);
-    obj.Double(object.texCoords.y);
-    obj.EndArray();
-}
-
-template<>
-inline void ProcessReplicationDispatch(Vertex& object, json& obj) {
-    object.position.x = obj[0].GetDouble();
-    object.position.y = obj[1].GetDouble();
-    object.position.z = obj[2].GetDouble();
-    object.normal.x = obj[3].GetDouble();
-    object.normal.y = obj[4].GetDouble();
-    object.normal.z = obj[5].GetDouble();
-    object.texCoords.x = obj[6].GetDouble();
-    object.texCoords.y = obj[7].GetDouble();
-}
 
 struct Light {
     Vector3 position;
     Vector3 color;
 };
-
 template<>
 inline void SerializeDispatch(Light& object, JSONWriter& obj) {
     obj.StartArray();
@@ -70,44 +44,49 @@ inline void ProcessReplicationDispatch(Light& object, json& obj) {
     object.color.z = obj[5].GetDouble();
 }
 
-struct Material : public Replicable {
-    // Material Name
-    REPLICATED(std::string, name, "name");
-    // Ambient Color
-    REPLICATED(Vector3, Ka, "Ka");
-    // Diffuse Color
-    REPLICATED(Vector3, Kd, "Kd");
-    // Specular Color
-    REPLICATED(Vector3, Ks, "Ks");
-    // Specular Exponent
-    REPLICATED(float, Ns, "Ns");
-    // Optical Density
-    REPLICATED(float, Ni, "Ni");
-    // Dissolve
-    REPLICATED(float, d, "d");
-    // Illumination
-    REPLICATED(int, illum, "illum");
-    // Ambient Texture Map
-    REPLICATED(std::string, map_Ka, "map_Ka");
-    // Diffuse Texture Map
-    REPLICATED(std::string, map_Kd, "map_Kd");
-    // Specular Texture Map
-    REPLICATED(std::string, map_Ks, "map_Ks");
-    // Specular Hightlight Map
-    REPLICATED(std::string, map_Ns, "map_Ns");
-    // Alpha Texture Map
-    REPLICATED(std::string, map_d, "map_d");
-    // Bump Map
-    REPLICATED(std::string, map_bump, "map_bump");
+struct Texture {
+    unsigned char* data = nullptr;
+    int width = 0;
+    int height = 0;
 };
 
-class Mesh : public Replicable {
-public:
-	REPLICATED(std::string, name, "name");
-    REPLICATED(std::vector<Vertex>, vertices, "vertices");
-    REPLICATED(std::vector<unsigned int>, indices, "indices");
-    REPLICATED(Material, material, "material");
+struct Material {
+    // Material Name
+    std::string name;
+    // Ambient Color
+    Vector3 Ka;
+    // Diffuse Color
+    Vector3 Kd;
+    // Specular Color
+    Vector3 Ks;
+    // Specular Exponent
+    float Ns;
+    // Optical Density
+    float Ni;
+    // Dissolve
+    float d;
+    // Illumination
+    int illum;
+    // Ambient Texture Map
+    Texture* map_Ka = nullptr;
+    // Diffuse Texture Map
+    Texture* map_Kd = nullptr;
+    // Specular Texture Map
+    Texture* map_Ks = nullptr;
+    // Specular Hightlight Map
+    Texture* map_Ns = nullptr;
+    // Alpha Texture Map
+    Texture* map_d = nullptr;
+    // Bump Map
+    Texture* map_bump = nullptr;
+    // Reflective Map
+    Texture* map_refl = nullptr;
+};
 
-    // std::vector<Texture> textures;
-    // TODO: material
+class Mesh {
+public:
+	std::string name;
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+    Material material;
 };

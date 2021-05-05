@@ -87,7 +87,7 @@ int main(int argc, char** argv) {
 
             JSONDocument obj;
             obj.ParseStream(wrap);
-            LOG_DEBUG(message);
+            // LOG_DEBUG(message);
             if (obj["event"] == "rdy") {
                 data->isReady = true;
             }

@@ -29,6 +29,7 @@ class ClientGL {
     GLint positionAttributeLocation;
     GLint normalAttributeLocation;
     GLint textureCoordsAttributeLocation;
+    GLint tangentAttributeLocation;
 
     // Uniforms
     GLint uniformProj;
@@ -45,6 +46,8 @@ class ClientGL {
     Game& game;
 
     std::unordered_map<Mesh*, MeshRenderInfo> meshRenderInfo;
+    std::unordered_map<Texture*, GLuint> textureGLInfo;
+
     bool hasModelsBeenReplicated = false;
 
     std::string LoadURL(const std::string& url);

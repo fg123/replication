@@ -11,6 +11,7 @@
 #include "logging.h"
 #include "replicable.h"
 #include "model.h"
+#include "ray-cast.h"
 
 // This must be 32 bit because client side JS only supports 32 bit
 using ObjectID = uint32_t;
@@ -56,23 +57,18 @@ class Object : public Replicable {
 protected:
     Game& game;
 
-    // All are measured in the same units, velocity is in position units
-    //   per second
-
 #ifdef BUILD_CLIENT
     // For Client-Side Interpolation
     Vector3 clientPosition;
     bool clientPositionSet = false;
 #endif
 
+    // All are measured in the same units, velocity is in position units
+    //   per second
     REPLICATED(Vector3, position, "p");
-
     REPLICATED(Quaternion, rotation, "r");
-
     REPLICATED(Vector3, lookDirection, "ld");
-
     REPLICATED(Vector3, scale, "sc");
-
     REPLICATED(Vector3, velocity, "v");
 
     Vector3 lastFramePosition;
@@ -85,6 +81,8 @@ protected:
     REPLICATED(bool, isGrounded, "ig");
 
     Time lastTickTime = 0;
+
+    Time spawnTime = 0;
 
     std::vector<Collider*> colliders;
 
@@ -132,6 +130,8 @@ public:
     CollisionResult CollidesWith(Collider* other);
     CollisionResult CollidesWith(Object* other);
     CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2);
+
+    void CollidesWith(RayCastRequest& ray, RayCastResult& result);
 
     void AddCollider(Collider* col) { colliders.push_back(col); }
     ObjectID GetId() const { return id; }

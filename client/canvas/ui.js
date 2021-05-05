@@ -62,6 +62,17 @@ module.exports = class UICanvas {
         this.context.fillText(last, x + perfTracker.size + 24, y + 16 + height / 2);
     }
 
+    DrawCrosshair(x, y, cwidth, clength, spread) {
+        // Top
+        this.context.fillRect(x - cwidth / 2, y - clength - spread, cwidth, clength);
+        // Bottom
+        this.context.fillRect(x - cwidth / 2, y + spread, cwidth, clength);
+        // Left
+        this.context.fillRect(x - clength - spread, y - cwidth / 2, clength, cwidth);
+        // Right
+        this.context.fillRect(x + spread, y - cwidth / 2, clength, cwidth);
+    }
+
     DrawWeapon(player, width, height) {
         // Bottom Right
         if (!player.w) return;
@@ -84,6 +95,17 @@ module.exports = class UICanvas {
             this.context.fillStyle = "green";
             drawRoundedRectangle(this.context, width - 250, height - 150, 200 * percentageReload, 20, 10, true, false);
         }
+
+        // Draw Crosshair
+        const cwidth = 4;
+        const clength = 15;
+        const x = Math.round(width / 2);
+        const y = Math.round(height / 2);
+        const spread = 5;
+        this.context.fillStyle = "black";
+        this.DrawCrosshair(x, y, cwidth + 4, clength + 4, spread);
+        this.context.fillStyle = "white";
+        this.DrawCrosshair(x, y, cwidth, clength, spread + 2);
     }
 
     DrawQ(player, width, height) {

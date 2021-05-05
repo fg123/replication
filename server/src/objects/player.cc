@@ -211,13 +211,13 @@ void PlayerObject::Tick(Time time) {
     //     }
     // }
 
-    Object::Tick(time);
 
     // const Vector3& position = GetPosition();
     // aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
 
     if (currentWeapon) {
         currentWeapon->SetPosition(GetAttachmentPoint());
+        currentWeapon->SetVelocity(GetVelocity());
     }
 
     if (zWeapon) {
@@ -229,6 +229,8 @@ void PlayerObject::Tick(Time time) {
     }
 
     lookDirection = glm::normalize(Vector::Forward * rotation);
+
+    Object::Tick(time);
 
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;

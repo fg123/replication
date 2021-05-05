@@ -34,6 +34,7 @@ Object::Object(Game& game) :
     isDirty(true),
     isStatic(false),
     isGrounded(false),
+    spawnTime(game.GetGameTime()),
     tags((uint64_t)Tag::OBJECT),
     collisionExclusion(0),
     collisionReporting(~0),
@@ -95,9 +96,12 @@ void Object::Tick(Time time) {
         SetDirty(true);
     }
 #endif
+
 #ifdef BUILD_CLIENT
     // Interpolate Over
     clientPosition += (position - clientPosition) / 2.0f;
+
+    // clientPosition = position;
 
     // Always set dirty for client because we want client
     //   GetObjectSerialized to work properly
@@ -170,6 +174,17 @@ CollisionResult Object::CollidesWith(Object* other) {
         }
     }
     return finalResult;
+}
+
+void Object::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+    if (GetColliderCount() == 0) {
+        return;
+    }
+    for (auto& collider: colliders) {
+        if (collider->CollidesWith(ray, result)) {
+            result.hitObject = this;
+        }
+    }
 }
 
 CollisionResult Object::CollidesWith(const Vector3& p1, const Vector3& p2) {

@@ -7,15 +7,15 @@
 class GunBase : public WeaponObject {
 protected:
     // Changable by underlying guns
-    float fireRate = 10;
-    int magazineSize;
+    REPLICATED_D(float, fireRate, "fr", 10);
+    REPLICATED(int, magazineSize, "magsize");
 
-    int magazines;
-    int bullets;
+    REPLICATED(int, magazines, "mags");
+    REPLICATED(int, bullets, "blts");
 
-    int damage;
+    REPLICATED(int, damage, "dmg");
 
-    Time reloadTime;
+    REPLICATED(Time, reloadTime, "rlt");
 
     bool automaticFire = false;
     float fireOffset;
@@ -24,7 +24,7 @@ private:
     Time nextFireTime = 0;
     Time reloadStartTime = 0;
 
-    Time timeSinceReload = 0;
+    REPLICATED_D(Time, timeSinceReload, "tsr", 0);
 
     void ActualFire(Time time);
 public:
@@ -36,8 +36,6 @@ public:
     virtual void Tick(Time time) override;
     virtual void StartFire(Time time) override;
     virtual void Fire(Time time) override;
-    virtual void Serialize(JSONWriter& obj) override;
-    virtual void ProcessReplication(json& obj) override;
 };
 
 #endif

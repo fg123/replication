@@ -5,6 +5,7 @@
 #include "timer.h"
 
 #include "animation.h"
+#include "ray-cast.h"
 
 #ifdef BUILD_SERVER
 #include "uWebSocket/App.h"
@@ -133,6 +134,9 @@ public:
 #endif
 
     void HandleCollisions(Object* obj);
+
+    RayCastResult RayCastInWorld(RayCastRequest request);
+
     Time GetGameTime() const { return gameTime; }
 
     Object* GetObjectImpl(ObjectID id) {

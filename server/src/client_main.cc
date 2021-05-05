@@ -158,21 +158,6 @@ extern "C" {
             JSONDocument object;
             object.Parse(input);
 
-            // if (object.HasMember("models")) {
-            //     // Initial Replication of Models
-            //     for (auto& model : object["models"].GetArray()) {
-            //         // Don't Replicate the actual internals
-            //         game.CreateNewModel()->ProcessReplication(model);
-            //     }
-            //     if (object.HasMember("lights")) {
-            //         for (auto& lightJson : object["lights"].GetArray()) {
-            //             Light& light = game.GetModelManager().lights.emplace_back();
-            //             ProcessReplicationDispatch(light, lightJson);
-            //         }
-            //     }
-            //     clientGl.OnModelsReplicated();
-            // }
-
             bool hasPlayerIn = false;
             for (auto& event : object["objs"].GetArray()) {
                 ObjectID ids = event["id"].GetUint();

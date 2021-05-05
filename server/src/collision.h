@@ -4,6 +4,7 @@
 #include "vector.h"
 #include "replicable.h"
 #include "json/json.hpp"
+#include "ray-cast.h"
 
 class Object;
 
@@ -29,6 +30,11 @@ public:
     // Detailed collision
     virtual CollisionResult CollidesWith(Collider* other) = 0;
     virtual CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) = 0;
+
+    virtual bool CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+        throw "Not implemented ray cast!";
+    }
+
     Vector3 GetPosition();
     Object* GetOwner() { return owner; }
     virtual void Serialize(JSONWriter& obj) override {
@@ -78,6 +84,7 @@ struct AABBCollider : public Collider {
     CollisionResult CollidesWith(Collider* other) override;
     bool CollidePotentialWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
+    bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
 };
 
 inline bool IsPointInAABB(const Vector3& RectPosition, const Vector3& RectSize, const Vector3& Point) {

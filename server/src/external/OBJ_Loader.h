@@ -185,6 +185,8 @@ namespace objl
 		std::string map_d;
 		// Bump Map
 		std::string map_bump;
+		// Reflective Map
+		std::string refl;
 	};
 
 	// Structure: Mesh
@@ -1148,6 +1150,11 @@ namespace objl
 				if (algorithm::firstToken(curline) == "map_Bump" || algorithm::firstToken(curline) == "map_bump" || algorithm::firstToken(curline) == "bump")
 				{
 					tempMaterial.map_bump = algorithm::tail(curline);
+				}
+				// Reflective Map
+				if (algorithm::firstToken(curline) == "refl")
+				{
+					tempMaterial.refl = algorithm::tail(curline);
 				}
 			}
 

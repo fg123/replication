@@ -9,20 +9,20 @@
 // Each Model corresponds to a specific file that's loaded from disk
 using ModelID = uint32_t;
 
-// Models are serialized once to client-side on connect / load but once loaded
-//   they are referenced by ID
-class Model : public Replicable {
+class Model {
 public:
-    REPLICATED(ModelID, id, "id");
-    REPLICATED(std::vector<Mesh>, meshes, "meshes");
+    ModelID id;
+    std::vector<Mesh> meshes;
 
     ModelID GetId() { return id; }
 };
+
 
 class ModelManager {
     std::unordered_map<std::string, Model*> modelMap;
 
 public:
+    std::unordered_map<std::string, Texture*> textures;
     std::vector<Model*> models;
     std::vector<Light> lights;
 
@@ -43,5 +43,8 @@ public:
     }
 
     ModelID LoadModel(const std::string& name, const std::string& path, std::istream& stream);
+    Texture* LoadTexture(const std::string& path);
 
+    // Notifies the manager that the texture has been loaded into graphics memory
+    void MarkTextureLoaded(Texture* texture);
 };

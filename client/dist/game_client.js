@@ -93,6 +93,10 @@ Module.expectedDataFileDownloads++;
    Module["FS_createPath"]("/", "models", true, true);
    Module["FS_createPath"]("/", "shaders", true, true);
    Module["FS_createPath"]("/", "source", true, true);
+   Module["FS_createPath"]("/", "textures", true, true);
+   Module["FS_createPath"]("/textures", "Grass003_1K-JPG", true, true);
+   Module["FS_createPath"]("/textures", "MetalPlates006_1K-JPG", true, true);
+   Module["FS_createPath"]("/textures", "Rock035_1K-JPG", true, true);
    function DataRequest(start, end, audio) {
     this.start = start;
     this.end = end;
@@ -156,136 +160,231 @@ Module.expectedDataFileDownloads++;
   "files": [ {
    "filename": "/maps/map1.json",
    "start": 0,
-   "end": 36888,
+   "end": 36912,
    "audio": 0
   }, {
    "filename": "/maps/map1.json.bak",
-   "start": 36888,
-   "end": 82028,
+   "start": 36912,
+   "end": 82052,
    "audio": 0
   }, {
    "filename": "/models/Bullet.mtl",
-   "start": 82028,
-   "end": 82269,
+   "start": 82052,
+   "end": 82293,
    "audio": 0
   }, {
    "filename": "/models/Bullet.obj",
-   "start": 82269,
-   "end": 110540,
+   "start": 82293,
+   "end": 110562,
+   "audio": 0
+  }, {
+   "filename": "/models/BulletTracer.mtl",
+   "start": 110562,
+   "end": 110700,
+   "audio": 0
+  }, {
+   "filename": "/models/BulletTracer.obj",
+   "start": 110700,
+   "end": 119982,
    "audio": 0
   }, {
    "filename": "/models/cube.obj",
-   "start": 110540,
-   "end": 111081,
+   "start": 119982,
+   "end": 120523,
    "audio": 0
   }, {
    "filename": "/models/island.obj",
-   "start": 111081,
-   "end": 1543655,
+   "start": 120523,
+   "end": 1553097,
    "audio": 0
   }, {
    "filename": "/models/Pistol.mtl",
-   "start": 1543655,
-   "end": 1543893,
+   "start": 1553097,
+   "end": 1553335,
    "audio": 0
   }, {
    "filename": "/models/Pistol.obj",
-   "start": 1543893,
-   "end": 1545944,
+   "start": 1553335,
+   "end": 1555386,
    "audio": 0
   }, {
    "filename": "/models/Player.mtl",
-   "start": 1545944,
-   "end": 1546184,
+   "start": 1555386,
+   "end": 1555626,
    "audio": 0
   }, {
    "filename": "/models/Player.obj",
-   "start": 1546184,
-   "end": 2318334,
+   "start": 1555626,
+   "end": 2327776,
    "audio": 0
   }, {
    "filename": "/models/Rifle.mtl",
-   "start": 2318334,
-   "end": 2318570,
+   "start": 2327776,
+   "end": 2328309,
    "audio": 0
   }, {
    "filename": "/models/Rifle.obj",
-   "start": 2318570,
-   "end": 2330907,
+   "start": 2328309,
+   "end": 2342811,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.mtl",
-   "start": 2330907,
-   "end": 2331228,
+   "start": 2342811,
+   "end": 2343499,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.obj",
-   "start": 2331228,
-   "end": 2337641,
+   "start": 2343499,
+   "end": 2350157,
    "audio": 0
   }, {
    "filename": "/models/suzanne.obj",
-   "start": 2337641,
-   "end": 2416397,
+   "start": 2350157,
+   "end": 2428913,
    "audio": 0
   }, {
    "filename": "/shaders/FragmentShader.frag",
-   "start": 2416397,
-   "end": 2418580,
+   "start": 2428913,
+   "end": 2432468,
    "audio": 0
   }, {
    "filename": "/shaders/VertexShader.vert",
-   "start": 2418580,
-   "end": 2419176,
+   "start": 2432468,
+   "end": 2433325,
    "audio": 0
   }, {
    "filename": "/source/Bullet.blend",
-   "start": 2419176,
-   "end": 3246348,
+   "start": 2433325,
+   "end": 3260993,
    "audio": 0
   }, {
    "filename": "/source/Bullet.blend1",
-   "start": 3246348,
-   "end": 4073520,
+   "start": 3260993,
+   "end": 4088661,
+   "audio": 0
+  }, {
+   "filename": "/source/BulletTracer.blend",
+   "start": 4088661,
+   "end": 4873709,
+   "audio": 0
+  }, {
+   "filename": "/source/BulletTracer.blend1",
+   "start": 4873709,
+   "end": 5658757,
    "audio": 0
   }, {
    "filename": "/source/Pistol.blend",
-   "start": 4073520,
-   "end": 4852116,
+   "start": 5658757,
+   "end": 6437353,
    "audio": 0
   }, {
    "filename": "/source/Player.blend",
-   "start": 4852116,
-   "end": 6186744,
+   "start": 6437353,
+   "end": 7771981,
    "audio": 0
   }, {
    "filename": "/source/Player.blend1",
-   "start": 6186744,
-   "end": 7521372,
+   "start": 7771981,
+   "end": 9106609,
    "audio": 0
   }, {
    "filename": "/source/Rifle.blend",
-   "start": 7521372,
-   "end": 8324872,
+   "start": 9106609,
+   "end": 9975089,
    "audio": 0
   }, {
    "filename": "/source/Rifle.blend1",
-   "start": 8324872,
-   "end": 9128372,
+   "start": 9975089,
+   "end": 10839905,
    "audio": 0
   }, {
    "filename": "/source/ShootingRange.blend",
-   "start": 9128372,
-   "end": 9944808,
+   "start": 10839905,
+   "end": 11714669,
    "audio": 0
   }, {
    "filename": "/source/ShootingRange.blend1",
-   "start": 9944808,
-   "end": 10761244,
+   "start": 11714669,
+   "end": 12589433,
+   "audio": 0
+  }, {
+   "filename": "/textures/Grass003_1K-JPG/Grass003_1K_AmbientOcclusion.jpg",
+   "start": 12589433,
+   "end": 13494860,
+   "audio": 0
+  }, {
+   "filename": "/textures/Grass003_1K-JPG/Grass003_1K_Color.jpg",
+   "start": 13494860,
+   "end": 15215628,
+   "audio": 0
+  }, {
+   "filename": "/textures/Grass003_1K-JPG/Grass003_1K_Displacement.jpg",
+   "start": 15215628,
+   "end": 16138985,
+   "audio": 0
+  }, {
+   "filename": "/textures/Grass003_1K-JPG/Grass003_1K_Normal.jpg",
+   "start": 16138985,
+   "end": 18482653,
+   "audio": 0
+  }, {
+   "filename": "/textures/Grass003_1K-JPG/Grass003_1K_Roughness.jpg",
+   "start": 18482653,
+   "end": 19337933,
+   "audio": 0
+  }, {
+   "filename": "/textures/MetalPlates006_1K-JPG/MetalPlates006_1K_Color.jpg",
+   "start": 19337933,
+   "end": 19853622,
+   "audio": 0
+  }, {
+   "filename": "/textures/MetalPlates006_1K-JPG/MetalPlates006_1K_Displacement.jpg",
+   "start": 19853622,
+   "end": 20185772,
+   "audio": 0
+  }, {
+   "filename": "/textures/MetalPlates006_1K-JPG/MetalPlates006_1K_Metalness.jpg",
+   "start": 20185772,
+   "end": 20381619,
+   "audio": 0
+  }, {
+   "filename": "/textures/MetalPlates006_1K-JPG/MetalPlates006_1K_Normal.jpg",
+   "start": 20381619,
+   "end": 21492630,
+   "audio": 0
+  }, {
+   "filename": "/textures/MetalPlates006_1K-JPG/MetalPlates006_1K_Roughness.jpg",
+   "start": 21492630,
+   "end": 22024017,
+   "audio": 0
+  }, {
+   "filename": "/textures/Rock035_1K-JPG/Rock035_1K_AmbientOcclusion.jpg",
+   "start": 22024017,
+   "end": 22633450,
+   "audio": 0
+  }, {
+   "filename": "/textures/Rock035_1K-JPG/Rock035_1K_Color.jpg",
+   "start": 22633450,
+   "end": 23933796,
+   "audio": 0
+  }, {
+   "filename": "/textures/Rock035_1K-JPG/Rock035_1K_Displacement.jpg",
+   "start": 23933796,
+   "end": 24266294,
+   "audio": 0
+  }, {
+   "filename": "/textures/Rock035_1K-JPG/Rock035_1K_Normal.jpg",
+   "start": 24266294,
+   "end": 26602934,
+   "audio": 0
+  }, {
+   "filename": "/textures/Rock035_1K-JPG/Rock035_1K_Roughness.jpg",
+   "start": 26602934,
+   "end": 27315e3,
    "audio": 0
   } ],
-  "remote_package_size": 10761244,
-  "package_uuid": "d573aaa7-9b40-4dd9-89a6-be8b42a2b652"
+  "remote_package_size": 27315e3,
+  "package_uuid": "93459b66-5145-4f62-b180-2fe785acc91a"
  });
 })();
 
@@ -5433,6 +5532,10 @@ function _getTempRet0() {
  return getTempRet0() | 0;
 }
 
+function _glActiveTexture(x0) {
+ GLctx["activeTexture"](x0);
+}
+
 function _glAttachShader(program, shader) {
  GLctx.attachShader(GL.programs[program], GL.shaders[shader]);
 }
@@ -5444,6 +5547,10 @@ function _glBindBuffer(target, buffer) {
   GLctx.currentPixelUnpackBufferBinding = buffer;
  }
  GLctx.bindBuffer(target, GL.buffers[buffer]);
+}
+
+function _glBindTexture(target, texture) {
+ GLctx.bindTexture(target, GL.textures[texture]);
 }
 
 function _glBindVertexArray(vao) {
@@ -5522,8 +5629,16 @@ function _glGenBuffers(n, buffers) {
  __glGenObject(n, buffers, "createBuffer", GL.buffers);
 }
 
+function _glGenTextures(n, textures) {
+ __glGenObject(n, textures, "createTexture", GL.textures);
+}
+
 function _glGenVertexArrays(n, arrays) {
  __glGenObject(n, arrays, "createVertexArray", GL.vaos);
+}
+
+function _glGenerateMipmap(x0) {
+ GLctx["generateMipmap"](x0);
 }
 
 function _glGetAttribLocation(program, name) {
@@ -5638,6 +5753,73 @@ function _glLinkProgram(program) {
 function _glShaderSource(shader, count, string, length) {
  var source = GL.getSource(shader, count, string, length);
  GLctx.shaderSource(GL.shaders[shader], source);
+}
+
+function computeUnpackAlignedImageSize(width, height, sizePerPixel, alignment) {
+ function roundedToNextMultipleOf(x, y) {
+  return x + y - 1 & -y;
+ }
+ var plainRowSize = width * sizePerPixel;
+ var alignedRowSize = roundedToNextMultipleOf(plainRowSize, alignment);
+ return height * alignedRowSize;
+}
+
+function __colorChannelsInGlTextureFormat(format) {
+ var colorChannels = {
+  5: 3,
+  6: 4,
+  8: 2,
+  29502: 3,
+  29504: 4,
+  26917: 2,
+  26918: 2,
+  29846: 3,
+  29847: 4
+ };
+ return colorChannels[format - 6402] || 1;
+}
+
+function heapObjectForWebGLType(type) {
+ type -= 5120;
+ if (type == 0) return HEAP8;
+ if (type == 1) return HEAPU8;
+ if (type == 2) return HEAP16;
+ if (type == 4) return HEAP32;
+ if (type == 6) return HEAPF32;
+ if (type == 5 || type == 28922 || type == 28520 || type == 30779 || type == 30782) return HEAPU32;
+ return HEAPU16;
+}
+
+function heapAccessShiftForWebGLHeap(heap) {
+ return 31 - Math.clz32(heap.BYTES_PER_ELEMENT);
+}
+
+function emscriptenWebGLGetTexPixelData(type, format, width, height, pixels, internalFormat) {
+ var heap = heapObjectForWebGLType(type);
+ var shift = heapAccessShiftForWebGLHeap(heap);
+ var byteSize = 1 << shift;
+ var sizePerPixel = __colorChannelsInGlTextureFormat(format) * byteSize;
+ var bytes = computeUnpackAlignedImageSize(width, height, sizePerPixel, GL.unpackAlignment);
+ return heap.subarray(pixels >> shift, pixels + bytes >> shift);
+}
+
+function _glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels) {
+ if (true) {
+  if (GLctx.currentPixelUnpackBufferBinding) {
+   GLctx.texImage2D(target, level, internalFormat, width, height, border, format, type, pixels);
+  } else if (pixels) {
+   var heap = heapObjectForWebGLType(type);
+   GLctx.texImage2D(target, level, internalFormat, width, height, border, format, type, heap, pixels >> heapAccessShiftForWebGLHeap(heap));
+  } else {
+   GLctx.texImage2D(target, level, internalFormat, width, height, border, format, type, null);
+  }
+  return;
+ }
+ GLctx.texImage2D(target, level, internalFormat, width, height, border, format, type, pixels ? emscriptenWebGLGetTexPixelData(type, format, width, height, pixels, internalFormat) : null);
+}
+
+function _glTexParameteri(x0, x1, x2) {
+ GLctx["texParameteri"](x0, x1, x2);
 }
 
 function _glUniform1f(location, v0) {
@@ -6112,8 +6294,10 @@ var asmLibraryArg = {
  "fd_seek": _fd_seek,
  "fd_write": _fd_write,
  "getTempRet0": _getTempRet0,
+ "glActiveTexture": _glActiveTexture,
  "glAttachShader": _glAttachShader,
  "glBindBuffer": _glBindBuffer,
+ "glBindTexture": _glBindTexture,
  "glBindVertexArray": _glBindVertexArray,
  "glBufferData": _glBufferData,
  "glClear": _glClear,
@@ -6126,7 +6310,9 @@ var asmLibraryArg = {
  "glEnable": _glEnable,
  "glEnableVertexAttribArray": _glEnableVertexAttribArray,
  "glGenBuffers": _glGenBuffers,
+ "glGenTextures": _glGenTextures,
  "glGenVertexArrays": _glGenVertexArrays,
+ "glGenerateMipmap": _glGenerateMipmap,
  "glGetAttribLocation": _glGetAttribLocation,
  "glGetProgramInfoLog": _glGetProgramInfoLog,
  "glGetProgramiv": _glGetProgramiv,
@@ -6135,6 +6321,8 @@ var asmLibraryArg = {
  "glGetUniformLocation": _glGetUniformLocation,
  "glLinkProgram": _glLinkProgram,
  "glShaderSource": _glShaderSource,
+ "glTexImage2D": _glTexImage2D,
+ "glTexParameteri": _glTexParameteri,
  "glUniform1f": _glUniform1f,
  "glUniform1i": _glUniform1i,
  "glUniform3fv": _glUniform3fv,
@@ -6273,15 +6461,15 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 83328;
+var _game = Module["_game"] = 78824;
 
-var _clientGl = Module["_clientGl"] = 83536;
+var _clientGl = Module["_clientGl"] = 79056;
 
-var _inputEvents = Module["_inputEvents"] = 83652;
+var _inputEvents = Module["_inputEvents"] = 79196;
 
-var _ping = Module["_ping"] = 83688;
+var _ping = Module["_ping"] = 79232;
 
-var _lastTickTime = Module["_lastTickTime"] = 83680;
+var _lastTickTime = Module["_lastTickTime"] = 79224;
 
 function invoke_iii(index, a1, a2) {
  var sp = stackSave();
@@ -6305,28 +6493,6 @@ function invoke_iiiii(index, a1, a2, a3, a4) {
  }
 }
 
-function invoke_viii(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiii(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
 function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
@@ -6342,6 +6508,17 @@ function invoke_ii(index, a1) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiii(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6408,6 +6585,17 @@ function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viii(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

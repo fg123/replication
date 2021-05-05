@@ -251,17 +251,18 @@ void Game::InitialReplication(PlayerSocketData* data) {
 
     // Initial Replication of all Models
     // This one will be slow
-    writer.Key("models");
-    writer.StartArray();
-    for (auto& model : modelManager.models) {
-        writer.StartObject();
-        model->Serialize(writer);
-        writer.EndObject();
-    }
-    writer.EndArray();
+    // writer.Key("models");
+    // writer.StartArray();
+    // for (auto& model : modelManager.models) {
+    //     writer.StartObject();
+    //     model->Serialize(writer);
+    //     writer.EndObject();
+    // }
+    // writer.EndArray();
 
-    writer.Key("lights");
-    SerializeDispatch(modelManager.lights, writer);
+    // writer.Key("lights");
+    // SerializeDispatch(modelManager.lights, writer);
+
     writer.EndObject();
     SendData(data, buffer.GetString());
 }
@@ -362,6 +363,7 @@ void Game::Replicate(Time time) {
 
 #ifdef BUILD_CLIENT
 void Game::RollbackTime(Time time) {
+    gameTime = time;
     for (auto& object : gameObjects) {
         object.second->SetLastTickTime(time);
     }
@@ -413,6 +415,18 @@ void Game::ProcessReplication(json& object) {
     obj->ProcessReplication(object);
 }
 #endif
+
+RayCastResult Game::RayCastInWorld(RayCastRequest request) {
+    RayCastResult result;
+    result.castRequest = request;
+    for (auto& object : gameObjects) {
+        if (object.second->IsCollisionExcluded(request.exclusionTags)) {
+            continue;
+        }
+        object.second->CollidesWith(request, result);
+    }
+    return result;
+}
 
 void Game::HandleCollisions(Object* obj) {
     Vector3 collisionResolution;

@@ -12,7 +12,7 @@ Vector3 Collider::GetPosition() {
 
 void GenerateAABBCollidersFromModel(Object* obj) {
     // Each Mesh Becomes a Collider
-    LOG_DEBUG("Generating Map Colliders");
+    // LOG_DEBUG("Generating Map Colliders");
     Model* model = obj->GetModel();
     if (model) {
         for (Mesh& mesh : model->meshes) {
@@ -23,7 +23,7 @@ void GenerateAABBCollidersFromModel(Object* obj) {
                     min = glm::min(min, mesh.vertices[i].position);
                     max = glm::max(max, mesh.vertices[i].position);
                 }
-                LOG_DEBUG("Collider: " << min << " Size " << max - min);
+                // LOG_DEBUG("Collider: " << min << " Size " << max - min);
                 obj->AddCollider(new AABBCollider(obj, min, max - min));
             }
         }

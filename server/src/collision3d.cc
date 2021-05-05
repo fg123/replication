@@ -215,6 +215,42 @@ CollisionResult AABBCollider::CollidesWith(const Vector3& p1, const Vector3& p2)
     return CollisionResult();
 }
 
+bool AABBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+    Vector3 pt_min = position;
+    Vector3 pt_max = position + size;
+    Vector3 invDirection = 1.0f / ray.direction;
+
+    // r.org is origin of ray
+    float t1 = (pt_min.x - ray.startPoint.x) * invDirection.x;
+    float t2 = (pt_max.x - ray.startPoint.x) * invDirection.x;
+    float t3 = (pt_min.y - ray.startPoint.y) * invDirection.y;
+    float t4 = (pt_max.y - ray.startPoint.y) * invDirection.y;
+    float t5 = (pt_min.z - ray.startPoint.z) * invDirection.z;
+    float t6 = (pt_max.z - ray.startPoint.z) * invDirection.z;
+
+    float tmin = glm::max(glm::max(glm::min(t1, t2), glm::min(t3, t4)), glm::min(t5, t6));
+    float tmax = glm::min(glm::min(glm::max(t1, t2), glm::max(t3, t4)), glm::max(t5, t6));
+
+    // if tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
+    if (tmax < 0) {
+        return false;
+    }
+
+    // if tmin > tmax, ray doesn't intersect AABB
+    if (tmin > tmax) {
+        return false;
+    }
+
+    if (result.isHit && result.zDepth < tmin) {
+        // Already have a result that's closer than ours
+        return false;
+    }
+    result.isHit = true;
+    result.hitLocation = ray.startPoint + ray.direction * tmin;
+    result.zDepth = tmin;
+    return true;
+}
+
 CollisionResult SphereCollider::CollidesWith(const Vector3& p1, const Vector3& p2) {
     // TODO:
     return CollisionResult();
