@@ -14,6 +14,7 @@ struct RayCastRequest {
 struct RayCastResult {
     bool isHit = false;
     Vector3 hitLocation;
+    Vector3 hitNormal;
     Object* hitObject = nullptr;
     float zDepth;
 

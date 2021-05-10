@@ -1,8 +1,12 @@
 #include "bullet.h"
 #include "game.h"
 #include "player.h"
+#include "sprite.h"
 
-BulletObject::BulletObject(Game& game, int damage) : Object(game), damage(damage) {
+BulletObject::BulletObject(Game& game, int damage, RayCastResult rayResult) :
+    Object(game),
+    damage(damage),
+    rayResult(rayResult) {
     // Bullets should not affect anyone's position
     collisionExclusion = (uint64_t) Tag::OBJECT;
 
@@ -17,12 +21,11 @@ BulletObject::BulletObject(Game& game, int damage) : Object(game), damage(damage
     airFriction = Vector3(1, 1, 1);
 }
 
-BulletObject::BulletObject(Game& game) : BulletObject(game, 0) {
+BulletObject::BulletObject(Game& game) : BulletObject(game, 0, RayCastResult()) {
 
 }
 
 void BulletObject::OnCollide(CollisionResult& result) {
-
     // Check Player Hit
 #ifdef BUILD_SERVER
     if (result.collidedWith->IsTagged(Tag::PLAYER)) {
@@ -31,15 +34,4 @@ void BulletObject::OnCollide(CollisionResult& result) {
 #endif
 
     game.DestroyObject(GetId());
-}
-
-void BulletObject::Serialize(JSONWriter& obj) {
-    Object::Serialize(obj);
-    obj.Key("dmg");
-    obj.Int(damage);
-}
-
-void BulletObject::ProcessReplication(json& obj) {
-    Object::ProcessReplication(obj);
-    damage = obj["dmg"].GetInt();
 }

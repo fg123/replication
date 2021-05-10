@@ -139,7 +139,6 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     void LoadMap(const char* map) {
         game.LoadMap(map);
-        clientGl.OnModelsReplicated();
     }
 
     EMSCRIPTEN_KEEPALIVE

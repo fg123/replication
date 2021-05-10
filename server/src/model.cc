@@ -108,37 +108,44 @@ ModelID ModelManager::LoadModel(const std::string& name, const std::string& path
             mesh.vertices[i].tangent = Average(tangents[i]);
         }
 
-        mesh.material.name = loadedMesh.MeshMaterial.name;
-        mesh.material.Ka = ToVec3(loadedMesh.MeshMaterial.Ka);
-        mesh.material.Kd = ToVec3(loadedMesh.MeshMaterial.Kd);
-        mesh.material.Ks = ToVec3(loadedMesh.MeshMaterial.Ks);
-        mesh.material.Ns = loadedMesh.MeshMaterial.Ns;
-        mesh.material.Ni = loadedMesh.MeshMaterial.Ni;
-        mesh.material.d = loadedMesh.MeshMaterial.d;
-        mesh.material.illum = loadedMesh.MeshMaterial.illum;
+        // Use Default Shader
+    #ifdef BUILD_CLIENT
+        DefaultMaterial* material = new DefaultMaterial;
+
+        material->name = loadedMesh.MeshMaterial.name;
+        material->Ka = ToVec3(loadedMesh.MeshMaterial.Ka);
+        material->Kd = ToVec3(loadedMesh.MeshMaterial.Kd);
+        material->Ks = ToVec3(loadedMesh.MeshMaterial.Ks);
+        material->Ns = loadedMesh.MeshMaterial.Ns;
+        material->Ni = loadedMesh.MeshMaterial.Ni;
+        material->d = loadedMesh.MeshMaterial.d;
+        material->illum = loadedMesh.MeshMaterial.illum;
 
         // Only Client Cares about Materials
-    #ifdef BUILD_CLIENT
-        mesh.material.map_Ka = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_Ka));
-        mesh.material.map_Kd = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_Kd));
-        mesh.material.map_Ks = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_Ks));
-        mesh.material.map_Ns = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_Ns));
-        mesh.material.map_d = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_d));
-        mesh.material.map_bump = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_bump));
-        mesh.material.map_refl = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.refl));
+        material->map_Ka = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_Ka), Texture::Format::RGB);
+        material->map_Kd = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_Kd), Texture::Format::RGB);
+        material->map_Ks = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_Ks), Texture::Format::RGB);
+        material->map_Ns = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_Ns), Texture::Format::RGB);
+        material->map_d = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_d), Texture::Format::RGB);
+        material->map_bump = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_bump), Texture::Format::RGB);
+        material->map_refl = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.refl), Texture::Format::RGB);
+        mesh.material = material;
+
+        mesh.InitializeMesh();
     #endif
     }
     return id;
 }
 
-Texture* ModelManager::LoadTexture(const std::string& path) {
+#ifdef BUILD_CLIENT
+Texture* ModelManager::LoadTexture(const std::string& path, Texture::Format format) {
     if (path.empty()) return nullptr;
     if (textures.find(path) == textures.end()) {
         LOG_INFO("Loading texture " << path);
         int width, height, nrChannels;
-        stbi_set_flip_vertically_on_load(true);
-        // Force RGB
-        unsigned char *data = stbi_load((path).c_str(), &width, &height, &nrChannels, 3);
+        // stbi_set_flip_vertically_on_load(true);
+        int channels = (format == Texture::Format::RGB) ? 3 : 4;
+        unsigned char *data = stbi_load((path).c_str(), &width, &height, &nrChannels, channels);
         if (!data) {
             LOG_ERROR("Could not load texture " << path);
             throw std::runtime_error("Could not load texture");
@@ -147,20 +154,15 @@ Texture* ModelManager::LoadTexture(const std::string& path) {
         tex->data = data;
         tex->width = width;
         tex->height = height;
+        tex->format = format;
         LOG_DEBUG("Loaded texture " << path);
         LOG_DEBUG("Sample: " << (int) data[0] << " " << (int) data[1] << " " << (int) data[2] << " "
                              << (int) data[3] << " " << (int) data[4] << " " << (int) data[5]);
+        tex->InitializeTexture();
         textures[path] = tex;
         return tex;
     }
     return textures[path];
 }
 
-void ModelManager::MarkTextureLoaded(Texture* texture) {
-    if (texture->data == nullptr) {
-        LOG_ERROR("Texture has been double-marked for loaded!");
-        throw std::runtime_error("double free");
-    }
-    stbi_image_free(texture->data);
-    texture->data = nullptr;
-}
+#endif

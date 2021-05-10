@@ -17,7 +17,7 @@ public:
         damage = 14;
         reloadTime = 1000;
         automaticFire = true;
-        fireOffset = 1;
+        fireOffset = 1.873;
 
         #ifdef BUILD_SERVER
             SetModel(game.GetModel("Rifle.obj"));

@@ -24,9 +24,6 @@ public:
     virtual ~Collider() { }
     virtual int GetType() = 0;
 
-    // A quick range check to eliminate collisions to check
-    virtual bool CollidePotentialWith(Collider* other) = 0;
-
     // Detailed collision
     virtual CollisionResult CollidesWith(Collider* other) = 0;
     virtual CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) = 0;
@@ -52,7 +49,6 @@ struct RectangleCollider : public Collider {
         size(size) {}
     virtual int GetType() override { return 0; }
     CollisionResult CollidesWith(Collider* other) override;
-    bool CollidePotentialWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
 };
 
@@ -65,7 +61,6 @@ struct CircleCollider : public Collider {
             radius(radius) {}
     virtual int GetType() override { return 1; }
     CollisionResult CollidesWith(Collider* other) override;
-    bool CollidePotentialWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
 };
 
@@ -82,7 +77,6 @@ struct AABBCollider : public Collider {
         size(size) {}
     virtual int GetType() override { return 2; }
     CollisionResult CollidesWith(Collider* other) override;
-    bool CollidePotentialWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
     bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
 };
@@ -94,7 +88,6 @@ inline bool IsPointInAABB(const Vector3& RectPosition, const Vector3& RectSize, 
         (Point.z > RectPosition.z && Point.z < RectPosition.z + RectSize.z);
 }
 
-// Deprecated 2D Colliders
 struct SphereCollider : public Collider {
     REPLICATED(float, radius, "r");
 
@@ -103,9 +96,61 @@ struct SphereCollider : public Collider {
             radius(radius) {}
     virtual int GetType() override { return 3; }
     CollisionResult CollidesWith(Collider* other) override;
-    bool CollidePotentialWith(Collider* other) override;
     CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
 };
+
+
+struct TwoPhaseCollider : public Replicable {
+    REPLICATED(AABBCollider, aabbBroad, "ab");
+    std::vector<Collider*> children;
+    Object* owner;
+
+    TwoPhaseCollider(Object* owner) :
+        aabbBroad(owner, Vector3(), Vector3()),
+        owner(owner) {}
+
+    ~TwoPhaseCollider() {
+        for (auto& collider : children) {
+            delete collider;
+        }
+        children.clear();
+    }
+
+    CollisionResult CollidesWith(Collider* other);
+    CollisionResult CollidesWith(TwoPhaseCollider* other);
+
+    CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) {
+        // TODO
+        throw "Not implemented";
+    }
+
+    bool CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+        bool ret = false;
+        for (auto& child : children) {
+            ret |= child->CollidesWith(ray, result);
+        }
+        return ret;
+    }
+
+    void AddCollider(Collider* collider) {
+        children.push_back(collider);
+        if (AABBCollider* aabb = dynamic_cast<AABBCollider*>(collider)) {
+            if (children.size() == 1) {
+                aabbBroad.position = aabb->position;
+                aabbBroad.size = aabb->size;
+            }
+            else {
+                aabbBroad.position = glm::min(aabbBroad.position, aabb->GetPosition());
+                aabbBroad.size = glm::max(aabbBroad.position + aabbBroad.size,
+                    aabb->position + aabb->size) - aabbBroad.position;
+            }
+        }
+    }
+
+    virtual void Serialize(JSONWriter& obj) override;
+    virtual void ProcessReplication(json& obj) override;
+};
+
 
 void GenerateAABBCollidersFromModel(Object* obj);
 

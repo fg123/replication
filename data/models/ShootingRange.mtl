@@ -1,5 +1,45 @@
 # Blender MTL File: 'ShootingRange.blend'
-# Material Count: 3
+# Material Count: 5
+
+newmtl Bricks
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\Bricks059_2K-JPG\\Bricks059_2K_Normal.jpg
+map_Kd ..\\textures\\Bricks059_2K-JPG\\Bricks059_2K_Color.jpg
+map_Ns ..\\textures\\Bricks059_2K-JPG\\Bricks059_2K_Roughness.jpg
+
+newmtl Floor
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\WoodFloor043_2K-JPG\\WoodFloor043_2K_Normal.jpg
+map_Kd ..\\textures\\WoodFloor043_2K-JPG\\WoodFloor043_2K_Color.jpg
+map_Ns ..\\textures\\WoodFloor043_2K-JPG\\WoodFloor043_2K_Roughness.jpg
+refl ..\\textures\\WoodFloor043_2K-JPG\\WoodFloor043_2K_Metalness.jpg
+
+newmtl Grass
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\Grass003_1K-JPG\\Grass003_1K_Normal.jpg
+map_Kd ..\\textures\\Grass003_1K-JPG\\Grass003_1K_Color.jpg
+map_Ns ..\\textures\\Grass003_1K-JPG\\Grass003_1K_Roughness.jpg
 
 newmtl Material
 Ns 323.999994
@@ -10,19 +50,6 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-
-newmtl Material.001
-Ns 225.000000
-Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
-Ke 0.000000 0.000000 0.000000
-Ni 1.450000
-d 1.000000
-illum 2
-map_Bump ..\\textures\\Rock035_1K-JPG\\Rock035_1K_Normal.jpg
-map_Kd ..\\textures\\Rock035_1K-JPG\\Rock035_1K_Color.jpg
-map_Ns ..\\textures\\Rock035_1K-JPG\\Rock035_1K_Roughness.jpg
 
 newmtl None
 Ns 500

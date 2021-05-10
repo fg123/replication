@@ -1,21 +1,18 @@
-#ifndef BULLET_H
-#define BULLET_H
+#pragma once
 
 #include "object.h"
+#include "ray-cast.h"
 
 class BulletObject : public Object {
-    int damage;
-
+    REPLICATED(int, damage, "dmg");
+    RayCastResult rayResult;
 public:
     CLASS_CREATE(BulletObject)
 
     BulletObject(Game& game);
-    BulletObject(Game& game, int damage);
+    BulletObject(Game& game, int damage, RayCastResult rayResult);
 
     virtual void OnCollide(CollisionResult& result) override;
-    virtual void Serialize(JSONWriter& obj) override;
-    virtual void ProcessReplication(json& obj) override;
 };
 
 CLASS_REGISTER(BulletObject);
-#endif

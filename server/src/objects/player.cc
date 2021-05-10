@@ -147,7 +147,7 @@ void PlayerObject::Tick(Time time) {
         inputVelocity = glm::normalize(leftRightComponent + forwardBackwardComponent) * 10.0f;
     }
     else {
-        inputVelocity *= 0.5;
+        inputVelocity *= 0.8;
         if (glm::length(inputVelocity) < 0.01) {
             inputVelocity = Vector3(0);
         }
@@ -228,9 +228,16 @@ void PlayerObject::Tick(Time time) {
         qWeapon->SetPosition(GetAttachmentPoint());
     }
 
-    lookDirection = glm::normalize(Vector::Forward * rotation);
-
     Object::Tick(time);
+
+    rotationPitch += pitchYawVelocity.x;
+    rotationYaw += pitchYawVelocity.y;
+    pitchYawVelocity *= 0.8;
+
+    Matrix4 matrix;
+    matrix = glm::rotate(matrix, glm::radians(rotationYaw), Vector::Up);
+    matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
+    rotation = glm::quat_cast(matrix);
 
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;
@@ -268,6 +275,10 @@ void PlayerObject::Serialize(JSONWriter& obj) {
     obj.Key("client_p");
     Vector3 cp = GetClientPosition();
     SerializeDispatch(cp, obj);
+
+    obj.Key("ld");
+    Vector3 ld = GetLookDirection();
+    SerializeDispatch(ld, obj);
 #endif
 
     // LOG_DEBUG("Player Object Serialize - End");
@@ -370,11 +381,6 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
         rotationYaw += moveX / 10;
         rotationPitch -= moveY / 10;
         rotationPitch = glm::clamp(rotationPitch, -89.f, 89.f);
-        Matrix4 matrix;
-        matrix = glm::rotate(matrix, glm::radians(rotationYaw), Vector::Up);
-        matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
-
-        rotation = glm::quat_cast(matrix);
     }
     else if (obj["event"] == "md") {
         int button = obj["button"].GetInt();
@@ -402,6 +408,6 @@ Vector3 PlayerObject::GetAttachmentPoint() const {
 
     return GetPosition()
         - left * 0.5f
-        + lookDirection * 1.0f
+        + GetLookDirection() * 1.0f
         - up * 0.2f;
 }

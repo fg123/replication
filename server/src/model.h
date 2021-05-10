@@ -6,6 +6,7 @@
 
 #include <string>
 
+
 // Each Model corresponds to a specific file that's loaded from disk
 using ModelID = uint32_t;
 
@@ -22,7 +23,10 @@ class ModelManager {
     std::unordered_map<std::string, Model*> modelMap;
 
 public:
-    std::unordered_map<std::string, Texture*> textures;
+    #ifdef BUILD_CLIENT
+        std::unordered_map<std::string, Texture*> textures;
+    #endif
+
     std::vector<Model*> models;
     std::vector<Light> lights;
 
@@ -43,8 +47,8 @@ public:
     }
 
     ModelID LoadModel(const std::string& name, const std::string& path, std::istream& stream);
-    Texture* LoadTexture(const std::string& path);
 
-    // Notifies the manager that the texture has been loaded into graphics memory
-    void MarkTextureLoaded(Texture* texture);
+#ifdef BUILD_CLIENT
+    Texture* LoadTexture(const std::string& path, Texture::Format format);
+#endif
 };

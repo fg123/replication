@@ -61,13 +61,16 @@ protected:
     // For Client-Side Interpolation
     Vector3 clientPosition;
     bool clientPositionSet = false;
+
+    Quaternion clientRotation;
+    bool clientRotationSet = false;
+
 #endif
 
     // All are measured in the same units, velocity is in position units
     //   per second
     REPLICATED(Vector3, position, "p");
     REPLICATED(Quaternion, rotation, "r");
-    REPLICATED(Vector3, lookDirection, "ld");
     REPLICATED(Vector3, scale, "sc");
     REPLICATED(Vector3, velocity, "v");
 
@@ -84,7 +87,7 @@ protected:
 
     Time spawnTime = 0;
 
-    std::vector<Collider*> colliders;
+    REPLICATED(TwoPhaseCollider, collider, "c");
 
     // In default mode, every collision will occur and all hits are reported
     //   to OnCollide
@@ -113,6 +116,7 @@ public:
         }
         lastTickTime = time;
     }
+    virtual void PreDraw() {}
 #endif
 
     Object(Game& game);
@@ -125,15 +129,17 @@ public:
 
     void ResolveCollision(const Vector3& difference);
 
-    size_t GetColliderCount() const { return colliders.size(); }
+    size_t GetColliderCount() const { return collider.children.size(); }
 
     CollisionResult CollidesWith(Collider* other);
     CollisionResult CollidesWith(Object* other);
     CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2);
-
     void CollidesWith(RayCastRequest& ray, RayCastResult& result);
 
-    void AddCollider(Collider* col) { colliders.push_back(col); }
+    void AddCollider(Collider* col) {
+        collider.AddCollider(col);
+    }
+
     ObjectID GetId() const { return id; }
 
     void SetId(ObjectID newId) { id = newId; }
@@ -150,7 +156,7 @@ public:
     const Vector3& GetScale() const { return scale; }
     const Quaternion& GetRotation() const { return rotation; }
     virtual Vector3 GetVelocity() { return velocity; }
-    const Vector3& GetLookDirection() const { return lookDirection; }
+    Vector3 GetLookDirection() const { return glm::normalize(Vector::Forward * rotation); }
 
     void SetPosition(const Vector3& in) { position = in; }
     void SetRotation(const Quaternion& in) { rotation = in; }
@@ -182,10 +188,11 @@ public:
     virtual const Matrix4 GetTransform() {
         // Vector3 direction =
         return glm::translate(clientPosition) *
-            glm::transpose(glm::toMat4(rotation)) *
+            glm::transpose(glm::toMat4(clientRotation)) *
             glm::scale(scale);
     }
     const Vector3& GetClientPosition() const { return clientPosition; }
+    const Quaternion& GetClientRotation() const { return clientRotation; }
 #endif
 
     Model* GetModel() {

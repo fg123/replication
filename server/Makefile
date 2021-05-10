@@ -2,7 +2,7 @@ EXE = game
 SRC_DIR = src
 SRC = $(shell find src/ -name "*.cc" | grep -v "main" | grep -v "client")
 SERVER_SRC = $(SRC) src/main.cc
-CLIENT_SRC = $(SRC) src/client_main.cc src/client_gl.cc
+CLIENT_SRC = $(SRC) src/client_main.cc src/client_gl.cc src/client_shader.cc
 SERVER_OBJ = $(SERVER_SRC:%.cc=%.o)
 # Use .wo for webassembly
 CLIENT_OBJ = $(CLIENT_SRC:%.cc=%.wo)

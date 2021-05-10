@@ -23,7 +23,15 @@ void GenerateAABBCollidersFromModel(Object* obj) {
                     min = glm::min(min, mesh.vertices[i].position);
                     max = glm::max(max, mesh.vertices[i].position);
                 }
-                // LOG_DEBUG("Collider: " << min << " Size " << max - min);
+
+                // for (size_t i = 0; i < mesh.indices.size(); i += 3) {
+                //     Vertex& a = mesh.vertices[mesh.indices[i]];
+                //     Vertex& b = mesh.vertices[mesh.indices[i] + 1];
+                //     Vertex& c = mesh.vertices[mesh.indices[i] + 2];
+                //     Vector3 min = glm::min(glm::min(a.position, b.position), c.position);
+                //     Vector3 max = glm::max(glm::max(a.position, b.position), c.position);
+
+                // }
                 obj->AddCollider(new AABBCollider(obj, min, max - min));
             }
         }
@@ -234,22 +242,3 @@ CollisionResult CircleCollider::CollidesWith(const Vector3& p1, const Vector3& p
     return CollisionResult();
 }
 
-bool RectangleCollider::CollidePotentialWith(Collider* other) {
-    if (other->GetType() == 0) {
-        // Just do the collide check for rect / rect
-        return CollidesWith(other).isColliding;
-    }
-    else {
-        return RectangleAndCircleCollidePotential(this, static_cast<CircleCollider*>(other));
-    }
-}
-
-bool CircleCollider::CollidePotentialWith(Collider* other) {
-    if (other->GetType() == 1) {
-        // Just do the collide check for circ / circ
-        return CollidesWith(other).isColliding;
-    }
-    else {
-        return RectangleAndCircleCollidePotential(static_cast<RectangleCollider*>(other), this);
-    }
-}

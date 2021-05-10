@@ -5,7 +5,6 @@
 #include "vector.h"
 #include "objects/player.h"
 #include "characters/dummy.h"
-#include "objects/rectangle.h"
 #include "characters/archer.h"
 #include "collision.h"
 

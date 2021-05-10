@@ -1,34 +1,86 @@
 #include "collision.h"
 #include "object.h"
 
-bool AABBAndSphereCollidePotential(AABBCollider* rect, SphereCollider* circle) {
-    Vector3 rectPosition = rect->GetPosition();
-    Vector3 circPosition = circle->GetPosition();
+CollisionResult AABBAndAABBCollide(AABBCollider* rect1, AABBCollider* rect2) {
+    Vector3 position = rect1->GetPosition();
+    Vector3 otherPos = rect2->GetPosition();
 
-    // Circle entirely to the left of rect
-    if (circPosition.x + circle->radius < rectPosition.x) return false;
+    float x1 = position.x;
+    float x2 = otherPos.x;
+    float y1 = position.y;
+    float y2 = otherPos.y;
+    float z1 = position.z;
+    float z2 = otherPos.z;
 
-    // Circle entirely to the right of rect
-    if (circPosition.x - circle->radius > rectPosition.x + rect->size.x) return false;
+    float w1 = rect1->size.x;
+    float w2 = rect2->size.x;
+    float h1 = rect1->size.y;
+    float h2 = rect2->size.y;
+    float d1 = rect1->size.z;
+    float d2 = rect2->size.z;
 
-    // Circle entirely to the top of rect
-    if (circPosition.y + circle->radius < rectPosition.y) return false;
+    bool leftCollide = (x1 < x2 + w2);
+    bool rightCollide = (x1 + w1 > x2);
+    bool topCollide = (y1 < y2 + h2);
+    bool bottomCollide = (y1 + h1 > y2);
+    bool frontCollide = (z1 < z2 + d2);
+    bool backCollide = (z1 + d1 > z2);
 
-    // Circle entirely to the bottom of rect
-    if (circPosition.y - circle->radius > rectPosition.y + rect->size.y) return false;
+    Vector3 myCenter    (x1 + w1 / 2.0, y1 + h1 / 2.0, z1 + d1 / 2.0);
+    Vector3 otherCenter (x2 + w2 / 2.0, y2 + h2 / 2.0, z2 + d2 / 2.0);
 
-    // Circle entirely to the front of rect
-    if (circPosition.z + circle->radius < rectPosition.z) return false;
+    bool biasX = myCenter.x < otherCenter.x;
+    bool biasY = myCenter.y < otherCenter.y;
+    bool biasZ = myCenter.z < otherCenter.z;
 
-    // Circle entirely to the back of rect
-    if (circPosition.z - circle->radius > rectPosition.z + rect->size.z) return false;
+    // LOG_DEBUG("Collides " << leftCollide << " " << rightCollide <<
+    //                   " " << topCollide << " " << bottomCollide <<
+    //                   " " << frontCollide << " " << backCollide);
+    CollisionResult r;
+    r.isColliding = (leftCollide && rightCollide) && (topCollide && bottomCollide) && (frontCollide && backCollide);
+    if (r.isColliding) {
 
-    // Do a more detailed check
-    return true;
+        r.collisionDifference.x = !biasX ? -(x2 + w2 - x1) : x1 + w1 - x2;
+        r.collisionDifference.y = !biasY ? -(y2 + h2 - y1) : y1 + h1 - y2;
+        r.collisionDifference.z = !biasZ ? -(z2 + d2 - z1) : z1 + d1 - z2;
+
+        // Each of the collision differences allow for the box to completely
+        //   come back out. Choose the smallest magnitude to resolve
+        if (glm::abs(r.collisionDifference.x) < glm::abs(r.collisionDifference.y) &&
+            glm::abs(r.collisionDifference.x) < glm::abs(r.collisionDifference.z)) {
+            r.collisionDifference.y = 0;
+            r.collisionDifference.z = 0;
+        }
+        if (glm::abs(r.collisionDifference.y) < glm::abs(r.collisionDifference.x) &&
+            glm::abs(r.collisionDifference.y) < glm::abs(r.collisionDifference.z)) {
+            r.collisionDifference.x = 0;
+            r.collisionDifference.z = 0;
+        }
+        if (glm::abs(r.collisionDifference.z) < glm::abs(r.collisionDifference.x) &&
+            glm::abs(r.collisionDifference.z) < glm::abs(r.collisionDifference.y)) {
+            r.collisionDifference.x = 0;
+            r.collisionDifference.y = 0;
+        }
+        // LOG_DEBUG("Collide! Correction " << r.collisionDifference);
+        // LOG_DEBUG("1: " << position << " " << size);
+        // LOG_DEBUG("2: " << otherPos << " " << otherRect->size);
+    }
+    return r;
+}
+
+CollisionResult SphereAndSphereCollide(SphereCollider* c1, SphereCollider* c2) {
+    float distance = glm::distance(c1->GetPosition(), c2->GetPosition());
+    float radii = (c1->radius + c2->radius);
+    CollisionResult r;
+    r.isColliding = distance < radii;
+    if (r.isColliding) {
+        Vector3 difference = glm::normalize(c2->GetPosition() - c1->GetPosition());
+        r.collisionDifference = difference * (radii - distance);
+    }
+    return r;
 }
 
 CollisionResult AABBAndSphereCollide(AABBCollider* rect, SphereCollider* circle) {
-    // TODO;
     Vector3 rectPosition = rect->GetPosition();
     Vector3 circPosition = circle->GetPosition();
 
@@ -115,100 +167,91 @@ CollisionResult AABBAndSphereCollide(AABBCollider* rect, SphereCollider* circle)
     return r;
 }
 
-CollisionResult AABBCollider::CollidesWith(Collider* other) {
-    if (other->GetType() == 2) {
-        // Trust the Ghetto RTTI
-        RectangleCollider* otherRect = static_cast<RectangleCollider*>(other);
-        Vector3 position = GetPosition();
-        Vector3 otherPos = otherRect->GetPosition();
-
-        float x1 = position.x;
-        float x2 = otherPos.x;
-        float y1 = position.y;
-        float y2 = otherPos.y;
-        float z1 = position.z;
-        float z2 = otherPos.z;
-
-        float w1 = size.x;
-        float w2 = otherRect->size.x;
-        float h1 = size.y;
-        float h2 = otherRect->size.y;
-        float d1 = size.z;
-        float d2 = otherRect->size.z;
-
-        bool leftCollide = (x1 < x2 + w2);
-        bool rightCollide = (x1 + w1 > x2);
-        bool topCollide = (y1 < y2 + h2);
-        bool bottomCollide = (y1 + h1 > y2);
-        bool frontCollide = (z1 < z2 + d2);
-        bool backCollide = (z1 + d1 > z2);
-
-        Vector3 myCenter    (x1 + w1 / 2.0, y1 + h1 / 2.0, z1 + d1 / 2.0);
-        Vector3 otherCenter (x2 + w2 / 2.0, y2 + h2 / 2.0, z2 + d2 / 2.0);
-
-        bool biasX = myCenter.x < otherCenter.x;
-        bool biasY = myCenter.y < otherCenter.y;
-        bool biasZ = myCenter.z < otherCenter.z;
-
-        // LOG_DEBUG("Collides " << leftCollide << " " << rightCollide <<
-        //                   " " << topCollide << " " << bottomCollide <<
-        //                   " " << frontCollide << " " << backCollide);
-        CollisionResult r;
-        r.isColliding = (leftCollide && rightCollide) && (topCollide && bottomCollide) && (frontCollide && backCollide);
-        if (r.isColliding) {
-
-            r.collisionDifference.x = !biasX ? -(x2 + w2 - x1) : x1 + w1 - x2;
-            r.collisionDifference.y = !biasY ? -(y2 + h2 - y1) : y1 + h1 - y2;
-            r.collisionDifference.z = !biasZ ? -(z2 + d2 - z1) : z1 + d1 - z2;
-
-            // Each of the collision differences allow for the box to completely
-            //   come back out. Choose the smallest magnitude to resolve
-            if (glm::abs(r.collisionDifference.x) < glm::abs(r.collisionDifference.y) &&
-                glm::abs(r.collisionDifference.x) < glm::abs(r.collisionDifference.z)) {
-                r.collisionDifference.y = 0;
-                r.collisionDifference.z = 0;
-            }
-            if (glm::abs(r.collisionDifference.y) < glm::abs(r.collisionDifference.x) &&
-                glm::abs(r.collisionDifference.y) < glm::abs(r.collisionDifference.z)) {
-                r.collisionDifference.x = 0;
-                r.collisionDifference.z = 0;
-            }
-            if (glm::abs(r.collisionDifference.z) < glm::abs(r.collisionDifference.x) &&
-                glm::abs(r.collisionDifference.z) < glm::abs(r.collisionDifference.y)) {
-                r.collisionDifference.x = 0;
-                r.collisionDifference.y = 0;
-            }
-            // LOG_DEBUG("Collide! Correction " << r.collisionDifference);
-            // LOG_DEBUG("1: " << position << " " << size);
-            // LOG_DEBUG("2: " << otherPos << " " << otherRect->size);
-        }
-        return r;
+CollisionResult TwoPhaseAndAABBCollide(TwoPhaseCollider* twoPhase, AABBCollider* aabb) {
+    if (!AABBAndAABBCollide(&twoPhase->aabbBroad, aabb).isColliding) {
+        // Early Out
+        return CollisionResult{};
     }
-    else {
+    CollisionResult finalResult;
+    for (auto& colliderOther: twoPhase->children) {
+        CollisionResult r = colliderOther->CollidesWith(aabb);
+        if (r.isColliding) {
+            finalResult.isColliding = true;
+            finalResult.collisionDifference += r.collisionDifference;
+        }
+    }
+    return finalResult;
+}
+
+CollisionResult TwoPhaseAndSphereCollide(TwoPhaseCollider* twoPhase, SphereCollider* sphere) {
+    if (!AABBAndSphereCollide(&twoPhase->aabbBroad, sphere).isColliding) {
+        // Early Out
+        return CollisionResult{};
+    }
+    CollisionResult finalResult;
+    for (auto& colliderOther: twoPhase->children) {
+        CollisionResult r = colliderOther->CollidesWith(sphere);
+        if (r.isColliding) {
+            finalResult.isColliding = true;
+            finalResult.collisionDifference += r.collisionDifference;
+        }
+    }
+    return finalResult;
+}
+
+CollisionResult TwoPhaseAndTwoPhaseCollide(TwoPhaseCollider* tp1, TwoPhaseCollider* tp2) {
+    if (!AABBAndAABBCollide(&tp1->aabbBroad, &tp2->aabbBroad).isColliding) {
+        // Early Out
+        return CollisionResult{};
+    }
+    CollisionResult finalResult;
+    for (auto& collider : tp2->children) {
+        CollisionResult r = tp1->CollidesWith(collider);
+        if (r.isColliding) {
+            finalResult.isColliding = true;
+            finalResult.collisionDifference += r.collisionDifference;
+        }
+    }
+    return finalResult;
+}
+
+CollisionResult AABBCollider::CollidesWith(Collider* other) {
+    if (other->GetType() == 3) {
         CollisionResult r = AABBAndSphereCollide(this, static_cast<SphereCollider*>(other));
         r.collisionDifference *= -1;
         return r;
     }
+    else if (other->GetType() == 2) {
+        // AABB Collider vs AABB Collider
+        return AABBAndAABBCollide(this, static_cast<AABBCollider*>(other));
+    }
 }
 
 CollisionResult SphereCollider::CollidesWith(Collider* other) {
-    if (other->GetType() == 3) {
-        // Trust the RTTI
-        CircleCollider* otherCirc = static_cast<CircleCollider*>(other);
-        float distance = glm::distance(GetPosition(), otherCirc->GetPosition());
-        float radii = (radius + otherCirc->radius);
-        CollisionResult r;
-        r.isColliding = distance < radii;
-        if (r.isColliding) {
-            Vector3 difference = glm::normalize(otherCirc->GetPosition() - GetPosition());
-            r.collisionDifference = difference * (radii - distance);
-        }
-        return r;
-    }
-    else {
+    if (other->GetType() == 2) {
         return AABBAndSphereCollide(static_cast<AABBCollider*>(other), this);
     }
+    else if (other->GetType() == 3) {
+        // Trust the RTTI
+        return SphereAndSphereCollide(this, static_cast<SphereCollider*>(other));
+    }
 }
+
+CollisionResult TwoPhaseCollider::CollidesWith(TwoPhaseCollider* other) {
+    return TwoPhaseAndTwoPhaseCollide(this, other);
+}
+
+CollisionResult TwoPhaseCollider::CollidesWith(Collider* other) {
+    if (other->GetType() == 2) {
+        return TwoPhaseAndAABBCollide(this, static_cast<AABBCollider*>(other));
+    }
+    else if (other->GetType() == 3) {
+        // Trust the RTTI
+        return TwoPhaseAndSphereCollide(this, static_cast<SphereCollider*>(other));
+    }
+    return CollisionResult{};
+}
+
 
 CollisionResult AABBCollider::CollidesWith(const Vector3& p1, const Vector3& p2) {
     // TODO:
@@ -216,8 +259,8 @@ CollisionResult AABBCollider::CollidesWith(const Vector3& p1, const Vector3& p2)
 }
 
 bool AABBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
-    Vector3 pt_min = position;
-    Vector3 pt_max = position + size;
+    Vector3 pt_min = GetPosition();
+    Vector3 pt_max = GetPosition() + size;
     Vector3 invDirection = 1.0f / ray.direction;
 
     // r.org is origin of ray
@@ -248,6 +291,15 @@ bool AABBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
     result.isHit = true;
     result.hitLocation = ray.startPoint + ray.direction * tmin;
     result.zDepth = tmin;
+
+    LOG_DEBUG("Hit Result: ");
+    LOG_DEBUG("Box " << pt_min << " " << pt_max);
+    LOG_DEBUG("Hit Location: " << result.hitLocation);
+    Vector3 hitVec = result.hitLocation - ((pt_min + pt_max) / 2.0f);
+    Vector3 d = glm::abs(pt_min - pt_max) / 2.0f;
+    Vector3 norm = (hitVec / d) * 1.00001f;
+    result.hitNormal = glm::normalize(Vector3((int)norm.x, (int)norm.y, (int)norm.z));
+    LOG_DEBUG("Hit Normal " << result.hitNormal);
     return true;
 }
 
@@ -256,22 +308,50 @@ CollisionResult SphereCollider::CollidesWith(const Vector3& p1, const Vector3& p
     return CollisionResult();
 }
 
-bool AABBCollider::CollidePotentialWith(Collider* other) {
-    if (other->GetType() == 2) {
-        // Just do the collide check for rect / rect
-        return CollidesWith(other).isColliding;
+void TwoPhaseCollider::Serialize(JSONWriter& obj) {
+    Replicable::Serialize(obj);
+    obj.Key("c");
+    obj.StartArray();
+    // LOG_DEBUG("Colliders:");
+    for (auto& collider : children) {
+        obj.StartObject();
+        collider->Serialize(obj);
+        obj.EndObject();
     }
-    else {
-        return AABBAndSphereCollidePotential(this, static_cast<SphereCollider*>(other));
-    }
+    obj.EndArray();
 }
 
-bool SphereCollider::CollidePotentialWith(Collider* other) {
-    if (other->GetType() == 3) {
-        // Just do the collide check for circ / circ
-        return CollidesWith(other).isColliding;
+void TwoPhaseCollider::ProcessReplication(json& object) {
+    Replicable::ProcessReplication(object);
+    if (children.size() != object["c"].GetArray().Size()) {
+        // LOG_WARN("Clearing colliders");
+        for (auto& collider : children) {
+            delete collider;
+        }
+        children.clear();
     }
-    else {
-        return AABBAndSphereCollidePotential(static_cast<AABBCollider*>(other), this);
+    if (children.empty()) {
+        for (json& colliderInfo : object["c"].GetArray()) {
+            if (colliderInfo["t"].GetInt() == 0) {
+                children.push_back(new RectangleCollider(owner, Vector3(), Vector3()));
+            }
+            else if (colliderInfo["t"].GetInt() == 1) {
+                children.push_back(new CircleCollider(owner, Vector3(), 0));
+            }
+            else if (colliderInfo["t"].GetInt() == 2) {
+                children.push_back(new AABBCollider(owner, Vector3(), Vector3()));
+            }
+            else if (colliderInfo["t"].GetInt() == 3) {
+                children.push_back(new SphereCollider(owner, Vector3(), 0));
+            }
+        }
+    }
+    size_t i = 0;
+    for (json& colliderInfo : object["c"].GetArray()) {
+        children[i]->ProcessReplication(colliderInfo);
+        i += 1;
+        if (i >= children.size()) {
+            break;
+        }
     }
 }

@@ -16,7 +16,6 @@ public:
         Object(game),
         from(from),
         to(to) {
-
         collisionExclusion = (uint64_t) Tag::OBJECT;
 
         SetTag(Tag::NO_GRAVITY);
@@ -25,21 +24,22 @@ public:
         SetModel(game.GetModel("BulletTracer.obj"));
     #endif
         // SetScale(Vector3(1, 1, glm::distance(from, to) / 2.0f));
-        SetPosition(from);
-        SetRotation(glm::quat_cast(glm::lookAt(from, to, Vector::Up)));
+        SetPosition(to);
+        SetRotation(DirectionToQuaternion(glm::normalize(from - to)));
+        SetScale(Vector3(1, 1, glm::distance(from, to)));
     }
 
     virtual void Tick(Time time) override {
         Object::Tick(time);
+        float timeSince = glm::max(0.0f, (time - spawnTime) - 100.f);
+        float travel = (timeSince / 1000.f) * 100.0f;
+        float totalTravel = glm::distance(from, to);
 
-        float progress = glm::clamp((time - spawnTime) / 80.f, 0.f, 1.f);
-        // LOG_DEBUG(progress);
-        // LOG_DEBUG(progress << " " << glm::distance(from, to) << " " << glm::mix(0.0f, glm::distance(from, to), progress)));
+        float progress = 1.0f - glm::clamp(travel / totalTravel, 0.f, 1.f);
         SetScale(Vector3(1, 1, glm::mix(0.0f, glm::distance(from, to), progress)));
 
     #ifdef BUILD_SERVER
-
-        if (time > spawnTime + 500) {
+        if (travel > totalTravel) {
             game.DestroyObject(GetId());
         }
     #endif

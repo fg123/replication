@@ -5,12 +5,12 @@ newmtl Material
 Ns 323.999994
 Ka 1.000000 1.000000 1.000000
 Kd 0.011088 0.011088 0.011088
-Ks 0.294118 0.294118 0.294118
+Ks 0.000000 0.000000 0.000000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
-illum 2
-map_Bump ..\\textures\\MetalPlates006_1K-JPG\\MetalPlates006_1K_Normal.jpg
-map_Kd ..\\textures\\MetalPlates006_1K-JPG\\MetalPlates006_1K_Color.jpg
-map_Ns ..\\textures\\MetalPlates006_1K-JPG\\MetalPlates006_1K_Roughness.jpg
-refl ..\\textures\\MetalPlates006_1K-JPG\\MetalPlates006_1K_Metalness.jpg
+illum 1
+map_Bump ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Normal.jpg
+map_Kd ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Color.jpg
+map_Ns ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Roughness.jpg
+refl ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Metalness.jpg

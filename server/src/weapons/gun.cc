@@ -2,6 +2,7 @@
 #include "bullet.h"
 #include "bullet-tracer.h"
 #include "player.h"
+#include "sprite.h"
 
 void GunBase::Tick(Time time) {
     if (reloadStartTime != 0) {
@@ -24,6 +25,13 @@ void GunBase::Tick(Time time) {
 
     if (attachedTo) {
         SetRotation(attachedTo->GetRotation());
+    }
+
+    if (time > lastFireTime + cooldownBeforeSpreadReduction) {
+        currentSpread -= spreadReduction;
+        if (currentSpread < 0.f) {
+            currentSpread = 0;
+        }
     }
     WeaponObject::Tick(time);
 }
@@ -57,7 +65,13 @@ void GunBase::ActualFire(Time time) {
     }
 
     bullets -= 1;
+    lastFireTime = time;
     nextFireTime = time + (1000.0 / fireRate);
+    currentSpread += spreadIncreasePerShot;
+
+    attachedTo->pitchYawVelocity.x += 0.1;
+    attachedTo->pitchYawVelocity.y += ((std::fmod(currentSpread, 12) < 6) ? -1 : 1) *
+        (currentSpread / 4) * ((time % 128 <= 64) ? 0.02 : 0.04);
 
     Vector3 bulletEnd = attachedTo->GetPosition() + attachedTo->GetLookDirection() * 10000.f;
     RayCastRequest request;
@@ -71,17 +85,31 @@ void GunBase::ActualFire(Time time) {
 
     // Ray Cast
 #ifdef BUILD_SERVER
-    // BulletObject* bullet = new BulletObject(game, damage);
-    // Vector3 startPosition = GetPosition() + GetLookDirection();
+    // BulletObject* bullet = new BulletObject(game, damage, result);
+    // // LOG_DEBUG(GetLookDirection() << " " << fireOffset);
+    // Vector3 startPosition = GetPosition() + GetLookDirection() * fireOffset;
     // bullet->SetPosition(startPosition);
-    // bullet->SetVelocity(bulletDirection * 100.0f);
+    // bullet->SetVelocity(glm::normalize(bulletEnd - startPosition) * 50.0f);
     // game.AddObject(bullet);
     // game.RequestReplication(GetId());
 
-    BulletTracer* bullet = new BulletTracer(game, GetPosition(), bulletEnd);
+    Vector3 startPosition = GetPosition() + GetLookDirection() * fireOffset;
+    BulletTracer* bullet = new BulletTracer(game, startPosition, bulletEnd);
     game.AddObject(bullet);
+
+    if (result.isHit) {
+        SpriteObject* decal = new SpriteObject(game, "textures/BulletHole/BulletHole.png");
+        decal->SetPosition(result.hitLocation + result.hitNormal * 0.001f);
+        decal->SetScale(Vector3(0.2f, 0.2f, 0.2f));
+        LOG_DEBUG("Bullet Hole " << DirectionToQuaternion(result.hitNormal));
+        decal->SetRotation(DirectionToQuaternion(result.hitNormal));
+        game.AddObject(decal);
+    }
+
     game.RequestReplication(GetId());
 #endif
+
+    SetDirty(true);
 }
 
 void GunBase::StartReload(Time time) {

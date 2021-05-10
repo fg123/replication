@@ -97,11 +97,11 @@ module.exports = class UICanvas {
         }
 
         // Draw Crosshair
-        const cwidth = 4;
+        const cwidth = 2;
         const clength = 15;
         const x = Math.round(width / 2);
         const y = Math.round(height / 2);
-        const spread = 5;
+        const spread = weapon.spread + 5;
         this.context.fillStyle = "black";
         this.DrawCrosshair(x, y, cwidth + 4, clength + 4, spread);
         this.context.fillStyle = "white";

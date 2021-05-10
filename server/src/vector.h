@@ -29,4 +29,11 @@ inline bool SameSign(T a, T b) {
     return (a * b) > 0;
 }
 
+inline Quaternion DirectionToQuaternion(const Vector3& direction) {
+    if (glm::length(glm::cross(direction, Vector::Up)) <= 0.0001f) {
+        // Let Left be the Roll
+        return glm::quat_cast(glm::lookAt(Vector3(0, 0, 0), direction, Vector::Left));
+    }
+    return glm::quat_cast(glm::lookAt(Vector3(0, 0, 0), direction, Vector::Up));
+}
 #endif

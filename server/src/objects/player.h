@@ -20,9 +20,12 @@ protected:
     REPLICATED_D(float, rotationYaw, "ry", 0.0f);
     REPLICATED_D(float, rotationPitch, "rp", 0.0f);
 
-    Vector3 inputVelocity;
+    REPLICATED(Vector3, inputVelocity, "iv");
+
 
 public:
+    REPLICATED(Vector2, pitchYawVelocity, "pyv");
+
     WeaponObject* currentWeapon = nullptr;
     WeaponObject* qWeapon = nullptr;
     WeaponObject* zWeapon = nullptr;
