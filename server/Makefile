@@ -57,9 +57,10 @@ client: $(CLIENT_OBJ)
 	cp bin/$(EXE)_client.data ../client/dist/
 
 client_prod: $(CLIENT_OBJ)
-	em++ -O3 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) -o bin/$(EXE)_client_prod.js
+	em++ -O3 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) $(WASM_LINKING_FLAGS) -o bin/$(EXE)_client_prod.js
 	cp bin/$(EXE)_client_prod.wasm ../client/dist/
 	cp bin/$(EXE)_client_prod.js ../client/dist/
+	cp bin/$(EXE)_client_prod.data ../client/dist/
 
 %.o: %.cc
 	$(CXX) $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
@@ -69,9 +70,6 @@ client_prod: $(CLIENT_OBJ)
 
 $(USOCKET)/uSockets.a:
 	$(MAKE) $(USOCKET)
-
-$(LIBASSIMP):
-	lib/build-libs.sh
 
 -include $(SERVER_DEPS)
 
