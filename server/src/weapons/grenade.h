@@ -1,16 +1,18 @@
-#ifndef GRENADE_H
-#define GRENADE_H
+#pragma once
 
 #include "input-hold-thrower.h"
 
 class GrenadeObject : public ThrownProjectile {
-    bool isPrimed = false;
+    REPLICATED_D(bool, isPrimed, "ip", false);
+
     Time startTickingTime = 0;
-    Time tickTimeDiff = 0;
+
+    REPLICATED_D(Time, tickTimeDiff, "ttd", 0);
+
     Time tickBeforeExplode = 500;
 
-    int damage = 40;
-    int damageRange = 50;
+    int damage = 25;
+    int damageRange = 5;
 
 public:
     CLASS_CREATE(GrenadeObject)
@@ -21,10 +23,6 @@ public:
 
     virtual void OnCollide(CollisionResult& result) override;
     virtual void Tick(Time time) override;
-    virtual void Serialize(JSONWriter& obj) override;
-    virtual void ProcessReplication(json& obj) override;
 };
 
 CLASS_REGISTER(GrenadeObject);
-
-#endif

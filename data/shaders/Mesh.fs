@@ -126,10 +126,7 @@ void main() {
     if (u_Material.illum == -1) {
         // Custom Model For 2D Sprite
         vec4 result = texture(u_map_Kd, FragmentTexCoords);
-        if (result.a < 0.5) {
-            discard;
-        }
-        OutputColor = vec4(result.rgb * diffuseAccum, 1);
+        OutputColor = vec4(result.rgb * diffuseAccum, result.a);
         // OutputColor = vec4(1, 0, 0, 0.5);
     }
     else if (u_Material.illum == 0) {
@@ -137,14 +134,14 @@ void main() {
     }
     else {
         if (u_Material.illum == 1) {
-            OutputColor = vec4(AmbientIntensity * GetKa()
+            OutputColor = vec4(AmbientIntensity * GetKd()
                 + GetKd() * diffuseAccum, GetD());
         }
         else {
             vec3 specularAccum = GetSpecularAccumulation();
 
             if (u_Material.illum == 2) {
-                OutputColor = vec4(AmbientIntensity * GetKa()
+                OutputColor = vec4(AmbientIntensity * GetKd()
                     + GetKd() * diffuseAccum
                     + GetKs() * specularAccum, GetD());
                 // OutputColor = vec4(1,1,1,1);

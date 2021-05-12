@@ -40,7 +40,7 @@ Game::Game(std::string mapPath, bool isProduction) : Game() {
     baseMap->SetTag(Tag::NO_GRAVITY);
     baseMap->SetIsStatic(true);
     baseMap->SetTag(Tag::GROUND);
-    baseMap->SetModel(modelManager.GetModel(0));
+    baseMap->SetModel(assetManager.GetModel(0));
     GenerateAABBCollidersFromModel(baseMap);
     AddObject(baseMap);
 }
@@ -65,13 +65,20 @@ void Game::LoadMap(std::string mapPath) {
             LOG_ERROR("Could not load model " + modelName);
             throw "Could not load model!";
         }
-        modelManager.LoadModel(modelName, modelPath, modelStream);
+        assetManager.LoadModel(modelName, modelPath, modelStream);
     }
     for (json& lightJson : obj["lights"].GetArray()) {
         // Light is an array that is serializable to Light
-        Light& light = modelManager.lights.emplace_back();
+        Light& light = assetManager.lights.emplace_back();
         ProcessReplicationDispatch(light, lightJson);
     }
+    #ifdef BUILD_CLIENT
+    for (json& audio : obj["sounds"].GetArray()) {
+        std::string audioName = audio.GetString();
+        std::string audioPath = RESOURCE_PATH("sounds/" + audioName);
+        assetManager.LoadAudio(audioName, audioPath);
+    }
+    #endif
 }
 
 Game::~Game() {
@@ -397,6 +404,7 @@ void Game::EnsureObjectExists(json& object) {
         }
         Object* obj = GetClassLookup()[objectType](*this);
         obj->SetId(id);
+        obj->createdThisFrameOnClient = true;
         gameObjects[id] = obj;
     }
 }
@@ -412,6 +420,10 @@ void Game::ProcessReplication(json& object) {
         return;
     }
     obj->ProcessReplication(object);
+    if (obj->createdThisFrameOnClient) {
+        obj->OnClientCreate();
+        obj->createdThisFrameOnClient = false;
+    }
 }
 #endif
 
@@ -551,10 +563,10 @@ void Game::RemovePlayer(PlayerSocketData* data) {
 }
 #endif
 
-void Game::GetUnitsInRange(const Vector3& position, double range,
+void Game::GetUnitsInRange(const Vector3& position, float range,
     bool includeBoundingBox, std::vector<RangeQueryResult>& results) {
 
-    CircleCollider collider { position, range };
+    SphereCollider collider { position, range };
 
     for (auto& pair : gameObjects) {
         Object* obj = pair.second;
@@ -571,7 +583,6 @@ void Game::GetUnitsInRange(const Vector3& position, double range,
     }
 }
 
-
 CollisionResult Game::CheckLineSegmentCollide(const Vector3& start,
     const Vector3& end, uint64_t includeTags) {
     CollisionResult result;
@@ -585,4 +596,16 @@ CollisionResult Game::CheckLineSegmentCollide(const Vector3& start,
         }
     }
     return CollisionResult{};
+}
+
+void Game::PlayAudio(const std::string& audio, float volume, const Vector3& position) {
+    #ifdef BUILD_CLIENT
+        audioRequests.emplace_back(assetManager.GetAudio(audio), volume, position);
+    #endif
+}
+
+void Game::PlayAudio(const std::string& audio, float volume, Object* boundObject) {
+    #ifdef BUILD_CLIENT
+        audioRequests.emplace_back(assetManager.GetAudio(audio), volume, boundObject->GetId());
+    #endif
 }

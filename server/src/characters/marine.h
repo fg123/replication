@@ -14,9 +14,9 @@ public:
     Marine(Game& game) : Marine(game, Vector3()) {}
     Marine(Game& game, Vector3 position) : PlayerObject(game, position) {
         #ifdef BUILD_SERVER
-            // qWeapon = new GrenadeThrower { game };
-            // game.AddObject(qWeapon);
-            // qWeapon->AttachToPlayer(this);
+            qWeapon = new GrenadeThrower { game };
+            game.AddObject(qWeapon);
+            qWeapon->AttachToPlayer(this);
 
             AssaultRifleObject* rifle = new AssaultRifleObject(game);
             game.AddObject(rifle);
@@ -26,9 +26,9 @@ public:
             // game.AddObject(pistol);
             // PickupWeapon(pistol);
 
-            // zWeapon = new ArtilleryStrike { game };
-            // game.AddObject(zWeapon);
-            // zWeapon->AttachToPlayer(this);
+            zWeapon = new ArtilleryStrike { game };
+            game.AddObject(zWeapon);
+            zWeapon->AttachToPlayer(this);
 
         #endif
     }

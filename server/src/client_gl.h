@@ -23,6 +23,10 @@ class ClientGL {
 
     std::vector<ShaderProgram*> shaderPrograms;
 
+    // Drawing Maps
+    std::unordered_set<Object*> opaque;
+    std::map<float, Object*> transparent;
+    std::unordered_set<Object*> foreground;
 public:
 
     ClientGL(Game& game, const char* selector);
@@ -36,4 +40,6 @@ public:
     void SetupGL();
 
     void Draw(int width, int height);
+    void DrawObject(Object* obj, int& lastProgram);
+    void DrawObjects();
 };

@@ -3,6 +3,7 @@
 
 #include "object.h"
 #include "timer.h"
+#include "asset-manager.h"
 
 #include "animation.h"
 #include "ray-cast.h"
@@ -66,11 +67,12 @@ class Game {
     std::unordered_set<Object*> newObjects;
 
     std::unordered_set<ObjectID> replicateNextTick;
+
 #endif
 
     Time gameTime;
 
-    ModelManager modelManager;
+    AssetManager assetManager;
 
 public:
     Game();
@@ -82,9 +84,21 @@ public:
 #ifdef BUILD_CLIENT
     Model* CreateNewModel() {
         Model* model = new Model;
-        modelManager.models.push_back(model);
+        assetManager.models.push_back(model);
         return model;
     }
+    struct AudioRequest {
+        Audio* audio;
+        float volume;
+        Vector3 location;
+        ObjectID boundObject = -1;
+        AudioRequest(Audio* audio, float volume,
+            const Vector3& location) : audio(audio), volume(volume), location(location) {}
+        AudioRequest(Audio* audio, float volume,
+            ObjectID boundObject) : audio(audio), volume(volume), boundObject(boundObject) {}
+    };
+
+    std::vector<AudioRequest> audioRequests;
 #endif
 
     ~Game();
@@ -154,16 +168,16 @@ public:
         return gameObjects;
     }
 
-    ModelManager& GetModelManager() {
-        return modelManager;
+    AssetManager& GetAssetManager() {
+        return assetManager;
     }
 
     Model* GetModel(ModelID id) {
-        return modelManager.GetModel(id);
+        return assetManager.GetModel(id);
     }
 
     Model* GetModel(const std::string modelName) {
-        return modelManager.GetModel(modelName);
+        return assetManager.GetModel(modelName);
     }
 
     ObjectID RequestId();
@@ -176,6 +190,9 @@ public:
         queuedCallsMutex.unlock();
     }
 
+    void PlayAudio(const std::string& audio, float volume, const Vector3& position);
+    void PlayAudio(const std::string& audio, float volume, Object* boundObject);
+
     // Communicate with Sockets (everything here must be locked)
 #ifdef BUILD_SERVER
     void AddPlayer(PlayerSocketData* data, PlayerObject* playerObject);
@@ -187,7 +204,7 @@ public:
     // Gets all units within a certain radial range (by position), if
     //   includeBoundingBox is set, counts unit if any part of bounding box
     //   is part of that range.
-    void GetUnitsInRange(const Vector3& position, double range,
+    void GetUnitsInRange(const Vector3& position, float range,
         bool includeBoundingBox,
         std::vector<RangeQueryResult>& results);
 

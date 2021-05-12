@@ -38,6 +38,8 @@ module.exports = class GameCanvas {
         this.canvas.style.height = this.clientState.height + 'px';
         this.clientState.wasm._Draw(this.clientState.width, this.clientState.height);
 
+        this.clientState.wasm._TickAudio();
+
         if (this.clientState.localPlayerObjectId) {
             if (this.clientState.localPlayerObject) {
                 this.clientState.cameraPos.x = this.clientState.localPlayerObject.client_p.x;

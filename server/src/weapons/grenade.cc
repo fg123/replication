@@ -1,12 +1,16 @@
 #include "grenade.h"
 #include "game.h"
-#include "explode.h"
+#include "explosion.h"
 
 GrenadeObject::GrenadeObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
     collisionExclusion |= (uint64_t) Tag::WEAPON;
-    AddCollider(new CircleCollider(this, Vector3(), 5.0));
-    airFriction = Vector3(1, 1, 0);
+    // AddCollider(new SphereCollider(this, Vector3(), 5.0));
+    #ifdef BUILD_SERVER
+        SetModel(game.GetModel("Grenade.obj"));
+        GenerateAABBCollidersFromModel(this);
+    #endif
+    // airFriction = Vector3(1, 1, 1);
 }
 
 void GrenadeObject::OnCollide(CollisionResult& result) {
@@ -36,32 +40,10 @@ void GrenadeObject::Tick(Time time) {
 }
 
 void GrenadeObject::Explode() {
-    // IMPLEMENT EXPLODE, scale damage as required
-    std::vector<Game::RangeQueryResult> results;
-    game.GetUnitsInRange(position, damageRange, false, results);
-
-    for (auto& result : results) {
-        // Flat Damage for now
-        if (result.first->IsTagged(Tag::PLAYER)) {
-            static_cast<PlayerObject*>(result.first)->DealDamage(damage);
-        }
-    }
 #ifdef BUILD_SERVER
+    ExplosionObject* explode = new ExplosionObject(game, damageRange, damage);
+    explode->SetPosition(GetPosition());
+    game.AddObject(explode);
     game.DestroyObject(GetId());
-    game.QueueAnimation(new ExplodeAnimation(position, damageRange));
 #endif
-}
-
-void GrenadeObject::Serialize(JSONWriter& obj) {
-    ThrownProjectile::Serialize(obj);
-    obj.Key("ip");
-    obj.Bool(isPrimed);
-    obj.Key("ttf");
-    obj.Uint64(tickTimeDiff);
-}
-
-void GrenadeObject::ProcessReplication(json& obj) {
-    ThrownProjectile::ProcessReplication(obj);
-    isPrimed = obj["ip"].GetBool();
-    tickTimeDiff = obj["ttf"].GetUint64();
 }

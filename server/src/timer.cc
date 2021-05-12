@@ -46,3 +46,26 @@ ScheduledCall* Timer::ScheduleInterval(std::function<void(Time)> function, Time 
     schedule.push_back(call);
     return call;
 }
+
+std::string TimeToString(Time time) {
+    std::ostringstream output;
+    output << std::setfill('0') << std::setw(2);
+    bool mustFill = false;
+    Time hours = time / (1000 * 3600);
+    if (hours > 0) {
+        output << hours << ":";
+        mustFill = true;
+    }
+    time %= (1000 * 3600);
+    Time minutes = time / (60 * 1000);
+    if (minutes > 0 || mustFill) {
+        output << minutes << ":";
+        mustFill = true;
+    }
+    time %= (1000 * 60);
+    Time seconds = time / 1000;
+    output << seconds << ".";
+    time %= 1000;
+    output << std::setw(3) << time;
+    return output.str();
+}

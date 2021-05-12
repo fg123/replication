@@ -154,7 +154,6 @@ void DefaultMaterialShaderProgram::PreDraw(Game& game,
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
-    glEnable(GL_DEPTH_TEST);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -164,7 +163,7 @@ void DefaultMaterialShaderProgram::PreDraw(Game& game,
     glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
 
     // Load Lights Into Shader
-    auto& lights = game.GetModelManager().lights;
+    auto& lights = game.GetAssetManager().lights;
     int numLights = lights.size();
     // LOG_DEBUG("Loading " << numLights << " into uniform");
     glUniform1i(uniformNumLights, numLights);

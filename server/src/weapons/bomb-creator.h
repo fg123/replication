@@ -30,7 +30,7 @@ public:
         }
     #ifdef BUILD_SERVER
         game.DestroyObject(GetId());
-        game.QueueAnimation(new ExplodeAnimation(position, damageRange));
+        // game.QueueAnimation(new ExplodeAnimation(position, damageRange));
     #endif
     }
 };

@@ -85,62 +85,58 @@ CollisionResult AABBAndSphereCollide(AABBCollider* rect, SphereCollider* circle)
     Vector3 circPosition = circle->GetPosition();
 
     Vector3 rectHalf (rect->size.x / 2.0f, rect->size.y / 2.0f, 0);
-    Vector3 rectCenter (
-        rectPosition.x + rectHalf.x,
-        rectPosition.y + rectHalf.y,
-        0
-    );
+    Vector3 rectCenter = rectPosition + rectHalf;
 
-    if (IsPointInRect(rectPosition, rect->size, circPosition)) {
-        // Calculate how far back to move the circle to get it out of the rectangle
-        // LOG_WARN("Circle (" << circle->GetOwner() << ") in Rectangle (" << rect->GetOwner() << ")");
+    // if (IsPointInAABB(rectPosition, rect->size, circPosition)) {
+    //     // Calculate how far back to move the circle to get it out of the rectangle
+    //     // LOG_WARN("Circle (" << circle->GetOwner() << ") in Rectangle (" << rect->GetOwner() << ")");
 
-        // LOG_DEBUG("Circle Position " << circPosition);
-        // LOG_DEBUG("Circle Velocity " << circle->GetOwner()->GetVelocity());
-        // LOG_DEBUG("Rectangle Position " << rectPosition);
-        // LOG_DEBUG("Rectangle Size " << rect->size);
+    //     // LOG_DEBUG("Circle Position " << circPosition);
+    //     // LOG_DEBUG("Circle Velocity " << circle->GetOwner()->GetVelocity());
+    //     // LOG_DEBUG("Rectangle Position " << rectPosition);
+    //     // LOG_DEBUG("Rectangle Size " << rect->size);
 
-        // Clamp backwards to edge of rectangle
-        Vector3 cVel = circle->GetOwner()->GetVelocity();
-        Vector3 rVel = rect->GetOwner()->GetVelocity();
+    //     // Clamp backwards to edge of rectangle
+    //     Vector3 cVel = circle->GetOwner()->GetVelocity();
+    //     Vector3 rVel = rect->GetOwner()->GetVelocity();
 
-        // LastFrame should be where the circle was last frame:
-        //   circPosition - cVel
-        // But, if the rectangle is moving towards the circle instead (or both are moving)
-        //   this position won't be correct.
-        Vector3 lastFrame = circPosition - cVel + rVel; // Where we were last frame
+    //     // LastFrame should be where the circle was last frame:
+    //     //   circPosition - cVel
+    //     // But, if the rectangle is moving towards the circle instead (or both are moving)
+    //     //   this position won't be correct.
+    //     Vector3 lastFrame = circPosition - cVel + rVel; // Where we were last frame
 
-        Vector3 topLeft = rectPosition - circle->radius;
-        Vector3 topRight = rectPosition;
-        topRight.x += rect->size.x + circle->radius;
-        topRight.y -= circle->radius;
+    //     Vector3 topLeft = rectPosition - circle->radius;
+    //     Vector3 topRight = rectPosition;
+    //     topRight.x += rect->size.x + circle->radius;
+    //     topRight.y -= circle->radius;
 
-        Vector3 bottomLeft = rectPosition;
-        bottomLeft.x -= circle->radius;
-        bottomLeft.y += rect->size.y + circle->radius;
-        Vector3 bottomRight = rectPosition + rect->size + circle->radius;
+    //     Vector3 bottomLeft = rectPosition;
+    //     bottomLeft.x -= circle->radius;
+    //     bottomLeft.y += rect->size.y + circle->radius;
+    //     Vector3 bottomRight = rectPosition + rect->size + circle->radius;
 
-        // Test each intersection
-        Vector3 intersectionPoint;
+    //     // Test each intersection
+    //     Vector3 intersectionPoint;
 
-        if (LineSegmentsIntersectPoint(circPosition, lastFrame, topLeft, topRight, intersectionPoint)) {
-        }
-        else if (LineSegmentsIntersectPoint(circPosition, lastFrame, topRight, bottomRight, intersectionPoint)) {
-        }
-        else if (LineSegmentsIntersectPoint(circPosition, lastFrame, bottomRight, bottomLeft, intersectionPoint)) {
-        }
-        else if (LineSegmentsIntersectPoint(circPosition, lastFrame, topLeft, bottomLeft, intersectionPoint)) {
-        }
-        else {
-            LOG_WARN("No intersection with edge!");
-        }
-        CollisionResult r;
-        r.collisionDifference = -(intersectionPoint - circPosition);
-        // LOG_DEBUG("Difference " << r.collisionDifference);
-        // LOG_DEBUG("New Pos " << circPosition - r.collisionDifference);
-        r.isColliding = true;
-        return r;
-    }
+    //     if (LineSegmentsIntersectPoint(circPosition, lastFrame, topLeft, topRight, intersectionPoint)) {
+    //     }
+    //     else if (LineSegmentsIntersectPoint(circPosition, lastFrame, topRight, bottomRight, intersectionPoint)) {
+    //     }
+    //     else if (LineSegmentsIntersectPoint(circPosition, lastFrame, bottomRight, bottomLeft, intersectionPoint)) {
+    //     }
+    //     else if (LineSegmentsIntersectPoint(circPosition, lastFrame, topLeft, bottomLeft, intersectionPoint)) {
+    //     }
+    //     else {
+    //         LOG_WARN("No intersection with edge!");
+    //     }
+    //     CollisionResult r;
+    //     r.collisionDifference = -(intersectionPoint - circPosition);
+    //     // LOG_DEBUG("Difference " << r.collisionDifference);
+    //     // LOG_DEBUG("New Pos " << circPosition - r.collisionDifference);
+    //     r.isColliding = true;
+    //     return r;
+    // }
 
     // get difference vector between both centers
     Vector3 difference = circPosition - rectCenter;
@@ -148,6 +144,9 @@ CollisionResult AABBAndSphereCollide(AABBCollider* rect, SphereCollider* circle)
 
     // add clamped value to AABB_center and we get the value of box closest to circle
     Vector3 closest = rectCenter + clamped;
+    if (IsPointInAABB(rectPosition, rect->size, circPosition)) {
+        closest = circPosition;
+    }
     // retrieve vector between center circle and closest point AABB and check if length <= radius
     // LOG_DEBUG("Difference " << closest << " " << circPosition);
     difference = closest - circPosition;

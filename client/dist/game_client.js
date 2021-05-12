@@ -92,11 +92,13 @@ Module.expectedDataFileDownloads++;
    Module["FS_createPath"]("/", "maps", true, true);
    Module["FS_createPath"]("/", "models", true, true);
    Module["FS_createPath"]("/", "shaders", true, true);
+   Module["FS_createPath"]("/", "sounds", true, true);
    Module["FS_createPath"]("/", "source", true, true);
    Module["FS_createPath"]("/", "textures", true, true);
    Module["FS_createPath"]("/textures", "Bricks059_2K-JPG", true, true);
    Module["FS_createPath"]("/textures", "BulletHole", true, true);
    Module["FS_createPath"]("/textures", "Grass003_1K-JPG", true, true);
+   Module["FS_createPath"]("/textures", "Lava004_1K-JPG", true, true);
    Module["FS_createPath"]("/textures", "Metal038_1K-JPG", true, true);
    Module["FS_createPath"]("/textures", "MetalPlates006_1K-JPG", true, true);
    Module["FS_createPath"]("/textures", "Rock035_1K-JPG", true, true);
@@ -164,336 +166,486 @@ Module.expectedDataFileDownloads++;
   "files": [ {
    "filename": "/maps/map1.json",
    "start": 0,
-   "end": 37033,
+   "end": 37192,
    "audio": 0
   }, {
    "filename": "/maps/map1.json.bak",
-   "start": 37033,
-   "end": 82173,
+   "start": 37192,
+   "end": 82332,
+   "audio": 0
+  }, {
+   "filename": "/models/Artillery.mtl",
+   "start": 82332,
+   "end": 82623,
+   "audio": 0
+  }, {
+   "filename": "/models/Artillery.obj",
+   "start": 82623,
+   "end": 3247011,
+   "audio": 0
+  }, {
+   "filename": "/models/ArtilleryIndicator.mtl",
+   "start": 3247011,
+   "end": 3247263,
+   "audio": 0
+  }, {
+   "filename": "/models/ArtilleryIndicator.obj",
+   "start": 3247263,
+   "end": 3293689,
    "audio": 0
   }, {
    "filename": "/models/Bullet.mtl",
-   "start": 82173,
-   "end": 82414,
+   "start": 3293689,
+   "end": 3293930,
    "audio": 0
   }, {
    "filename": "/models/Bullet.obj",
-   "start": 82414,
-   "end": 110683,
+   "start": 3293930,
+   "end": 3322199,
    "audio": 0
   }, {
    "filename": "/models/BulletTracer.mtl",
-   "start": 110683,
-   "end": 110964,
+   "start": 3322199,
+   "end": 3322480,
    "audio": 0
   }, {
    "filename": "/models/BulletTracer.obj",
-   "start": 110964,
-   "end": 120393,
+   "start": 3322480,
+   "end": 3331909,
    "audio": 0
   }, {
    "filename": "/models/cube.obj",
-   "start": 120393,
-   "end": 120934,
+   "start": 3331909,
+   "end": 3332450,
+   "audio": 0
+  }, {
+   "filename": "/models/Explosion.mtl",
+   "start": 3332450,
+   "end": 3332871,
+   "audio": 0
+  }, {
+   "filename": "/models/Explosion.obj",
+   "start": 3332871,
+   "end": 4571423,
+   "audio": 0
+  }, {
+   "filename": "/models/Grenade.mtl",
+   "start": 4571423,
+   "end": 4572022,
+   "audio": 0
+  }, {
+   "filename": "/models/Grenade.obj",
+   "start": 4572022,
+   "end": 5479004,
    "audio": 0
   }, {
    "filename": "/models/island.obj",
-   "start": 120934,
-   "end": 1553508,
+   "start": 5479004,
+   "end": 6911578,
    "audio": 0
   }, {
    "filename": "/models/Pistol.mtl",
-   "start": 1553508,
-   "end": 1553746,
+   "start": 6911578,
+   "end": 6911816,
    "audio": 0
   }, {
    "filename": "/models/Pistol.obj",
-   "start": 1553746,
-   "end": 1555797,
+   "start": 6911816,
+   "end": 6913867,
    "audio": 0
   }, {
    "filename": "/models/Player.mtl",
-   "start": 1555797,
-   "end": 1556037,
+   "start": 6913867,
+   "end": 6914107,
    "audio": 0
   }, {
    "filename": "/models/Player.obj",
-   "start": 1556037,
-   "end": 2328160,
+   "start": 6914107,
+   "end": 7686230,
    "audio": 0
   }, {
    "filename": "/models/Quad.obj",
-   "start": 2328160,
-   "end": 2328504,
+   "start": 7686230,
+   "end": 7686574,
    "audio": 0
   }, {
    "filename": "/models/Rifle.mtl",
-   "start": 2328504,
-   "end": 2328989,
+   "start": 7686574,
+   "end": 7687059,
    "audio": 0
   }, {
    "filename": "/models/Rifle.obj",
-   "start": 2328989,
-   "end": 2343592,
+   "start": 7687059,
+   "end": 7701662,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.mtl",
-   "start": 2343592,
-   "end": 2345112,
+   "start": 7701662,
+   "end": 7702714,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.obj",
-   "start": 2345112,
-   "end": 2359654,
+   "start": 7702714,
+   "end": 7717256,
    "audio": 0
   }, {
    "filename": "/models/suzanne.obj",
-   "start": 2359654,
-   "end": 2438410,
+   "start": 7717256,
+   "end": 7796012,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.fs",
-   "start": 2438410,
-   "end": 2442268,
+   "start": 7796012,
+   "end": 7799816,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.vs",
-   "start": 2442268,
-   "end": 2443125,
+   "start": 7799816,
+   "end": 7800673,
+   "audio": 0
+  }, {
+   "filename": "/sounds/bang.wav",
+   "start": 7800673,
+   "end": 7928259,
+   "audio": 1
+  }, {
+   "filename": "/sounds/boom-old1.wav",
+   "start": 7928259,
+   "end": 7999983,
+   "audio": 1
+  }, {
+   "filename": "/sounds/boom.wav",
+   "start": 7999983,
+   "end": 8071707,
+   "audio": 1
+  }, {
+   "filename": "/sounds/incoming.wav",
+   "start": 8071707,
+   "end": 8226429,
+   "audio": 1
+  }, {
+   "filename": "/sounds/reload.wav",
+   "start": 8226429,
+   "end": 8340137,
+   "audio": 1
+  }, {
+   "filename": "/sounds/ueh.wav",
+   "start": 8340137,
+   "end": 8374997,
+   "audio": 1
+  }, {
+   "filename": "/source/Artillery.blend",
+   "start": 8374997,
+   "end": 10766725,
+   "audio": 0
+  }, {
+   "filename": "/source/Artillery.blend1",
+   "start": 10766725,
+   "end": 15523989,
+   "audio": 0
+  }, {
+   "filename": "/source/ArtilleryIndicator.blend",
+   "start": 15523989,
+   "end": 16366665,
+   "audio": 0
+  }, {
+   "filename": "/source/ArtilleryIndicator.blend1",
+   "start": 16366665,
+   "end": 17209341,
    "audio": 0
   }, {
    "filename": "/source/Bullet.blend",
-   "start": 2443125,
-   "end": 3270793,
+   "start": 17209341,
+   "end": 18037009,
    "audio": 0
   }, {
    "filename": "/source/Bullet.blend1",
-   "start": 3270793,
-   "end": 4098461,
+   "start": 18037009,
+   "end": 18864677,
    "audio": 0
   }, {
    "filename": "/source/BulletTracer.blend",
-   "start": 4098461,
-   "end": 4937705,
+   "start": 18864677,
+   "end": 19703921,
    "audio": 0
   }, {
    "filename": "/source/BulletTracer.blend1",
-   "start": 4937705,
-   "end": 5772869,
+   "start": 19703921,
+   "end": 20539085,
+   "audio": 0
+  }, {
+   "filename": "/source/Explosion.blend",
+   "start": 20539085,
+   "end": 21947433,
+   "audio": 0
+  }, {
+   "filename": "/source/Explosion.blend1",
+   "start": 21947433,
+   "end": 23053889,
+   "audio": 0
+  }, {
+   "filename": "/source/Grenade.blend",
+   "start": 23053889,
+   "end": 24638741,
+   "audio": 0
+  }, {
+   "filename": "/source/Grenade.blend1",
+   "start": 24638741,
+   "end": 26228377,
    "audio": 0
   }, {
    "filename": "/source/Pistol.blend",
-   "start": 5772869,
-   "end": 6551465,
+   "start": 26228377,
+   "end": 27006973,
    "audio": 0
   }, {
    "filename": "/source/Player.blend",
-   "start": 6551465,
-   "end": 7885949,
+   "start": 27006973,
+   "end": 28341457,
    "audio": 0
   }, {
    "filename": "/source/Player.blend1",
-   "start": 7885949,
-   "end": 9220577,
+   "start": 28341457,
+   "end": 29675941,
    "audio": 0
   }, {
    "filename": "/source/Quad.blend",
-   "start": 9220577,
-   "end": 9998309,
+   "start": 29675941,
+   "end": 30453665,
    "audio": 0
   }, {
    "filename": "/source/Quad.blend1",
-   "start": 9998309,
-   "end": 10776385,
+   "start": 30453665,
+   "end": 31231397,
    "audio": 0
   }, {
    "filename": "/source/Rifle.blend",
-   "start": 10776385,
-   "end": 11650009,
+   "start": 31231397,
+   "end": 32105021,
    "audio": 0
   }, {
    "filename": "/source/Rifle.blend1",
-   "start": 11650009,
-   "end": 12520537,
+   "start": 32105021,
+   "end": 32975549,
    "audio": 0
   }, {
    "filename": "/source/ShootingRange.blend",
-   "start": 12520537,
-   "end": 13547053,
+   "start": 32975549,
+   "end": 33980977,
    "audio": 0
   }, {
    "filename": "/source/ShootingRange.blend1",
-   "start": 13547053,
-   "end": 14573569,
+   "start": 33980977,
+   "end": 36989997,
+   "audio": 0
+  }, {
+   "filename": "/textures/Artillery.png",
+   "start": 36989997,
+   "end": 38107224,
+   "audio": 0
+  }, {
+   "filename": "/textures/Bomb.tif",
+   "start": 38107224,
+   "end": 62643484,
    "audio": 0
   }, {
    "filename": "/textures/BulletTracer.png",
-   "start": 14573569,
-   "end": 14607336,
+   "start": 62643484,
+   "end": 62677251,
+   "audio": 0
+  }, {
+   "filename": "/textures/Skydome.png",
+   "start": 62677251,
+   "end": 64349422,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_2K-JPG/Bricks059_2K_AmbientOcclusion.jpg",
-   "start": 14607336,
-   "end": 16903995,
+   "start": 64349422,
+   "end": 66646081,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_2K-JPG/Bricks059_2K_Color.jpg",
-   "start": 16903995,
-   "end": 22585841,
+   "start": 66646081,
+   "end": 72327927,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_2K-JPG/Bricks059_2K_Displacement.jpg",
-   "start": 22585841,
-   "end": 23739531,
+   "start": 72327927,
+   "end": 73481617,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_2K-JPG/Bricks059_2K_Normal.jpg",
-   "start": 23739531,
-   "end": 30551800,
+   "start": 73481617,
+   "end": 80293886,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_2K-JPG/Bricks059_2K_Roughness.jpg",
-   "start": 30551800,
-   "end": 33079923,
+   "start": 80293886,
+   "end": 82822009,
    "audio": 0
   }, {
    "filename": "/textures/BulletHole/BulletHole.png",
-   "start": 33079923,
-   "end": 33086801,
+   "start": 82822009,
+   "end": 82854213,
    "audio": 0
   }, {
    "filename": "/textures/Grass003_1K-JPG/Grass003_1K_AmbientOcclusion.jpg",
-   "start": 33086801,
-   "end": 33992228,
+   "start": 82854213,
+   "end": 83759640,
    "audio": 0
   }, {
    "filename": "/textures/Grass003_1K-JPG/Grass003_1K_Color.jpg",
-   "start": 33992228,
-   "end": 35712996,
+   "start": 83759640,
+   "end": 85480408,
    "audio": 0
   }, {
    "filename": "/textures/Grass003_1K-JPG/Grass003_1K_Displacement.jpg",
-   "start": 35712996,
-   "end": 36636353,
+   "start": 85480408,
+   "end": 86403765,
    "audio": 0
   }, {
    "filename": "/textures/Grass003_1K-JPG/Grass003_1K_Normal.jpg",
-   "start": 36636353,
-   "end": 38980021,
+   "start": 86403765,
+   "end": 88747433,
    "audio": 0
   }, {
    "filename": "/textures/Grass003_1K-JPG/Grass003_1K_Roughness.jpg",
-   "start": 38980021,
-   "end": 39835301,
+   "start": 88747433,
+   "end": 89602713,
+   "audio": 0
+  }, {
+   "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Color.jpg",
+   "start": 89602713,
+   "end": 90936144,
+   "audio": 0
+  }, {
+   "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Displacement.jpg",
+   "start": 90936144,
+   "end": 91232980,
+   "audio": 0
+  }, {
+   "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Emission.jpg",
+   "start": 91232980,
+   "end": 92563963,
+   "audio": 0
+  }, {
+   "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Normal.jpg",
+   "start": 92563963,
+   "end": 94260324,
+   "audio": 0
+  }, {
+   "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Roughness.jpg",
+   "start": 94260324,
+   "end": 94831186,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Color.jpg",
-   "start": 39835301,
-   "end": 40365126,
+   "start": 94831186,
+   "end": 95361011,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Displacement.jpg",
-   "start": 40365126,
-   "end": 40794340,
+   "start": 95361011,
+   "end": 95790225,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Metalness.jpg",
-   "start": 40794340,
-   "end": 40924344,
+   "start": 95790225,
+   "end": 95920229,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Normal.jpg",
-   "start": 40924344,
-   "end": 41989886,
+   "start": 95920229,
+   "end": 96985771,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Roughness.jpg",
-   "start": 41989886,
-   "end": 42362163,
+   "start": 96985771,
+   "end": 97358048,
    "audio": 0
   }, {
    "filename": "/textures/MetalPlates006_1K-JPG/MetalPlates006_1K_Color.jpg",
-   "start": 42362163,
-   "end": 42877852,
+   "start": 97358048,
+   "end": 97873737,
    "audio": 0
   }, {
    "filename": "/textures/MetalPlates006_1K-JPG/MetalPlates006_1K_Displacement.jpg",
-   "start": 42877852,
-   "end": 43210002,
+   "start": 97873737,
+   "end": 98205887,
    "audio": 0
   }, {
    "filename": "/textures/MetalPlates006_1K-JPG/MetalPlates006_1K_Metalness.jpg",
-   "start": 43210002,
-   "end": 43405849,
+   "start": 98205887,
+   "end": 98401734,
    "audio": 0
   }, {
    "filename": "/textures/MetalPlates006_1K-JPG/MetalPlates006_1K_Normal.jpg",
-   "start": 43405849,
-   "end": 44516860,
+   "start": 98401734,
+   "end": 99512745,
    "audio": 0
   }, {
    "filename": "/textures/MetalPlates006_1K-JPG/MetalPlates006_1K_Roughness.jpg",
-   "start": 44516860,
-   "end": 45048247,
+   "start": 99512745,
+   "end": 100044132,
    "audio": 0
   }, {
    "filename": "/textures/Rock035_1K-JPG/Rock035_1K_AmbientOcclusion.jpg",
-   "start": 45048247,
-   "end": 45657680,
+   "start": 100044132,
+   "end": 100653565,
    "audio": 0
   }, {
    "filename": "/textures/Rock035_1K-JPG/Rock035_1K_Color.jpg",
-   "start": 45657680,
-   "end": 46958026,
+   "start": 100653565,
+   "end": 101953911,
    "audio": 0
   }, {
    "filename": "/textures/Rock035_1K-JPG/Rock035_1K_Displacement.jpg",
-   "start": 46958026,
-   "end": 47290524,
+   "start": 101953911,
+   "end": 102286409,
    "audio": 0
   }, {
    "filename": "/textures/Rock035_1K-JPG/Rock035_1K_Normal.jpg",
-   "start": 47290524,
-   "end": 49627164,
+   "start": 102286409,
+   "end": 104623049,
    "audio": 0
   }, {
    "filename": "/textures/Rock035_1K-JPG/Rock035_1K_Roughness.jpg",
-   "start": 49627164,
-   "end": 50339230,
+   "start": 104623049,
+   "end": 105335115,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor043_2K-JPG/WoodFloor043_2K_AmbientOcclusion.jpg",
-   "start": 50339230,
-   "end": 50966371,
+   "start": 105335115,
+   "end": 105962256,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor043_2K-JPG/WoodFloor043_2K_Color.jpg",
-   "start": 50966371,
-   "end": 53460474,
+   "start": 105962256,
+   "end": 108456359,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor043_2K-JPG/WoodFloor043_2K_Displacement.jpg",
-   "start": 53460474,
-   "end": 54141393,
+   "start": 108456359,
+   "end": 109137278,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor043_2K-JPG/WoodFloor043_2K_Metalness.jpg",
-   "start": 54141393,
-   "end": 54153339,
+   "start": 109137278,
+   "end": 109149224,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor043_2K-JPG/WoodFloor043_2K_Normal.jpg",
-   "start": 54153339,
-   "end": 55944233,
+   "start": 109149224,
+   "end": 110940118,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor043_2K-JPG/WoodFloor043_2K_Roughness.jpg",
-   "start": 55944233,
-   "end": 56881368,
+   "start": 110940118,
+   "end": 111877253,
    "audio": 0
   } ],
-  "remote_package_size": 56881368,
-  "package_uuid": "cd1da2c0-e320-44d2-b580-38336e6dcfa6"
+  "remote_package_size": 111877253,
+  "package_uuid": "630aa160-dcfc-4c61-945d-37cde725f620"
  });
 })();
 
@@ -5152,12 +5304,52 @@ function _abort() {
  abort();
 }
 
-function _emscripten_memcpy_big(dest, src, num) {
- HEAPU8.copyWithin(dest, src, src + num);
-}
-
-function _emscripten_get_heap_size() {
- return HEAPU8.length;
+function _emscripten_set_main_loop_timing(mode, value) {
+ Browser.mainLoop.timingMode = mode;
+ Browser.mainLoop.timingValue = value;
+ if (!Browser.mainLoop.func) {
+  console.error("emscripten_set_main_loop_timing: Cannot set timing mode for main loop since a main loop does not exist! Call emscripten_set_main_loop first to set one up.");
+  return 1;
+ }
+ if (mode == 0) {
+  Browser.mainLoop.scheduler = function Browser_mainLoop_scheduler_setTimeout() {
+   var timeUntilNextTick = Math.max(0, Browser.mainLoop.tickStartTime + value - _emscripten_get_now()) | 0;
+   setTimeout(Browser.mainLoop.runner, timeUntilNextTick);
+  };
+  Browser.mainLoop.method = "timeout";
+ } else if (mode == 1) {
+  Browser.mainLoop.scheduler = function Browser_mainLoop_scheduler_rAF() {
+   Browser.requestAnimationFrame(Browser.mainLoop.runner);
+  };
+  Browser.mainLoop.method = "rAF";
+ } else if (mode == 2) {
+  if (typeof setImmediate === "undefined") {
+   var setImmediates = [];
+   var emscriptenMainLoopMessageId = "setimmediate";
+   var Browser_setImmediate_messageHandler = function(event) {
+    if (event.data === emscriptenMainLoopMessageId || event.data.target === emscriptenMainLoopMessageId) {
+     event.stopPropagation();
+     setImmediates.shift()();
+    }
+   };
+   addEventListener("message", Browser_setImmediate_messageHandler, true);
+   setImmediate = function Browser_emulated_setImmediate(func) {
+    setImmediates.push(func);
+    if (ENVIRONMENT_IS_WORKER) {
+     if (Module["setImmediates"] === undefined) Module["setImmediates"] = [];
+     Module["setImmediates"].push(func);
+     postMessage({
+      target: emscriptenMainLoopMessageId
+     });
+    } else postMessage(emscriptenMainLoopMessageId, "*");
+   };
+  }
+  Browser.mainLoop.scheduler = function Browser_mainLoop_scheduler_setImmediate() {
+   setImmediate(Browser.mainLoop.runner);
+  };
+  Browser.mainLoop.method = "immediate";
+ }
+ return 0;
 }
 
 var _emscripten_get_now;
@@ -5172,6 +5364,2427 @@ if (ENVIRONMENT_IS_NODE) {
 } else _emscripten_get_now = function() {
  return performance.now();
 };
+
+function setMainLoop(browserIterationFunc, fps, simulateInfiniteLoop, arg, noSetTiming) {
+ noExitRuntime = true;
+ assert(!Browser.mainLoop.func, "emscripten_set_main_loop: there can only be one main loop function at once: call emscripten_cancel_main_loop to cancel the previous one before setting a new one with different parameters.");
+ Browser.mainLoop.func = browserIterationFunc;
+ Browser.mainLoop.arg = arg;
+ var thisMainLoopId = Browser.mainLoop.currentlyRunningMainloop;
+ Browser.mainLoop.runner = function Browser_mainLoop_runner() {
+  if (ABORT) return;
+  if (Browser.mainLoop.queue.length > 0) {
+   var start = Date.now();
+   var blocker = Browser.mainLoop.queue.shift();
+   blocker.func(blocker.arg);
+   if (Browser.mainLoop.remainingBlockers) {
+    var remaining = Browser.mainLoop.remainingBlockers;
+    var next = remaining % 1 == 0 ? remaining - 1 : Math.floor(remaining);
+    if (blocker.counted) {
+     Browser.mainLoop.remainingBlockers = next;
+    } else {
+     next = next + .5;
+     Browser.mainLoop.remainingBlockers = (8 * remaining + next) / 9;
+    }
+   }
+   console.log('main loop blocker "' + blocker.name + '" took ' + (Date.now() - start) + " ms");
+   Browser.mainLoop.updateStatus();
+   if (thisMainLoopId < Browser.mainLoop.currentlyRunningMainloop) return;
+   setTimeout(Browser.mainLoop.runner, 0);
+   return;
+  }
+  if (thisMainLoopId < Browser.mainLoop.currentlyRunningMainloop) return;
+  Browser.mainLoop.currentFrameNumber = Browser.mainLoop.currentFrameNumber + 1 | 0;
+  if (Browser.mainLoop.timingMode == 1 && Browser.mainLoop.timingValue > 1 && Browser.mainLoop.currentFrameNumber % Browser.mainLoop.timingValue != 0) {
+   Browser.mainLoop.scheduler();
+   return;
+  } else if (Browser.mainLoop.timingMode == 0) {
+   Browser.mainLoop.tickStartTime = _emscripten_get_now();
+  }
+  if (Browser.mainLoop.method === "timeout" && Module.ctx) {
+   warnOnce("Looks like you are rendering without using requestAnimationFrame for the main loop. You should use 0 for the frame rate in emscripten_set_main_loop in order to use requestAnimationFrame, as that can greatly improve your frame rates!");
+   Browser.mainLoop.method = "";
+  }
+  Browser.mainLoop.runIter(browserIterationFunc);
+  checkStackCookie();
+  if (thisMainLoopId < Browser.mainLoop.currentlyRunningMainloop) return;
+  if (typeof SDL === "object" && SDL.audio && SDL.audio.queueNewAudioData) SDL.audio.queueNewAudioData();
+  Browser.mainLoop.scheduler();
+ };
+ if (!noSetTiming) {
+  if (fps && fps > 0) _emscripten_set_main_loop_timing(0, 1e3 / fps); else _emscripten_set_main_loop_timing(1, 1);
+  Browser.mainLoop.scheduler();
+ }
+ if (simulateInfiniteLoop) {
+  throw "unwind";
+ }
+}
+
+var Browser = {
+ mainLoop: {
+  scheduler: null,
+  method: "",
+  currentlyRunningMainloop: 0,
+  func: null,
+  arg: 0,
+  timingMode: 0,
+  timingValue: 0,
+  currentFrameNumber: 0,
+  queue: [],
+  pause: function() {
+   Browser.mainLoop.scheduler = null;
+   Browser.mainLoop.currentlyRunningMainloop++;
+  },
+  resume: function() {
+   Browser.mainLoop.currentlyRunningMainloop++;
+   var timingMode = Browser.mainLoop.timingMode;
+   var timingValue = Browser.mainLoop.timingValue;
+   var func = Browser.mainLoop.func;
+   Browser.mainLoop.func = null;
+   setMainLoop(func, 0, false, Browser.mainLoop.arg, true);
+   _emscripten_set_main_loop_timing(timingMode, timingValue);
+   Browser.mainLoop.scheduler();
+  },
+  updateStatus: function() {
+   if (Module["setStatus"]) {
+    var message = Module["statusMessage"] || "Please wait...";
+    var remaining = Browser.mainLoop.remainingBlockers;
+    var expected = Browser.mainLoop.expectedBlockers;
+    if (remaining) {
+     if (remaining < expected) {
+      Module["setStatus"](message + " (" + (expected - remaining) + "/" + expected + ")");
+     } else {
+      Module["setStatus"](message);
+     }
+    } else {
+     Module["setStatus"]("");
+    }
+   }
+  },
+  runIter: function(func) {
+   if (ABORT) return;
+   if (Module["preMainLoop"]) {
+    var preRet = Module["preMainLoop"]();
+    if (preRet === false) {
+     return;
+    }
+   }
+   try {
+    func();
+   } catch (e) {
+    if (e instanceof ExitStatus) {
+     return;
+    } else if (e == "unwind") {
+     return;
+    } else {
+     if (e && typeof e === "object" && e.stack) err("exception thrown: " + [ e, e.stack ]);
+     throw e;
+    }
+   }
+   if (Module["postMainLoop"]) Module["postMainLoop"]();
+  }
+ },
+ isFullscreen: false,
+ pointerLock: false,
+ moduleContextCreatedCallbacks: [],
+ workers: [],
+ init: function() {
+  if (!Module["preloadPlugins"]) Module["preloadPlugins"] = [];
+  if (Browser.initted) return;
+  Browser.initted = true;
+  try {
+   new Blob();
+   Browser.hasBlobConstructor = true;
+  } catch (e) {
+   Browser.hasBlobConstructor = false;
+   console.log("warning: no blob constructor, cannot create blobs with mimetypes");
+  }
+  Browser.BlobBuilder = typeof MozBlobBuilder != "undefined" ? MozBlobBuilder : typeof WebKitBlobBuilder != "undefined" ? WebKitBlobBuilder : !Browser.hasBlobConstructor ? console.log("warning: no BlobBuilder") : null;
+  Browser.URLObject = typeof window != "undefined" ? window.URL ? window.URL : window.webkitURL : undefined;
+  if (!Module.noImageDecoding && typeof Browser.URLObject === "undefined") {
+   console.log("warning: Browser does not support creating object URLs. Built-in browser image decoding will not be available.");
+   Module.noImageDecoding = true;
+  }
+  var imagePlugin = {};
+  imagePlugin["canHandle"] = function imagePlugin_canHandle(name) {
+   return !Module.noImageDecoding && /\.(jpg|jpeg|png|bmp)$/i.test(name);
+  };
+  imagePlugin["handle"] = function imagePlugin_handle(byteArray, name, onload, onerror) {
+   var b = null;
+   if (Browser.hasBlobConstructor) {
+    try {
+     b = new Blob([ byteArray ], {
+      type: Browser.getMimetype(name)
+     });
+     if (b.size !== byteArray.length) {
+      b = new Blob([ new Uint8Array(byteArray).buffer ], {
+       type: Browser.getMimetype(name)
+      });
+     }
+    } catch (e) {
+     warnOnce("Blob constructor present but fails: " + e + "; falling back to blob builder");
+    }
+   }
+   if (!b) {
+    var bb = new Browser.BlobBuilder();
+    bb.append(new Uint8Array(byteArray).buffer);
+    b = bb.getBlob();
+   }
+   var url = Browser.URLObject.createObjectURL(b);
+   assert(typeof url == "string", "createObjectURL must return a url as a string");
+   var img = new Image();
+   img.onload = function img_onload() {
+    assert(img.complete, "Image " + name + " could not be decoded");
+    var canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+    Module["preloadedImages"][name] = canvas;
+    Browser.URLObject.revokeObjectURL(url);
+    if (onload) onload(byteArray);
+   };
+   img.onerror = function img_onerror(event) {
+    console.log("Image " + url + " could not be decoded");
+    if (onerror) onerror();
+   };
+   img.src = url;
+  };
+  Module["preloadPlugins"].push(imagePlugin);
+  var audioPlugin = {};
+  audioPlugin["canHandle"] = function audioPlugin_canHandle(name) {
+   return !Module.noAudioDecoding && name.substr(-4) in {
+    ".ogg": 1,
+    ".wav": 1,
+    ".mp3": 1
+   };
+  };
+  audioPlugin["handle"] = function audioPlugin_handle(byteArray, name, onload, onerror) {
+   var done = false;
+   function finish(audio) {
+    if (done) return;
+    done = true;
+    Module["preloadedAudios"][name] = audio;
+    if (onload) onload(byteArray);
+   }
+   function fail() {
+    if (done) return;
+    done = true;
+    Module["preloadedAudios"][name] = new Audio();
+    if (onerror) onerror();
+   }
+   if (Browser.hasBlobConstructor) {
+    try {
+     var b = new Blob([ byteArray ], {
+      type: Browser.getMimetype(name)
+     });
+    } catch (e) {
+     return fail();
+    }
+    var url = Browser.URLObject.createObjectURL(b);
+    assert(typeof url == "string", "createObjectURL must return a url as a string");
+    var audio = new Audio();
+    audio.addEventListener("canplaythrough", function() {
+     finish(audio);
+    }, false);
+    audio.onerror = function audio_onerror(event) {
+     if (done) return;
+     console.log("warning: browser could not fully decode audio " + name + ", trying slower base64 approach");
+     function encode64(data) {
+      var BASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+      var PAD = "=";
+      var ret = "";
+      var leftchar = 0;
+      var leftbits = 0;
+      for (var i = 0; i < data.length; i++) {
+       leftchar = leftchar << 8 | data[i];
+       leftbits += 8;
+       while (leftbits >= 6) {
+        var curr = leftchar >> leftbits - 6 & 63;
+        leftbits -= 6;
+        ret += BASE[curr];
+       }
+      }
+      if (leftbits == 2) {
+       ret += BASE[(leftchar & 3) << 4];
+       ret += PAD + PAD;
+      } else if (leftbits == 4) {
+       ret += BASE[(leftchar & 15) << 2];
+       ret += PAD;
+      }
+      return ret;
+     }
+     audio.src = "data:audio/x-" + name.substr(-3) + ";base64," + encode64(byteArray);
+     finish(audio);
+    };
+    audio.src = url;
+    Browser.safeSetTimeout(function() {
+     finish(audio);
+    }, 1e4);
+   } else {
+    return fail();
+   }
+  };
+  Module["preloadPlugins"].push(audioPlugin);
+  function pointerLockChange() {
+   Browser.pointerLock = document["pointerLockElement"] === Module["canvas"] || document["mozPointerLockElement"] === Module["canvas"] || document["webkitPointerLockElement"] === Module["canvas"] || document["msPointerLockElement"] === Module["canvas"];
+  }
+  var canvas = Module["canvas"];
+  if (canvas) {
+   canvas.requestPointerLock = canvas["requestPointerLock"] || canvas["mozRequestPointerLock"] || canvas["webkitRequestPointerLock"] || canvas["msRequestPointerLock"] || function() {};
+   canvas.exitPointerLock = document["exitPointerLock"] || document["mozExitPointerLock"] || document["webkitExitPointerLock"] || document["msExitPointerLock"] || function() {};
+   canvas.exitPointerLock = canvas.exitPointerLock.bind(document);
+   document.addEventListener("pointerlockchange", pointerLockChange, false);
+   document.addEventListener("mozpointerlockchange", pointerLockChange, false);
+   document.addEventListener("webkitpointerlockchange", pointerLockChange, false);
+   document.addEventListener("mspointerlockchange", pointerLockChange, false);
+   if (Module["elementPointerLock"]) {
+    canvas.addEventListener("click", function(ev) {
+     if (!Browser.pointerLock && Module["canvas"].requestPointerLock) {
+      Module["canvas"].requestPointerLock();
+      ev.preventDefault();
+     }
+    }, false);
+   }
+  }
+ },
+ createContext: function(canvas, useWebGL, setInModule, webGLContextAttributes) {
+  if (useWebGL && Module.ctx && canvas == Module.canvas) return Module.ctx;
+  var ctx;
+  var contextHandle;
+  if (useWebGL) {
+   var contextAttributes = {
+    antialias: false,
+    alpha: false,
+    majorVersion: 2
+   };
+   if (webGLContextAttributes) {
+    for (var attribute in webGLContextAttributes) {
+     contextAttributes[attribute] = webGLContextAttributes[attribute];
+    }
+   }
+   if (typeof GL !== "undefined") {
+    contextHandle = GL.createContext(canvas, contextAttributes);
+    if (contextHandle) {
+     ctx = GL.getContext(contextHandle).GLctx;
+    }
+   }
+  } else {
+   ctx = canvas.getContext("2d");
+  }
+  if (!ctx) return null;
+  if (setInModule) {
+   if (!useWebGL) assert(typeof GLctx === "undefined", "cannot set in module if GLctx is used, but we are a non-GL context that would replace it");
+   Module.ctx = ctx;
+   if (useWebGL) GL.makeContextCurrent(contextHandle);
+   Module.useWebGL = useWebGL;
+   Browser.moduleContextCreatedCallbacks.forEach(function(callback) {
+    callback();
+   });
+   Browser.init();
+  }
+  return ctx;
+ },
+ destroyContext: function(canvas, useWebGL, setInModule) {},
+ fullscreenHandlersInstalled: false,
+ lockPointer: undefined,
+ resizeCanvas: undefined,
+ requestFullscreen: function(lockPointer, resizeCanvas) {
+  Browser.lockPointer = lockPointer;
+  Browser.resizeCanvas = resizeCanvas;
+  if (typeof Browser.lockPointer === "undefined") Browser.lockPointer = true;
+  if (typeof Browser.resizeCanvas === "undefined") Browser.resizeCanvas = false;
+  var canvas = Module["canvas"];
+  function fullscreenChange() {
+   Browser.isFullscreen = false;
+   var canvasContainer = canvas.parentNode;
+   if ((document["fullscreenElement"] || document["mozFullScreenElement"] || document["msFullscreenElement"] || document["webkitFullscreenElement"] || document["webkitCurrentFullScreenElement"]) === canvasContainer) {
+    canvas.exitFullscreen = Browser.exitFullscreen;
+    if (Browser.lockPointer) canvas.requestPointerLock();
+    Browser.isFullscreen = true;
+    if (Browser.resizeCanvas) {
+     Browser.setFullscreenCanvasSize();
+    } else {
+     Browser.updateCanvasDimensions(canvas);
+    }
+   } else {
+    canvasContainer.parentNode.insertBefore(canvas, canvasContainer);
+    canvasContainer.parentNode.removeChild(canvasContainer);
+    if (Browser.resizeCanvas) {
+     Browser.setWindowedCanvasSize();
+    } else {
+     Browser.updateCanvasDimensions(canvas);
+    }
+   }
+   if (Module["onFullScreen"]) Module["onFullScreen"](Browser.isFullscreen);
+   if (Module["onFullscreen"]) Module["onFullscreen"](Browser.isFullscreen);
+  }
+  if (!Browser.fullscreenHandlersInstalled) {
+   Browser.fullscreenHandlersInstalled = true;
+   document.addEventListener("fullscreenchange", fullscreenChange, false);
+   document.addEventListener("mozfullscreenchange", fullscreenChange, false);
+   document.addEventListener("webkitfullscreenchange", fullscreenChange, false);
+   document.addEventListener("MSFullscreenChange", fullscreenChange, false);
+  }
+  var canvasContainer = document.createElement("div");
+  canvas.parentNode.insertBefore(canvasContainer, canvas);
+  canvasContainer.appendChild(canvas);
+  canvasContainer.requestFullscreen = canvasContainer["requestFullscreen"] || canvasContainer["mozRequestFullScreen"] || canvasContainer["msRequestFullscreen"] || (canvasContainer["webkitRequestFullscreen"] ? function() {
+   canvasContainer["webkitRequestFullscreen"](Element["ALLOW_KEYBOARD_INPUT"]);
+  } : null) || (canvasContainer["webkitRequestFullScreen"] ? function() {
+   canvasContainer["webkitRequestFullScreen"](Element["ALLOW_KEYBOARD_INPUT"]);
+  } : null);
+  canvasContainer.requestFullscreen();
+ },
+ requestFullScreen: function() {
+  abort("Module.requestFullScreen has been replaced by Module.requestFullscreen (without a capital S)");
+ },
+ exitFullscreen: function() {
+  if (!Browser.isFullscreen) {
+   return false;
+  }
+  var CFS = document["exitFullscreen"] || document["cancelFullScreen"] || document["mozCancelFullScreen"] || document["msExitFullscreen"] || document["webkitCancelFullScreen"] || function() {};
+  CFS.apply(document, []);
+  return true;
+ },
+ nextRAF: 0,
+ fakeRequestAnimationFrame: function(func) {
+  var now = Date.now();
+  if (Browser.nextRAF === 0) {
+   Browser.nextRAF = now + 1e3 / 60;
+  } else {
+   while (now + 2 >= Browser.nextRAF) {
+    Browser.nextRAF += 1e3 / 60;
+   }
+  }
+  var delay = Math.max(Browser.nextRAF - now, 0);
+  setTimeout(func, delay);
+ },
+ requestAnimationFrame: function(func) {
+  if (typeof requestAnimationFrame === "function") {
+   requestAnimationFrame(func);
+   return;
+  }
+  var RAF = Browser.fakeRequestAnimationFrame;
+  RAF(func);
+ },
+ safeCallback: function(func) {
+  return function() {
+   if (!ABORT) return func.apply(null, arguments);
+  };
+ },
+ allowAsyncCallbacks: true,
+ queuedAsyncCallbacks: [],
+ pauseAsyncCallbacks: function() {
+  Browser.allowAsyncCallbacks = false;
+ },
+ resumeAsyncCallbacks: function() {
+  Browser.allowAsyncCallbacks = true;
+  if (Browser.queuedAsyncCallbacks.length > 0) {
+   var callbacks = Browser.queuedAsyncCallbacks;
+   Browser.queuedAsyncCallbacks = [];
+   callbacks.forEach(function(func) {
+    func();
+   });
+  }
+ },
+ safeRequestAnimationFrame: function(func) {
+  return Browser.requestAnimationFrame(function() {
+   if (ABORT) return;
+   if (Browser.allowAsyncCallbacks) {
+    func();
+   } else {
+    Browser.queuedAsyncCallbacks.push(func);
+   }
+  });
+ },
+ safeSetTimeout: function(func, timeout) {
+  noExitRuntime = true;
+  return setTimeout(function() {
+   if (ABORT) return;
+   if (Browser.allowAsyncCallbacks) {
+    func();
+   } else {
+    Browser.queuedAsyncCallbacks.push(func);
+   }
+  }, timeout);
+ },
+ safeSetInterval: function(func, timeout) {
+  noExitRuntime = true;
+  return setInterval(function() {
+   if (ABORT) return;
+   if (Browser.allowAsyncCallbacks) {
+    func();
+   }
+  }, timeout);
+ },
+ getMimetype: function(name) {
+  return {
+   "jpg": "image/jpeg",
+   "jpeg": "image/jpeg",
+   "png": "image/png",
+   "bmp": "image/bmp",
+   "ogg": "audio/ogg",
+   "wav": "audio/wav",
+   "mp3": "audio/mpeg"
+  }[name.substr(name.lastIndexOf(".") + 1)];
+ },
+ getUserMedia: function(func) {
+  if (!window.getUserMedia) {
+   window.getUserMedia = navigator["getUserMedia"] || navigator["mozGetUserMedia"];
+  }
+  window.getUserMedia(func);
+ },
+ getMovementX: function(event) {
+  return event["movementX"] || event["mozMovementX"] || event["webkitMovementX"] || 0;
+ },
+ getMovementY: function(event) {
+  return event["movementY"] || event["mozMovementY"] || event["webkitMovementY"] || 0;
+ },
+ getMouseWheelDelta: function(event) {
+  var delta = 0;
+  switch (event.type) {
+  case "DOMMouseScroll":
+   delta = event.detail / 3;
+   break;
+
+  case "mousewheel":
+   delta = event.wheelDelta / 120;
+   break;
+
+  case "wheel":
+   delta = event.deltaY;
+   switch (event.deltaMode) {
+   case 0:
+    delta /= 100;
+    break;
+
+   case 1:
+    delta /= 3;
+    break;
+
+   case 2:
+    delta *= 80;
+    break;
+
+   default:
+    throw "unrecognized mouse wheel delta mode: " + event.deltaMode;
+   }
+   break;
+
+  default:
+   throw "unrecognized mouse wheel event: " + event.type;
+  }
+  return delta;
+ },
+ mouseX: 0,
+ mouseY: 0,
+ mouseMovementX: 0,
+ mouseMovementY: 0,
+ touches: {},
+ lastTouches: {},
+ calculateMouseEvent: function(event) {
+  if (Browser.pointerLock) {
+   if (event.type != "mousemove" && "mozMovementX" in event) {
+    Browser.mouseMovementX = Browser.mouseMovementY = 0;
+   } else {
+    Browser.mouseMovementX = Browser.getMovementX(event);
+    Browser.mouseMovementY = Browser.getMovementY(event);
+   }
+   if (typeof SDL != "undefined") {
+    Browser.mouseX = SDL.mouseX + Browser.mouseMovementX;
+    Browser.mouseY = SDL.mouseY + Browser.mouseMovementY;
+   } else {
+    Browser.mouseX += Browser.mouseMovementX;
+    Browser.mouseY += Browser.mouseMovementY;
+   }
+  } else {
+   var rect = Module["canvas"].getBoundingClientRect();
+   var cw = Module["canvas"].width;
+   var ch = Module["canvas"].height;
+   var scrollX = typeof window.scrollX !== "undefined" ? window.scrollX : window.pageXOffset;
+   var scrollY = typeof window.scrollY !== "undefined" ? window.scrollY : window.pageYOffset;
+   assert(typeof scrollX !== "undefined" && typeof scrollY !== "undefined", "Unable to retrieve scroll position, mouse positions likely broken.");
+   if (event.type === "touchstart" || event.type === "touchend" || event.type === "touchmove") {
+    var touch = event.touch;
+    if (touch === undefined) {
+     return;
+    }
+    var adjustedX = touch.pageX - (scrollX + rect.left);
+    var adjustedY = touch.pageY - (scrollY + rect.top);
+    adjustedX = adjustedX * (cw / rect.width);
+    adjustedY = adjustedY * (ch / rect.height);
+    var coords = {
+     x: adjustedX,
+     y: adjustedY
+    };
+    if (event.type === "touchstart") {
+     Browser.lastTouches[touch.identifier] = coords;
+     Browser.touches[touch.identifier] = coords;
+    } else if (event.type === "touchend" || event.type === "touchmove") {
+     var last = Browser.touches[touch.identifier];
+     if (!last) last = coords;
+     Browser.lastTouches[touch.identifier] = last;
+     Browser.touches[touch.identifier] = coords;
+    }
+    return;
+   }
+   var x = event.pageX - (scrollX + rect.left);
+   var y = event.pageY - (scrollY + rect.top);
+   x = x * (cw / rect.width);
+   y = y * (ch / rect.height);
+   Browser.mouseMovementX = x - Browser.mouseX;
+   Browser.mouseMovementY = y - Browser.mouseY;
+   Browser.mouseX = x;
+   Browser.mouseY = y;
+  }
+ },
+ asyncLoad: function(url, onload, onerror, noRunDep) {
+  var dep = !noRunDep ? getUniqueRunDependency("al " + url) : "";
+  readAsync(url, function(arrayBuffer) {
+   assert(arrayBuffer, 'Loading data file "' + url + '" failed (no arrayBuffer).');
+   onload(new Uint8Array(arrayBuffer));
+   if (dep) removeRunDependency(dep);
+  }, function(event) {
+   if (onerror) {
+    onerror();
+   } else {
+    throw 'Loading data file "' + url + '" failed.';
+   }
+  });
+  if (dep) addRunDependency(dep);
+ },
+ resizeListeners: [],
+ updateResizeListeners: function() {
+  var canvas = Module["canvas"];
+  Browser.resizeListeners.forEach(function(listener) {
+   listener(canvas.width, canvas.height);
+  });
+ },
+ setCanvasSize: function(width, height, noUpdates) {
+  var canvas = Module["canvas"];
+  Browser.updateCanvasDimensions(canvas, width, height);
+  if (!noUpdates) Browser.updateResizeListeners();
+ },
+ windowedWidth: 0,
+ windowedHeight: 0,
+ setFullscreenCanvasSize: function() {
+  if (typeof SDL != "undefined") {
+   var flags = SAFE_HEAP_LOAD(SDL.screen | 0, 4, 1) >>> 0;
+   flags = flags | 8388608;
+   SAFE_HEAP_STORE(SDL.screen | 0, flags | 0, 4);
+  }
+  Browser.updateCanvasDimensions(Module["canvas"]);
+  Browser.updateResizeListeners();
+ },
+ setWindowedCanvasSize: function() {
+  if (typeof SDL != "undefined") {
+   var flags = SAFE_HEAP_LOAD(SDL.screen | 0, 4, 1) >>> 0;
+   flags = flags & ~8388608;
+   SAFE_HEAP_STORE(SDL.screen | 0, flags | 0, 4);
+  }
+  Browser.updateCanvasDimensions(Module["canvas"]);
+  Browser.updateResizeListeners();
+ },
+ updateCanvasDimensions: function(canvas, wNative, hNative) {
+  if (wNative && hNative) {
+   canvas.widthNative = wNative;
+   canvas.heightNative = hNative;
+  } else {
+   wNative = canvas.widthNative;
+   hNative = canvas.heightNative;
+  }
+  var w = wNative;
+  var h = hNative;
+  if (Module["forcedAspectRatio"] && Module["forcedAspectRatio"] > 0) {
+   if (w / h < Module["forcedAspectRatio"]) {
+    w = Math.round(h * Module["forcedAspectRatio"]);
+   } else {
+    h = Math.round(w / Module["forcedAspectRatio"]);
+   }
+  }
+  if ((document["fullscreenElement"] || document["mozFullScreenElement"] || document["msFullscreenElement"] || document["webkitFullscreenElement"] || document["webkitCurrentFullScreenElement"]) === canvas.parentNode && typeof screen != "undefined") {
+   var factor = Math.min(screen.width / w, screen.height / h);
+   w = Math.round(w * factor);
+   h = Math.round(h * factor);
+  }
+  if (Browser.resizeCanvas) {
+   if (canvas.width != w) canvas.width = w;
+   if (canvas.height != h) canvas.height = h;
+   if (typeof canvas.style != "undefined") {
+    canvas.style.removeProperty("width");
+    canvas.style.removeProperty("height");
+   }
+  } else {
+   if (canvas.width != wNative) canvas.width = wNative;
+   if (canvas.height != hNative) canvas.height = hNative;
+   if (typeof canvas.style != "undefined") {
+    if (w != wNative || h != hNative) {
+     canvas.style.setProperty("width", w + "px", "important");
+     canvas.style.setProperty("height", h + "px", "important");
+    } else {
+     canvas.style.removeProperty("width");
+     canvas.style.removeProperty("height");
+    }
+   }
+  }
+ },
+ wgetRequests: {},
+ nextWgetRequestHandle: 0,
+ getNextWgetRequestHandle: function() {
+  var handle = Browser.nextWgetRequestHandle;
+  Browser.nextWgetRequestHandle++;
+  return handle;
+ }
+};
+
+var AL = {
+ QUEUE_INTERVAL: 25,
+ QUEUE_LOOKAHEAD: .1,
+ DEVICE_NAME: "Emscripten OpenAL",
+ CAPTURE_DEVICE_NAME: "Emscripten OpenAL capture",
+ ALC_EXTENSIONS: {
+  ALC_SOFT_pause_device: true,
+  ALC_SOFT_HRTF: true
+ },
+ AL_EXTENSIONS: {
+  AL_EXT_float32: true,
+  AL_SOFT_loop_points: true,
+  AL_SOFT_source_length: true,
+  AL_EXT_source_distance_model: true,
+  AL_SOFT_source_spatialize: true
+ },
+ _alcErr: 0,
+ alcErr: 0,
+ deviceRefCounts: {},
+ alcStringCache: {},
+ paused: false,
+ stringCache: {},
+ contexts: {},
+ currentCtx: null,
+ buffers: {
+  0: {
+   id: 0,
+   refCount: 0,
+   audioBuf: null,
+   frequency: 0,
+   bytesPerSample: 2,
+   channels: 1,
+   length: 0
+  }
+ },
+ paramArray: [],
+ _nextId: 1,
+ newId: function() {
+  return AL.freeIds.length > 0 ? AL.freeIds.pop() : AL._nextId++;
+ },
+ freeIds: [],
+ scheduleContextAudio: function(ctx) {
+  if (Browser.mainLoop.timingMode === 1 && document["visibilityState"] != "visible") {
+   return;
+  }
+  for (var i in ctx.sources) {
+   AL.scheduleSourceAudio(ctx.sources[i]);
+  }
+ },
+ scheduleSourceAudio: function(src, lookahead) {
+  if (Browser.mainLoop.timingMode === 1 && document["visibilityState"] != "visible") {
+   return;
+  }
+  if (src.state !== 4114) {
+   return;
+  }
+  var currentTime = AL.updateSourceTime(src);
+  var startTime = src.bufStartTime;
+  var startOffset = src.bufOffset;
+  var bufCursor = src.bufsProcessed;
+  for (var i = 0; i < src.audioQueue.length; i++) {
+   var audioSrc = src.audioQueue[i];
+   startTime = audioSrc._startTime + audioSrc._duration;
+   startOffset = 0;
+   bufCursor += audioSrc._skipCount + 1;
+  }
+  if (!lookahead) {
+   lookahead = AL.QUEUE_LOOKAHEAD;
+  }
+  var lookaheadTime = currentTime + lookahead;
+  var skipCount = 0;
+  while (startTime < lookaheadTime) {
+   if (bufCursor >= src.bufQueue.length) {
+    if (src.looping) {
+     bufCursor %= src.bufQueue.length;
+    } else {
+     break;
+    }
+   }
+   var buf = src.bufQueue[bufCursor % src.bufQueue.length];
+   if (buf.length === 0) {
+    skipCount++;
+    if (skipCount === src.bufQueue.length) {
+     break;
+    }
+   } else {
+    var audioSrc = src.context.audioCtx.createBufferSource();
+    audioSrc.buffer = buf.audioBuf;
+    audioSrc.playbackRate.value = src.playbackRate;
+    if (buf.audioBuf._loopStart || buf.audioBuf._loopEnd) {
+     audioSrc.loopStart = buf.audioBuf._loopStart;
+     audioSrc.loopEnd = buf.audioBuf._loopEnd;
+    }
+    var duration = 0;
+    if (src.type === 4136 && src.looping) {
+     duration = Number.POSITIVE_INFINITY;
+     audioSrc.loop = true;
+     if (buf.audioBuf._loopStart) {
+      audioSrc.loopStart = buf.audioBuf._loopStart;
+     }
+     if (buf.audioBuf._loopEnd) {
+      audioSrc.loopEnd = buf.audioBuf._loopEnd;
+     }
+    } else {
+     duration = (buf.audioBuf.duration - startOffset) / src.playbackRate;
+    }
+    audioSrc._startOffset = startOffset;
+    audioSrc._duration = duration;
+    audioSrc._skipCount = skipCount;
+    skipCount = 0;
+    audioSrc.connect(src.gain);
+    if (typeof audioSrc.start !== "undefined") {
+     startTime = Math.max(startTime, src.context.audioCtx.currentTime);
+     audioSrc.start(startTime, startOffset);
+    } else if (typeof audioSrc.noteOn !== "undefined") {
+     startTime = Math.max(startTime, src.context.audioCtx.currentTime);
+     audioSrc.noteOn(startTime);
+    }
+    audioSrc._startTime = startTime;
+    src.audioQueue.push(audioSrc);
+    startTime += duration;
+   }
+   startOffset = 0;
+   bufCursor++;
+  }
+ },
+ updateSourceTime: function(src) {
+  var currentTime = src.context.audioCtx.currentTime;
+  if (src.state !== 4114) {
+   return currentTime;
+  }
+  if (!isFinite(src.bufStartTime)) {
+   src.bufStartTime = currentTime - src.bufOffset / src.playbackRate;
+   src.bufOffset = 0;
+  }
+  var nextStartTime = 0;
+  while (src.audioQueue.length) {
+   var audioSrc = src.audioQueue[0];
+   src.bufsProcessed += audioSrc._skipCount;
+   nextStartTime = audioSrc._startTime + audioSrc._duration;
+   if (currentTime < nextStartTime) {
+    break;
+   }
+   src.audioQueue.shift();
+   src.bufStartTime = nextStartTime;
+   src.bufOffset = 0;
+   src.bufsProcessed++;
+  }
+  if (src.bufsProcessed >= src.bufQueue.length && !src.looping) {
+   AL.setSourceState(src, 4116);
+  } else if (src.type === 4136 && src.looping) {
+   var buf = src.bufQueue[0];
+   if (buf.length === 0) {
+    src.bufOffset = 0;
+   } else {
+    var delta = (currentTime - src.bufStartTime) * src.playbackRate;
+    var loopStart = buf.audioBuf._loopStart || 0;
+    var loopEnd = buf.audioBuf._loopEnd || buf.audioBuf.duration;
+    if (loopEnd <= loopStart) {
+     loopEnd = buf.audioBuf.duration;
+    }
+    if (delta < loopEnd) {
+     src.bufOffset = delta;
+    } else {
+     src.bufOffset = loopStart + (delta - loopStart) % (loopEnd - loopStart);
+    }
+   }
+  } else if (src.audioQueue[0]) {
+   src.bufOffset = (currentTime - src.audioQueue[0]._startTime) * src.playbackRate;
+  } else {
+   if (src.type !== 4136 && src.looping) {
+    var srcDuration = AL.sourceDuration(src) / src.playbackRate;
+    if (srcDuration > 0) {
+     src.bufStartTime += Math.floor((currentTime - src.bufStartTime) / srcDuration) * srcDuration;
+    }
+   }
+   for (var i = 0; i < src.bufQueue.length; i++) {
+    if (src.bufsProcessed >= src.bufQueue.length) {
+     if (src.looping) {
+      src.bufsProcessed %= src.bufQueue.length;
+     } else {
+      AL.setSourceState(src, 4116);
+      break;
+     }
+    }
+    var buf = src.bufQueue[src.bufsProcessed];
+    if (buf.length > 0) {
+     nextStartTime = src.bufStartTime + buf.audioBuf.duration / src.playbackRate;
+     if (currentTime < nextStartTime) {
+      src.bufOffset = (currentTime - src.bufStartTime) * src.playbackRate;
+      break;
+     }
+     src.bufStartTime = nextStartTime;
+    }
+    src.bufOffset = 0;
+    src.bufsProcessed++;
+   }
+  }
+  return currentTime;
+ },
+ cancelPendingSourceAudio: function(src) {
+  AL.updateSourceTime(src);
+  for (var i = 1; i < src.audioQueue.length; i++) {
+   var audioSrc = src.audioQueue[i];
+   audioSrc.stop();
+  }
+  if (src.audioQueue.length > 1) {
+   src.audioQueue.length = 1;
+  }
+ },
+ stopSourceAudio: function(src) {
+  for (var i = 0; i < src.audioQueue.length; i++) {
+   src.audioQueue[i].stop();
+  }
+  src.audioQueue.length = 0;
+ },
+ setSourceState: function(src, state) {
+  if (state === 4114) {
+   if (src.state === 4114 || src.state == 4116) {
+    src.bufsProcessed = 0;
+    src.bufOffset = 0;
+   } else {}
+   AL.stopSourceAudio(src);
+   src.state = 4114;
+   src.bufStartTime = Number.NEGATIVE_INFINITY;
+   AL.scheduleSourceAudio(src);
+  } else if (state === 4115) {
+   if (src.state === 4114) {
+    AL.updateSourceTime(src);
+    AL.stopSourceAudio(src);
+    src.state = 4115;
+   }
+  } else if (state === 4116) {
+   if (src.state !== 4113) {
+    src.state = 4116;
+    src.bufsProcessed = src.bufQueue.length;
+    src.bufStartTime = Number.NEGATIVE_INFINITY;
+    src.bufOffset = 0;
+    AL.stopSourceAudio(src);
+   }
+  } else if (state === 4113) {
+   if (src.state !== 4113) {
+    src.state = 4113;
+    src.bufsProcessed = 0;
+    src.bufStartTime = Number.NEGATIVE_INFINITY;
+    src.bufOffset = 0;
+    AL.stopSourceAudio(src);
+   }
+  }
+ },
+ initSourcePanner: function(src) {
+  if (src.type === 4144) {
+   return;
+  }
+  var templateBuf = AL.buffers[0];
+  for (var i = 0; i < src.bufQueue.length; i++) {
+   if (src.bufQueue[i].id !== 0) {
+    templateBuf = src.bufQueue[i];
+    break;
+   }
+  }
+  if (src.spatialize === 1 || src.spatialize === 2 && templateBuf.channels === 1) {
+   if (src.panner) {
+    return;
+   }
+   src.panner = src.context.audioCtx.createPanner();
+   AL.updateSourceGlobal(src);
+   AL.updateSourceSpace(src);
+   src.panner.connect(src.context.gain);
+   src.gain.disconnect();
+   src.gain.connect(src.panner);
+  } else {
+   if (!src.panner) {
+    return;
+   }
+   src.panner.disconnect();
+   src.gain.disconnect();
+   src.gain.connect(src.context.gain);
+   src.panner = null;
+  }
+ },
+ updateContextGlobal: function(ctx) {
+  for (var i in ctx.sources) {
+   AL.updateSourceGlobal(ctx.sources[i]);
+  }
+ },
+ updateSourceGlobal: function(src) {
+  var panner = src.panner;
+  if (!panner) {
+   return;
+  }
+  panner.refDistance = src.refDistance;
+  panner.maxDistance = src.maxDistance;
+  panner.rolloffFactor = src.rolloffFactor;
+  panner.panningModel = src.context.hrtf ? "HRTF" : "equalpower";
+  var distanceModel = src.context.sourceDistanceModel ? src.distanceModel : src.context.distanceModel;
+  switch (distanceModel) {
+  case 0:
+   panner.distanceModel = "inverse";
+   panner.refDistance = 3.40282e38;
+   break;
+
+  case 53249:
+  case 53250:
+   panner.distanceModel = "inverse";
+   break;
+
+  case 53251:
+  case 53252:
+   panner.distanceModel = "linear";
+   break;
+
+  case 53253:
+  case 53254:
+   panner.distanceModel = "exponential";
+   break;
+  }
+ },
+ updateListenerSpace: function(ctx) {
+  var listener = ctx.audioCtx.listener;
+  if (listener.positionX) {
+   listener.positionX.value = ctx.listener.position[0];
+   listener.positionY.value = ctx.listener.position[1];
+   listener.positionZ.value = ctx.listener.position[2];
+  } else {
+   listener.setPosition(ctx.listener.position[0], ctx.listener.position[1], ctx.listener.position[2]);
+  }
+  if (listener.forwardX) {
+   listener.forwardX.value = ctx.listener.direction[0];
+   listener.forwardY.value = ctx.listener.direction[1];
+   listener.forwardZ.value = ctx.listener.direction[2];
+   listener.upX.value = ctx.listener.up[0];
+   listener.upY.value = ctx.listener.up[1];
+   listener.upZ.value = ctx.listener.up[2];
+  } else {
+   listener.setOrientation(ctx.listener.direction[0], ctx.listener.direction[1], ctx.listener.direction[2], ctx.listener.up[0], ctx.listener.up[1], ctx.listener.up[2]);
+  }
+  for (var i in ctx.sources) {
+   AL.updateSourceSpace(ctx.sources[i]);
+  }
+ },
+ updateSourceSpace: function(src) {
+  if (!src.panner) {
+   return;
+  }
+  var panner = src.panner;
+  var posX = src.position[0];
+  var posY = src.position[1];
+  var posZ = src.position[2];
+  var dirX = src.direction[0];
+  var dirY = src.direction[1];
+  var dirZ = src.direction[2];
+  var listener = src.context.listener;
+  var lPosX = listener.position[0];
+  var lPosY = listener.position[1];
+  var lPosZ = listener.position[2];
+  if (src.relative) {
+   var lBackX = -listener.direction[0];
+   var lBackY = -listener.direction[1];
+   var lBackZ = -listener.direction[2];
+   var lUpX = listener.up[0];
+   var lUpY = listener.up[1];
+   var lUpZ = listener.up[2];
+   var inverseMagnitude = function(x, y, z) {
+    var length = Math.sqrt(x * x + y * y + z * z);
+    if (length < Number.EPSILON) {
+     return 0;
+    }
+    return 1 / length;
+   };
+   var invMag = inverseMagnitude(lBackX, lBackY, lBackZ);
+   lBackX *= invMag;
+   lBackY *= invMag;
+   lBackZ *= invMag;
+   invMag = inverseMagnitude(lUpX, lUpY, lUpZ);
+   lUpX *= invMag;
+   lUpY *= invMag;
+   lUpZ *= invMag;
+   var lRightX = lUpY * lBackZ - lUpZ * lBackY;
+   var lRightY = lUpZ * lBackX - lUpX * lBackZ;
+   var lRightZ = lUpX * lBackY - lUpY * lBackX;
+   invMag = inverseMagnitude(lRightX, lRightY, lRightZ);
+   lRightX *= invMag;
+   lRightY *= invMag;
+   lRightZ *= invMag;
+   lUpX = lBackY * lRightZ - lBackZ * lRightY;
+   lUpY = lBackZ * lRightX - lBackX * lRightZ;
+   lUpZ = lBackX * lRightY - lBackY * lRightX;
+   var oldX = dirX;
+   var oldY = dirY;
+   var oldZ = dirZ;
+   dirX = oldX * lRightX + oldY * lUpX + oldZ * lBackX;
+   dirY = oldX * lRightY + oldY * lUpY + oldZ * lBackY;
+   dirZ = oldX * lRightZ + oldY * lUpZ + oldZ * lBackZ;
+   oldX = posX;
+   oldY = posY;
+   oldZ = posZ;
+   posX = oldX * lRightX + oldY * lUpX + oldZ * lBackX;
+   posY = oldX * lRightY + oldY * lUpY + oldZ * lBackY;
+   posZ = oldX * lRightZ + oldY * lUpZ + oldZ * lBackZ;
+   posX += lPosX;
+   posY += lPosY;
+   posZ += lPosZ;
+  }
+  if (panner.positionX) {
+   panner.positionX.value = posX;
+   panner.positionY.value = posY;
+   panner.positionZ.value = posZ;
+  } else {
+   panner.setPosition(posX, posY, posZ);
+  }
+  if (panner.orientationX) {
+   panner.orientationX.value = dirX;
+   panner.orientationY.value = dirY;
+   panner.orientationZ.value = dirZ;
+  } else {
+   panner.setOrientation(dirX, dirY, dirZ);
+  }
+  var oldShift = src.dopplerShift;
+  var velX = src.velocity[0];
+  var velY = src.velocity[1];
+  var velZ = src.velocity[2];
+  var lVelX = listener.velocity[0];
+  var lVelY = listener.velocity[1];
+  var lVelZ = listener.velocity[2];
+  if (posX === lPosX && posY === lPosY && posZ === lPosZ || velX === lVelX && velY === lVelY && velZ === lVelZ) {
+   src.dopplerShift = 1;
+  } else {
+   var speedOfSound = src.context.speedOfSound;
+   var dopplerFactor = src.context.dopplerFactor;
+   var slX = lPosX - posX;
+   var slY = lPosY - posY;
+   var slZ = lPosZ - posZ;
+   var magSl = Math.sqrt(slX * slX + slY * slY + slZ * slZ);
+   var vls = (slX * lVelX + slY * lVelY + slZ * lVelZ) / magSl;
+   var vss = (slX * velX + slY * velY + slZ * velZ) / magSl;
+   vls = Math.min(vls, speedOfSound / dopplerFactor);
+   vss = Math.min(vss, speedOfSound / dopplerFactor);
+   src.dopplerShift = (speedOfSound - dopplerFactor * vls) / (speedOfSound - dopplerFactor * vss);
+  }
+  if (src.dopplerShift !== oldShift) {
+   AL.updateSourceRate(src);
+  }
+ },
+ updateSourceRate: function(src) {
+  if (src.state === 4114) {
+   AL.cancelPendingSourceAudio(src);
+   var audioSrc = src.audioQueue[0];
+   if (!audioSrc) {
+    return;
+   }
+   var duration;
+   if (src.type === 4136 && src.looping) {
+    duration = Number.POSITIVE_INFINITY;
+   } else {
+    duration = (audioSrc.buffer.duration - audioSrc._startOffset) / src.playbackRate;
+   }
+   audioSrc._duration = duration;
+   audioSrc.playbackRate.value = src.playbackRate;
+   AL.scheduleSourceAudio(src);
+  }
+ },
+ sourceDuration: function(src) {
+  var length = 0;
+  for (var i = 0; i < src.bufQueue.length; i++) {
+   var audioBuf = src.bufQueue[i].audioBuf;
+   length += audioBuf ? audioBuf.duration : 0;
+  }
+  return length;
+ },
+ sourceTell: function(src) {
+  AL.updateSourceTime(src);
+  var offset = 0;
+  for (var i = 0; i < src.bufsProcessed; i++) {
+   offset += src.bufQueue[i].audioBuf.duration;
+  }
+  offset += src.bufOffset;
+  return offset;
+ },
+ sourceSeek: function(src, offset) {
+  var playing = src.state == 4114;
+  if (playing) {
+   AL.setSourceState(src, 4113);
+  }
+  if (src.bufQueue[src.bufsProcessed].audioBuf !== null) {
+   src.bufsProcessed = 0;
+   while (offset > src.bufQueue[src.bufsProcessed].audioBuf.duration) {
+    offset -= src.bufQueue[src.bufsProcessed].audiobuf.duration;
+    src.bufsProcessed++;
+   }
+   src.bufOffset = offset;
+  }
+  if (playing) {
+   AL.setSourceState(src, 4114);
+  }
+ },
+ getGlobalParam: function(funcname, param) {
+  if (!AL.currentCtx) {
+   return null;
+  }
+  switch (param) {
+  case 49152:
+   return AL.currentCtx.dopplerFactor;
+
+  case 49155:
+   return AL.currentCtx.speedOfSound;
+
+  case 53248:
+   return AL.currentCtx.distanceModel;
+
+  default:
+   AL.currentCtx.err = 40962;
+   return null;
+  }
+ },
+ setGlobalParam: function(funcname, param, value) {
+  if (!AL.currentCtx) {
+   return;
+  }
+  switch (param) {
+  case 49152:
+   if (!Number.isFinite(value) || value < 0) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   AL.currentCtx.dopplerFactor = value;
+   AL.updateListenerSpace(AL.currentCtx);
+   break;
+
+  case 49155:
+   if (!Number.isFinite(value) || value <= 0) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   AL.currentCtx.speedOfSound = value;
+   AL.updateListenerSpace(AL.currentCtx);
+   break;
+
+  case 53248:
+   switch (value) {
+   case 0:
+   case 53249:
+   case 53250:
+   case 53251:
+   case 53252:
+   case 53253:
+   case 53254:
+    AL.currentCtx.distanceModel = value;
+    AL.updateContextGlobal(AL.currentCtx);
+    break;
+
+   default:
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   break;
+
+  default:
+   AL.currentCtx.err = 40962;
+   return;
+  }
+ },
+ getListenerParam: function(funcname, param) {
+  if (!AL.currentCtx) {
+   return null;
+  }
+  switch (param) {
+  case 4100:
+   return AL.currentCtx.listener.position;
+
+  case 4102:
+   return AL.currentCtx.listener.velocity;
+
+  case 4111:
+   return AL.currentCtx.listener.direction.concat(AL.currentCtx.listener.up);
+
+  case 4106:
+   return AL.currentCtx.gain.gain.value;
+
+  default:
+   AL.currentCtx.err = 40962;
+   return null;
+  }
+ },
+ setListenerParam: function(funcname, param, value) {
+  if (!AL.currentCtx) {
+   return;
+  }
+  if (value === null) {
+   AL.currentCtx.err = 40962;
+   return;
+  }
+  var listener = AL.currentCtx.listener;
+  switch (param) {
+  case 4100:
+   if (!Number.isFinite(value[0]) || !Number.isFinite(value[1]) || !Number.isFinite(value[2])) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   listener.position[0] = value[0];
+   listener.position[1] = value[1];
+   listener.position[2] = value[2];
+   AL.updateListenerSpace(AL.currentCtx);
+   break;
+
+  case 4102:
+   if (!Number.isFinite(value[0]) || !Number.isFinite(value[1]) || !Number.isFinite(value[2])) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   listener.velocity[0] = value[0];
+   listener.velocity[1] = value[1];
+   listener.velocity[2] = value[2];
+   AL.updateListenerSpace(AL.currentCtx);
+   break;
+
+  case 4106:
+   if (!Number.isFinite(value) || value < 0) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   AL.currentCtx.gain.gain.value = value;
+   break;
+
+  case 4111:
+   if (!Number.isFinite(value[0]) || !Number.isFinite(value[1]) || !Number.isFinite(value[2]) || !Number.isFinite(value[3]) || !Number.isFinite(value[4]) || !Number.isFinite(value[5])) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   listener.direction[0] = value[0];
+   listener.direction[1] = value[1];
+   listener.direction[2] = value[2];
+   listener.up[0] = value[3];
+   listener.up[1] = value[4];
+   listener.up[2] = value[5];
+   AL.updateListenerSpace(AL.currentCtx);
+   break;
+
+  default:
+   AL.currentCtx.err = 40962;
+   return;
+  }
+ },
+ getBufferParam: function(funcname, bufferId, param) {
+  if (!AL.currentCtx) {
+   return;
+  }
+  var buf = AL.buffers[bufferId];
+  if (!buf || bufferId === 0) {
+   AL.currentCtx.err = 40961;
+   return;
+  }
+  switch (param) {
+  case 8193:
+   return buf.frequency;
+
+  case 8194:
+   return buf.bytesPerSample * 8;
+
+  case 8195:
+   return buf.channels;
+
+  case 8196:
+   return buf.length * buf.bytesPerSample * buf.channels;
+
+  case 8213:
+   if (buf.length === 0) {
+    return [ 0, 0 ];
+   } else {
+    return [ (buf.audioBuf._loopStart || 0) * buf.frequency, (buf.audioBuf._loopEnd || buf.length) * buf.frequency ];
+   }
+
+  default:
+   AL.currentCtx.err = 40962;
+   return null;
+  }
+ },
+ setBufferParam: function(funcname, bufferId, param, value) {
+  if (!AL.currentCtx) {
+   return;
+  }
+  var buf = AL.buffers[bufferId];
+  if (!buf || bufferId === 0) {
+   AL.currentCtx.err = 40961;
+   return;
+  }
+  if (value === null) {
+   AL.currentCtx.err = 40962;
+   return;
+  }
+  switch (param) {
+  case 8196:
+   if (value !== 0) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   break;
+
+  case 8213:
+   if (value[0] < 0 || value[0] > buf.length || value[1] < 0 || value[1] > buf.Length || value[0] >= value[1]) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   if (buf.refCount > 0) {
+    AL.currentCtx.err = 40964;
+    return;
+   }
+   if (buf.audioBuf) {
+    buf.audioBuf._loopStart = value[0] / buf.frequency;
+    buf.audioBuf._loopEnd = value[1] / buf.frequency;
+   }
+   break;
+
+  default:
+   AL.currentCtx.err = 40962;
+   return;
+  }
+ },
+ getSourceParam: function(funcname, sourceId, param) {
+  if (!AL.currentCtx) {
+   return null;
+  }
+  var src = AL.currentCtx.sources[sourceId];
+  if (!src) {
+   AL.currentCtx.err = 40961;
+   return null;
+  }
+  switch (param) {
+  case 514:
+   return src.relative;
+
+  case 4097:
+   return src.coneInnerAngle;
+
+  case 4098:
+   return src.coneOuterAngle;
+
+  case 4099:
+   return src.pitch;
+
+  case 4100:
+   return src.position;
+
+  case 4101:
+   return src.direction;
+
+  case 4102:
+   return src.velocity;
+
+  case 4103:
+   return src.looping;
+
+  case 4105:
+   if (src.type === 4136) {
+    return src.bufQueue[0].id;
+   } else {
+    return 0;
+   }
+
+  case 4106:
+   return src.gain.gain.value;
+
+  case 4109:
+   return src.minGain;
+
+  case 4110:
+   return src.maxGain;
+
+  case 4112:
+   return src.state;
+
+  case 4117:
+   if (src.bufQueue.length === 1 && src.bufQueue[0].id === 0) {
+    return 0;
+   } else {
+    return src.bufQueue.length;
+   }
+
+  case 4118:
+   if (src.bufQueue.length === 1 && src.bufQueue[0].id === 0 || src.looping) {
+    return 0;
+   } else {
+    return src.bufsProcessed;
+   }
+
+  case 4128:
+   return src.refDistance;
+
+  case 4129:
+   return src.rolloffFactor;
+
+  case 4130:
+   return src.coneOuterGain;
+
+  case 4131:
+   return src.maxDistance;
+
+  case 4132:
+   return AL.sourceTell(src);
+
+  case 4133:
+   var offset = AL.sourceTell(src);
+   if (offset > 0) {
+    offset *= src.bufQueue[0].frequency;
+   }
+   return offset;
+
+  case 4134:
+   var offset = AL.sourceTell(src);
+   if (offset > 0) {
+    offset *= src.bufQueue[0].frequency * src.bufQueue[0].bytesPerSample;
+   }
+   return offset;
+
+  case 4135:
+   return src.type;
+
+  case 4628:
+   return src.spatialize;
+
+  case 8201:
+   var length = 0;
+   var bytesPerFrame = 0;
+   for (var i = 0; i < src.bufQueue.length; i++) {
+    length += src.bufQueue[i].length;
+    if (src.bufQueue[i].id !== 0) {
+     bytesPerFrame = src.bufQueue[i].bytesPerSample * src.bufQueue[i].channels;
+    }
+   }
+   return length * bytesPerFrame;
+
+  case 8202:
+   var length = 0;
+   for (var i = 0; i < src.bufQueue.length; i++) {
+    length += src.bufQueue[i].length;
+   }
+   return length;
+
+  case 8203:
+   return AL.sourceDuration(src);
+
+  case 53248:
+   return src.distanceModel;
+
+  default:
+   AL.currentCtx.err = 40962;
+   return null;
+  }
+ },
+ setSourceParam: function(funcname, sourceId, param, value) {
+  if (!AL.currentCtx) {
+   return;
+  }
+  var src = AL.currentCtx.sources[sourceId];
+  if (!src) {
+   AL.currentCtx.err = 40961;
+   return;
+  }
+  if (value === null) {
+   AL.currentCtx.err = 40962;
+   return;
+  }
+  switch (param) {
+  case 514:
+   if (value === 1) {
+    src.relative = true;
+    AL.updateSourceSpace(src);
+   } else if (value === 0) {
+    src.relative = false;
+    AL.updateSourceSpace(src);
+   } else {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   break;
+
+  case 4097:
+   if (!Number.isFinite(value)) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.coneInnerAngle = value;
+   if (src.panner) {
+    src.panner.coneInnerAngle = value % 360;
+   }
+   break;
+
+  case 4098:
+   if (!Number.isFinite(value)) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.coneOuterAngle = value;
+   if (src.panner) {
+    src.panner.coneOuterAngle = value % 360;
+   }
+   break;
+
+  case 4099:
+   if (!Number.isFinite(value) || value <= 0) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   if (src.pitch === value) {
+    break;
+   }
+   src.pitch = value;
+   AL.updateSourceRate(src);
+   break;
+
+  case 4100:
+   if (!Number.isFinite(value[0]) || !Number.isFinite(value[1]) || !Number.isFinite(value[2])) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.position[0] = value[0];
+   src.position[1] = value[1];
+   src.position[2] = value[2];
+   AL.updateSourceSpace(src);
+   break;
+
+  case 4101:
+   if (!Number.isFinite(value[0]) || !Number.isFinite(value[1]) || !Number.isFinite(value[2])) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.direction[0] = value[0];
+   src.direction[1] = value[1];
+   src.direction[2] = value[2];
+   AL.updateSourceSpace(src);
+   break;
+
+  case 4102:
+   if (!Number.isFinite(value[0]) || !Number.isFinite(value[1]) || !Number.isFinite(value[2])) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.velocity[0] = value[0];
+   src.velocity[1] = value[1];
+   src.velocity[2] = value[2];
+   AL.updateSourceSpace(src);
+   break;
+
+  case 4103:
+   if (value === 1) {
+    src.looping = true;
+    AL.updateSourceTime(src);
+    if (src.type === 4136 && src.audioQueue.length > 0) {
+     var audioSrc = src.audioQueue[0];
+     audioSrc.loop = true;
+     audioSrc._duration = Number.POSITIVE_INFINITY;
+    }
+   } else if (value === 0) {
+    src.looping = false;
+    var currentTime = AL.updateSourceTime(src);
+    if (src.type === 4136 && src.audioQueue.length > 0) {
+     var audioSrc = src.audioQueue[0];
+     audioSrc.loop = false;
+     audioSrc._duration = src.bufQueue[0].audioBuf.duration / src.playbackRate;
+     audioSrc._startTime = currentTime - src.bufOffset / src.playbackRate;
+    }
+   } else {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   break;
+
+  case 4105:
+   if (src.state === 4114 || src.state === 4115) {
+    AL.currentCtx.err = 40964;
+    return;
+   }
+   if (value === 0) {
+    for (var i in src.bufQueue) {
+     src.bufQueue[i].refCount--;
+    }
+    src.bufQueue.length = 1;
+    src.bufQueue[0] = AL.buffers[0];
+    src.bufsProcessed = 0;
+    src.type = 4144;
+   } else {
+    var buf = AL.buffers[value];
+    if (!buf) {
+     AL.currentCtx.err = 40963;
+     return;
+    }
+    for (var i in src.bufQueue) {
+     src.bufQueue[i].refCount--;
+    }
+    src.bufQueue.length = 0;
+    buf.refCount++;
+    src.bufQueue = [ buf ];
+    src.bufsProcessed = 0;
+    src.type = 4136;
+   }
+   AL.initSourcePanner(src);
+   AL.scheduleSourceAudio(src);
+   break;
+
+  case 4106:
+   if (!Number.isFinite(value) || value < 0) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.gain.gain.value = value;
+   break;
+
+  case 4109:
+   if (!Number.isFinite(value) || value < 0 || value > Math.min(src.maxGain, 1)) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.minGain = value;
+   break;
+
+  case 4110:
+   if (!Number.isFinite(value) || value < Math.max(0, src.minGain) || value > 1) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.maxGain = value;
+   break;
+
+  case 4128:
+   if (!Number.isFinite(value) || value < 0) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.refDistance = value;
+   if (src.panner) {
+    src.panner.refDistance = value;
+   }
+   break;
+
+  case 4129:
+   if (!Number.isFinite(value) || value < 0) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.rolloffFactor = value;
+   if (src.panner) {
+    src.panner.rolloffFactor = value;
+   }
+   break;
+
+  case 4130:
+   if (!Number.isFinite(value) || value < 0 || value > 1) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.coneOuterGain = value;
+   if (src.panner) {
+    src.panner.coneOuterGain = value;
+   }
+   break;
+
+  case 4131:
+   if (!Number.isFinite(value) || value < 0) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.maxDistance = value;
+   if (src.panner) {
+    src.panner.maxDistance = value;
+   }
+   break;
+
+  case 4132:
+   if (value < 0 || value > AL.sourceDuration(src)) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   AL.sourceSeek(src, value);
+   break;
+
+  case 4133:
+   var srcLen = AL.sourceDuration(src);
+   if (srcLen > 0) {
+    var frequency;
+    for (var bufId in src.bufQueue) {
+     if (bufId) {
+      frequency = src.bufQueue[bufId].frequency;
+      break;
+     }
+    }
+    value /= frequency;
+   }
+   if (value < 0 || value > srcLen) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   AL.sourceSeek(src, value);
+   break;
+
+  case 4134:
+   var srcLen = AL.sourceDuration(src);
+   if (srcLen > 0) {
+    var bytesPerSec;
+    for (var bufId in src.bufQueue) {
+     if (bufId) {
+      var buf = src.bufQueue[bufId];
+      bytesPerSec = buf.frequency * buf.bytesPerSample * buf.channels;
+      break;
+     }
+    }
+    value /= bytesPerSec;
+   }
+   if (value < 0 || value > srcLen) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   AL.sourceSeek(src, value);
+   break;
+
+  case 4628:
+   if (value !== 0 && value !== 1 && value !== 2) {
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   src.spatialize = value;
+   AL.initSourcePanner(src);
+   break;
+
+  case 8201:
+  case 8202:
+  case 8203:
+   AL.currentCtx.err = 40964;
+   break;
+
+  case 53248:
+   switch (value) {
+   case 0:
+   case 53249:
+   case 53250:
+   case 53251:
+   case 53252:
+   case 53253:
+   case 53254:
+    src.distanceModel = value;
+    if (AL.currentCtx.sourceDistanceModel) {
+     AL.updateContextGlobal(AL.currentCtx);
+    }
+    break;
+
+   default:
+    AL.currentCtx.err = 40963;
+    return;
+   }
+   break;
+
+  default:
+   AL.currentCtx.err = 40962;
+   return;
+  }
+ },
+ captures: {},
+ sharedCaptureAudioCtx: null,
+ requireValidCaptureDevice: function(deviceId, funcname) {
+  if (deviceId === 0) {
+   AL.alcErr = 40961;
+   return null;
+  }
+  var c = AL.captures[deviceId];
+  if (!c) {
+   AL.alcErr = 40961;
+   return null;
+  }
+  var err = c.mediaStreamError;
+  if (err) {
+   AL.alcErr = 40961;
+   return null;
+  }
+  return c;
+ }
+};
+
+function _alBufferData(bufferId, format, pData, size, freq) {
+ if (!AL.currentCtx) {
+  return;
+ }
+ var buf = AL.buffers[bufferId];
+ if (!buf) {
+  AL.currentCtx.err = 40963;
+  return;
+ }
+ if (freq <= 0) {
+  AL.currentCtx.err = 40963;
+  return;
+ }
+ var audioBuf = null;
+ try {
+  switch (format) {
+  case 4352:
+   if (size > 0) {
+    audioBuf = AL.currentCtx.audioCtx.createBuffer(1, size, freq);
+    var channel0 = audioBuf.getChannelData(0);
+    for (var i = 0; i < size; ++i) {
+     channel0[i] = SAFE_HEAP_LOAD(pData++, 1, 1) * .0078125 - 1;
+    }
+   }
+   buf.bytesPerSample = 1;
+   buf.channels = 1;
+   buf.length = size;
+   break;
+
+  case 4353:
+   if (size > 0) {
+    audioBuf = AL.currentCtx.audioCtx.createBuffer(1, size >> 1, freq);
+    var channel0 = audioBuf.getChannelData(0);
+    pData >>= 1;
+    for (var i = 0; i < size >> 1; ++i) {
+     channel0[i] = SAFE_HEAP_LOAD(pData++ * 2, 2, 0) * 30517578125e-15;
+    }
+   }
+   buf.bytesPerSample = 2;
+   buf.channels = 1;
+   buf.length = size >> 1;
+   break;
+
+  case 4354:
+   if (size > 0) {
+    audioBuf = AL.currentCtx.audioCtx.createBuffer(2, size >> 1, freq);
+    var channel0 = audioBuf.getChannelData(0);
+    var channel1 = audioBuf.getChannelData(1);
+    for (var i = 0; i < size >> 1; ++i) {
+     channel0[i] = SAFE_HEAP_LOAD(pData++, 1, 1) * .0078125 - 1;
+     channel1[i] = SAFE_HEAP_LOAD(pData++, 1, 1) * .0078125 - 1;
+    }
+   }
+   buf.bytesPerSample = 1;
+   buf.channels = 2;
+   buf.length = size >> 1;
+   break;
+
+  case 4355:
+   if (size > 0) {
+    audioBuf = AL.currentCtx.audioCtx.createBuffer(2, size >> 2, freq);
+    var channel0 = audioBuf.getChannelData(0);
+    var channel1 = audioBuf.getChannelData(1);
+    pData >>= 1;
+    for (var i = 0; i < size >> 2; ++i) {
+     channel0[i] = SAFE_HEAP_LOAD(pData++ * 2, 2, 0) * 30517578125e-15;
+     channel1[i] = SAFE_HEAP_LOAD(pData++ * 2, 2, 0) * 30517578125e-15;
+    }
+   }
+   buf.bytesPerSample = 2;
+   buf.channels = 2;
+   buf.length = size >> 2;
+   break;
+
+  case 65552:
+   if (size > 0) {
+    audioBuf = AL.currentCtx.audioCtx.createBuffer(1, size >> 2, freq);
+    var channel0 = audioBuf.getChannelData(0);
+    pData >>= 2;
+    for (var i = 0; i < size >> 2; ++i) {
+     channel0[i] = SAFE_HEAP_LOAD_D(pData++ * 4, 4, 0);
+    }
+   }
+   buf.bytesPerSample = 4;
+   buf.channels = 1;
+   buf.length = size >> 2;
+   break;
+
+  case 65553:
+   if (size > 0) {
+    audioBuf = AL.currentCtx.audioCtx.createBuffer(2, size >> 3, freq);
+    var channel0 = audioBuf.getChannelData(0);
+    var channel1 = audioBuf.getChannelData(1);
+    pData >>= 2;
+    for (var i = 0; i < size >> 3; ++i) {
+     channel0[i] = SAFE_HEAP_LOAD_D(pData++ * 4, 4, 0);
+     channel1[i] = SAFE_HEAP_LOAD_D(pData++ * 4, 4, 0);
+    }
+   }
+   buf.bytesPerSample = 4;
+   buf.channels = 2;
+   buf.length = size >> 3;
+   break;
+
+  default:
+   AL.currentCtx.err = 40963;
+   return;
+  }
+  buf.frequency = freq;
+  buf.audioBuf = audioBuf;
+ } catch (e) {
+  AL.currentCtx.err = 40963;
+  return;
+ }
+}
+
+function _alSourcei(sourceId, param, value) {
+ switch (param) {
+ case 514:
+ case 4097:
+ case 4098:
+ case 4103:
+ case 4105:
+ case 4128:
+ case 4129:
+ case 4131:
+ case 4132:
+ case 4133:
+ case 4134:
+ case 4628:
+ case 8201:
+ case 8202:
+ case 53248:
+  AL.setSourceParam("alSourcei", sourceId, param, value);
+  break;
+
+ default:
+  AL.setSourceParam("alSourcei", sourceId, param, null);
+  break;
+ }
+}
+
+function _alDeleteSources(count, pSourceIds) {
+ if (!AL.currentCtx) {
+  return;
+ }
+ for (var i = 0; i < count; ++i) {
+  var srcId = SAFE_HEAP_LOAD(pSourceIds + i * 4 | 0, 4, 0) | 0;
+  if (!AL.currentCtx.sources[srcId]) {
+   AL.currentCtx.err = 40961;
+   return;
+  }
+ }
+ for (var i = 0; i < count; ++i) {
+  var srcId = SAFE_HEAP_LOAD(pSourceIds + i * 4 | 0, 4, 0) | 0;
+  AL.setSourceState(AL.currentCtx.sources[srcId], 4116);
+  _alSourcei(srcId, 4105, 0);
+  delete AL.currentCtx.sources[srcId];
+  AL.freeIds.push(srcId);
+ }
+}
+
+function _alGenBuffers(count, pBufferIds) {
+ if (!AL.currentCtx) {
+  return;
+ }
+ for (var i = 0; i < count; ++i) {
+  var buf = {
+   deviceId: AL.currentCtx.deviceId,
+   id: AL.newId(),
+   refCount: 0,
+   audioBuf: null,
+   frequency: 0,
+   bytesPerSample: 2,
+   channels: 1,
+   length: 0
+  };
+  AL.deviceRefCounts[buf.deviceId]++;
+  AL.buffers[buf.id] = buf;
+  SAFE_HEAP_STORE(pBufferIds + i * 4 | 0, buf.id | 0, 4);
+ }
+}
+
+function _alGenSources(count, pSourceIds) {
+ if (!AL.currentCtx) {
+  return;
+ }
+ for (var i = 0; i < count; ++i) {
+  var gain = AL.currentCtx.audioCtx.createGain();
+  gain.connect(AL.currentCtx.gain);
+  var src = {
+   context: AL.currentCtx,
+   id: AL.newId(),
+   type: 4144,
+   state: 4113,
+   bufQueue: [ AL.buffers[0] ],
+   audioQueue: [],
+   looping: false,
+   pitch: 1,
+   dopplerShift: 1,
+   gain: gain,
+   minGain: 0,
+   maxGain: 1,
+   panner: null,
+   bufsProcessed: 0,
+   bufStartTime: Number.NEGATIVE_INFINITY,
+   bufOffset: 0,
+   relative: false,
+   refDistance: 1,
+   maxDistance: 3.40282e38,
+   rolloffFactor: 1,
+   position: [ 0, 0, 0 ],
+   velocity: [ 0, 0, 0 ],
+   direction: [ 0, 0, 0 ],
+   coneOuterGain: 0,
+   coneInnerAngle: 360,
+   coneOuterAngle: 360,
+   distanceModel: 53250,
+   spatialize: 2,
+   get playbackRate() {
+    return this.pitch * this.dopplerShift;
+   }
+  };
+  AL.currentCtx.sources[src.id] = src;
+  SAFE_HEAP_STORE(pSourceIds + i * 4 | 0, src.id | 0, 4);
+ }
+}
+
+function _alGetSourcei(sourceId, param, pValue) {
+ var val = AL.getSourceParam("alGetSourcei", sourceId, param);
+ if (val === null) {
+  return;
+ }
+ if (!pValue) {
+  AL.currentCtx.err = 40963;
+  return;
+ }
+ switch (param) {
+ case 514:
+ case 4097:
+ case 4098:
+ case 4103:
+ case 4105:
+ case 4112:
+ case 4117:
+ case 4118:
+ case 4128:
+ case 4129:
+ case 4131:
+ case 4132:
+ case 4133:
+ case 4134:
+ case 4135:
+ case 4628:
+ case 8201:
+ case 8202:
+ case 53248:
+  SAFE_HEAP_STORE(pValue | 0, val | 0, 4);
+  break;
+
+ default:
+  AL.currentCtx.err = 40962;
+  return;
+ }
+}
+
+function _alListener3f(param, value0, value1, value2) {
+ switch (param) {
+ case 4100:
+ case 4102:
+  AL.paramArray[0] = value0;
+  AL.paramArray[1] = value1;
+  AL.paramArray[2] = value2;
+  AL.setListenerParam("alListener3f", param, AL.paramArray);
+  break;
+
+ default:
+  AL.setListenerParam("alListener3f", param, null);
+  break;
+ }
+}
+
+function _alListenerfv(param, pValues) {
+ if (!AL.currentCtx) {
+  return;
+ }
+ if (!pValues) {
+  AL.currentCtx.err = 40963;
+  return;
+ }
+ switch (param) {
+ case 4100:
+ case 4102:
+  AL.paramArray[0] = Math.fround(SAFE_HEAP_LOAD_D(pValues | 0, 4, 0));
+  AL.paramArray[1] = Math.fround(SAFE_HEAP_LOAD_D(pValues + 4 | 0, 4, 0));
+  AL.paramArray[2] = Math.fround(SAFE_HEAP_LOAD_D(pValues + 8 | 0, 4, 0));
+  AL.setListenerParam("alListenerfv", param, AL.paramArray);
+  break;
+
+ case 4111:
+  AL.paramArray[0] = Math.fround(SAFE_HEAP_LOAD_D(pValues | 0, 4, 0));
+  AL.paramArray[1] = Math.fround(SAFE_HEAP_LOAD_D(pValues + 4 | 0, 4, 0));
+  AL.paramArray[2] = Math.fround(SAFE_HEAP_LOAD_D(pValues + 8 | 0, 4, 0));
+  AL.paramArray[3] = Math.fround(SAFE_HEAP_LOAD_D(pValues + 12 | 0, 4, 0));
+  AL.paramArray[4] = Math.fround(SAFE_HEAP_LOAD_D(pValues + 16 | 0, 4, 0));
+  AL.paramArray[5] = Math.fround(SAFE_HEAP_LOAD_D(pValues + 20 | 0, 4, 0));
+  AL.setListenerParam("alListenerfv", param, AL.paramArray);
+  break;
+
+ default:
+  AL.setListenerParam("alListenerfv", param, null);
+  break;
+ }
+}
+
+function _alSource3f(sourceId, param, value0, value1, value2) {
+ switch (param) {
+ case 4100:
+ case 4101:
+ case 4102:
+  AL.paramArray[0] = value0;
+  AL.paramArray[1] = value1;
+  AL.paramArray[2] = value2;
+  AL.setSourceParam("alSource3f", sourceId, param, AL.paramArray);
+  break;
+
+ default:
+  AL.setSourceParam("alSource3f", sourceId, param, null);
+  break;
+ }
+}
+
+function _alSourcePlay(sourceId) {
+ if (!AL.currentCtx) {
+  return;
+ }
+ var src = AL.currentCtx.sources[sourceId];
+ if (!src) {
+  AL.currentCtx.err = 40961;
+  return;
+ }
+ AL.setSourceState(src, 4114);
+}
+
+function _alSourcef(sourceId, param, value) {
+ switch (param) {
+ case 4097:
+ case 4098:
+ case 4099:
+ case 4106:
+ case 4109:
+ case 4110:
+ case 4128:
+ case 4129:
+ case 4130:
+ case 4131:
+ case 4132:
+ case 4133:
+ case 4134:
+ case 8203:
+  AL.setSourceParam("alSourcef", sourceId, param, value);
+  break;
+
+ default:
+  AL.setSourceParam("alSourcef", sourceId, param, null);
+  break;
+ }
+}
+
+function listenOnce(object, event, func) {
+ object.addEventListener(event, func, {
+  "once": true
+ });
+}
+
+function autoResumeAudioContext(ctx, elements) {
+ if (!elements) {
+  elements = [ document, document.getElementById("canvas") ];
+ }
+ [ "keydown", "mousedown", "touchstart" ].forEach(function(event) {
+  elements.forEach(function(element) {
+   if (element) {
+    listenOnce(element, event, function() {
+     if (ctx.state === "suspended") ctx.resume();
+    });
+   }
+  });
+ });
+}
+
+function _alcCreateContext(deviceId, pAttrList) {
+ if (!(deviceId in AL.deviceRefCounts)) {
+  AL.alcErr = 40961;
+  return 0;
+ }
+ var options = null;
+ var attrs = [];
+ var hrtf = null;
+ pAttrList >>= 2;
+ if (pAttrList) {
+  var attr = 0;
+  var val = 0;
+  while (true) {
+   attr = SAFE_HEAP_LOAD(pAttrList++ * 4, 4, 0);
+   attrs.push(attr);
+   if (attr === 0) {
+    break;
+   }
+   val = SAFE_HEAP_LOAD(pAttrList++ * 4, 4, 0);
+   attrs.push(val);
+   switch (attr) {
+   case 4103:
+    if (!options) {
+     options = {};
+    }
+    options.sampleRate = val;
+    break;
+
+   case 4112:
+   case 4113:
+    break;
+
+   case 6546:
+    switch (val) {
+    case 0:
+     hrtf = false;
+     break;
+
+    case 1:
+     hrtf = true;
+     break;
+
+    case 2:
+     break;
+
+    default:
+     AL.alcErr = 40964;
+     return 0;
+    }
+    break;
+
+   case 6550:
+    if (val !== 0) {
+     AL.alcErr = 40964;
+     return 0;
+    }
+    break;
+
+   default:
+    AL.alcErr = 40964;
+    return 0;
+   }
+  }
+ }
+ var AudioContext = window.AudioContext || window.webkitAudioContext;
+ var ac = null;
+ try {
+  if (options) {
+   ac = new AudioContext(options);
+  } else {
+   ac = new AudioContext();
+  }
+ } catch (e) {
+  if (e.name === "NotSupportedError") {
+   AL.alcErr = 40964;
+  } else {
+   AL.alcErr = 40961;
+  }
+  return 0;
+ }
+ autoResumeAudioContext(ac);
+ if (typeof ac.createGain === "undefined") {
+  ac.createGain = ac.createGainNode;
+ }
+ var gain = ac.createGain();
+ gain.connect(ac.destination);
+ var ctx = {
+  deviceId: deviceId,
+  id: AL.newId(),
+  attrs: attrs,
+  audioCtx: ac,
+  listener: {
+   position: [ 0, 0, 0 ],
+   velocity: [ 0, 0, 0 ],
+   direction: [ 0, 0, 0 ],
+   up: [ 0, 0, 0 ]
+  },
+  sources: [],
+  interval: setInterval(function() {
+   AL.scheduleContextAudio(ctx);
+  }, AL.QUEUE_INTERVAL),
+  gain: gain,
+  distanceModel: 53250,
+  speedOfSound: 343.3,
+  dopplerFactor: 1,
+  sourceDistanceModel: false,
+  hrtf: hrtf || false,
+  _err: 0,
+  get err() {
+   return this._err;
+  },
+  set err(val) {
+   if (this._err === 0 || val === 0) {
+    this._err = val;
+   }
+  }
+ };
+ AL.deviceRefCounts[deviceId]++;
+ AL.contexts[ctx.id] = ctx;
+ if (hrtf !== null) {
+  for (var ctxId in AL.contexts) {
+   var c = AL.contexts[ctxId];
+   if (c.deviceId === deviceId) {
+    c.hrtf = hrtf;
+    AL.updateContextGlobal(c);
+   }
+  }
+ }
+ return ctx.id;
+}
+
+function _alcMakeContextCurrent(contextId) {
+ if (contextId === 0) {
+  AL.currentCtx = null;
+  return 0;
+ } else {
+  AL.currentCtx = AL.contexts[contextId];
+  return 1;
+ }
+}
+
+function _alcOpenDevice(pDeviceName) {
+ if (pDeviceName) {
+  var name = UTF8ToString(pDeviceName);
+  if (name !== AL.DEVICE_NAME) {
+   return 0;
+  }
+ }
+ if (typeof AudioContext !== "undefined" || typeof webkitAudioContext !== "undefined") {
+  var deviceId = AL.newId();
+  AL.deviceRefCounts[deviceId] = 0;
+  return deviceId;
+ } else {
+  return 0;
+ }
+}
+
+var _emscripten_get_now_is_monotonic = true;
+
+function _clock_gettime(clk_id, tp) {
+ var now;
+ if (clk_id === 0) {
+  now = Date.now();
+ } else if ((clk_id === 1 || clk_id === 4) && _emscripten_get_now_is_monotonic) {
+  now = _emscripten_get_now();
+ } else {
+  setErrNo(28);
+  return -1;
+ }
+ SAFE_HEAP_STORE(tp | 0, now / 1e3 | 0 | 0, 4);
+ SAFE_HEAP_STORE(tp + 4 | 0, now % 1e3 * 1e3 * 1e3 | 0 | 0, 4);
+ return 0;
+}
+
+function _emscripten_memcpy_big(dest, src, num) {
+ HEAPU8.copyWithin(dest, src, src + num);
+}
+
+function _emscripten_get_heap_size() {
+ return HEAPU8.length;
+}
 
 function emscripten_realloc_buffer(size) {
  try {
@@ -5710,6 +8323,10 @@ function _glCreateShader(shaderType) {
 
 function _glCullFace(x0) {
  GLctx["cullFace"](x0);
+}
+
+function _glDisable(x0) {
+ GLctx["disable"](x0);
 }
 
 function _glDrawArrays(mode, first, count) {
@@ -6338,6 +8955,38 @@ Module["FS_createDevice"] = FS.createDevice;
 
 Module["FS_unlink"] = FS.unlink;
 
+Module["requestFullscreen"] = function Module_requestFullscreen(lockPointer, resizeCanvas) {
+ Browser.requestFullscreen(lockPointer, resizeCanvas);
+};
+
+Module["requestFullScreen"] = function Module_requestFullScreen() {
+ Browser.requestFullScreen();
+};
+
+Module["requestAnimationFrame"] = function Module_requestAnimationFrame(func) {
+ Browser.requestAnimationFrame(func);
+};
+
+Module["setCanvasSize"] = function Module_setCanvasSize(width, height, noUpdates) {
+ Browser.setCanvasSize(width, height, noUpdates);
+};
+
+Module["pauseMainLoop"] = function Module_pauseMainLoop() {
+ Browser.mainLoop.pause();
+};
+
+Module["resumeMainLoop"] = function Module_resumeMainLoop() {
+ Browser.mainLoop.resume();
+};
+
+Module["getUserMedia"] = function Module_getUserMedia() {
+ Browser.getUserMedia();
+};
+
+Module["createContext"] = function Module_createContext(canvas, useWebGL, setInModule, webGLContextAttributes) {
+ return Browser.createContext(canvas, useWebGL, setInModule, webGLContextAttributes);
+};
+
 var GLctx;
 
 var ASSERTIONS = true;
@@ -6390,7 +9039,22 @@ var asmLibraryArg = {
  "__sys_ioctl": ___sys_ioctl,
  "__sys_open": ___sys_open,
  "abort": _abort,
+ "alBufferData": _alBufferData,
+ "alDeleteSources": _alDeleteSources,
+ "alGenBuffers": _alGenBuffers,
+ "alGenSources": _alGenSources,
+ "alGetSourcei": _alGetSourcei,
+ "alListener3f": _alListener3f,
+ "alListenerfv": _alListenerfv,
+ "alSource3f": _alSource3f,
+ "alSourcePlay": _alSourcePlay,
+ "alSourcef": _alSourcef,
+ "alSourcei": _alSourcei,
+ "alcCreateContext": _alcCreateContext,
+ "alcMakeContextCurrent": _alcMakeContextCurrent,
+ "alcOpenDevice": _alcOpenDevice,
  "alignfault": alignfault,
+ "clock_gettime": _clock_gettime,
  "emscripten_memcpy_big": _emscripten_memcpy_big,
  "emscripten_resize_heap": _emscripten_resize_heap,
  "emscripten_webgl_create_context": _emscripten_webgl_create_context,
@@ -6416,6 +9080,7 @@ var asmLibraryArg = {
  "glCreateProgram": _glCreateProgram,
  "glCreateShader": _glCreateShader,
  "glCullFace": _glCullFace,
+ "glDisable": _glDisable,
  "glDrawArrays": _glDrawArrays,
  "glEnable": _glEnable,
  "glEnableVertexAttribArray": _glEnableVertexAttribArray,
@@ -6445,6 +9110,7 @@ var asmLibraryArg = {
  "invoke_i": invoke_i,
  "invoke_ii": invoke_ii,
  "invoke_iii": invoke_iii,
+ "invoke_iiiff": invoke_iiiff,
  "invoke_iiii": invoke_iiii,
  "invoke_iiiid": invoke_iiiid,
  "invoke_iiiii": invoke_iiiii,
@@ -6456,11 +9122,14 @@ var asmLibraryArg = {
  "invoke_iiiiiiiiiiiii": invoke_iiiiiiiiiiiii,
  "invoke_iiiiij": invoke_iiiiij,
  "invoke_iij": invoke_iij,
+ "invoke_j": invoke_j,
+ "invoke_jii": invoke_jii,
  "invoke_jiiii": invoke_jiiii,
  "invoke_v": invoke_v,
  "invoke_vi": invoke_vi,
  "invoke_vii": invoke_vii,
- "invoke_viidii": invoke_viidii,
+ "invoke_viifi": invoke_viifi,
+ "invoke_viifii": invoke_viifii,
  "invoke_viii": invoke_viii,
  "invoke_viiii": invoke_viiii,
  "invoke_viiiii": invoke_viiiii,
@@ -6482,9 +9151,11 @@ var ___wasm_call_ctors = Module["___wasm_call_ctors"] = createExportWrapper("__w
 
 var _free = Module["_free"] = createExportWrapper("free");
 
-var _fflush = Module["_fflush"] = createExportWrapper("fflush");
-
 var _malloc = Module["_malloc"] = createExportWrapper("malloc");
+
+var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
+
+var _fflush = Module["_fflush"] = createExportWrapper("fflush");
 
 var _SetLocalPlayerClient = Module["_SetLocalPlayerClient"] = createExportWrapper("SetLocalPlayerClient");
 
@@ -6512,7 +9183,7 @@ var _HandleReplicate = Module["_HandleReplicate"] = createExportWrapper("HandleR
 
 var _Draw = Module["_Draw"] = createExportWrapper("Draw");
 
-var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
+var _TickAudio = Module["_TickAudio"] = createExportWrapper("TickAudio");
 
 var __get_tzname = Module["__get_tzname"] = createExportWrapper("_get_tzname");
 
@@ -6554,13 +9225,17 @@ var _sbrk = Module["_sbrk"] = createExportWrapper("sbrk");
 
 var _emscripten_get_sbrk_ptr = Module["_emscripten_get_sbrk_ptr"] = createExportWrapper("emscripten_get_sbrk_ptr");
 
-var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
+var dynCall_j = Module["dynCall_j"] = createExportWrapper("dynCall_j");
 
 var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
+
+var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
 
 var dynCall_iij = Module["dynCall_iij"] = createExportWrapper("dynCall_iij");
 
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
+
+var dynCall_jii = Module["dynCall_jii"] = createExportWrapper("dynCall_jii");
 
 var dynCall_iiiiij = Module["dynCall_iiiiij"] = createExportWrapper("dynCall_iiiiij");
 
@@ -6570,31 +9245,22 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 83928;
+var _game = Module["_game"] = 89872;
 
-var _clientGl = Module["_clientGl"] = 84160;
+var _clientGl = Module["_clientGl"] = 90136;
 
-var _inputEvents = Module["_inputEvents"] = 84216;
+var _clientAudio = Module["_clientAudio"] = 90244;
 
-var _ping = Module["_ping"] = 84248;
+var _inputEvents = Module["_inputEvents"] = 90268;
 
-var _lastTickTime = Module["_lastTickTime"] = 84240;
+var _ping = Module["_ping"] = 90304;
 
-function invoke_iii(index, a1, a2) {
+var _lastTickTime = Module["_lastTickTime"] = 90296;
+
+function invoke_vii(index, a1, a2) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1, a2);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiii(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4);
+  wasmTable.get(index)(a1, a2);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6613,10 +9279,10 @@ function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
  }
 }
 
-function invoke_ii(index, a1) {
+function invoke_iii(index, a1, a2) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1);
+  return wasmTable.get(index)(a1, a2);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6635,32 +9301,10 @@ function invoke_iiii(index, a1, a2, a3) {
  }
 }
 
-function invoke_vii(index, a1, a2) {
+function invoke_ii(index, a1) {
  var sp = stackSave();
  try {
-  wasmTable.get(index)(a1, a2);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiiii(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+  return wasmTable.get(index)(a1);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6679,10 +9323,54 @@ function invoke_vi(index, a1) {
  }
 }
 
+function invoke_viiiiii(index, a1, a2, a3, a4, a5, a6) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viii(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_fii(index, a1, a2) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_v(index) {
  var sp = stackSave();
  try {
   wasmTable.get(index)();
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6701,10 +9389,21 @@ function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  }
 }
 
-function invoke_viii(index, a1, a2, a3) {
+function invoke_iiiii(index, a1, a2, a3, a4) {
  var sp = stackSave();
  try {
-  wasmTable.get(index)(a1, a2, a3);
+  return wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiii(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6734,17 +9433,6 @@ function invoke_viiii(index, a1, a2, a3, a4) {
  }
 }
 
-function invoke_viiiiii(index, a1, a2, a3, a4, a5, a6) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
 function invoke_i(index) {
  var sp = stackSave();
  try {
@@ -6756,10 +9444,10 @@ function invoke_i(index) {
  }
 }
 
-function invoke_fii(index, a1, a2) {
+function invoke_viifi(index, a1, a2, a3, a4) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1, a2);
+  wasmTable.get(index)(a1, a2, a3, a4);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6767,10 +9455,21 @@ function invoke_fii(index, a1, a2) {
  }
 }
 
-function invoke_viidii(index, a1, a2, a3, a4, a5) {
+function invoke_viifii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3, a4, a5);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiff(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -6866,6 +9565,17 @@ function invoke_viiiiiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10,
  }
 }
 
+function invoke_j(index) {
+ var sp = stackSave();
+ try {
+  return dynCall_j(index);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_vij(index, a1, a2, a3) {
  var sp = stackSave();
  try {
@@ -6881,6 +9591,17 @@ function invoke_iij(index, a1, a2, a3) {
  var sp = stackSave();
  try {
   return dynCall_iij(index, a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_jii(index, a1, a2) {
+ var sp = stackSave();
+ try {
+  return dynCall_jii(index, a1, a2);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

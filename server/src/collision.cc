@@ -1,5 +1,6 @@
 #include "collision.h"
 #include "object.h"
+#include "util.h"
 
 Vector3 Collider::GetPosition() {
     if (owner) {
@@ -16,7 +17,9 @@ void GenerateAABBCollidersFromModel(Object* obj) {
     Model* model = obj->GetModel();
     if (model) {
         for (Mesh& mesh : model->meshes) {
-            if (!mesh.vertices.empty()) {
+            std::string lower = ToLower(mesh.name);
+            LOG_DEBUG(lower);
+            if (!mesh.vertices.empty() && !Contains(lower, "nocollide")) {
                 Vector3 min = mesh.vertices[0].position;
                 Vector3 max = mesh.vertices[0].position;
                 for (size_t i = 1; i < mesh.vertices.size(); i++) {

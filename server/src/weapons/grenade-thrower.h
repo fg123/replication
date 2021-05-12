@@ -1,5 +1,4 @@
-#ifndef GRENADE_THROWER_H
-#define GRENADE_THROWER_H
+#pragma once
 
 #include "game.h"
 #include "input-hold-thrower.h"
@@ -12,9 +11,9 @@ public:
     GrenadeThrower(Game& game) : GrenadeThrower(game, Vector3()) {}
     GrenadeThrower(Game& game, Vector3 position) : InputHoldThrower<GrenadeObject>(game, position) {
         cooldown = 2000;
+        powerMin = 70;
+        powerMax = 70;
     }
 };
 
 CLASS_REGISTER(GrenadeThrower);
-
-#endif

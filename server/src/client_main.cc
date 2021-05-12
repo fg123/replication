@@ -12,6 +12,7 @@
 #include "perf.h"
 
 #include "client_gl.h"
+#include "client_audio.h"
 
 // We probably need to include all these so it registers
 #include "characters/marine.h"
@@ -32,6 +33,9 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     ClientGL clientGl(game, "#game");
+
+    EMSCRIPTEN_KEEPALIVE
+    ClientAudio clientAudio(game);
 
     EMSCRIPTEN_KEEPALIVE
     std::deque<JSONDocument> inputEvents;
@@ -66,6 +70,8 @@ extern "C" {
     void SetupClientContext() {
         clientGl.SetupContext();
         clientGl.SetupGL();
+
+        clientAudio.SetupContext();
     }
 
     EMSCRIPTEN_KEEPALIVE
@@ -267,5 +273,10 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     void Draw(int width, int height) {
         clientGl.Draw(width, height);
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    void TickAudio() {
+        clientAudio.Tick();
     }
 }

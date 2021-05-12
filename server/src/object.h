@@ -45,12 +45,25 @@ struct ObjectRegister {
 
 // Bitflag, everything is AT LEAST an object.
 enum Tag : uint64_t {
-    OBJECT          = 0b0000000000000000001,
-    PLAYER          = 0b0000000000000000010,
-    GROUND          = 0b0000000000000000100,
-    WEAPON          = 0b0000000000000001000,
-    NO_GRAVITY      = 0b0000000000000010000,
-    NO_KILLPLANE    = 0b0000000000000100000
+    // Every Object Should Have This Set
+    OBJECT              = 0b0000000000000000001,
+    // PlayerObject
+    PLAYER              = 0b0000000000000000010,
+    // Controls when a player object can jump
+    GROUND              = 0b0000000000000000100,
+    // WeaponObjects
+    WEAPON              = 0b0000000000000001000,
+    // Disables Gravity Force
+    NO_GRAVITY          = 0b0000000000000010000,
+    // Disable KillPlane / LivePlane
+    NO_KILLPLANE        = 0b0000000000000100000,
+
+    // Client Draw Control Flags
+
+    // Draws after opaque
+    DRAW_TRANSPARENCY   = 0b0000000000001000000,
+    // Draws after transparency (no z-buffer)
+    DRAW_FOREGROUND     = 0b0000000000010000000,
 };
 
 class Object : public Replicable {
@@ -117,6 +130,7 @@ public:
         lastTickTime = time;
     }
     virtual void PreDraw() {}
+    bool createdThisFrameOnClient = false;
 #endif
 
     Object(Game& game);
@@ -126,6 +140,10 @@ public:
     virtual void Tick(Time time);
 
     virtual void OnDeath() {}
+
+    // This is called on the first tick of the object on the client
+    //   after it has been replicated
+    virtual void OnClientCreate() {}
 
     void ResolveCollision(const Vector3& difference);
 

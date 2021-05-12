@@ -187,29 +187,29 @@ void PlayerObject::Tick(Time time) {
         }
     }
 
-    // if (qWeapon) {
-    //     if (keyboardState[KEY_MAP[Q_KEY]]) {
-    //         if (!lastKeyboardState[KEY_MAP[Q_KEY]]) {
-    //             qWeapon->StartFire(time);
-    //         }
-    //         qWeapon->Fire(time);
-    //     }
-    //     else if (lastKeyboardState[KEY_MAP[Q_KEY]]) {
-    //         qWeapon->ReleaseFire(time);
-    //     }
-    // }
+    if (qWeapon) {
+        if (keyboardState[KEY_MAP[Q_KEY]]) {
+            if (!lastKeyboardState[KEY_MAP[Q_KEY]]) {
+                qWeapon->StartFire(time);
+            }
+            qWeapon->Fire(time);
+        }
+        else if (lastKeyboardState[KEY_MAP[Q_KEY]]) {
+            qWeapon->ReleaseFire(time);
+        }
+    }
 
-    // if (zWeapon) {
-    //     if (keyboardState[KEY_MAP[Z_KEY]]) {
-    //         if (!lastKeyboardState[KEY_MAP[Z_KEY]]) {
-    //             zWeapon->StartFire(time);
-    //         }
-    //         zWeapon->Fire(time);
-    //     }
-    //     else if (lastKeyboardState[KEY_MAP[Z_KEY]]) {
-    //         zWeapon->ReleaseFire(time);
-    //     }
-    // }
+    if (zWeapon) {
+        if (keyboardState[KEY_MAP[Z_KEY]]) {
+            if (!lastKeyboardState[KEY_MAP[Z_KEY]]) {
+                zWeapon->StartFire(time);
+            }
+            zWeapon->Fire(time);
+        }
+        else if (lastKeyboardState[KEY_MAP[Z_KEY]]) {
+            zWeapon->ReleaseFire(time);
+        }
+    }
 
 
     // const Vector3& position = GetPosition();
@@ -340,9 +340,9 @@ void PlayerObject::OnCollide(CollisionResult& result) {
 }
 
 void PlayerObject::DealDamage(int damage) {
-    health -= damage;
+    game.PlayAudio("ueh.wav", 1.0f, this);
 #ifdef BUILD_SERVER
-    game.QueueAnimation(new FloatingTextAnimation(GetPosition(), "-" + std::to_string(damage), "red"));
+    health -= damage;
     if (health <= 0) {
         ObjectID id = GetId();
         game.DestroyObject(id);

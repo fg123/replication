@@ -84,7 +84,6 @@ void GunBase::ActualFire(Time time) {
     }
 
     // Ray Cast
-#ifdef BUILD_SERVER
     // BulletObject* bullet = new BulletObject(game, damage, result);
     // // LOG_DEBUG(GetLookDirection() << " " << fireOffset);
     // Vector3 startPosition = GetPosition() + GetLookDirection() * fireOffset;
@@ -94,20 +93,33 @@ void GunBase::ActualFire(Time time) {
     // game.RequestReplication(GetId());
 
     Vector3 startPosition = GetPosition() + GetLookDirection() * fireOffset;
+
+#ifdef BUILD_SERVER
     BulletTracer* bullet = new BulletTracer(game, startPosition, bulletEnd);
     game.AddObject(bullet);
+#endif
 
     if (result.isHit) {
-        SpriteObject* decal = new SpriteObject(game, "textures/BulletHole/BulletHole.png");
-        decal->SetPosition(result.hitLocation + result.hitNormal * 0.001f);
-        decal->SetScale(Vector3(0.2f, 0.2f, 0.2f));
-        LOG_DEBUG("Bullet Hole " << DirectionToQuaternion(result.hitNormal));
-        decal->SetRotation(DirectionToQuaternion(result.hitNormal));
-        game.AddObject(decal);
+        if (result.hitObject->IsTagged(Tag::PLAYER)) {
+            static_cast<PlayerObject*>(result.hitObject)->DealDamage(damage);
+        }
+        else {
+            #ifdef BUILD_SERVER
+                SpriteObject* decal = new SpriteObject(game, "textures/BulletHole/BulletHole.png");
+                decal->SetPosition(result.hitLocation + result.hitNormal * 0.002f);
+                decal->SetScale(Vector3(0.2f, 0.2f, 0.2f));
+                LOG_DEBUG("Bullet Hole " << DirectionToQuaternion(result.hitNormal));
+                decal->SetRotation(DirectionToQuaternion(result.hitNormal));
+                game.AddObject(decal);
+            #endif
+        }
     }
 
+#ifdef BUILD_SERVER
     game.RequestReplication(GetId());
 #endif
+
+    game.PlayAudio("bang.wav", 1.0f, GetPosition());
 
     SetDirty(true);
 }
@@ -115,5 +127,6 @@ void GunBase::ActualFire(Time time) {
 void GunBase::StartReload(Time time) {
     if (reloadStartTime == 0 && magazines > 0 && bullets != magazineSize) {
         reloadStartTime = time;
+        game.PlayAudio("reload.wav", 1.0f, this);
     }
 }

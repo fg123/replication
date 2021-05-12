@@ -18,6 +18,9 @@ public:
     SpriteObject(Game& game, const std::string& texture) : Object(game), texture(texture) {
         // Make a Copy
         customQuad = *game.GetModel("Quad.obj");
+
+        // Tell client it might have transparency parts
+        SetTag(Tag::DRAW_TRANSPARENCY);
     }
 
     virtual void ProcessReplication(json& obj) override {
@@ -32,7 +35,7 @@ public:
 
             // Custom Model
             material->illum = -1;
-            material->map_Kd = game.GetModelManager().LoadTexture(texture, Texture::Format::RGBA);
+            material->map_Kd = game.GetAssetManager().LoadTexture(texture, Texture::Format::RGBA);
         }
     #endif
     }

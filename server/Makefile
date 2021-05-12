@@ -2,7 +2,7 @@ EXE = game
 SRC_DIR = src
 SRC = $(shell find src/ -name "*.cc" | grep -v "main" | grep -v "client")
 SERVER_SRC = $(SRC) src/main.cc
-CLIENT_SRC = $(SRC) src/client_main.cc src/client_gl.cc src/client_shader.cc
+CLIENT_SRC = $(SRC) src/client_main.cc src/client_gl.cc src/client_shader.cc src/client_audio.cc
 SERVER_OBJ = $(SERVER_SRC:%.cc=%.o)
 # Use .wo for webassembly
 CLIENT_OBJ = $(CLIENT_SRC:%.cc=%.wo)
@@ -35,6 +35,9 @@ WASM_FLAGS = \
 	-s MAX_WEBGL_VERSION=2 \
 	--source-map-base http://localhost:8000/
 
+WASM_LINKING_FLAGS = \
+	-lopenal \
+	--preload-file ../data@/
 GCC_FLAGS = -Wno-class-memaccess -fmax-errors=5
 
 all: server client
@@ -48,8 +51,7 @@ server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o bin/$(EXE)_server_prod
 
 client: $(CLIENT_OBJ)
-	em++ -O3 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) -o bin/$(EXE)_client.js \
-		--preload-file ../data@/
+	em++ -O3 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o bin/$(EXE)_client.js
 	cp bin/$(EXE)_client.wasm ../client/dist/
 	cp bin/$(EXE)_client.js ../client/dist/
 	cp bin/$(EXE)_client.data ../client/dist/

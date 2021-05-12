@@ -4,6 +4,7 @@
 #include <chrono>
 #include <functional>
 #include <vector>
+#include <sstream>
 
 #include "perf.h"
 
@@ -39,8 +40,9 @@ struct ScheduledCall {
 class Timer {
     std::vector<ScheduledCall*> schedule;
 
-    Time Now();
 public:
+    static Time Now();
+
     Timer();
     ~Timer();
 
@@ -51,4 +53,5 @@ public:
 
 };
 
+std::string TimeToString(Time time);
 #endif

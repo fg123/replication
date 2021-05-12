@@ -17,29 +17,22 @@ map_Ns ..\\textures\\Bricks059_2K-JPG\\Bricks059_2K_Roughness.jpg
 newmtl Floor
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
+Kd 0.091654 0.018669 0.000000
+Ks 0.020000 0.020000 0.020000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Bump ..\\textures\\WoodFloor043_2K-JPG\\WoodFloor043_2K_Normal.jpg
-map_Kd ..\\textures\\WoodFloor043_2K-JPG\\WoodFloor043_2K_Color.jpg
-map_Ns ..\\textures\\WoodFloor043_2K-JPG\\WoodFloor043_2K_Roughness.jpg
-refl ..\\textures\\WoodFloor043_2K-JPG\\WoodFloor043_2K_Metalness.jpg
 
 newmtl Grass
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.800000 0.800000
-Ks 0.500000 0.500000 0.500000
+Kd 0.006345 0.147253 0.000000
+Ks 0.020000 0.020000 0.020000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Bump ..\\textures\\Grass003_1K-JPG\\Grass003_1K_Normal.jpg
-map_Kd ..\\textures\\Grass003_1K-JPG\\Grass003_1K_Color.jpg
-map_Ns ..\\textures\\Grass003_1K-JPG\\Grass003_1K_Roughness.jpg
 
 newmtl Material
 Ns 323.999994

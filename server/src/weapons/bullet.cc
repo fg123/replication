@@ -27,11 +27,9 @@ BulletObject::BulletObject(Game& game) : BulletObject(game, 0, RayCastResult()) 
 
 void BulletObject::OnCollide(CollisionResult& result) {
     // Check Player Hit
-#ifdef BUILD_SERVER
     if (result.collidedWith->IsTagged(Tag::PLAYER)) {
         static_cast<PlayerObject*>(result.collidedWith)->DealDamage(damage);
     }
-#endif
 
     game.DestroyObject(GetId());
 }
