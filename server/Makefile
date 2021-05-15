@@ -37,7 +37,12 @@ WASM_FLAGS = \
 
 WASM_LINKING_FLAGS = \
 	-lopenal \
-	--preload-file ../data@/
+	--preload-file ../data/maps@/maps \
+	--preload-file ../data/models@/models \
+	--preload-file ../data/shaders@/shaders \
+	--preload-file ../data/sounds@/sounds \
+	--preload-file ../data/textures@/textures
+
 GCC_FLAGS = -Wno-class-memaccess -fmax-errors=5
 
 all: server client

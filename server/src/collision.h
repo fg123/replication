@@ -26,7 +26,17 @@ public:
 
     // Detailed collision
     virtual CollisionResult CollidesWith(Collider* other) = 0;
-    virtual CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) = 0;
+    bool CollidesWith(const Vector3& p1, const Vector3& p2) {
+        RayCastRequest request;
+        request.startPoint = p1;
+        request.direction = glm::normalize(p2 - p1);
+        RayCastResult result;
+        if (!CollidesWith(request, result)) {
+            return false;
+        }
+        // Within bounds of line segment
+        return result.zDepth < glm::distance(p1, p2);
+    }
 
     virtual bool CollidesWith(RayCastRequest& ray, RayCastResult& result) {
         throw "Not implemented ray cast!";
@@ -49,7 +59,6 @@ struct RectangleCollider : public Collider {
         size(size) {}
     virtual int GetType() override { return 0; }
     CollisionResult CollidesWith(Collider* other) override;
-    CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
 };
 
 // Deprecated 2D Colliders
@@ -61,7 +70,6 @@ struct CircleCollider : public Collider {
             radius(radius) {}
     virtual int GetType() override { return 1; }
     CollisionResult CollidesWith(Collider* other) override;
-    CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
 };
 
 inline bool IsPointInRect(const Vector3& RectPosition, const Vector3& RectSize, const Vector3& Point) {
@@ -77,7 +85,6 @@ struct AABBCollider : public Collider {
         size(size) {}
     virtual int GetType() override { return 2; }
     CollisionResult CollidesWith(Collider* other) override;
-    CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
     bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
 };
 
@@ -96,9 +103,7 @@ struct SphereCollider : public Collider {
             radius(radius) {}
     virtual int GetType() override { return 3; }
     CollisionResult CollidesWith(Collider* other) override;
-    CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) override;
 };
-
 
 struct TwoPhaseCollider : public Replicable {
     REPLICATED(AABBCollider, aabbBroad, "ab");
@@ -119,9 +124,12 @@ struct TwoPhaseCollider : public Replicable {
     CollisionResult CollidesWith(Collider* other);
     CollisionResult CollidesWith(TwoPhaseCollider* other);
 
-    CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2) {
-        // TODO
-        throw "Not implemented";
+    bool CollidesWith(const Vector3& p1, const Vector3& p2) {
+        bool ret = false;
+        for (auto& child : children) {
+            ret |= child->CollidesWith(p1, p2);
+        }
+        return ret;
     }
 
     bool CollidesWith(RayCastRequest& ray, RayCastResult& result) {

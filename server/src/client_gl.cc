@@ -9,6 +9,8 @@
 #include <fstream>
 #include <map>
 
+const static bool DRAW_COLLIDERS = false;
+
 ClientGL::ClientGL(Game& game, const char* selector) :
     canvasSelector(selector),
     game(game) {
@@ -30,6 +32,55 @@ void ClientGL::SetupContext() {
 void ClientGL::SetupGL() {
     // Setup Available Shaders
     shaderPrograms.push_back(new DefaultMaterialShaderProgram());
+
+    debugShaderProgram = new DebugShaderProgram();
+
+    // Setup Cube
+    glGenVertexArrays(1, &debugCube.renderInfo.vao);
+    glBindVertexArray(debugCube.renderInfo.vao);
+
+    std::vector<float> verts = {
+        0, 0, 0,
+        0, 0, 1,
+        0, 1, 0,
+        0, 1, 1,
+        1, 0, 0,
+        1, 0, 1,
+        1, 1, 0,
+        1, 1, 1,
+    };
+    std::vector<unsigned int> indices = {
+        0, 1,
+        1, 3,
+        3, 2,
+        2, 0,
+        4, 5,
+        5, 7,
+        7, 6,
+        6, 4,
+        0, 4,
+        1, 5,
+        2, 6,
+        3, 7
+    };
+
+    glGenBuffers(1, &debugCube.renderInfo.vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, debugCube.renderInfo.vbo);
+    glBufferData(GL_ARRAY_BUFFER,
+        verts.size() * sizeof(float),
+        verts.data(), GL_STATIC_DRAW
+    );
+
+    glVertexAttribPointer(0,
+        3, GL_FLOAT, false, 3 * sizeof(float), (const void*)0);
+    glEnableVertexAttribArray(0);
+
+    glGenBuffers(1, &debugCube.renderInfo.ibo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, debugCube.renderInfo.ibo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+        indices.size() * sizeof(unsigned int),
+        indices.data(), GL_STATIC_DRAW);
+    debugCube.renderInfo.iboCount = indices.size();
 }
 
 void ClientGL::DrawObject(Object* obj, int& lastProgram) {
@@ -43,6 +94,20 @@ void ClientGL::DrawObject(Object* obj, int& lastProgram) {
                 shaderPrograms[program]->Use();
             }
             shaderPrograms[program]->Draw(*this, transform, &mesh);
+        }
+
+        if (DRAW_COLLIDERS) {
+            debugShaderProgram->Use();
+            lastProgram = -1;
+            for (auto& cptr : obj->GetCollider().children) {
+                if (AABBCollider* collider = dynamic_cast<AABBCollider*>(cptr)) {
+                    Vector3 position = collider->GetPosition();
+                    Vector3 size = collider->size;
+                    Matrix4 model = glm::translate(position) * glm::scale(size);
+
+                    debugShaderProgram->Draw(*this, model, &debugCube);
+                }
+            }
         }
     }
 }
@@ -60,7 +125,7 @@ void ClientGL::Draw(int width, int height) {
     }
 
     if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
-        cameraPosition = localPlayer->GetClientPosition();
+        cameraPosition = localPlayer->GetPosition();
         cameraRotation = localPlayer->GetLookDirection();
         for (auto& child : localPlayer->children) {
             child->SetTag(Tag::DRAW_FOREGROUND);
@@ -95,8 +160,11 @@ void ClientGL::Draw(int width, int height) {
     );
 
     for (auto& program : shaderPrograms) {
+        program->Use();
         program->PreDraw(game, cameraPosition, viewMat, projMat);
     }
+    debugShaderProgram->Use();
+    debugShaderProgram->PreDraw(game, cameraPosition, viewMat, projMat);
 
     DrawObjects();
 }
@@ -110,9 +178,8 @@ void ClientGL::DrawObjects() {
     for (auto it = transparent.rbegin(); it != transparent.rend(); ++it) {
         DrawObject(it->second, lastProgram);
     }
-    glDisable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT);
     for (auto& obj : foreground) {
         DrawObject(obj, lastProgram);
     }
-    glEnable(GL_DEPTH_TEST);
 }

@@ -21,6 +21,7 @@ public:
 
         // Tell client it might have transparency parts
         SetTag(Tag::DRAW_TRANSPARENCY);
+        isStatic = true;
     }
 
     virtual void ProcessReplication(json& obj) override {

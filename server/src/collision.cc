@@ -27,14 +27,6 @@ void GenerateAABBCollidersFromModel(Object* obj) {
                     max = glm::max(max, mesh.vertices[i].position);
                 }
 
-                // for (size_t i = 0; i < mesh.indices.size(); i += 3) {
-                //     Vertex& a = mesh.vertices[mesh.indices[i]];
-                //     Vertex& b = mesh.vertices[mesh.indices[i] + 1];
-                //     Vertex& c = mesh.vertices[mesh.indices[i] + 2];
-                //     Vector3 min = glm::min(glm::min(a.position, b.position), c.position);
-                //     Vector3 max = glm::max(glm::max(a.position, b.position), c.position);
-
-                // }
                 obj->AddCollider(new AABBCollider(obj, min, max - min));
             }
         }
@@ -217,31 +209,3 @@ CollisionResult CircleCollider::CollidesWith(Collider* other) {
         return RectangleAndCircleCollide(static_cast<RectangleCollider*>(other), this);
     }
 }
-
-CollisionResult RectangleCollider::CollidesWith(const Vector3& p1, const Vector3& p2) {
-    CollisionResult result;
-    Vector3 RectPosition = GetPosition();
-    if (IsPointInRect(RectPosition, size, p1) || IsPointInRect(RectPosition, size, p2)) {
-        result.isColliding = true;
-        return result;
-    }
-    Vector3 topRight = RectPosition;
-    topRight.x += size.x;
-
-    Vector3 bottomLeft = RectPosition;
-    bottomLeft.y += size.y;
-
-    Vector3 bottomRight = RectPosition + size;
-
-    result.isColliding = AreLineSegmentsIntersecting(p1, p2, RectPosition, topRight) ||
-        AreLineSegmentsIntersecting(p1, p2, topRight, bottomRight) ||
-        AreLineSegmentsIntersecting(p1, p2, bottomRight, bottomLeft) ||
-        AreLineSegmentsIntersecting(p1, p2, RectPosition, bottomLeft);
-    return result;
-}
-
-CollisionResult CircleCollider::CollidesWith(const Vector3& p1, const Vector3& p2) {
-    // TODO:
-    return CollisionResult();
-}
-

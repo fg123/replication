@@ -44,10 +44,8 @@ PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game) {
 
     // AddCollider(new CircleCollider(this, Vector3(0, -15, 0), 15.0));
 
-#ifdef BUILD_SERVER
     SetModel(game.GetModel("Player.obj"));
     GenerateAABBCollidersFromModel(this);
-#endif
     SetScale(Vector3(1, 1, 1));
 }
 
@@ -88,6 +86,8 @@ void PlayerObject::PickupWeapon(WeaponObject* weapon) {
 }
 
 void PlayerObject::Tick(Time time) {
+    Object::Tick(time);
+
     {
         #ifdef BUILD_SERVER
             Time clientTime = lastClientInputTime + (ticksSinceLastProcessed * TickInterval);
@@ -98,7 +98,8 @@ void PlayerObject::Tick(Time time) {
         // if (glm::length(GetVelocity()) > 0.01) {
         //     LOG_DEBUG(clientTime << ": " << GetPosition());
         // }
-
+        // LOG_DEBUG("Input Vel " << inputVelocity);
+        // LOG_DEBUG("Regular Vel " << velocity);
         std::scoped_lock lock(socketDataMutex);
 
         while (inputBuffer.size() > 0) {
@@ -144,7 +145,7 @@ void PlayerObject::Tick(Time time) {
     if (hasMovement) {
         leftRightComponent.y = 0;
         forwardBackwardComponent.y = 0;
-        inputVelocity = glm::normalize(leftRightComponent + forwardBackwardComponent) * 10.0f;
+        inputVelocity = glm::normalize(leftRightComponent + forwardBackwardComponent) * 8.0f;
     }
     else {
         inputVelocity *= 0.8;
@@ -211,33 +212,47 @@ void PlayerObject::Tick(Time time) {
         }
     }
 
-
-    // const Vector3& position = GetPosition();
-    // aimAngle = std::atan2(mousePosition.y - position.y, mousePosition.x - position.x);
-
-    if (currentWeapon) {
-        currentWeapon->SetPosition(GetAttachmentPoint());
-        currentWeapon->SetVelocity(GetVelocity());
-    }
-
-    if (zWeapon) {
-        zWeapon->SetPosition(GetAttachmentPoint());
-    }
-
-    if (qWeapon) {
-        qWeapon->SetPosition(GetAttachmentPoint());
-    }
-
-    Object::Tick(time);
-
     rotationPitch += pitchYawVelocity.x;
     rotationYaw += pitchYawVelocity.y;
+    rotationPitch = std::fmod(rotationPitch, 360);
+    rotationYaw = std::fmod(rotationYaw, 360);
+
     pitchYawVelocity *= 0.8;
 
     Matrix4 matrix;
     matrix = glm::rotate(matrix, glm::radians(rotationYaw), Vector::Up);
     matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
     rotation = glm::quat_cast(matrix);
+
+    if (currentWeapon) {
+        currentWeapon->SetPosition(GetAttachmentPoint(currentWeapon->attachmentPoint));
+        currentWeapon->SetVelocity(GetVelocity());
+        currentWeapon->SetRotation(GetRotation());
+        #ifdef BUILD_CLIENT
+            currentWeapon->clientPosition = currentWeapon->GetPosition();
+            currentWeapon->clientRotation = currentWeapon->GetRotation();
+        #endif
+    }
+
+    if (zWeapon) {
+        zWeapon->SetPosition(GetAttachmentPoint(zWeapon->attachmentPoint));
+        zWeapon->SetVelocity(GetVelocity());
+        zWeapon->SetRotation(GetRotation());
+        #ifdef BUILD_CLIENT
+            zWeapon->clientPosition = zWeapon->GetPosition();
+            zWeapon->clientRotation = zWeapon->GetRotation();
+        #endif
+    }
+
+    if (qWeapon) {
+        qWeapon->SetPosition(GetAttachmentPoint(qWeapon->attachmentPoint));
+        qWeapon->SetVelocity(GetVelocity());
+        qWeapon->SetRotation(GetRotation());
+        #ifdef BUILD_CLIENT
+            qWeapon->clientPosition = qWeapon->GetPosition();
+            qWeapon->clientRotation = qWeapon->GetRotation();
+        #endif
+    }
 
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;
@@ -335,7 +350,6 @@ void PlayerObject::OnCollide(CollisionResult& result) {
             PickupWeapon(static_cast<WeaponObject*>(result.collidedWith));
         }
     }
-    // LOG_DEBUG("Collided with " << result.collidedWith->GetClass());
     Object::OnCollide(result);
 }
 
@@ -402,7 +416,7 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
     #endif
 }
 
-Vector3 PlayerObject::GetAttachmentPoint() const {
+Vector3 PlayerObject::GetRightAttachmentPoint() const {
     Vector3 left = glm::normalize(Vector::Left * rotation);
     Vector3 up = glm::normalize(Vector::Up * rotation);
 
@@ -410,4 +424,23 @@ Vector3 PlayerObject::GetAttachmentPoint() const {
         - left * 0.5f
         + GetLookDirection() * 1.0f
         - up * 0.2f;
+}
+
+Vector3 PlayerObject::GetLeftAttachmentPoint() const {
+    Vector3 left = glm::normalize(Vector::Left * rotation);
+    Vector3 up = glm::normalize(Vector::Up * rotation);
+
+    return GetPosition()
+        + left * 0.5f
+        + GetLookDirection() * 1.0f
+        - up * 0.2f;
+}
+
+Vector3 PlayerObject::GetAttachmentPoint(WeaponAttachmentPoint attachmentPoint) const {
+    if (attachmentPoint == WeaponAttachmentPoint::LEFT)
+        return GetLeftAttachmentPoint();
+    else if (attachmentPoint == WeaponAttachmentPoint::RIGHT)
+        return GetRightAttachmentPoint();
+    else
+        return GetPosition();
 }

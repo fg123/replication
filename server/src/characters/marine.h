@@ -16,15 +16,11 @@ public:
         #ifdef BUILD_SERVER
             qWeapon = new GrenadeThrower { game };
             game.AddObject(qWeapon);
-            qWeapon->AttachToPlayer(this);
+            qWeapon->AttachToPlayer(this, WeaponAttachmentPoint::CENTER);
 
             AssaultRifleObject* rifle = new AssaultRifleObject(game);
             game.AddObject(rifle);
             PickupWeapon(rifle);
-
-            // PistolObject* pistol = new PistolObject(game);
-            // game.AddObject(pistol);
-            // PickupWeapon(pistol);
 
             zWeapon = new ArtilleryStrike { game };
             game.AddObject(zWeapon);

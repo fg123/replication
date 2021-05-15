@@ -10,6 +10,8 @@ class ExplosionObject : public Object {
     REPLICATED(float, damage, "dmg");
 
     std::unordered_set<Object*> damaged;
+
+    float rotation = 0.f;
 public:
     CLASS_CREATE(ExplosionObject);
 

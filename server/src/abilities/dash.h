@@ -5,7 +5,7 @@
 #include "player.h"
 
 class DashAbility : public WeaponWithCooldown {
-    static const int DashAmount = 1300;
+    static const int DashAmount = 20;
 
     int noGravDuration = 2000;
 
@@ -28,25 +28,24 @@ public:
 
         if (time > noGravDuration + lastDash) {
             attachedTo->RemoveTag(Tag::NO_GRAVITY);
-            attachedTo->airFriction.y = 1;
         }
     #endif
     }
 
     virtual void StartFire(Time time) override {
         WeaponWithCooldown::StartFire(time);
-    #ifdef BUILD_SERVER
         if (IsOnCooldown()) return;
         CooldownStart(time);
+    #ifdef BUILD_SERVER
         lastDash = time;
 
         Vector3 velocity = attachedTo->GetVelocity();
-        velocity.y = -DashAmount;
+        velocity.y = DashAmount;
 
         attachedTo->SetVelocity(velocity);
         attachedTo->SetTag(Tag::NO_GRAVITY);
-        attachedTo->airFriction.y = 0.95;
     #endif
+        game.PlayAudio("Archer/arrow-jump.wav", 1.f, attachedTo);
     }
 };
 

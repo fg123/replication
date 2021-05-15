@@ -2,9 +2,10 @@ const characters = require('../characters');
 const $ = require('jquery');
 
 module.exports = class EscapeMenu {
-    constructor(clientState, escapeMenuDiv) {
+    constructor(clientState, escapeMenuDiv, game) {
         this.clientState = clientState;
         this.escapeMenuDiv = escapeMenuDiv;
+        this.game = game;
         this.selections = {};
 
         Object.keys(characters).forEach((c) => {
@@ -19,6 +20,10 @@ module.exports = class EscapeMenu {
                 clientState.SendCharacterSelection(c);
             });
             this.selections[c] = characterSelect;
+        });
+
+        $(".backToGameBtn").click(() => {
+            this.game.canvas.requestPointerLock();
         });
 
         escapeMenuDiv.style.display = "none";

@@ -143,8 +143,8 @@ void DefaultMaterialShaderProgram::Draw(ClientGL& client, const Matrix4& model, 
 
     glBindVertexArray(mesh->renderInfo.vao);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glDrawArrays(GL_TRIANGLES, 0, mesh->renderInfo.iboCount);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
+    glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
 }
 
 void DefaultMaterialShaderProgram::PreDraw(Game& game,
@@ -173,4 +173,21 @@ void DefaultMaterialShaderProgram::PreDraw(Game& game,
         glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
         glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
     }
+}
+
+void DebugShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {
+    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+    glBindVertexArray(mesh->renderInfo.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
+    glDrawElements(GL_LINES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
+    // glDrawArrays(GL_LINES, 0, mesh->renderInfo.iboCount);
+}
+
+void DebugShaderProgram::PreDraw(Game& game,
+                const Vector3& viewPos,
+                const Matrix4& view,
+                const Matrix4& proj) {
+    glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
 }

@@ -20,9 +20,9 @@ public:
 
         SetTag(Tag::NO_GRAVITY);
 
-    #ifdef BUILD_SERVER
+
         SetModel(game.GetModel("BulletTracer.obj"));
-    #endif
+
         // SetScale(Vector3(1, 1, glm::distance(from, to) / 2.0f));
         SetPosition(to);
         SetRotation(DirectionToQuaternion(glm::normalize(from - to)));

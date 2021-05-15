@@ -5,11 +5,9 @@
 GrenadeObject::GrenadeObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
     collisionExclusion |= (uint64_t) Tag::WEAPON;
-    // AddCollider(new SphereCollider(this, Vector3(), 5.0));
-    #ifdef BUILD_SERVER
-        SetModel(game.GetModel("Grenade.obj"));
-        GenerateAABBCollidersFromModel(this);
-    #endif
+    SetModel(game.GetModel("Grenade.obj"));
+    GenerateAABBCollidersFromModel(this);
+    game.PlayAudio("GrenadeOut.wav", 1.f, this);
     // airFriction = Vector3(1, 1, 1);
 }
 

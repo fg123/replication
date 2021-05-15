@@ -8,7 +8,9 @@ struct RayCastRequest {
     Vector3 startPoint;
     Vector3 direction;
 
-    uint64_t exclusionTags = 0;
+    uint64_t exclusionTags;
+
+    RayCastRequest();
 };
 
 struct RayCastResult {

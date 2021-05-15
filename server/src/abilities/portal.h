@@ -7,7 +7,6 @@
 
 // The in game manisfestation of the portal
 class PortalObject : public Object {
-    Time lastUse = 0;
     Time cooldown = 500;
     bool canUse = false;
 
@@ -15,23 +14,29 @@ class PortalObject : public Object {
     Time timeLasting = 20000;
 
     REPLICATED_D(int, hp, "h", 0);
-
+    bool initialCooldownSet = false;
 public:
+    Time lastUse = 0;
     PortalObject* otherPortal = nullptr;
 
     CLASS_CREATE(PortalObject);
-    PortalObject(Game& game) : PortalObject(game, Vector3()) {}
-    PortalObject(Game& game, Vector3 position) : Object(game) {
+
+    PortalObject(Game& game) : Object(game) {
         // Don't affect anyone's position in game
         collisionExclusion |= (uint64_t) Tag::OBJECT;
 
         SetTag(Tag::NO_GRAVITY);
-        SetPosition(position);
-        AddCollider(new RectangleCollider(this, Vector3(-18, -38, 0), Vector3(37, 76, 0)));
+
+        SetModel(game.GetModel("Portal.obj"));
+        GenerateAABBCollidersFromModel(this);
     }
 
     virtual void Tick(Time time) override {
         Object::Tick(time);
+        if (!initialCooldownSet) {
+            initialCooldownSet = true;
+            lastUse = time;
+        }
         canUse = time > lastUse + cooldown;
 
     #ifdef BUILD_SERVER
@@ -52,16 +57,16 @@ public:
 
     virtual void OnCollide(CollisionResult& result) override {
         Object::OnCollide(result);
-        #ifdef BUILD_SERVER
-            if (canUse && result.collidedWith->IsTagged(Tag::PLAYER) && otherPortal != nullptr) {
-                lastUse = lastTickTime;
-                otherPortal->lastUse = otherPortal->lastTickTime;
-                canUse = false;
-                otherPortal->canUse = false;
+        LOG_DEBUG("Collide " << lastUse << "lastUse " << canUse << " " << otherPortal);
+        if (canUse && result.collidedWith->IsTagged(Tag::PLAYER) && otherPortal != nullptr) {
+            lastUse = lastTickTime;
+            otherPortal->lastUse = otherPortal->lastTickTime;
+            canUse = false;
+            otherPortal->canUse = false;
 
-                result.collidedWith->SetPosition(otherPortal->GetPosition());
-            }
-        #endif
+            result.collidedWith->SetPosition(otherPortal->GetPosition());
+            game.PlayAudio("HookReel.wav", 1.f, result.collidedWith);
+        }
     }
 
     virtual void Serialize(JSONWriter& obj) override {
@@ -102,27 +107,37 @@ public:
 
     virtual void StartFire(Time time) override {
         WeaponWithCooldown::StartFire(time);
-    #ifdef BUILD_SERVER
+
         if (IsOnCooldown()) return;
 
-        if (currentlyPortaling && firstPortal) {
+        if (currentlyPortaling) {
             // TODO: Check if too close then we cancel
-            PortalObject* secondPortal = new PortalObject(game, attachedTo->GetPosition());
-            secondPortal->otherPortal = firstPortal;
-            firstPortal->otherPortal = secondPortal;
+            game.PlayAudio("PortalEnd.wav", 1.f, attachedTo);
+            #ifdef BUILD_SERVER
+                PortalObject* secondPortal = new PortalObject(game);
+                secondPortal->SetPosition(attachedTo->GetPosition());
+                secondPortal->SetRotation(attachedTo->GetRotation());
+                secondPortal->otherPortal = firstPortal;
+                firstPortal->otherPortal = secondPortal;
 
-            game.AddObject(secondPortal);
+                game.AddObject(secondPortal);
+            #endif
+
             currentlyPortaling = false;
             firstPortal = nullptr;
             CooldownStart(time);
         }
         else {
             // Create First Portal
-            firstPortal = new PortalObject(game, attachedTo->GetPosition());
-            game.AddObject(firstPortal);
+            game.PlayAudio("PortalStart.wav", 1.f, attachedTo);
+            #ifdef BUILD_SERVER
+                firstPortal = new PortalObject(game);
+                firstPortal->SetPosition(attachedTo->GetPosition());
+                firstPortal->SetRotation(attachedTo->GetRotation());
+                game.AddObject(firstPortal);
+            #endif
             currentlyPortaling = true;
         }
-    #endif
     }
 };
 

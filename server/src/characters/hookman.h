@@ -1,5 +1,4 @@
-#ifndef HOOKMAN_H
-#define HOOKMAN_H
+#pragma once
 
 #include "player.h"
 #include "weapons/hook-thrower.h"
@@ -15,7 +14,7 @@ public:
         #ifdef BUILD_SERVER
             qWeapon = new HookThrower { game };
             game.AddObject(qWeapon);
-            qWeapon->AttachToPlayer(this);
+            qWeapon->AttachToPlayer(this, WeaponAttachmentPoint::LEFT);
 
             PistolObject* pistol = new PistolObject(game);
             game.AddObject(pistol);
@@ -29,4 +28,3 @@ public:
 };
 
 CLASS_REGISTER(Hookman);
-#endif

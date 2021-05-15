@@ -36,6 +36,7 @@ public:
         lastUse = time;
         if (attachedTo && attachedTo->GetWeapon() && dynamic_cast<BowObject*>(attachedTo->GetWeapon())) {
             dynamic_cast<BowObject*>(attachedTo->GetWeapon())->SetInstantFire(true);
+            game.PlayAudio("Archer/arrow-ulti-activate.wav", 1.f, attachedTo);
         }
     }
 

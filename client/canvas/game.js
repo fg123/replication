@@ -4,16 +4,15 @@ module.exports = class GameCanvas {
     constructor (clientState, canvas) {
         this.canvas = canvas;
         this.clientState = clientState;
-        this.pointerLocked = false;
 
         document.addEventListener('pointerlockchange', () => {
-            this.pointerLocked = document.pointerLockElement === this.canvas;
+            this.clientState.isPaused = document.pointerLockElement !== this.canvas;
         }, false);
-        window.addEventListener("click", () => {
-            console.log("Click");
-            this.canvas.requestPointerLock = this.canvas.requestPointerLock;
-            this.canvas.requestPointerLock();
-        });
+
+        // window.addEventListener("click", () => {
+        //     console.log("Click");
+        //     this.canvas.requestPointerLock();
+        // });
 
         this.clientState.wasm._SetupClientContext();
 
@@ -23,13 +22,18 @@ module.exports = class GameCanvas {
     Draw() {
         // Serialize all data back out.
         if (this.clientState.localPlayerObjectId !== undefined) {
-            const serializedString = this.clientState.wasm._GetObjectSerialized(
-                this.clientState.localPlayerObjectId
-            );
-            const jsonString = this.clientState.wasm.UTF8ToString(serializedString);
-            const serializedObject = JSON.parse(jsonString);
-            this.clientState.wasm._free(serializedString);
-            this.clientState.localPlayerObject = serializedObject;
+            if (this.clientState.wasm._IsObjectAlive(this.clientState.localPlayerObjectId)) {
+                const serializedString = this.clientState.wasm._GetObjectSerialized(
+                    this.clientState.localPlayerObjectId
+                );
+                const jsonString = this.clientState.wasm.UTF8ToString(serializedString);
+                const serializedObject = JSON.parse(jsonString);
+                this.clientState.wasm._free(serializedString);
+                this.clientState.localPlayerObject = serializedObject;
+            }
+            else {
+                this.clientState.localPlayerObject = undefined;
+            }
         }
 
         this.canvas.width  = this.clientState.width;
@@ -52,7 +56,7 @@ module.exports = class GameCanvas {
             }
         }
 
-        if (this.pointerLocked) {
+        if (!this.clientState.isPaused) {
             this.clientState.SendMouseMoveEvent();
         }
         requestAnimationFrame(() => { this.Draw() });

@@ -1,5 +1,5 @@
 # Replication
-This is a 2D game engine written in C++. The client is deployed on the browser
+This is a 3D game engine written in C++. The client is deployed on the browser
 running a local copy of the engine in WebAssembly. A game is defined as a set
 of objects that are replicated from the server engine to the client engine.
 

@@ -11,8 +11,7 @@
 #include "json/json.hpp"
 
 #include <fstream>
-
-static const double TILE_SIZE = 48;
+#include <exception>
 
 Vector3 liveBoxStart(-1000, -100, -1000);
 Vector3 liveBoxSize(2000, 2000, 2000);
@@ -60,10 +59,11 @@ void Game::LoadMap(std::string mapPath) {
     for (json& model : obj["models"].GetArray()) {
         std::string modelName = model.GetString();
         std::string modelPath = RESOURCE_PATH("models/" + modelName);
+        LOG_INFO("Loading " << modelPath);
         std::ifstream modelStream (modelPath);
         if (!modelStream.is_open()) {
-            LOG_ERROR("Could not load model " + modelName);
-            throw "Could not load model!";
+            LOG_ERROR("Could not load model " << modelPath);
+            throw std::system_error(errno, std::system_category(), "failed to open " + modelPath);
         }
         assetManager.LoadModel(modelName, modelPath, modelStream);
     }
@@ -583,29 +583,30 @@ void Game::GetUnitsInRange(const Vector3& position, float range,
     }
 }
 
-CollisionResult Game::CheckLineSegmentCollide(const Vector3& start,
+bool Game::CheckLineSegmentCollide(const Vector3& start,
     const Vector3& end, uint64_t includeTags) {
     CollisionResult result;
     for (auto& object : gameObjects) {
         if (((uint64_t)object.second->GetTags() & includeTags) != 0) {
-            CollisionResult r = object.second->CollidesWith(start, end);
-            if (r.isColliding) {
-                r.collidedWith = object.second;
-                return r;
+            bool r = object.second->CollidesWith(start, end);
+            if (r) {
+                return true;
             }
         }
     }
-    return CollisionResult{};
+    return false;
 }
 
 void Game::PlayAudio(const std::string& audio, float volume, const Vector3& position) {
     #ifdef BUILD_CLIENT
+        LOG_DEBUG("Playing audio " << audio);
         audioRequests.emplace_back(assetManager.GetAudio(audio), volume, position);
     #endif
 }
 
 void Game::PlayAudio(const std::string& audio, float volume, Object* boundObject) {
     #ifdef BUILD_CLIENT
+        LOG_DEBUG("Playing audio " << audio);
         audioRequests.emplace_back(assetManager.GetAudio(audio), volume, boundObject->GetId());
     #endif
 }

@@ -36,7 +36,7 @@ struct PlayerSocketData {
 };
 
 #ifdef BUILD_SERVER
-    #define RESOURCE_PATH(path) (std::string("../data/") + path)
+    #define RESOURCE_PATH(path) (std::string("data/") + path)
 #else
     #define RESOURCE_PATH(path) (path)
 #endif
@@ -208,7 +208,7 @@ public:
         bool includeBoundingBox,
         std::vector<RangeQueryResult>& results);
 
-    CollisionResult CheckLineSegmentCollide(const Vector3& start,
+    bool CheckLineSegmentCollide(const Vector3& start,
         const Vector3& end, uint64_t includeTags = ~0);
 };
 

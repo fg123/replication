@@ -11,7 +11,7 @@ class ArrowObject : public ThrownProjectile {
 
     Vector3 savedVelocity;
 
-    static const Time timeBeforeDie = 3000;
+    static const Time timeBeforeDie = 10000;
 
 public:
     CLASS_CREATE(ArrowObject)

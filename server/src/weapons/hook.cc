@@ -1,14 +1,19 @@
 #include "hook.h"
+#include "hook-thrower.h"
 
 HookObject::HookObject(Game& game) : ThrownProjectile(game) {
     // Don't Collide with Weapons
     collisionExclusion |= (uint64_t) Tag::WEAPON;
     collisionExclusion |= (uint64_t) Tag::PLAYER;
     SetTag(Tag::NO_GRAVITY);
-    AddCollider(new CircleCollider(this, Vector3(0, 0, 0), 5.0));
-    airFriction = Vector3(1, 1, 0);
-}
+    #ifdef BUILD_SERVER
+        SetModel(game.GetModel("BulletTracer.obj"));
+        AddCollider(new AABBCollider(this, Vector3(-0.1, -0.1, -0.1), Vector3(0.2, 0.2, 0.2)));
+    #endif
 
+    game.PlayAudio("HookThrow.wav", 1.f, this);
+    airFriction = Vector3(1, 1, 1);
+}
 
 void HookObject::OnCollide(CollisionResult& result) {
     if (result.collidedWith->IsTagged(Tag::WEAPON)) {
@@ -23,47 +28,54 @@ void HookObject::OnCollide(CollisionResult& result) {
 
 void HookObject::Tick(Time time) {
     ThrownProjectile::Tick(time);
+    // Always Rotate Towards Attached
+    PlayerObject* playerObject = static_cast<PlayerObject*>(firedBy->GetAttachedTo());
+
+    SetRotation(DirectionToQuaternion(firedBy->GetPosition() - GetPosition()));
+    SetScale(Vector3(0.5f, 0.5f, glm::distance(firedBy->GetPosition(), GetPosition())));
+
     bool isDead = false;
     if (!IsStatic() &&
-        glm::distance(firedBy->GetAttachedTo()->GetPosition(), GetPosition()) > 500) {
+        glm::distance(firedBy->GetPosition(), GetPosition()) > HookObject::MaxLength) {
         isDead = true;
-
+        static_cast<HookThrower*>(firedBy)->ResetCooldown();
     }
     else if (IsStatic()) {
-        Vector3 position = firedBy->GetAttachedTo()->GetPosition();
-        Vector3 velocity = firedBy->GetAttachedTo()->GetVelocity();
+        if (!audioPlayed) {
+            game.PlayAudio("HookReel.wav", 1.f, playerObject);
+            audioPlayed = true;
+        }
+        Vector3 position = playerObject->GetPosition();
+        // Vector3 velocity = playerObject->Object::GetVelocity();
         // Make regular direction twice as powerful as the aiming pull
         Vector3 direction = glm::normalize(GetPosition() - position) * 5.0f;
-        Vector3 aimDirection = firedBy->GetAttachedTo()->GetLookDirection();
-        velocity = glm::normalize(direction + aimDirection) * 1000.0f;
-        firedBy->GetAttachedTo()->SetVelocity(velocity);
+        Vector3 aimDirection = playerObject->GetLookDirection();
+        // velocity = glm::normalize(direction + aimDirection) * 1000.0f;
+        playerObject->SetVelocity(glm::normalize(direction + aimDirection) * 15.0f);
         hasForceBeenApplied = true;
 
-        // TODO: Cut off the rope if it intersects map object
-        CollisionResult r = game.CheckLineSegmentCollide(position + direction * 10.0f,
-            GetPosition() - (direction * 10.0f), (uint64_t)Tag::GROUND);
-        if (r.isColliding) {
-            isDead = true;
-        }
+        // // TODO: Cut off the rope if it intersects map object
+        // CollisionResult r = game.CheckLineSegmentCollide(position + direction * 10.0f,
+        //     GetPosition() - (direction * 10.0f), (uint64_t)Tag::GROUND);
+        // if (r.isColliding) {
+        //     isDead = true;
+        // }
     }
+
     if (hasForceBeenApplied &&
-        glm::distance(firedBy->GetAttachedTo()->GetPosition(), GetPosition()) < 100) {
+        glm::distance(playerObject->GetPosition(), GetPosition()) < 2.f) {
         isDead = true;
     }
+
+    if (time - spawnTime > 5000.f) {
+        isDead = true;
+    }
+
 #ifdef BUILD_SERVER
     if (isDead) {
+        LOG_DEBUG("Kill HookObject");
         game.DestroyObject(GetId());
     }
 #endif
-}
-
-void HookObject::Serialize(JSONWriter& obj) {
-    ThrownProjectile::Serialize(obj);
-    obj.Key("owner");
-    obj.Uint(firedBy->GetAttachedTo()->GetId());
-}
-
-void HookObject::ProcessReplication(json& obj) {
-    ThrownProjectile::ProcessReplication(obj);
 }
 

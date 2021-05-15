@@ -27,6 +27,10 @@ class ClientGL {
     std::unordered_set<Object*> opaque;
     std::map<float, Object*> transparent;
     std::unordered_set<Object*> foreground;
+
+    DebugShaderProgram* debugShaderProgram;
+    Mesh debugCube;
+
 public:
 
     ClientGL(Game& game, const char* selector);

@@ -12,12 +12,8 @@ BulletObject::BulletObject(Game& game, int damage, RayCastResult rayResult) :
 
     SetTag(Tag::NO_GRAVITY);
 
-#ifdef BUILD_SERVER
     SetModel(game.GetModel("Bullet.obj"));
     GenerateAABBCollidersFromModel(this);
-#endif
-
-    //AddCollider(new CircleCollider(this, Vector3(), 3.0));
     airFriction = Vector3(1, 1, 1);
 }
 

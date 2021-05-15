@@ -7,17 +7,34 @@
 //   things
 class PlayerObject;
 
+enum class WeaponAttachmentPoint : int {
+    LEFT, CENTER, RIGHT
+};
+
+template<>
+inline void SerializeDispatch(WeaponAttachmentPoint& object, JSONWriter& obj) {
+    obj.Int((int) object);
+}
+
+template<>
+inline void ProcessReplicationDispatch(WeaponAttachmentPoint& object, json& obj) {
+    object = (WeaponAttachmentPoint)obj.GetInt();
+}
+
 class WeaponObject : public Object {
 protected:
     PlayerObject* attachedTo = nullptr;
-
 public:
+    REPLICATED(WeaponAttachmentPoint, attachmentPoint, "atp");
+    REPLICATED_D(float, currentSpread, "spread", 0.f);
+
     WeaponObject(Game& game) : WeaponObject(game, Vector3()) {
     }
     WeaponObject(Game& game, Vector3 position);
 
     PlayerObject* GetAttachedTo() { return attachedTo; }
-    void AttachToPlayer(PlayerObject* player);
+    void AttachToPlayer(PlayerObject* player, WeaponAttachmentPoint attachmentPoint =
+        WeaponAttachmentPoint::RIGHT);
     void Detach();
 
     virtual void StartFire(Time time) {}
@@ -29,7 +46,6 @@ public:
     virtual void Tick(Time time) override;
     virtual void Serialize(JSONWriter& obj) override;
     virtual void ProcessReplication(json& obj) override;
-
 };
 
 // Manages cooldown
@@ -51,6 +67,8 @@ public:
 
     bool IsOnCooldown() { return currentCooldown != 0; }
     void CooldownStart(Time time);
+
+    void ResetCooldown();
 };
 
 #endif

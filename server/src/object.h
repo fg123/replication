@@ -1,5 +1,4 @@
-#ifndef OBJECT_H
-#define OBJECT_H
+#pragma once
 
 #include <cstdint>
 #include <unordered_map>
@@ -70,16 +69,6 @@ class Object : public Replicable {
 protected:
     Game& game;
 
-#ifdef BUILD_CLIENT
-    // For Client-Side Interpolation
-    Vector3 clientPosition;
-    bool clientPositionSet = false;
-
-    Quaternion clientRotation;
-    bool clientRotationSet = false;
-
-#endif
-
     // All are measured in the same units, velocity is in position units
     //   per second
     REPLICATED(Vector3, position, "p");
@@ -111,6 +100,16 @@ protected:
     Model* model = nullptr;
 
 public:
+
+#ifdef BUILD_CLIENT
+    // For Client-Side Interpolation
+    Vector3 clientPosition;
+    bool clientPositionSet = false;
+
+    Quaternion clientRotation;
+    bool clientRotationSet = false;
+
+#endif
     // For object hierarchy, this is all managed from the game, used for
     //   knowing who ticks(). Parents tick their own children.
     std::unordered_set<Object*> children;
@@ -148,11 +147,11 @@ public:
     void ResolveCollision(const Vector3& difference);
 
     size_t GetColliderCount() const { return collider.children.size(); }
-
+    const TwoPhaseCollider& GetCollider() const { return collider; }
     CollisionResult CollidesWith(Collider* other);
     CollisionResult CollidesWith(Object* other);
-    CollisionResult CollidesWith(const Vector3& p1, const Vector3& p2);
-    void CollidesWith(RayCastRequest& ray, RayCastResult& result);
+    bool CollidesWith(const Vector3& p1, const Vector3& p2);
+    bool CollidesWith(RayCastRequest& ray, RayCastResult& result);
 
     void AddCollider(Collider* col) {
         collider.AddCollider(col);
@@ -194,13 +193,10 @@ public:
 
     virtual void OnCollide(CollisionResult& result);
 
-#ifdef BUILD_SERVER
-    // Server-Only can change model, rely on replication to client
     void SetModel(Model* newModel) {
         model = newModel;
         isDirty = true;
     }
-#endif
 
 #ifdef BUILD_CLIENT
     virtual const Matrix4 GetTransform() {
@@ -239,5 +235,3 @@ inline std::ostream& operator<<(std::ostream& os, const Object* obj) {
     os << "(" << obj->GetId() << ") " << obj->GetClass();
     return os;
 }
-
-#endif

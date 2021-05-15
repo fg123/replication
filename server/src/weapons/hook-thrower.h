@@ -1,5 +1,4 @@
-#ifndef HOOK_THROWER_H
-#define HOOK_THROWER_H
+#pragma once
 
 #include "game.h"
 #include "input-hold-thrower.h"
@@ -13,9 +12,13 @@ public:
     HookThrower(Game& game, Vector3 position) : InputHoldThrower<HookObject>(game, position) {
         instantFire = true;
         cooldown = 2000;
+        powerMax = 60.f;
+        maxDistance = HookObject::MaxLength;
+
+        #ifdef BUILD_SERVER
+            SetModel(game.GetModel("HookThrower.obj"));
+        #endif
     }
 };
 
 CLASS_REGISTER(HookThrower);
-
-#endif

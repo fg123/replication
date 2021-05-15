@@ -1,15 +1,12 @@
 #include "explosion.h"
 #include "player.h"
 
-ExplosionObject::ExplosionObject(Game& game) : ExplosionObject(game, 0.f, 0.f) {
-}
+ExplosionObject::ExplosionObject(Game& game) : ExplosionObject(game, 0.f, 0.f) { }
 
 ExplosionObject::ExplosionObject(Game& game, float radius, float damage) :
     Object(game), radius(radius), damage(damage) {
 
-    #ifdef BUILD_SERVER
-        SetModel(game.GetModel("Explosion.obj"));
-    #endif
+    SetModel(game.GetModel("Explosion.obj"));
 }
 
 void ExplosionObject::OnClientCreate() {

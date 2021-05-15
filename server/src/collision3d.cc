@@ -51,13 +51,13 @@ CollisionResult AABBAndAABBCollide(AABBCollider* rect1, AABBCollider* rect2) {
             r.collisionDifference.y = 0;
             r.collisionDifference.z = 0;
         }
-        if (glm::abs(r.collisionDifference.y) < glm::abs(r.collisionDifference.x) &&
-            glm::abs(r.collisionDifference.y) < glm::abs(r.collisionDifference.z)) {
+        else if (glm::abs(r.collisionDifference.y) < glm::abs(r.collisionDifference.x) &&
+                 glm::abs(r.collisionDifference.y) < glm::abs(r.collisionDifference.z)) {
             r.collisionDifference.x = 0;
             r.collisionDifference.z = 0;
         }
-        if (glm::abs(r.collisionDifference.z) < glm::abs(r.collisionDifference.x) &&
-            glm::abs(r.collisionDifference.z) < glm::abs(r.collisionDifference.y)) {
+        else if (glm::abs(r.collisionDifference.z) < glm::abs(r.collisionDifference.x) &&
+                 glm::abs(r.collisionDifference.z) < glm::abs(r.collisionDifference.y)) {
             r.collisionDifference.x = 0;
             r.collisionDifference.y = 0;
         }
@@ -80,88 +80,67 @@ CollisionResult SphereAndSphereCollide(SphereCollider* c1, SphereCollider* c2) {
     return r;
 }
 
+Vector3 AABBSurfaceNormal(AABBCollider* rect, Vector3 point) {
+    Vector3 pt_min = rect->GetPosition();
+    Vector3 pt_max = rect->GetPosition() + rect->size;
+    Vector3 hitVec = point - ((pt_min + pt_max) / 2.0f);
+    Vector3 d = glm::abs(pt_min - pt_max) / 2.0f;
+    Vector3 norm = (hitVec / d) * 1.00001f;
+    return glm::normalize(Vector3((int)norm.x, (int)norm.y, (int)norm.z));
+}
+
+bool CheckAABBAndSphereCollide(const Vector3& rpos, const Vector3& rsize,
+    const Vector3& cpos, const float& rad) {
+
+    Vector3 rectHalf = rsize / 2.0f;
+    Vector3 rectCenter = rpos + rectHalf;
+    Vector3 difference = cpos - rectCenter;
+    Vector3 closest = glm::clamp(difference, -rectHalf, rectHalf);
+
+    float distanceToClosest = glm::length(closest);
+    float distanceToCircle = glm::length(difference);
+
+    return distanceToCircle < distanceToClosest + rad;
+}
+
 CollisionResult AABBAndSphereCollide(AABBCollider* rect, SphereCollider* circle) {
     Vector3 rectPosition = rect->GetPosition();
     Vector3 circPosition = circle->GetPosition();
 
-    Vector3 rectHalf (rect->size.x / 2.0f, rect->size.y / 2.0f, 0);
+    // Find a position from
+    Vector3 rectHalf = rect->size / 2.0f;
     Vector3 rectCenter = rectPosition + rectHalf;
-
-    // if (IsPointInAABB(rectPosition, rect->size, circPosition)) {
-    //     // Calculate how far back to move the circle to get it out of the rectangle
-    //     // LOG_WARN("Circle (" << circle->GetOwner() << ") in Rectangle (" << rect->GetOwner() << ")");
-
-    //     // LOG_DEBUG("Circle Position " << circPosition);
-    //     // LOG_DEBUG("Circle Velocity " << circle->GetOwner()->GetVelocity());
-    //     // LOG_DEBUG("Rectangle Position " << rectPosition);
-    //     // LOG_DEBUG("Rectangle Size " << rect->size);
-
-    //     // Clamp backwards to edge of rectangle
-    //     Vector3 cVel = circle->GetOwner()->GetVelocity();
-    //     Vector3 rVel = rect->GetOwner()->GetVelocity();
-
-    //     // LastFrame should be where the circle was last frame:
-    //     //   circPosition - cVel
-    //     // But, if the rectangle is moving towards the circle instead (or both are moving)
-    //     //   this position won't be correct.
-    //     Vector3 lastFrame = circPosition - cVel + rVel; // Where we were last frame
-
-    //     Vector3 topLeft = rectPosition - circle->radius;
-    //     Vector3 topRight = rectPosition;
-    //     topRight.x += rect->size.x + circle->radius;
-    //     topRight.y -= circle->radius;
-
-    //     Vector3 bottomLeft = rectPosition;
-    //     bottomLeft.x -= circle->radius;
-    //     bottomLeft.y += rect->size.y + circle->radius;
-    //     Vector3 bottomRight = rectPosition + rect->size + circle->radius;
-
-    //     // Test each intersection
-    //     Vector3 intersectionPoint;
-
-    //     if (LineSegmentsIntersectPoint(circPosition, lastFrame, topLeft, topRight, intersectionPoint)) {
-    //     }
-    //     else if (LineSegmentsIntersectPoint(circPosition, lastFrame, topRight, bottomRight, intersectionPoint)) {
-    //     }
-    //     else if (LineSegmentsIntersectPoint(circPosition, lastFrame, bottomRight, bottomLeft, intersectionPoint)) {
-    //     }
-    //     else if (LineSegmentsIntersectPoint(circPosition, lastFrame, topLeft, bottomLeft, intersectionPoint)) {
-    //     }
-    //     else {
-    //         LOG_WARN("No intersection with edge!");
-    //     }
-    //     CollisionResult r;
-    //     r.collisionDifference = -(intersectionPoint - circPosition);
-    //     // LOG_DEBUG("Difference " << r.collisionDifference);
-    //     // LOG_DEBUG("New Pos " << circPosition - r.collisionDifference);
-    //     r.isColliding = true;
-    //     return r;
-    // }
 
     // get difference vector between both centers
     Vector3 difference = circPosition - rectCenter;
-    Vector3 clamped = glm::clamp(difference, -rectHalf, rectHalf);
 
+    Vector3 clamped = glm::clamp(difference, -rectHalf, rectHalf);
+    LOG_DEBUG("Clamped " << clamped);
     // add clamped value to AABB_center and we get the value of box closest to circle
     Vector3 closest = rectCenter + clamped;
     if (IsPointInAABB(rectPosition, rect->size, circPosition)) {
+
         closest = circPosition;
     }
+    LOG_DEBUG("Closest " << closest);
+    LOG_DEBUG("Circ Position " << circPosition);
     // retrieve vector between center circle and closest point AABB and check if length <= radius
     // LOG_DEBUG("Difference " << closest << " " << circPosition);
-    difference = closest - circPosition;
-    // Difference should point away from the rectangle.
-    float differenceLength = glm::length(difference);
 
-    difference = glm::normalize(difference);
+    // We want the circle to be at closest + radius * surface normal there
+    Vector3 normal = AABBSurfaceNormal(rect, closest);
+    // Vector3 desired = closest + glm::normalize() * circle->radius;
 
-    float overlapRange = circle->radius - differenceLength;
+    float distanceToClosest = glm::length(clamped);
+    float distanceToCircle = glm::length(difference);
+
+    bool colliding = distanceToCircle < distanceToClosest + circle->radius;
 
     CollisionResult r;
-    r.isColliding = overlapRange > 0;
+    r.isColliding = colliding;
     if (r.isColliding) {
         // LOG_DEBUG("Circ Rect " << difference << " " << overlapRange);
-        r.collisionDifference = difference * overlapRange;
+        // r.collisionDifference = circPosition - desired;
     }
     return r;
 }
@@ -251,12 +230,6 @@ CollisionResult TwoPhaseCollider::CollidesWith(Collider* other) {
     return CollisionResult{};
 }
 
-
-CollisionResult AABBCollider::CollidesWith(const Vector3& p1, const Vector3& p2) {
-    // TODO:
-    return CollisionResult();
-}
-
 bool AABBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
     Vector3 pt_min = GetPosition();
     Vector3 pt_max = GetPosition() + size;
@@ -291,20 +264,9 @@ bool AABBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
     result.hitLocation = ray.startPoint + ray.direction * tmin;
     result.zDepth = tmin;
 
-    LOG_DEBUG("Hit Result: ");
-    LOG_DEBUG("Box " << pt_min << " " << pt_max);
-    LOG_DEBUG("Hit Location: " << result.hitLocation);
-    Vector3 hitVec = result.hitLocation - ((pt_min + pt_max) / 2.0f);
-    Vector3 d = glm::abs(pt_min - pt_max) / 2.0f;
-    Vector3 norm = (hitVec / d) * 1.00001f;
-    result.hitNormal = glm::normalize(Vector3((int)norm.x, (int)norm.y, (int)norm.z));
-    LOG_DEBUG("Hit Normal " << result.hitNormal);
+    result.hitNormal = AABBSurfaceNormal(this, result.hitLocation);
+    // LOG_DEBUG("Hit Normal " << result.hitNormal);
     return true;
-}
-
-CollisionResult SphereCollider::CollidesWith(const Vector3& p1, const Vector3& p2) {
-    // TODO:
-    return CollisionResult();
 }
 
 void TwoPhaseCollider::Serialize(JSONWriter& obj) {

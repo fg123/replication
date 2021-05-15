@@ -18,7 +18,7 @@ module.exports = class ClientState {
         this.showColliders = false;
         this.localPlayerObjectId = undefined;
         this.localPlayerObject = undefined;
-        this.isPaused = false;
+        this.isPaused = true;
         this.events = {};
 
         this.ping = 0;
@@ -87,7 +87,7 @@ module.exports = class ClientState {
         const handler = (ev) => {
             // console.log(ev.data);
             const event = JSON.parse(ev.data);
-            console.log(event);
+            // console.log(event);
             if (event["playerLocalObjectId"] !== undefined) {
                 console.log("Player Local ID", event);
                 const id = event["playerLocalObjectId"];
@@ -221,12 +221,7 @@ module.exports = class ClientState {
             this.wasm._TickGame();
         }, tickInterval);
 
-
-
         window.addEventListener('keydown', e => {
-            if (e.key === "Escape") {
-                this.isPaused = !this.isPaused;
-            }
             if (!e.repeat) {
                 this.SendInputPacket({
                     event: "kd",

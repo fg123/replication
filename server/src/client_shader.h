@@ -87,3 +87,29 @@ public:
                  const Matrix4& proj) override;
     void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) override;
 };
+
+
+class DebugShaderProgram : public ShaderProgram {
+    // Uniforms
+    GLint uniformProj;
+    GLint uniformView;
+    GLint uniformModel;
+
+public:
+    DebugShaderProgram() {
+        AddShader(LoadURL("shaders/Debug.vs"), GL_VERTEX_SHADER);
+        AddShader(LoadURL("shaders/Debug.fs"), GL_FRAGMENT_SHADER);
+        LinkProgram();
+        Use();
+
+        uniformProj = GetUniformLocation("u_Projection");
+        uniformView = GetUniformLocation("u_View");
+        uniformModel = GetUniformLocation("u_Model");
+    }
+
+    void PreDraw(Game& game,
+                 const Vector3& viewPos,
+                 const Matrix4& view,
+                 const Matrix4& proj) override;
+    void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) override;
+};

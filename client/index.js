@@ -36,9 +36,9 @@ window.Module['onRuntimeInitialized'] = function() {
         const resourceManager = new ResourceManager(() => {
             console.log('Starting Game');
             const clientState = new ClientState(webSocket, instance, resourceManager);
-            new GameCanvas(clientState, gameCanvas);
+            const game = new GameCanvas(clientState, gameCanvas);
             new UICanvas(clientState, uiCanvas, uiContext);
-            new EscapeMenu(clientState, document.getElementById('escapeMenu'));
+            new EscapeMenu(clientState, document.getElementById('escapeMenu'), game);
         });
     };
     webSocket.onclose = function(e) {

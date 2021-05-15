@@ -5,7 +5,7 @@
 #include "collision.h"
 
 class Bomb : public Object {
-    int damageRange = 100;
+    int damageRange = 5;
     int damage = 70;
 
 public:
@@ -13,24 +13,17 @@ public:
     Bomb(Game& game) : Bomb(game, Vector3()) {}
     Bomb(Game& game, Vector3 position) : Object(game) {
         SetPosition(position);
-        AddCollider(new CircleCollider(this, Vector3(), 24));
-        collisionExclusion |= (uint64_t) Tag::PLAYER;
+        SetModel(game.GetModel("BombCrate.obj"));
+        GenerateAABBCollidersFromModel(this);
+        SetTag(Tag::GROUND);
     }
 
     void Explode() {
-        // IMPLEMENT EXPLODE, scale damage as required
-        std::vector<Game::RangeQueryResult> results;
-        game.GetUnitsInRange(position, damageRange, false, results);
-
-        for (auto& result : results) {
-            // Flat Damage for now
-            if (result.first->IsTagged(Tag::PLAYER)) {
-                static_cast<PlayerObject*>(result.first)->DealDamage(damage);
-            }
-        }
     #ifdef BUILD_SERVER
+        ExplosionObject* explode = new ExplosionObject(game, damageRange, damage);
+        explode->SetPosition(GetPosition());
+        game.AddObject(explode);
         game.DestroyObject(GetId());
-        // game.QueueAnimation(new ExplodeAnimation(position, damageRange));
     #endif
     }
 };
@@ -40,7 +33,7 @@ CLASS_REGISTER(Bomb);
 class BombCreator : public WeaponWithCooldown {
     std::vector<Bomb*> bombs;
 
-    REPLICATED_D(int, dropRange, "dr", 300);
+    REPLICATED_D(float, dropRange, "dr", 5);
 
 public:
     CLASS_CREATE(BombCreator)
@@ -58,12 +51,24 @@ public:
 #ifdef BUILD_SERVER
     virtual void StartFire(Time time) override {
         if (IsOnCooldown()) return;
-        // if (glm::distance(Vector3(attachedTo->mousePosition, 0), attachedTo->GetPosition()) < dropRange) {
-        //     // Bomb* bomb = new Bomb(game, Vector3(attachedTo->mousePosition, 0));
-        //     bombs.push_back(bomb);
-        //     game.AddObject(bomb);
-        //     CooldownStart(time);
-        // }
+
+        Vector3 rayCastEnd = attachedTo->GetPosition() + attachedTo->GetLookDirection() * dropRange;
+
+        RayCastRequest request;
+        request.startPoint = attachedTo->GetPosition() + attachedTo->GetLookDirection();
+        request.direction = attachedTo->GetLookDirection();
+
+        RayCastResult result = game.RayCastInWorld(request);
+        if (result.isHit) {
+            if (glm::distance(attachedTo->GetPosition(), result.hitLocation) < dropRange) {
+                rayCastEnd = result.hitLocation;
+            }
+        }
+
+        Bomb* bomb = new Bomb(game, rayCastEnd);
+        bombs.push_back(bomb);
+        game.AddObject(bomb);
+        CooldownStart(time);
     }
 
     void ExplodeAll() {

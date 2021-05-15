@@ -3,9 +3,9 @@
 #include "player.h"
 
 ArrowObject::ArrowObject(Game& game) : ThrownProjectile(game) {
-    collisionExclusion = (uint64_t) Tag::OBJECT;
-    AddCollider(new CircleCollider(this, Vector3(), 3.0));
-    airFriction = Vector3(1, 1, 0);
+    SetModel(game.GetModel("Arrow.obj"));
+    AddCollider(new AABBCollider(this, Vector3(-0.15, -0.15, -0.15), Vector3(0.3, 0.3, 0.3)));
+    airFriction = Vector3(1, 1, 1);
 }
 
 void ArrowObject::OnCollide(CollisionResult& result) {
@@ -16,7 +16,7 @@ void ArrowObject::OnCollide(CollisionResult& result) {
         SetVelocity(Vector3());
     }
     else if (result.collidedWith->IsStatic() && !IsStatic()) {
-        LOG_DEBUG("Setting to Static");
+        LOG_DEBUG("Arrow Setting to Static " << result.collisionDifference);
         SetIsStatic(true);
         savedVelocity = GetVelocity();
         collisionExclusion |= (uint64_t) Tag::PLAYER;
@@ -33,6 +33,7 @@ void ArrowObject::Tick(Time time) {
         // For display purposes
         SetVelocity(savedVelocity);
     }
+    SetRotation(DirectionToQuaternion(GetVelocity()));
 #ifdef BUILD_SERVER
     if (timeLanded != 0 && timeSinceLanded > timeBeforeDie) {
         game.DestroyObject(GetId());

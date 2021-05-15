@@ -4,32 +4,6 @@
 #include "weapon.h"
 #include "game.h"
 
-// struct RecoilPattern {
-//     std::vector<Vector2> corePoints;
-
-//     std::vector<glm::vec4> cubicFunctions;
-
-//     RecoilPattern(std::initializer_list<Vector2> l) : corePoints(l) {
-//         // Generate Cubic Spline
-
-//     }
-
-//     float GetRecoil(float time) {
-//         for (size_t i = 1; i < corePoints.size(); i++) {
-//             if (corePoints[i].x < time) {
-//                 return EvaluateCubic(cubicFunctions[i], time);
-//             }
-//         }
-//     }
-
-//     float EvaluateCubic(const glm::vec4& fn, const float& time) {
-//         return fn[0] +
-//             fn[1] * time +
-//             fn[2] * time * time +
-//             fn[3] * time * time * time;
-//     }
-// };
-
 class GunBase : public WeaponObject {
 protected:
     // Changable by underlying guns
@@ -47,7 +21,8 @@ protected:
     float spreadIncreasePerShot = 2;
     int cooldownBeforeSpreadReduction = 100;
 
-    // static RecoilPattern pattern;
+    float recoilRotationPitch = 0;
+    float recoilRotationPitchVel = 0;
 
 private:
     Time lastFireTime = 0;
@@ -55,7 +30,6 @@ private:
     Time reloadStartTime = 0;
 
     REPLICATED_D(Time, timeSinceReload, "tsr", 0);
-    REPLICATED(float, currentSpread, "spread");
 
     void ActualFire(Time time);
 public:
@@ -67,6 +41,18 @@ public:
     virtual void Tick(Time time) override;
     virtual void StartFire(Time time) override;
     virtual void Fire(Time time) override;
+    #ifdef BUILD_CLIENT
+    virtual const Matrix4 GetTransform() override {
+        Matrix4 recoilMatrix;
+        recoilMatrix = glm::rotate(recoilMatrix, glm::radians(recoilRotationPitch),
+            Vector3(recoilMatrix[0][0], recoilMatrix[1][0], recoilMatrix[2][0]));
+
+        return glm::translate(clientPosition) *
+            glm::transpose(glm::toMat4(clientRotation)) *
+            glm::transpose(recoilMatrix) *
+            glm::scale(scale);
+    }
+    #endif
 };
 
 #endif

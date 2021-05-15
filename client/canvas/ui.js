@@ -62,7 +62,7 @@ module.exports = class UICanvas {
         this.context.fillText(last, x + perfTracker.size + 24, y + 16 + height / 2);
     }
 
-    DrawCrosshair(x, y, cwidth, clength, spread) {
+    DrawCrosshairInternal(x, y, cwidth, clength, spread) {
         // Top
         this.context.fillRect(x - cwidth / 2, y - clength - spread, cwidth, clength);
         // Bottom
@@ -77,6 +77,7 @@ module.exports = class UICanvas {
         // Bottom Right
         if (!player.w) return;
         const weapon = this.clientState.GetObject(player.w);
+        if (weapon === undefined) return;
         if (weapon.blts === undefined) return;
         const bullets = weapon.blts;
         const magazines = weapon.mags;
@@ -95,17 +96,29 @@ module.exports = class UICanvas {
             this.context.fillStyle = "green";
             drawRoundedRectangle(this.context, width - 250, height - 150, 200 * percentageReload, 20, 10, true, false);
         }
+    }
 
+    DrawCrosshair(player, width, height) {
+        if (!player.w) return;
+        const weapon = this.clientState.GetObject(player.w);
+        if (weapon.spread === undefined) return 0;
         // Draw Crosshair
         const cwidth = 2;
         const clength = 15;
         const x = Math.round(width / 2);
         const y = Math.round(height / 2);
         const spread = weapon.spread + 5;
-        this.context.fillStyle = "black";
-        this.DrawCrosshair(x, y, cwidth + 4, clength + 4, spread);
-        this.context.fillStyle = "white";
-        this.DrawCrosshair(x, y, cwidth, clength, spread + 2);
+        this.context.fillStyle = "rgba(0, 0, 0, 0.9)";
+        this.DrawCrosshairInternal(x, y, cwidth + 4, clength + 4, spread);
+        this.context.fillStyle = "rgba(255, 255, 255, 0.9)";
+        this.DrawCrosshairInternal(x, y, cwidth, clength, spread + 2);
+
+        if (weapon.pow) {
+            this.context.fillStyle = "rgba(0, 0, 0, 0.9)";
+            this.context.fillRect(width / 2 - 32, height / 2 + 28, 64, 14);
+            this.context.fillStyle = "rgba(30, 144, 255, 0.9)";
+            this.context.fillRect(width / 2 - 30, height / 2 + 30, 60 * weapon.pow, 10);
+        }
     }
 
     DrawQ(player, width, height) {
@@ -222,6 +235,7 @@ module.exports = class UICanvas {
 
 
         this.DrawWeapon(player, width, height);
+        this.DrawCrosshair(player, width, height);
 
         this.DrawQ(player, width, height);
         this.DrawZ(player, width, height);

@@ -14,7 +14,7 @@ WeaponObject::WeaponObject(Game& game, Vector3 position) : Object(game) {
     Detach();
 }
 
-void WeaponObject::AttachToPlayer(PlayerObject* player) {
+void WeaponObject::AttachToPlayer(PlayerObject* player, WeaponAttachmentPoint inAttachmentPoint) {
     if (player == nullptr) {
         LOG_ERROR("Can't attach to null! Use Detach() instead!");
         throw std::runtime_error("Can't attach to null! Use Detach() instead!");
@@ -27,6 +27,8 @@ void WeaponObject::AttachToPlayer(PlayerObject* player) {
         return;
     }
     // Associate hierarchy
+    attachmentPoint = inAttachmentPoint;
+
     game.AssignParent(this, player);
     attachedTo = player;
     SetDirty(true);
@@ -48,9 +50,7 @@ void WeaponObject::Tick(Time time) {
     Object::Tick(time);
     if (attachedTo) {
         // Attached!
-        // SetPosition(attachedTo->GetAttachmentPoint());
         SetTag(Tag::NO_GRAVITY);
-        // SetVelocity(attachedTo->GetVelocity());
     }
     else {
         RemoveTag(Tag::NO_GRAVITY);
@@ -95,4 +95,8 @@ void WeaponWithCooldown::Tick(Time time) {
 
 void WeaponWithCooldown::CooldownStart(Time time) {
     lastUseTime = time;
+}
+
+void WeaponWithCooldown::ResetCooldown() {
+    lastUseTime = 0;
 }

@@ -1,10 +1,11 @@
 #include "object.h"
 #include "game.h"
+#include "ray-cast.h"
 
 #include "json/json.hpp"
 
 static const double GRAVITY = 30;
-static const double EPSILON = 10e-20;
+static const double EPSILON = 10e-10;
 
 std::unordered_map<std::string, ObjectConstructor>& GetClassLookup() {
     static std::unordered_map<std::string, ObjectConstructor> ClassLookup;
@@ -39,7 +40,7 @@ Object::Object(Game& game) :
     tags((uint64_t)Tag::OBJECT),
     collisionExclusion(0),
     collisionReporting(~0),
-    airFriction(0.8, 0.8, 0.8)
+    airFriction(0.95, 0.95, 0.95)
 {}
 
 Object::~Object() {}
@@ -49,61 +50,84 @@ void Object::Tick(Time time) {
     for (auto& child : children) {
         child->Tick(time);
     }
-    // Always replicate for now
-    if (isStatic) return;
-
     Time delta = DeltaTime(time);
     if (delta == 0) return;
 
-    // if (IsTagged(Tag::PLAYER)) {
-    //     LOG_DEBUG(delta);
-    // }
     // Apply Physics
     float timeFactor = delta / 1000.0;
 
-    if (!isStatic && GetColliderCount() > 0 && !IsTagged(Tag::NO_GRAVITY)) {
-        velocity.y -= GRAVITY * timeFactor;
-    }
-
-    // velocity.x *= airFriction.x;
-    // velocity.y *= airFriction.y;
-    // velocity.z *= airFriction.z;
-
     Vector3 positionDelta = GetVelocity() * timeFactor;
-    position += positionDelta;
-
     isGrounded = false;
-    game.HandleCollisions(this);
+    if (!isStatic) {
+        if (GetColliderCount() > 0 && !IsTagged(Tag::NO_GRAVITY)) {
+            velocity.y -= GRAVITY * timeFactor;
+        }
 
-    if (std::abs(velocity.x) < EPSILON) {
-        velocity.x = 0;
-    }
-    if (std::abs(velocity.y) < EPSILON) {
-        velocity.y = 0;
-    }
-    if (std::abs(velocity.z) < EPSILON) {
-        velocity.z = 0;
+        velocity.x *= airFriction.x;
+        if (velocity.y > 0) {
+            velocity.y *= airFriction.y;
+        }
+        velocity.z *= airFriction.z;
+
+        // Minimize Tunnelling by Creating Divisions
+        // position += positionDelta;
+
+        float AABBSize = glm::abs(glm::min(
+            collider.aabbBroad.size.x,
+            collider.aabbBroad.size.y,
+            collider.aabbBroad.size.z));
+        float movement = glm::length(positionDelta);
+
+        int divisions = AABBSize < EPSILON ? 1 : glm::ceil(movement / AABBSize);
+
+        Vector3 subStepDelta = positionDelta;
+        for (int i = 0; i < divisions; i++) {
+            position += subStepDelta / (float)divisions;
+            game.HandleCollisions(this);
+            if (IsStatic()) {
+                break;
+            }
+            subStepDelta = GetVelocity() * timeFactor;
+        }
+
+        if (divisions == 0) {
+            // We did not call HandleCollisions so reporting won't be triggered
+            //   above, so we additionally handle collisions here.
+            game.HandleCollisions(this);
+        }
+
+        if (std::abs(velocity.x) < EPSILON) {
+            velocity.x = 0;
+        }
+        if (std::abs(velocity.y) < EPSILON) {
+            velocity.y = 0;
+        }
+        if (std::abs(velocity.z) < EPSILON) {
+            velocity.z = 0;
+        }
     }
 
-#ifdef BUILD_SERVER
-    // We are dirty if velocity changed last frame
-    //    or position changed significantly
-    if (position - positionDelta != lastFramePosition ||
-        GetVelocity() != lastFrameVelocity) {
+    #ifdef BUILD_SERVER
+        // We are dirty if velocity changed last frame
+        //    or position changed significantly
+        if (position - positionDelta != lastFramePosition ||
+            GetVelocity() != lastFrameVelocity) {
+            SetDirty(true);
+        }
+    #endif
+
+    #ifdef BUILD_CLIENT
+        // Interpolate Over
+        clientPosition += (position - clientPosition) / 2.0f;
+        clientRotation = glm::slerp(clientRotation, rotation, 0.5f);
+
+        // clientPosition = position;
+        // clientRotation = rotation;
+
+        // Always set dirty for client because we want client
+        //   GetObjectSerialized to work properly
         SetDirty(true);
-    }
-#endif
-
-#ifdef BUILD_CLIENT
-    // Interpolate Over
-    clientPosition += (position - clientPosition) / 2.0f;
-    clientRotation = glm::slerp(clientRotation, rotation, 0.5f);
-    // clientPosition = position;
-
-    // Always set dirty for client because we want client
-    //   GetObjectSerialized to work properly
-    SetDirty(true);
-#endif
+    #endif
 
     lastFrameVelocity = velocity;
     lastFramePosition = position;
@@ -116,8 +140,8 @@ void Object::ResolveCollision(const Vector3& difference) {
         LOG_ERROR("ResolveCollision has nan difference " << difference);
         throw std::runtime_error("ResolveCollision has nan difference!");
     }
-
     // LOG_DEBUG("Difference " << difference << " " << velocity);
+
     position -= difference;
     // We had to adjust the collision in a certain direction.
     // If the velocity does not match the direction of resolution, do nothing
@@ -145,15 +169,6 @@ void Object::OnCollide(CollisionResult& result) {
 
 CollisionResult Object::CollidesWith(Collider* other) {
     return collider.CollidesWith(other);
-    // CollisionResult finalResult;
-    // for (auto& collider: colliders) {
-    //     CollisionResult r = collider->CollidesWith(other);
-    //     if (r.isColliding) {
-    //         finalResult.isColliding = true;
-    //         finalResult.collisionDifference += r.collisionDifference;
-    //     }
-    // }
-    // return finalResult;
 }
 
 CollisionResult Object::CollidesWith(Object* other) {
@@ -161,28 +176,20 @@ CollisionResult Object::CollidesWith(Object* other) {
         return CollisionResult();
     }
     return collider.CollidesWith(&other->collider);
-    // // Add up all the collisions
-    // CollisionResult finalResult;
-    // for (auto& colliderOther: other->colliders) {
-    //     CollisionResult r = CollidesWith(colliderOther);
-    //     if (r.isColliding) {
-    //         finalResult.isColliding = true;
-    //         finalResult.collisionDifference += r.collisionDifference;
-    //     }
-    // }
-    // return finalResult;
 }
 
-void Object::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+bool Object::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
     if (GetColliderCount() == 0) {
-        return;
+        return false;
     }
-    if (collider.CollidesWith(ray, result)) {
+    bool r = collider.CollidesWith(ray, result);
+    if (r) {
         result.hitObject = this;
     }
+    return r;
 }
 
-CollisionResult Object::CollidesWith(const Vector3& p1, const Vector3& p2) {
+bool Object::CollidesWith(const Vector3& p1, const Vector3& p2) {
     return collider.CollidesWith(p1, p2);
 }
 
@@ -220,14 +227,13 @@ void Object::Serialize(JSONWriter& obj) {
 void Object::ProcessReplication(json& object) {
     Replicable::ProcessReplication(object);
 
-    // LOG_BREADCRUMB();
     if (object.HasMember("pa")) {
         parent = game.GetObject(object["pa"].GetInt());
     }
     else {
         parent = nullptr;
     }
-    // LOG_BREADCRUMB();
+
     children.clear();
     if (object.HasMember("ch")) {
         for (json& value : object["ch"].GetArray()) {

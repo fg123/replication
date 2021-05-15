@@ -10,9 +10,9 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Bump ..\\textures\\Bricks059_2K-JPG\\Bricks059_2K_Normal.jpg
-map_Kd ..\\textures\\Bricks059_2K-JPG\\Bricks059_2K_Color.jpg
-map_Ns ..\\textures\\Bricks059_2K-JPG\\Bricks059_2K_Roughness.jpg
+map_Bump ..\\textures\\Bricks059_1K-JPG\\Bricks059_1K_Normal.jpg
+map_Kd ..\\textures\\Bricks059_1K-JPG\\Bricks059_1K_Color.jpg
+map_Ns ..\\textures\\Bricks059_1K-JPG\\Bricks059_1K_Roughness.jpg
 
 newmtl Floor
 Ns 225.000000

@@ -102,6 +102,14 @@ struct DefaultMaterial : public Material {
 };
 #endif
 
+#ifdef BUILD_CLIENT
+struct MeshRenderInfo {
+    GLuint vao;
+    GLuint vbo;
+    GLuint ibo;
+    size_t iboCount;
+};
+#endif
 class Mesh {
 public:
 	std::string name;
@@ -109,12 +117,7 @@ public:
     std::vector<unsigned int> indices;
 #ifdef BUILD_CLIENT
     Material* material = nullptr;
-    struct MeshRenderInfo {
-        GLuint vao;
-        GLuint vbo;
-        GLuint ibo;
-        size_t iboCount;
-    } renderInfo;
+    MeshRenderInfo renderInfo;
 #endif
 
     void InitializeMesh();

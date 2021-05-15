@@ -22,7 +22,6 @@ protected:
 
     REPLICATED(Vector3, inputVelocity, "iv");
 
-
 public:
     REPLICATED(Vector2, pitchYawVelocity, "pyv");
 
@@ -69,7 +68,10 @@ public:
     // TODO: add damage source
     virtual void OnTakeDamage(int damage) {};
 
-    Vector3 GetAttachmentPoint() const;
+    Vector3 GetLeftAttachmentPoint() const;
+    Vector3 GetRightAttachmentPoint() const;
+
+    Vector3 GetAttachmentPoint(WeaponAttachmentPoint attachmentPoint) const;
 
     // #ifdef BUILD_CLIENT
     // // Don't show rotation on client

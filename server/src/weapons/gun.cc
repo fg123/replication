@@ -2,7 +2,7 @@
 #include "bullet.h"
 #include "bullet-tracer.h"
 #include "player.h"
-#include "sprite.h"
+#include "bullet-hole.h"
 
 void GunBase::Tick(Time time) {
     if (reloadStartTime != 0) {
@@ -23,16 +23,25 @@ void GunBase::Tick(Time time) {
         }
     }
 
-    if (attachedTo) {
-        SetRotation(attachedTo->GetRotation());
-    }
-
     if (time > lastFireTime + cooldownBeforeSpreadReduction) {
         currentSpread -= spreadReduction;
         if (currentSpread < 0.f) {
             currentSpread = 0;
         }
     }
+
+#ifdef BUILD_CLIENT
+    recoilRotationPitch += recoilRotationPitchVel;
+    recoilRotationPitchVel *= 0.5;
+    if (glm::abs(recoilRotationPitchVel) < 0.01f) {
+        recoilRotationPitchVel = 0;
+        recoilRotationPitch -= 5;
+    }
+    if (recoilRotationPitch < 0) {
+        recoilRotationPitch = 0;
+    }
+#endif
+
     WeaponObject::Tick(time);
 }
 
@@ -68,12 +77,15 @@ void GunBase::ActualFire(Time time) {
     lastFireTime = time;
     nextFireTime = time + (1000.0 / fireRate);
     currentSpread += spreadIncreasePerShot;
+    if (!automaticFire) {
+        recoilRotationPitchVel = 45.f;
+    }
 
     attachedTo->pitchYawVelocity.x += 0.1;
     attachedTo->pitchYawVelocity.y += ((std::fmod(currentSpread, 12) < 6) ? -1 : 1) *
         (currentSpread / 4) * ((time % 128 <= 64) ? 0.02 : 0.04);
 
-    Vector3 bulletEnd = attachedTo->GetPosition() + attachedTo->GetLookDirection() * 10000.f;
+    Vector3 bulletEnd = attachedTo->GetPosition() + attachedTo->GetLookDirection() * 1000.f;
     RayCastRequest request;
     request.startPoint = attachedTo->GetPosition() + attachedTo->GetLookDirection();
     request.direction = attachedTo->GetLookDirection();
@@ -105,10 +117,9 @@ void GunBase::ActualFire(Time time) {
         }
         else {
             #ifdef BUILD_SERVER
-                SpriteObject* decal = new SpriteObject(game, "textures/BulletHole/BulletHole.png");
+                BulletHoleDecal* decal = new BulletHoleDecal(game);
                 decal->SetPosition(result.hitLocation + result.hitNormal * 0.002f);
                 decal->SetScale(Vector3(0.2f, 0.2f, 0.2f));
-                LOG_DEBUG("Bullet Hole " << DirectionToQuaternion(result.hitNormal));
                 decal->SetRotation(DirectionToQuaternion(result.hitNormal));
                 game.AddObject(decal);
             #endif

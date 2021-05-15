@@ -17,10 +17,10 @@ public:
     ArtilleryObject(Game& game, Object* indicator) : Object(game), indicatorObject(indicator) {
         collisionExclusion |= (uint64_t) Tag::WEAPON;
         collisionExclusion |= (uint64_t) Tag::PLAYER;
-        #ifdef BUILD_SERVER
-            SetModel(game.GetModel("Artillery.obj"));
-            GenerateAABBCollidersFromModel(this);
-        #endif
+
+        SetModel(game.GetModel("Artillery.obj"));
+        GenerateAABBCollidersFromModel(this);
+
         airFriction = Vector3(1, 1, 1);
     }
 
@@ -50,12 +50,10 @@ public:
     ArtilleryIndObject(Game& game, Vector3 position) : Object(game) {
         SetPosition(position);
 
-        #ifdef BUILD_SERVER
-            SetModel(game.GetModel("ArtilleryIndicator.obj"));
-            ArtilleryObject* proj = new ArtilleryObject(game, this);
-            proj->SetPosition(Vector3(GetPosition().x, 100.0f, GetPosition().z));
-            game.AddObject(proj);
-        #endif
+        SetModel(game.GetModel("ArtilleryIndicator.obj"));
+        ArtilleryObject* proj = new ArtilleryObject(game, this);
+        proj->SetPosition(Vector3(GetPosition().x, 100.0f, GetPosition().z));
+        game.AddObject(proj);
     }
 };
 

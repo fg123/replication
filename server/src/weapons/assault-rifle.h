@@ -19,9 +19,7 @@ public:
         automaticFire = true;
         fireOffset = 1.873;
 
-        #ifdef BUILD_SERVER
-            SetModel(game.GetModel("Rifle.obj"));
-        #endif
+        SetModel(game.GetModel("Rifle.obj"));
     }
 };
 

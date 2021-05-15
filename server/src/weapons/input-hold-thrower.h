@@ -36,7 +36,7 @@ class InputHoldThrower : public WeaponWithCooldown {
     Time fireHoldDownTime = 0;
     Time chargeUpTime = 0;
 
-    REPLICATED(Vector3, arrowFireVel, "afv");
+    REPLICATED(float, power, "pow");
 
     Time lastThrow = 0;
 
@@ -47,6 +47,8 @@ protected:
     Time maxHoldDown = 1000;
     float powerMin = 1;
     float powerMax = 20;
+
+    float maxDistance = 1000.f;
 
     REPLICATED_D(bool, instantFire, "inst", false);
 
@@ -59,12 +61,11 @@ public:
         WeaponWithCooldown::Tick(time);
         if (attachedTo && fireHoldDownTime != 0) {
             chargeUpTime = std::min(time - fireHoldDownTime, maxHoldDown);
-            float power = (((float) chargeUpTime / (float) maxHoldDown) * (powerMax - powerMin)) + powerMin;
-            arrowFireVel = attachedTo->GetLookDirection() * power;
+            power = ((float) chargeUpTime / (float) maxHoldDown);
         }
         else {
             chargeUpTime = 0;
-            arrowFireVel = Vector3();
+            power = 0;
         }
         timeSinceLastThrow = time - lastThrow;
     }
@@ -72,8 +73,7 @@ public:
     virtual void StartFire(Time time) override {
         if (IsOnCooldown()) return;
         if (instantFire && timeSinceLastThrow > cooldown) {
-            float power = powerMax;
-            arrowFireVel = attachedTo->GetLookDirection() * power;
+            power = 1.0;
             FireProjectile(time);
         }
     }
@@ -85,12 +85,25 @@ public:
         }
     }
 
-    void FireProjectile(Time time) {
+    virtual void FireProjectile(Time time) {
+        Vector3 projEnd = attachedTo->GetPosition() + attachedTo->GetLookDirection() * maxDistance;
+        RayCastRequest request;
+        request.startPoint = attachedTo->GetPosition() + attachedTo->GetLookDirection();
+        request.direction = attachedTo->GetLookDirection();
+
+        RayCastResult result = game.RayCastInWorld(request);
+        if (result.isHit) {
+            projEnd = result.hitLocation;
+        }
+
+        Vector3 startPosition = GetPosition() + GetLookDirection() * 1.0f;
+
         #ifdef BUILD_SERVER
             Projectile* proj = new Projectile(game);
             proj->SetFiredBy(this);
-            proj->SetPosition(GetPosition() + attachedTo->GetLookDirection() * 1.0f);
-            proj->SetVelocity(arrowFireVel);
+            proj->SetPosition(startPosition);
+            float totalPower = (power * (powerMax - powerMin)) + powerMin;
+            proj->SetVelocity(glm::normalize(projEnd - startPosition) * totalPower);
             game.AddObject(proj);
         #endif
         lastThrow = time;
