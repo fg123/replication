@@ -1,10 +1,12 @@
 #include "game.h"
 #include "timer.h"
+#include "tests.h"
 #include "characters/marine.h"
 #include "characters/archer.h"
 #include "characters/hookman.h"
 #include "characters/bombmaker.h"
 #include "logging.h"
+#include "global.h"
 
 #include <thread>
 #include <mutex>
@@ -26,21 +28,28 @@ void GameLoop(Timer& gameTimer) {
 
 int main(int argc, char** argv) {
     try {
-        std::string mapPath = "maps/map1.json";
-        bool isProduction = false;
         for (int i = 1; i < argc; i++) {
             std::string arg { argv[i] };
-            if (arg == "-p") {
-                isProduction = true;
+            if (arg == "--production") {
+                GlobalSettings.IsProduction = true;
+            }
+            else if (arg == "--test") {
+                GlobalSettings.RunTests = true;
             }
             else {
-                mapPath = arg;
+                GlobalSettings.MapPath = arg;
             }
+        }
+
+        if (GlobalSettings.RunTests) {
+            Game game;
+            Tests tests { game };
+            return tests.Run();
         }
 
         Timer gameTimer;
 
-        Game game { mapPath, isProduction };
+        Game game;
         ScheduledCall* gameTick = gameTimer.ScheduleInterval(
             std::bind(&Game::Tick, &game, std::placeholders::_1),
             TickInterval
@@ -72,13 +81,13 @@ int main(int argc, char** argv) {
                 PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
                 data->ws = ws;
                 data->eventLoop = uWS::Loop::get();
-                data->nextRespawnCharacter = "Archer";
-                PlayerObject* playerObject = new Archer(game, Vector3(0, 30, 0));
+                data->nextRespawnCharacter = "Marine";
+                PlayerObject* playerObject = new Marine(game, Vector3(0, 30, 0));
                 data->playerObject = playerObject;
 
                 game.AddPlayer(data, playerObject);
             },
-            .message = [&mapPath](auto *ws, std::string_view message, uWS::OpCode opCode) {
+            .message = [](auto *ws, std::string_view message, uWS::OpCode opCode) {
                 PlayerSocketData* data = static_cast<PlayerSocketData*>(ws->getUserData());
                 if (!data->playerObject) {
                     // Next tick hasn't been scheduled yet
@@ -98,7 +107,7 @@ int main(int argc, char** argv) {
                 }
                 else if (obj["event"] == "mapPath") {
                     LOG_DEBUG("Sending Map Path");
-                    ws->send("{\"mapPath\": \"" + mapPath + "\"}", uWS::OpCode::TEXT);
+                    ws->send("{\"mapPath\": \"" + GlobalSettings.MapPath + "\"}", uWS::OpCode::TEXT);
                 }
                 else if (obj["event"] == "setchar") {
                     std::string charName { obj["char"].GetString(), obj["char"].GetStringLength() };

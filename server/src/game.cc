@@ -1,5 +1,6 @@
 #include "game.h"
 #include "logging.h"
+#include "global.h"
 
 #include "object.h"
 #include "vector.h"
@@ -10,40 +11,31 @@
 
 #include "json/json.hpp"
 
+#include "static-mesh.h"
+
 #include <fstream>
 #include <exception>
 
 Vector3 liveBoxStart(-1000, -100, -1000);
 Vector3 liveBoxSize(2000, 2000, 2000);
 
-Game::Game() : nextId(1), isProduction(false) {
+Game::Game() : nextId(1) {
+    if (GlobalSettings.RunTests) return;
+    #ifdef BUILD_SERVER
+        if (GlobalSettings.IsProduction) {
+            LOG_INFO("==== PRODUCTION MODE ====");
+        }
+        else {
+            LOG_INFO("==== DEVELOPMENT MODE ====");
+        }
 
+        LoadMap(RESOURCE_PATH(GlobalSettings.MapPath));
+
+        // Models[0] is always the base map
+        StaticMeshObject* baseMap = new StaticMeshObject(*this, "Heaven.obj");
+        AddObject(baseMap);
+    #endif
 }
-
-#ifdef BUILD_SERVER
-Game::Game(std::string mapPath, bool isProduction) : Game() {
-    this->isProduction = isProduction;
-    this->mapPath = mapPath;
-
-    if (IsProduction()) {
-        LOG_INFO("==== PRODUCTION MODE ====");
-    }
-    else {
-        LOG_INFO("==== DEVELOPMENT MODE ====");
-    }
-
-    LoadMap(RESOURCE_PATH(mapPath));
-
-    // Models[0] is always the base map
-    GameObject* baseMap = new GameObject(*this, Vector3());
-    baseMap->SetTag(Tag::NO_GRAVITY);
-    baseMap->SetIsStatic(true);
-    baseMap->SetTag(Tag::GROUND);
-    baseMap->SetModel(assetManager.GetModel(0));
-    GenerateAABBCollidersFromModel(baseMap);
-    AddObject(baseMap);
-}
-#endif
 
 void Game::LoadMap(std::string mapPath) {
     LOG_INFO("Loading Map " << mapPath);
@@ -566,7 +558,7 @@ void Game::RemovePlayer(PlayerSocketData* data) {
 void Game::GetUnitsInRange(const Vector3& position, float range,
     bool includeBoundingBox, std::vector<RangeQueryResult>& results) {
 
-    SphereCollider collider { position, range };
+    SphereCollider collider { nullptr, position, range };
 
     for (auto& pair : gameObjects) {
         Object* obj = pair.second;

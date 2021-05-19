@@ -1,31 +1,39 @@
-#ifndef COLLISION_H
-#define COLLISION_H
+#pragma once
 
 #include "vector.h"
 #include "replicable.h"
 #include "json/json.hpp"
 #include "ray-cast.h"
+#include "mesh.h"
 
 class Object;
 
 struct CollisionResult {
     bool isColliding = false;
     Vector3 collisionDifference;
-    Object* collidedWith;
+    Object* collidedWith = nullptr;
 };
+std::ostream& operator<<(std::ostream& out, const CollisionResult& result);
 
-struct Collider : Replicable {
+struct Collider {
     // Attached to a game object with position offset
     Object* owner;
-    REPLICATED(Vector3, position, "p");
+    // REPLICATED(Vector3, position, "p");
+    // REPLICATED(Quaternion, rotation, "r");
+    Vector3 position;
+    Quaternion rotation;
 
 public:
-    Collider(Object* owner, Vector3 position) : owner(owner), position(position) { }
+    Collider(Object* owner, Vector3 position, Quaternion rotation) :
+        owner(owner), position(position), rotation(rotation) { }
+
     virtual ~Collider() { }
     virtual int GetType() = 0;
 
-    // Detailed collision
+    // Narrow Phase Collision
     virtual CollisionResult CollidesWith(Collider* other) = 0;
+
+    // Uses the ray collision model to calculate
     bool CollidesWith(const Vector3& p1, const Vector3& p2) {
         RayCastRequest request;
         request.startPoint = p1;
@@ -43,46 +51,28 @@ public:
     }
 
     Vector3 GetPosition();
+    Quaternion GetRotation();
+
+    Matrix4 GetWorldTransform();
+
     Object* GetOwner() { return owner; }
-    virtual void Serialize(JSONWriter& obj) override {
-        Replicable::Serialize(obj);
-        obj.Key("t");
-        obj.Int(GetType());
-    }
+    // virtual void Serialize(JSONWriter& obj) override {
+    //     Replicable::Serialize(obj);
+    //     obj.Key("t");
+    //     obj.Int(GetType());
+    // }
 };
-
-// Deprecated 2D Colliders
-struct RectangleCollider : public Collider {
-    REPLICATED(Vector3, size, "s");
-
-    RectangleCollider(Object* owner, Vector3 position, Vector3 size) : Collider(owner, position),
-        size(size) {}
-    virtual int GetType() override { return 0; }
-    CollisionResult CollidesWith(Collider* other) override;
-};
-
-// Deprecated 2D Colliders
-struct CircleCollider : public Collider {
-    REPLICATED(float, radius, "r");
-
-    CircleCollider(Vector3 position, double radius) : CircleCollider(nullptr, position, radius) {}
-    CircleCollider(Object* owner, Vector3 position, double radius) : Collider(owner, position),
-            radius(radius) {}
-    virtual int GetType() override { return 1; }
-    CollisionResult CollidesWith(Collider* other) override;
-};
-
-inline bool IsPointInRect(const Vector3& RectPosition, const Vector3& RectSize, const Vector3& Point) {
-    return
-        (Point.x > RectPosition.x && Point.x < RectPosition.x + RectSize.x) &&
-        (Point.y > RectPosition.y && Point.y < RectPosition.y + RectSize.y);
-}
 
 struct AABBCollider : public Collider {
-    REPLICATED(Vector3, size, "s");
+    // REPLICATED(Vector3, size, "s");
+    Vector3 size;
 
-    AABBCollider(Object* owner, Vector3 position, Vector3 size) : Collider(owner, position),
-        size(size) {}
+    AABBCollider(Object* owner, Vector3 position, Vector3 size, Quaternion rotation) :
+        Collider(owner, position, rotation), size(size) {}
+
+    AABBCollider(Object* owner, Vector3 position, Vector3 size) :
+        AABBCollider(owner, position, size, Quaternion{}) {}
+
     virtual int GetType() override { return 2; }
     CollisionResult CollidesWith(Collider* other) override;
     bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
@@ -96,17 +86,45 @@ inline bool IsPointInAABB(const Vector3& RectPosition, const Vector3& RectSize, 
 }
 
 struct SphereCollider : public Collider {
-    REPLICATED(float, radius, "r");
+    // REPLICATED(float, radius, "r");
+    float radius;
 
-    SphereCollider(Vector3 position, double radius) : SphereCollider(nullptr, position, radius) {}
-    SphereCollider(Object* owner, Vector3 position, double radius) : Collider(owner, position),
-            radius(radius) {}
+    SphereCollider(Object* owner, Vector3 position, double radius) :
+        Collider(owner, position, Quaternion{}),
+        radius(radius) {}
+
     virtual int GetType() override { return 3; }
     CollisionResult CollidesWith(Collider* other) override;
 };
 
-struct TwoPhaseCollider : public Replicable {
-    REPLICATED(AABBCollider, aabbBroad, "ab");
+struct StaticMeshCollider : public Collider {
+    AABBCollider broad;
+
+    Mesh& mesh;
+
+    StaticMeshCollider(Object* owner, Mesh& mesh) :
+        Collider(owner, Vector3{}, Quaternion{}),
+        broad(owner, Vector3{}, Vector3{}),
+        mesh(mesh) {
+
+        if (!mesh.vertices.empty()) {
+            Vector3 min = mesh.vertices[0].position;
+            Vector3 max = mesh.vertices[0].position;
+            for (size_t i = 1; i < mesh.vertices.size(); i++) {
+                min = glm::min(min, mesh.vertices[i].position);
+                max = glm::max(max, mesh.vertices[i].position);
+            }
+            broad = AABBCollider(owner, min, max - min);
+        }
+    }
+
+    virtual int GetType() override { return 4; }
+    CollisionResult CollidesWith(Collider* other) override;
+    bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
+};
+
+struct TwoPhaseCollider  {
+    AABBCollider aabbBroad;
     std::vector<Collider*> children;
     Object* owner;
 
@@ -140,26 +158,28 @@ struct TwoPhaseCollider : public Replicable {
         return ret;
     }
 
+    void ExpandBroadIfNeeded(AABBCollider* aabb) {
+        if (children.size() == 1) {
+            aabbBroad.position = aabb->position;
+            aabbBroad.size = aabb->size;
+        }
+        else {
+            aabbBroad.position = glm::min(aabbBroad.position, aabb->GetPosition());
+            aabbBroad.size = glm::max(aabbBroad.position + aabbBroad.size,
+                aabb->position + aabb->size) - aabbBroad.position;
+        }
+    }
     void AddCollider(Collider* collider) {
         children.push_back(collider);
         if (AABBCollider* aabb = dynamic_cast<AABBCollider*>(collider)) {
-            if (children.size() == 1) {
-                aabbBroad.position = aabb->position;
-                aabbBroad.size = aabb->size;
-            }
-            else {
-                aabbBroad.position = glm::min(aabbBroad.position, aabb->GetPosition());
-                aabbBroad.size = glm::max(aabbBroad.position + aabbBroad.size,
-                    aabb->position + aabb->size) - aabbBroad.position;
-            }
+            ExpandBroadIfNeeded(aabb);
+        }
+        else if (StaticMeshCollider* mesh = dynamic_cast<StaticMeshCollider*>(collider)) {
+            ExpandBroadIfNeeded(&mesh->broad);
         }
     }
 
-    virtual void Serialize(JSONWriter& obj) override;
-    virtual void ProcessReplication(json& obj) override;
 };
 
-
 void GenerateAABBCollidersFromModel(Object* obj);
-
-#endif
+void GenerateStaticMeshCollidersFromModel(Object* obj);

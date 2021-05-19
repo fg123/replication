@@ -9,7 +9,7 @@
 #include <fstream>
 #include <map>
 
-const static bool DRAW_COLLIDERS = false;
+const static bool DRAW_COLLIDERS = true;
 
 ClientGL::ClientGL(Game& game, const char* selector) :
     canvasSelector(selector),
@@ -101,9 +101,8 @@ void ClientGL::DrawObject(Object* obj, int& lastProgram) {
             lastProgram = -1;
             for (auto& cptr : obj->GetCollider().children) {
                 if (AABBCollider* collider = dynamic_cast<AABBCollider*>(cptr)) {
-                    Vector3 position = collider->GetPosition();
-                    Vector3 size = collider->size;
-                    Matrix4 model = glm::translate(position) * glm::scale(size);
+                    // Transform locally first
+                    Matrix4 model = collider->GetWorldTransform() * glm::scale(collider->size);
 
                     debugShaderProgram->Draw(*this, model, &debugCube);
                 }

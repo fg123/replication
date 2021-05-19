@@ -1,5 +1,4 @@
-#ifndef ARROW_H
-#define ARROW_H
+#pragma once
 
 #include "input-hold-thrower.h"
 
@@ -23,4 +22,3 @@ public:
 };
 
 CLASS_REGISTER(ArrowObject);
-#endif

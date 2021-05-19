@@ -16,7 +16,9 @@
     "Portal.obj",
     "Bow.obj",
     "Arrow.obj",
-    "BombCrate.obj"
+    "BombCrate.obj",
+    "Plane.obj",
+    "Heaven.obj"
  ],
  "sounds": [
     "bang.wav",

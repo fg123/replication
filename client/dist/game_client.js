@@ -164,396 +164,416 @@ Module.expectedDataFileDownloads++;
   "files": [ {
    "filename": "/maps/map1.json",
    "start": 0,
-   "end": 886,
+   "end": 921,
    "audio": 0
   }, {
    "filename": "/models/Arrow.mtl",
-   "start": 886,
-   "end": 1550,
+   "start": 921,
+   "end": 1585,
    "audio": 0
   }, {
    "filename": "/models/Arrow.obj",
-   "start": 1550,
-   "end": 8239,
+   "start": 1585,
+   "end": 8274,
    "audio": 0
   }, {
    "filename": "/models/Artillery.mtl",
-   "start": 8239,
-   "end": 8530,
+   "start": 8274,
+   "end": 8565,
    "audio": 0
   }, {
    "filename": "/models/Artillery.obj",
-   "start": 8530,
-   "end": 1663968,
+   "start": 8565,
+   "end": 1664003,
    "audio": 0
   }, {
    "filename": "/models/ArtilleryIndicator.mtl",
-   "start": 1663968,
-   "end": 1664220,
+   "start": 1664003,
+   "end": 1664255,
    "audio": 0
   }, {
    "filename": "/models/ArtilleryIndicator.obj",
-   "start": 1664220,
-   "end": 1710646,
+   "start": 1664255,
+   "end": 1710681,
    "audio": 0
   }, {
    "filename": "/models/BombCrate.mtl",
-   "start": 1710646,
-   "end": 1711011,
+   "start": 1710681,
+   "end": 1711046,
    "audio": 0
   }, {
    "filename": "/models/BombCrate.obj",
-   "start": 1711011,
-   "end": 1712102,
+   "start": 1711046,
+   "end": 1712137,
    "audio": 0
   }, {
    "filename": "/models/Bow.mtl",
-   "start": 1712102,
-   "end": 1712764,
+   "start": 1712137,
+   "end": 1712799,
    "audio": 0
   }, {
    "filename": "/models/Bow.obj",
-   "start": 1712764,
-   "end": 1726359,
+   "start": 1712799,
+   "end": 1726394,
    "audio": 0
   }, {
    "filename": "/models/Bullet.mtl",
-   "start": 1726359,
-   "end": 1726600,
+   "start": 1726394,
+   "end": 1726635,
    "audio": 0
   }, {
    "filename": "/models/Bullet.obj",
-   "start": 1726600,
-   "end": 1754869,
+   "start": 1726635,
+   "end": 1754904,
    "audio": 0
   }, {
    "filename": "/models/BulletTracer.mtl",
-   "start": 1754869,
-   "end": 1755150,
+   "start": 1754904,
+   "end": 1755185,
    "audio": 0
   }, {
    "filename": "/models/BulletTracer.obj",
-   "start": 1755150,
-   "end": 1764579,
+   "start": 1755185,
+   "end": 1764614,
    "audio": 0
   }, {
    "filename": "/models/cube.obj",
-   "start": 1764579,
-   "end": 1765120,
+   "start": 1764614,
+   "end": 1765155,
    "audio": 0
   }, {
    "filename": "/models/Explosion.mtl",
-   "start": 1765120,
-   "end": 1765541,
+   "start": 1765155,
+   "end": 1765576,
    "audio": 0
   }, {
    "filename": "/models/Explosion.obj",
-   "start": 1765541,
-   "end": 2433179,
+   "start": 1765576,
+   "end": 2433214,
    "audio": 0
   }, {
    "filename": "/models/Grenade.mtl",
-   "start": 2433179,
-   "end": 2433778,
+   "start": 2433214,
+   "end": 2433813,
    "audio": 0
   }, {
    "filename": "/models/Grenade.obj",
-   "start": 2433778,
-   "end": 2680737,
+   "start": 2433813,
+   "end": 2680772,
+   "audio": 0
+  }, {
+   "filename": "/models/Heaven.mtl",
+   "start": 2680772,
+   "end": 2681928,
+   "audio": 0
+  }, {
+   "filename": "/models/Heaven.obj",
+   "start": 2681928,
+   "end": 2963195,
    "audio": 0
   }, {
    "filename": "/models/HookThrower.mtl",
-   "start": 2680737,
-   "end": 2681102,
+   "start": 2963195,
+   "end": 2963560,
    "audio": 0
   }, {
    "filename": "/models/HookThrower.obj",
-   "start": 2681102,
-   "end": 2683461,
+   "start": 2963560,
+   "end": 2965919,
    "audio": 0
   }, {
    "filename": "/models/island.obj",
-   "start": 2683461,
-   "end": 4116035,
+   "start": 2965919,
+   "end": 4398493,
    "audio": 0
   }, {
    "filename": "/models/Pistol.mtl",
-   "start": 4116035,
-   "end": 4116395,
+   "start": 4398493,
+   "end": 4398853,
    "audio": 0
   }, {
    "filename": "/models/Pistol.obj",
-   "start": 4116395,
-   "end": 4118783,
+   "start": 4398853,
+   "end": 4401241,
+   "audio": 0
+  }, {
+   "filename": "/models/Plane.mtl",
+   "start": 4401241,
+   "end": 4401365,
+   "audio": 0
+  }, {
+   "filename": "/models/Plane.obj",
+   "start": 4401365,
+   "end": 4401733,
    "audio": 0
   }, {
    "filename": "/models/Player.mtl",
-   "start": 4118783,
-   "end": 4119023,
+   "start": 4401733,
+   "end": 4401973,
    "audio": 0
   }, {
    "filename": "/models/Player.obj",
-   "start": 4119023,
-   "end": 4891146,
+   "start": 4401973,
+   "end": 5174096,
    "audio": 0
   }, {
    "filename": "/models/Portal.mtl",
-   "start": 4891146,
-   "end": 4891569,
+   "start": 5174096,
+   "end": 5174519,
    "audio": 0
   }, {
    "filename": "/models/Portal.obj",
-   "start": 4891569,
-   "end": 4919867,
+   "start": 5174519,
+   "end": 5202817,
    "audio": 0
   }, {
    "filename": "/models/Quad.obj",
-   "start": 4919867,
-   "end": 4920211,
+   "start": 5202817,
+   "end": 5203161,
    "audio": 0
   }, {
    "filename": "/models/Rifle.mtl",
-   "start": 4920211,
-   "end": 4920696,
+   "start": 5203161,
+   "end": 5203646,
    "audio": 0
   }, {
    "filename": "/models/Rifle.obj",
-   "start": 4920696,
-   "end": 4935299,
+   "start": 5203646,
+   "end": 5218249,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.mtl",
-   "start": 4935299,
-   "end": 4936351,
+   "start": 5218249,
+   "end": 5219486,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.obj",
-   "start": 4936351,
-   "end": 4949778,
+   "start": 5219486,
+   "end": 6154414,
    "audio": 0
   }, {
    "filename": "/models/suzanne.obj",
-   "start": 4949778,
-   "end": 5028534,
+   "start": 6154414,
+   "end": 6233170,
    "audio": 0
   }, {
    "filename": "/shaders/Debug.fs",
-   "start": 5028534,
-   "end": 5028657,
+   "start": 6233170,
+   "end": 6233293,
    "audio": 0
   }, {
    "filename": "/shaders/Debug.vs",
-   "start": 5028657,
-   "end": 5028888,
+   "start": 6233293,
+   "end": 6233524,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.fs",
-   "start": 5028888,
-   "end": 5032692,
+   "start": 6233524,
+   "end": 6237328,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.vs",
-   "start": 5032692,
-   "end": 5033549,
+   "start": 6237328,
+   "end": 6238185,
    "audio": 0
   }, {
    "filename": "/sounds/bang.wav",
-   "start": 5033549,
-   "end": 5161135,
+   "start": 6238185,
+   "end": 6365771,
    "audio": 1
   }, {
    "filename": "/sounds/boom-old1.wav",
-   "start": 5161135,
-   "end": 5232859,
+   "start": 6365771,
+   "end": 6437495,
    "audio": 1
   }, {
    "filename": "/sounds/boom.wav",
-   "start": 5232859,
-   "end": 5304583,
+   "start": 6437495,
+   "end": 6509219,
    "audio": 1
   }, {
    "filename": "/sounds/GrenadeOut.wav",
-   "start": 5304583,
-   "end": 5384499,
+   "start": 6509219,
+   "end": 6589135,
    "audio": 1
   }, {
    "filename": "/sounds/HookReel.wav",
-   "start": 5384499,
-   "end": 5442911,
+   "start": 6589135,
+   "end": 6647547,
    "audio": 1
   }, {
    "filename": "/sounds/HookThrow.wav",
-   "start": 5442911,
-   "end": 5470603,
+   "start": 6647547,
+   "end": 6675239,
    "audio": 1
   }, {
    "filename": "/sounds/incoming.wav",
-   "start": 5470603,
-   "end": 5625325,
+   "start": 6675239,
+   "end": 6829961,
    "audio": 1
   }, {
    "filename": "/sounds/PortalEnd.wav",
-   "start": 5625325,
-   "end": 5697049,
+   "start": 6829961,
+   "end": 6901685,
    "audio": 1
   }, {
    "filename": "/sounds/PortalStart.wav",
-   "start": 5697049,
-   "end": 5769797,
+   "start": 6901685,
+   "end": 6974433,
    "audio": 1
   }, {
    "filename": "/sounds/reload.wav",
-   "start": 5769797,
-   "end": 5883505,
+   "start": 6974433,
+   "end": 7088141,
    "audio": 1
   }, {
    "filename": "/sounds/ueh.wav",
-   "start": 5883505,
-   "end": 5918365,
+   "start": 7088141,
+   "end": 7123001,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-jump.wav",
-   "start": 5918365,
-   "end": 6188813,
+   "start": 7123001,
+   "end": 7393449,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-pullback.wav",
-   "start": 6188813,
-   "end": 6336385,
+   "start": 7393449,
+   "end": 7541021,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-shoot.wav",
-   "start": 6336385,
-   "end": 6451185,
+   "start": 7541021,
+   "end": 7655821,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-ulti-activate.wav",
-   "start": 6451185,
-   "end": 6774889,
+   "start": 7655821,
+   "end": 7979525,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-ulti-shoot.wav",
-   "start": 6774889,
-   "end": 6926559,
+   "start": 7979525,
+   "end": 8131195,
    "audio": 1
   }, {
    "filename": "/textures/Artillery.png",
-   "start": 6926559,
-   "end": 8043786,
+   "start": 8131195,
+   "end": 9248422,
    "audio": 0
   }, {
    "filename": "/textures/BulletTracer.png",
-   "start": 8043786,
-   "end": 8077553,
+   "start": 9248422,
+   "end": 9282189,
    "audio": 0
   }, {
    "filename": "/textures/Skydome.png",
-   "start": 8077553,
-   "end": 9749724,
+   "start": 9282189,
+   "end": 10954360,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_AmbientOcclusion.jpg",
-   "start": 9749724,
-   "end": 10350058,
+   "start": 10954360,
+   "end": 11554694,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Color.jpg",
-   "start": 10350058,
-   "end": 11771748,
+   "start": 11554694,
+   "end": 12976384,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Displacement.jpg",
-   "start": 11771748,
-   "end": 12156177,
+   "start": 12976384,
+   "end": 13360813,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Normal.jpg",
-   "start": 12156177,
-   "end": 13822732,
+   "start": 13360813,
+   "end": 15027368,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Roughness.jpg",
-   "start": 13822732,
-   "end": 14502825,
+   "start": 15027368,
+   "end": 15707461,
    "audio": 0
   }, {
    "filename": "/textures/BulletHole/BulletHole.png",
-   "start": 14502825,
-   "end": 14535029,
+   "start": 15707461,
+   "end": 15739665,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Color.jpg",
-   "start": 14535029,
-   "end": 15868460,
+   "start": 15739665,
+   "end": 17073096,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Displacement.jpg",
-   "start": 15868460,
-   "end": 16165296,
+   "start": 17073096,
+   "end": 17369932,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Emission.jpg",
-   "start": 16165296,
-   "end": 17496279,
+   "start": 17369932,
+   "end": 18700915,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Normal.jpg",
-   "start": 17496279,
-   "end": 19192640,
+   "start": 18700915,
+   "end": 20397276,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Roughness.jpg",
-   "start": 19192640,
-   "end": 19763502,
+   "start": 20397276,
+   "end": 20968138,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Color.jpg",
-   "start": 19763502,
-   "end": 20293327,
+   "start": 20968138,
+   "end": 21497963,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Displacement.jpg",
-   "start": 20293327,
-   "end": 20722541,
+   "start": 21497963,
+   "end": 21927177,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Metalness.jpg",
-   "start": 20722541,
-   "end": 20852545,
+   "start": 21927177,
+   "end": 22057181,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Normal.jpg",
-   "start": 20852545,
-   "end": 21918087,
+   "start": 22057181,
+   "end": 23122723,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Roughness.jpg",
-   "start": 21918087,
-   "end": 22290364,
+   "start": 23122723,
+   "end": 23495e3,
    "audio": 0
   }, {
    "filename": "/textures/Wood026_1K-JPG/Wood026_1K_Color.jpg",
-   "start": 22290364,
-   "end": 23275999,
+   "start": 23495e3,
+   "end": 24480635,
    "audio": 0
   }, {
    "filename": "/textures/Wood026_1K-JPG/Wood026_1K_Normal.jpg",
-   "start": 23275999,
-   "end": 24511267,
+   "start": 24480635,
+   "end": 25715903,
    "audio": 0
   }, {
    "filename": "/textures/WoodenCrate/Wood_Crate_001_basecolor.jpg",
-   "start": 24511267,
-   "end": 24551078,
+   "start": 25715903,
+   "end": 25755714,
    "audio": 0
   }, {
    "filename": "/textures/WoodenCrate/Wood_Crate_001_normal.jpg",
-   "start": 24551078,
-   "end": 24811335,
+   "start": 25755714,
+   "end": 26015971,
    "audio": 0
   } ],
-  "remote_package_size": 24811335,
-  "package_uuid": "8ae2c286-13a9-42e1-9ece-2cf99ea77258"
+  "remote_package_size": 26015971,
+  "package_uuid": "d085e912-bb5d-46ea-9c3b-2f959ab51905"
  });
 })();
 
@@ -9015,7 +9035,6 @@ var asmLibraryArg = {
  "invoke_iii": invoke_iii,
  "invoke_iiiff": invoke_iiiff,
  "invoke_iiii": invoke_iiii,
- "invoke_iiiid": invoke_iiiid,
  "invoke_iiiii": invoke_iiiii,
  "invoke_iiiiii": invoke_iiiiii,
  "invoke_iiiiiii": invoke_iiiiiii,
@@ -9148,17 +9167,17 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 91832;
+var _game = Module["_game"] = 86880;
 
-var _clientGl = Module["_clientGl"] = 92096;
+var _clientGl = Module["_clientGl"] = 87128;
 
-var _clientAudio = Module["_clientAudio"] = 92264;
+var _clientAudio = Module["_clientAudio"] = 87296;
 
-var _inputEvents = Module["_inputEvents"] = 92288;
+var _inputEvents = Module["_inputEvents"] = 87320;
 
-var _ping = Module["_ping"] = 92320;
+var _ping = Module["_ping"] = 87352;
 
-var _lastTickTime = Module["_lastTickTime"] = 92312;
+var _lastTickTime = Module["_lastTickTime"] = 87344;
 
 function invoke_vii(index, a1, a2) {
  var sp = stackSave();
@@ -9292,39 +9311,6 @@ function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  }
 }
 
-function invoke_iiiii(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiiii(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiid(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();
  try {
@@ -9347,10 +9333,43 @@ function invoke_i(index) {
  }
 }
 
+function invoke_iiiii(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_viifi(index, a1, a2, a3, a4) {
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiii(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_viiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -9417,17 +9436,6 @@ function invoke_diii(index, a1, a2, a3) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

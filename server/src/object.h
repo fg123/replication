@@ -89,7 +89,8 @@ protected:
 
     Time spawnTime = 0;
 
-    REPLICATED(TwoPhaseCollider, collider, "c");
+    TwoPhaseCollider collider;
+    // REPLICATED(TwoPhaseCollider, collider, "c");
 
     // In default mode, every collision will occur and all hits are reported
     //   to OnCollide
@@ -173,7 +174,7 @@ public:
     const Vector3& GetScale() const { return scale; }
     const Quaternion& GetRotation() const { return rotation; }
     virtual Vector3 GetVelocity() { return velocity; }
-    Vector3 GetLookDirection() const { return glm::normalize(Vector::Forward * rotation); }
+    virtual Vector3 GetLookDirection() const { return glm::normalize(Vector::Forward * rotation); }
 
     void SetPosition(const Vector3& in) { position = in; }
     void SetRotation(const Quaternion& in) { rotation = in; }

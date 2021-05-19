@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include "object.h"
 #include "timer.h"
@@ -19,7 +18,12 @@
 
 class PlayerObject;
 
+#ifdef BUILD_SERVER
 static const int TickInterval = 16;
+#endif
+#ifdef BUILD_CLIENT
+static const int TickInterval = 16;
+#endif
 static const int ReplicateInterval = 100;
 
 struct PlayerSocketData {
@@ -43,7 +47,6 @@ struct PlayerSocketData {
 
 class Game {
     std::atomic<ObjectID> nextId;
-    bool isProduction;
 
     std::mutex queuedCallsMutex;
     std::vector<std::function<void(Game& game)>> queuedCalls;
@@ -54,8 +57,6 @@ class Game {
     std::mutex playersSetMutex;
 
     std::unordered_set<ObjectID> deadObjects;
-
-    std::string mapPath;
 
 #ifdef BUILD_SERVER
     // Notifies client of any animations
@@ -76,10 +77,6 @@ class Game {
 
 public:
     Game();
-
-#ifdef BUILD_SERVER
-    Game(std::string mapPath, bool isProduction);
-#endif
 
 #ifdef BUILD_CLIENT
     Model* CreateNewModel() {
@@ -116,8 +113,6 @@ public:
     void DetachParent(Object* child);
 
 #ifdef BUILD_SERVER
-    bool IsProduction() const { return isProduction; }
-
     // Replicate objects in replicateNextTick to clients
     void Replicate(Time time);
 
@@ -211,5 +206,3 @@ public:
     bool CheckLineSegmentCollide(const Vector3& start,
         const Vector3& end, uint64_t includeTags = ~0);
 };
-
-#endif

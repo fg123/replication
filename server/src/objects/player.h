@@ -39,8 +39,8 @@ public:
     // Ticks since we processed the last client input frame
     Time ticksSinceLastProcessed = 0;
 
-    std::array<bool, 11> keyboardState {};
-    std::array<bool, 11> lastKeyboardState {};
+    std::array<bool, 12> keyboardState {};
+    std::array<bool, 12> lastKeyboardState {};
 
     std::array<bool, 5> mouseState {};
     std::array<bool, 5> lastMouseState {};
@@ -60,6 +60,16 @@ public:
 
     WeaponObject* GetWeapon() { return currentWeapon; }
     virtual Vector3 GetVelocity() override { return velocity + inputVelocity; }
+    Quaternion GetRotationWithPitch() const {
+        Matrix4 matrix;
+        matrix = glm::rotate(matrix, glm::radians(rotationYaw), Vector::Up);
+        matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
+        return glm::quat_cast(matrix);
+    }
+    virtual Vector3 GetLookDirection() const override {
+        // Regular rotation does not factor in pitch
+        return glm::normalize(Vector::Forward * GetRotationWithPitch());
+    }
     void PickupWeapon(WeaponObject* weapon);
     void DropWeapon();
 

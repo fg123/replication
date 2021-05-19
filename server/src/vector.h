@@ -12,6 +12,8 @@ constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
 
 using Vector2 = glm::vec2;
 using Vector3 = glm::vec3;
+using Vector4 = glm::vec4;
+using Matrix3 = glm::mat3;
 using Matrix4 = glm::mat4;
 using Quaternion = glm::quat;
 
@@ -35,5 +37,15 @@ inline Quaternion DirectionToQuaternion(const Vector3& direction) {
         return glm::quat_cast(glm::lookAt(Vector3(0, 0, 0), direction, Vector::Left));
     }
     return glm::quat_cast(glm::lookAt(Vector3(0, 0, 0), direction, Vector::Up));
+}
+
+inline bool IsZero(float a) {
+    return glm::abs(a) < 0.00001f;
+}
+inline bool IsZero(Vector3 a) {
+    return glm::length(a) < 0.00001f;
+}
+inline bool IsZero(Quaternion a) {
+    return IsZero(Vector3(a.x, a.y, a.z));
 }
 #endif

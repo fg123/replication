@@ -1,7 +1,7 @@
 #include "object.h"
 #include "game.h"
 #include "ray-cast.h"
-
+#include "vector.h"
 #include "json/json.hpp"
 
 static const double GRAVITY = 30;
@@ -96,13 +96,13 @@ void Object::Tick(Time time) {
             game.HandleCollisions(this);
         }
 
-        if (std::abs(velocity.x) < EPSILON) {
+        if (glm::abs(velocity.x) < EPSILON) {
             velocity.x = 0;
         }
-        if (std::abs(velocity.y) < EPSILON) {
+        if (glm::abs(velocity.y) < EPSILON) {
             velocity.y = 0;
         }
-        if (std::abs(velocity.z) < EPSILON) {
+        if (glm::abs(velocity.z) < EPSILON) {
             velocity.z = 0;
         }
     }
@@ -140,23 +140,22 @@ void Object::ResolveCollision(const Vector3& difference) {
         LOG_ERROR("ResolveCollision has nan difference " << difference);
         throw std::runtime_error("ResolveCollision has nan difference!");
     }
-    // LOG_DEBUG("Difference " << difference << " " << velocity);
+    if (IsTagged(Tag::PLAYER) && glm::length(difference) > 0.01f) {
+        LOG_DEBUG("Player Correction Difference " << difference);
+    }
 
-    position -= difference;
+    position += difference;
     // We had to adjust the collision in a certain direction.
     // If the velocity does not match the direction of resolution, do nothing
     // If it does, we need to clamp it to zero.
-    // This is kinda wonky and unintuitive because you decided to do -=
-    //   collisionDifference, changing it around requires changing the
-    //   calculations for collisionDifference in the collision subroutines
 
-    if (SameSign(difference.x, velocity.x)) {
+    if (!IsZero(difference.x) && !SameSign(difference.x, velocity.x)) {
         velocity.x = 0;
     }
-    if (SameSign(difference.y, velocity.y)) {
+    if (!IsZero(difference.y) && !SameSign(difference.y, velocity.y)) {
         velocity.y = 0;
     }
-    if (SameSign(difference.z, velocity.z)) {
+    if (!IsZero(difference.z) && !SameSign(difference.z, velocity.z)) {
         velocity.z = 0;
     }
 }

@@ -9,6 +9,7 @@ static const int A_KEY = 65;
 static const int S_KEY = 83;
 static const int D_KEY = 68;
 static const int F_KEY = 70;
+static const int V_KEY = 86;
 static const int R_KEY = 82;
 static const int G_KEY = 71;
 static const int Q_KEY = 81;
@@ -28,7 +29,8 @@ std::unordered_map<int, size_t> KEY_MAP = {
     { Z_KEY, 7 },
     { W_KEY, 8 },
     { SPACE_KEY, 9 },
-    { K_KEY, 10 }
+    { K_KEY, 10 },
+    { V_KEY, 11 }
 };
 
 PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector3()) {
@@ -122,8 +124,10 @@ void PlayerObject::Tick(Time time) {
     }
     Vector3 leftRightComponent;
     Vector3 forwardBackwardComponent;
+    Vector3 upDownComponent;
 
     bool hasMovement = false;
+
     if (keyboardState[KEY_MAP[A_KEY]]) {
         leftRightComponent = Vector::Left * rotation;
         hasMovement = true;
@@ -140,12 +144,25 @@ void PlayerObject::Tick(Time time) {
         forwardBackwardComponent = -Vector::Forward * rotation;
         hasMovement = true;
     }
+    if (IsTagged(Tag::NO_GRAVITY)) {
+        if (keyboardState[KEY_MAP[F_KEY]]) {
+            upDownComponent = Vector::Up;
+            hasMovement = true;
+        }
+        if (keyboardState[KEY_MAP[V_KEY]]) {
+            upDownComponent = -Vector::Up;
+            hasMovement = true;
+        }
+    }
 
     // TODO: move speed
     if (hasMovement) {
-        leftRightComponent.y = 0;
-        forwardBackwardComponent.y = 0;
-        inputVelocity = glm::normalize(leftRightComponent + forwardBackwardComponent) * 8.0f;
+        if (!IsTagged(Tag::NO_GRAVITY)) {
+            leftRightComponent.y = 0;
+            forwardBackwardComponent.y = 0;
+        }
+        inputVelocity = glm::normalize(leftRightComponent +
+            forwardBackwardComponent + upDownComponent) * 8.0f;
     }
     else {
         inputVelocity *= 0.8;
@@ -221,13 +238,13 @@ void PlayerObject::Tick(Time time) {
 
     Matrix4 matrix;
     matrix = glm::rotate(matrix, glm::radians(rotationYaw), Vector::Up);
-    matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
+    // matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
     rotation = glm::quat_cast(matrix);
 
     if (currentWeapon) {
         currentWeapon->SetPosition(GetAttachmentPoint(currentWeapon->attachmentPoint));
         currentWeapon->SetVelocity(GetVelocity());
-        currentWeapon->SetRotation(GetRotation());
+        currentWeapon->SetRotation(GetRotationWithPitch());
         #ifdef BUILD_CLIENT
             currentWeapon->clientPosition = currentWeapon->GetPosition();
             currentWeapon->clientRotation = currentWeapon->GetRotation();
@@ -237,7 +254,7 @@ void PlayerObject::Tick(Time time) {
     if (zWeapon) {
         zWeapon->SetPosition(GetAttachmentPoint(zWeapon->attachmentPoint));
         zWeapon->SetVelocity(GetVelocity());
-        zWeapon->SetRotation(GetRotation());
+        zWeapon->SetRotation(GetRotationWithPitch());
         #ifdef BUILD_CLIENT
             zWeapon->clientPosition = zWeapon->GetPosition();
             zWeapon->clientRotation = zWeapon->GetRotation();
@@ -247,7 +264,7 @@ void PlayerObject::Tick(Time time) {
     if (qWeapon) {
         qWeapon->SetPosition(GetAttachmentPoint(qWeapon->attachmentPoint));
         qWeapon->SetVelocity(GetVelocity());
-        qWeapon->SetRotation(GetRotation());
+        qWeapon->SetRotation(GetRotationWithPitch());
         #ifdef BUILD_CLIENT
             qWeapon->clientPosition = qWeapon->GetPosition();
             qWeapon->clientRotation = qWeapon->GetRotation();

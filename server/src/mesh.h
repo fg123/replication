@@ -20,6 +20,11 @@ struct Vertex {
     Vector3 normal;
     Vector2 texCoords;
     Vector3 tangent;
+    Vertex() {}
+    Vertex(float x, float y, float z) : position(x, y, z) {}
+    Vertex(float x, float y, float z,
+           float nx, float ny, float nz) : position(x, y, z),
+            normal(nx, ny, nz) {}
 };
 
 struct Light {
