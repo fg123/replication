@@ -95,6 +95,7 @@ class DebugShaderProgram : public ShaderProgram {
     GLint uniformView;
     GLint uniformModel;
 
+    GLint uniformColor;
 public:
     DebugShaderProgram() {
         AddShader(LoadURL("shaders/Debug.vs"), GL_VERTEX_SHADER);
@@ -105,6 +106,7 @@ public:
         uniformProj = GetUniformLocation("u_Projection");
         uniformView = GetUniformLocation("u_View");
         uniformModel = GetUniformLocation("u_Model");
+        uniformColor = GetUniformLocation("u_Color");
     }
 
     void PreDraw(Game& game,
@@ -112,4 +114,8 @@ public:
                  const Matrix4& view,
                  const Matrix4& proj) override;
     void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) override;
+
+    void SetColor(Vector3 color) {
+        glUniform3f(uniformColor, color.r, color.g, color.b);
+    }
 };

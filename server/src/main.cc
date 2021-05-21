@@ -26,6 +26,16 @@ void GameLoop(Timer& gameTimer) {
     }
 }
 
+void Usage(char* arg0) {
+    std::cout << "usage: " << arg0 << " [options] mapPath" << std::endl;
+    std::cout << "    options: " << std::endl;
+    std::cout << "        --production              : production mode" << std::endl;
+    std::cout << "        --test                    : run only tests" << std::endl;
+    std::cout << "        --client-draw-bvh         : draw bvh on client" << std::endl;
+    std::cout << "        --client-draw-colliders   : draw colliders on client" << std::endl;
+    std::cout << "        --help                    : shows this message" << std::endl;
+}
+
 int main(int argc, char** argv) {
     try {
         for (int i = 1; i < argc; i++) {
@@ -35,6 +45,17 @@ int main(int argc, char** argv) {
             }
             else if (arg == "--test") {
                 GlobalSettings.RunTests = true;
+            }
+            else if (arg == "--client-draw-bvh") {
+                GlobalSettings.Client_DrawBVH = true;
+                GlobalSettings.Client_DrawColliders = true;
+            }
+            else if (arg == "--client-draw-colliders") {
+                GlobalSettings.Client_DrawColliders = true;
+            }
+            else if (arg == "--help") {
+                Usage(argv[0]);
+                exit(1);
             }
             else {
                 GlobalSettings.MapPath = arg;
@@ -105,9 +126,17 @@ int main(int argc, char** argv) {
                 else if (obj["event"] == "hb") {
                     ws->send(message, uWS::OpCode::TEXT);
                 }
-                else if (obj["event"] == "mapPath") {
-                    LOG_DEBUG("Sending Map Path");
-                    ws->send("{\"mapPath\": \"" + GlobalSettings.MapPath + "\"}", uWS::OpCode::TEXT);
+                else if (obj["event"] == "globalSettings") {
+                    LOG_DEBUG("Sending Global Settings");
+                    rapidjson::StringBuffer buffer;
+                    rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+                    writer.StartObject();
+                    writer.Key("globalSettings");
+                    writer.StartObject();
+                    GlobalSettings.Serialize(writer);
+                    writer.EndObject();
+                    writer.EndObject();
+                    ws->send(buffer.GetString(), uWS::OpCode::TEXT);
                 }
                 else if (obj["event"] == "setchar") {
                     std::string charName { obj["char"].GetString(), obj["char"].GetStringLength() };

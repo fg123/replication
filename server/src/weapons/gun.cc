@@ -87,6 +87,7 @@ void GunBase::ActualFire(Time time) {
 
     Vector3 bulletEnd = attachedTo->GetPosition() + attachedTo->GetLookDirection() * 1000.f;
     RayCastRequest request;
+    request.excludeObjects.insert(attachedTo->GetId());
     request.startPoint = attachedTo->GetPosition() + attachedTo->GetLookDirection();
     request.direction = attachedTo->GetLookDirection();
 

@@ -32,7 +32,7 @@ Game::Game() : nextId(1) {
         LoadMap(RESOURCE_PATH(GlobalSettings.MapPath));
 
         // Models[0] is always the base map
-        StaticMeshObject* baseMap = new StaticMeshObject(*this, "Heaven.obj");
+        StaticMeshObject* baseMap = new StaticMeshObject(*this, "ShootingRange.obj");
         AddObject(baseMap);
     #endif
 }
@@ -421,9 +421,11 @@ void Game::ProcessReplication(json& object) {
 
 RayCastResult Game::RayCastInWorld(RayCastRequest request) {
     RayCastResult result;
-    result.castRequest = request;
     for (auto& object : gameObjects) {
         if (object.second->IsCollisionExcluded(request.exclusionTags)) {
+            continue;
+        }
+        if (request.excludeObjects.find(object.first) != request.excludeObjects.end()) {
             continue;
         }
         object.second->CollidesWith(request, result);

@@ -13,6 +13,7 @@
 
 #include "client_gl.h"
 #include "client_audio.h"
+#include "global.h"
 
 // We probably need to include all these so it registers
 #include "characters/marine.h"
@@ -143,8 +144,12 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
-    void LoadMap(const char* map) {
-        game.LoadMap(map);
+    void LoadGlobalSettings(const char* settings) {
+        LOG_DEBUG(settings);
+        JSONDocument object;
+        object.Parse(settings);
+        GlobalSettings.ProcessReplication(object["globalSettings"]);
+        game.LoadMap(GlobalSettings.MapPath);
     }
 
     EMSCRIPTEN_KEEPALIVE

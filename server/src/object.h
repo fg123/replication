@@ -145,7 +145,8 @@ public:
     //   after it has been replicated
     virtual void OnClientCreate() {}
 
-    void ResolveCollision(const Vector3& difference);
+    void HandleAllCollisions();
+    void ResolveCollision(Vector3 difference);
 
     size_t GetColliderCount() const { return collider.children.size(); }
     const TwoPhaseCollider& GetCollider() const { return collider; }

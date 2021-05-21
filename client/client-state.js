@@ -56,7 +56,7 @@ module.exports = class ClientState {
         this.SetupSocketHandler();
 
         this.SendData(JSON.stringify({
-            event: "mapPath"
+            event: "globalSettings"
         }));
     }
 
@@ -101,10 +101,10 @@ module.exports = class ClientState {
                 }
                 return;
             }
-            else if (event["mapPath"] !== undefined) {
+            else if (event["globalSettings"] !== undefined) {
                 // We can actually start now
-                const heapString = this.ToHeapString(this.wasm, event["mapPath"]);
-                this.wasm._LoadMap(heapString);
+                const heapString = this.ToHeapString(this.wasm, ev.data);
+                this.wasm._LoadGlobalSettings(heapString);
                 this.wasm._free(heapString);
 
                 this.StartGame();

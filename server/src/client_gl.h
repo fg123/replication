@@ -32,7 +32,6 @@ class ClientGL {
     Mesh debugCube;
 
 public:
-
     ClientGL(Game& game, const char* selector);
 
     // Client Communication

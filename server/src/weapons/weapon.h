@@ -1,5 +1,4 @@
-#ifndef WEAPON_H
-#define WEAPON_H
+#pragma once
 
 #include "object.h"
 
@@ -70,5 +69,3 @@ public:
 
     void ResetCooldown();
 };
-
-#endif

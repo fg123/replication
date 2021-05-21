@@ -98,9 +98,11 @@ Module.expectedDataFileDownloads++;
    Module["FS_createPath"]("/textures", "Bricks059_1K-JPG", true, true);
    Module["FS_createPath"]("/textures", "BulletHole", true, true);
    Module["FS_createPath"]("/textures", "Lava004_1K-JPG", true, true);
+   Module["FS_createPath"]("/textures", "Marble012_1K-JPG", true, true);
    Module["FS_createPath"]("/textures", "Metal038_1K-JPG", true, true);
    Module["FS_createPath"]("/textures", "Wood026_1K-JPG", true, true);
    Module["FS_createPath"]("/textures", "WoodenCrate", true, true);
+   Module["FS_createPath"]("/textures", "WoodFloor040_1K-JPG", true, true);
    function DataRequest(start, end, audio) {
     this.start = start;
     this.end = end;
@@ -344,236 +346,286 @@ Module.expectedDataFileDownloads++;
   }, {
    "filename": "/models/ShootingRange.mtl",
    "start": 5218249,
-   "end": 5219486,
+   "end": 5220261,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.obj",
-   "start": 5219486,
-   "end": 6154414,
+   "start": 5220261,
+   "end": 6757518,
    "audio": 0
   }, {
    "filename": "/models/suzanne.obj",
-   "start": 6154414,
-   "end": 6233170,
+   "start": 6757518,
+   "end": 6836274,
    "audio": 0
   }, {
    "filename": "/shaders/Debug.fs",
-   "start": 6233170,
-   "end": 6233293,
+   "start": 6836274,
+   "end": 6836422,
    "audio": 0
   }, {
    "filename": "/shaders/Debug.vs",
-   "start": 6233293,
-   "end": 6233524,
+   "start": 6836422,
+   "end": 6836653,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.fs",
-   "start": 6233524,
-   "end": 6237328,
+   "start": 6836653,
+   "end": 6840457,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.vs",
-   "start": 6237328,
-   "end": 6238185,
+   "start": 6840457,
+   "end": 6841314,
    "audio": 0
   }, {
    "filename": "/sounds/bang.wav",
-   "start": 6238185,
-   "end": 6365771,
+   "start": 6841314,
+   "end": 6968900,
    "audio": 1
   }, {
    "filename": "/sounds/boom-old1.wav",
-   "start": 6365771,
-   "end": 6437495,
+   "start": 6968900,
+   "end": 7040624,
    "audio": 1
   }, {
    "filename": "/sounds/boom.wav",
-   "start": 6437495,
-   "end": 6509219,
+   "start": 7040624,
+   "end": 7112348,
    "audio": 1
   }, {
    "filename": "/sounds/GrenadeOut.wav",
-   "start": 6509219,
-   "end": 6589135,
+   "start": 7112348,
+   "end": 7192264,
    "audio": 1
   }, {
    "filename": "/sounds/HookReel.wav",
-   "start": 6589135,
-   "end": 6647547,
+   "start": 7192264,
+   "end": 7250676,
    "audio": 1
   }, {
    "filename": "/sounds/HookThrow.wav",
-   "start": 6647547,
-   "end": 6675239,
+   "start": 7250676,
+   "end": 7278368,
    "audio": 1
   }, {
    "filename": "/sounds/incoming.wav",
-   "start": 6675239,
-   "end": 6829961,
+   "start": 7278368,
+   "end": 7433090,
    "audio": 1
   }, {
    "filename": "/sounds/PortalEnd.wav",
-   "start": 6829961,
-   "end": 6901685,
+   "start": 7433090,
+   "end": 7504814,
    "audio": 1
   }, {
    "filename": "/sounds/PortalStart.wav",
-   "start": 6901685,
-   "end": 6974433,
+   "start": 7504814,
+   "end": 7577562,
    "audio": 1
   }, {
    "filename": "/sounds/reload.wav",
-   "start": 6974433,
-   "end": 7088141,
+   "start": 7577562,
+   "end": 7691270,
    "audio": 1
   }, {
    "filename": "/sounds/ueh.wav",
-   "start": 7088141,
-   "end": 7123001,
+   "start": 7691270,
+   "end": 7726130,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-jump.wav",
-   "start": 7123001,
-   "end": 7393449,
+   "start": 7726130,
+   "end": 7996578,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-pullback.wav",
-   "start": 7393449,
-   "end": 7541021,
+   "start": 7996578,
+   "end": 8144150,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-shoot.wav",
-   "start": 7541021,
-   "end": 7655821,
+   "start": 8144150,
+   "end": 8258950,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-ulti-activate.wav",
-   "start": 7655821,
-   "end": 7979525,
+   "start": 8258950,
+   "end": 8582654,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-ulti-shoot.wav",
-   "start": 7979525,
-   "end": 8131195,
+   "start": 8582654,
+   "end": 8734324,
    "audio": 1
   }, {
    "filename": "/textures/Artillery.png",
-   "start": 8131195,
-   "end": 9248422,
+   "start": 8734324,
+   "end": 9851551,
    "audio": 0
   }, {
    "filename": "/textures/BulletTracer.png",
-   "start": 9248422,
-   "end": 9282189,
+   "start": 9851551,
+   "end": 9885318,
+   "audio": 0
+  }, {
+   "filename": "/textures/Mountains.png",
+   "start": 9885318,
+   "end": 9962136,
    "audio": 0
   }, {
    "filename": "/textures/Skydome.png",
-   "start": 9282189,
-   "end": 10954360,
+   "start": 9962136,
+   "end": 11634307,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_AmbientOcclusion.jpg",
-   "start": 10954360,
-   "end": 11554694,
+   "start": 11634307,
+   "end": 12234641,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Color.jpg",
-   "start": 11554694,
-   "end": 12976384,
+   "start": 12234641,
+   "end": 13656331,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Displacement.jpg",
-   "start": 12976384,
-   "end": 13360813,
+   "start": 13656331,
+   "end": 14040760,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Normal.jpg",
-   "start": 13360813,
-   "end": 15027368,
+   "start": 14040760,
+   "end": 15707315,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Roughness.jpg",
-   "start": 15027368,
-   "end": 15707461,
+   "start": 15707315,
+   "end": 16387408,
    "audio": 0
   }, {
    "filename": "/textures/BulletHole/BulletHole.png",
-   "start": 15707461,
-   "end": 15739665,
+   "start": 16387408,
+   "end": 16419612,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Color.jpg",
-   "start": 15739665,
-   "end": 17073096,
+   "start": 16419612,
+   "end": 17753043,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Displacement.jpg",
-   "start": 17073096,
-   "end": 17369932,
+   "start": 17753043,
+   "end": 18049879,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Emission.jpg",
-   "start": 17369932,
-   "end": 18700915,
+   "start": 18049879,
+   "end": 19380862,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Normal.jpg",
-   "start": 18700915,
-   "end": 20397276,
+   "start": 19380862,
+   "end": 21077223,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Roughness.jpg",
-   "start": 20397276,
-   "end": 20968138,
+   "start": 21077223,
+   "end": 21648085,
+   "audio": 0
+  }, {
+   "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Color.jpg",
+   "start": 21648085,
+   "end": 22741069,
+   "audio": 0
+  }, {
+   "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Displacement.jpg",
+   "start": 22741069,
+   "end": 23531629,
+   "audio": 0
+  }, {
+   "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Normal.jpg",
+   "start": 23531629,
+   "end": 23871478,
+   "audio": 0
+  }, {
+   "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Roughness.jpg",
+   "start": 23871478,
+   "end": 24451578,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Color.jpg",
-   "start": 20968138,
-   "end": 21497963,
+   "start": 24451578,
+   "end": 24981403,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Displacement.jpg",
-   "start": 21497963,
-   "end": 21927177,
+   "start": 24981403,
+   "end": 25410617,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Metalness.jpg",
-   "start": 21927177,
-   "end": 22057181,
+   "start": 25410617,
+   "end": 25540621,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Normal.jpg",
-   "start": 22057181,
-   "end": 23122723,
+   "start": 25540621,
+   "end": 26606163,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Roughness.jpg",
-   "start": 23122723,
-   "end": 23495e3,
+   "start": 26606163,
+   "end": 26978440,
    "audio": 0
   }, {
    "filename": "/textures/Wood026_1K-JPG/Wood026_1K_Color.jpg",
-   "start": 23495e3,
-   "end": 24480635,
+   "start": 26978440,
+   "end": 27964075,
    "audio": 0
   }, {
    "filename": "/textures/Wood026_1K-JPG/Wood026_1K_Normal.jpg",
-   "start": 24480635,
-   "end": 25715903,
+   "start": 27964075,
+   "end": 29199343,
    "audio": 0
   }, {
    "filename": "/textures/WoodenCrate/Wood_Crate_001_basecolor.jpg",
-   "start": 25715903,
-   "end": 25755714,
+   "start": 29199343,
+   "end": 29239154,
    "audio": 0
   }, {
    "filename": "/textures/WoodenCrate/Wood_Crate_001_normal.jpg",
-   "start": 25755714,
-   "end": 26015971,
+   "start": 29239154,
+   "end": 29499411,
+   "audio": 0
+  }, {
+   "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_AmbientOcclusion.jpg",
+   "start": 29499411,
+   "end": 29879132,
+   "audio": 0
+  }, {
+   "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Color.jpg",
+   "start": 29879132,
+   "end": 30679213,
+   "audio": 0
+  }, {
+   "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Displacement.jpg",
+   "start": 30679213,
+   "end": 31196108,
+   "audio": 0
+  }, {
+   "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Normal.jpg",
+   "start": 31196108,
+   "end": 32220597,
+   "audio": 0
+  }, {
+   "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Roughness.jpg",
+   "start": 32220597,
+   "end": 32594619,
    "audio": 0
   } ],
-  "remote_package_size": 26015971,
-  "package_uuid": "d085e912-bb5d-46ea-9c3b-2f959ab51905"
+  "remote_package_size": 32594619,
+  "package_uuid": "d5e395db-7ca7-44ca-a7bb-cdfe6a04541d"
  });
 })();
 
@@ -8480,6 +8532,10 @@ function _glUniform1i(location, v0) {
  GLctx.uniform1i(GL.uniforms[location], v0);
 }
 
+function _glUniform3f(location, v0, v1, v2) {
+ GLctx.uniform3f(GL.uniforms[location], v0, v1, v2);
+}
+
 function _glUniform3fv(location, count, value) {
  GLctx.uniform3fv(GL.uniforms[location], HEAPF32, value >> 2, count * 3);
 }
@@ -9022,12 +9078,14 @@ var asmLibraryArg = {
  "glTexParameteri": _glTexParameteri,
  "glUniform1f": _glUniform1f,
  "glUniform1i": _glUniform1i,
+ "glUniform3f": _glUniform3f,
  "glUniform3fv": _glUniform3fv,
  "glUniformMatrix4fv": _glUniformMatrix4fv,
  "glUseProgram": _glUseProgram,
  "glVertexAttribPointer": _glVertexAttribPointer,
  "glViewport": _glViewport,
  "invoke_diii": invoke_diii,
+ "invoke_fffff": invoke_fffff,
  "invoke_fii": invoke_fii,
  "invoke_fiii": invoke_fiii,
  "invoke_i": invoke_i,
@@ -9049,6 +9107,7 @@ var asmLibraryArg = {
  "invoke_jiiii": invoke_jiiii,
  "invoke_v": invoke_v,
  "invoke_vi": invoke_vi,
+ "invoke_vifff": invoke_vifff,
  "invoke_vii": invoke_vii,
  "invoke_viifi": invoke_viifi,
  "invoke_viifii": invoke_viifii,
@@ -9099,7 +9158,7 @@ var _GetObjectSerialized = Module["_GetObjectSerialized"] = createExportWrapper(
 
 var _HandleLocalInput = Module["_HandleLocalInput"] = createExportWrapper("HandleLocalInput");
 
-var _LoadMap = Module["_LoadMap"] = createExportWrapper("LoadMap");
+var _LoadGlobalSettings = Module["_LoadGlobalSettings"] = createExportWrapper("LoadGlobalSettings");
 
 var _HandleReplicate = Module["_HandleReplicate"] = createExportWrapper("HandleReplicate");
 
@@ -9167,17 +9226,17 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 86880;
+var _game = Module["_game"] = 91672;
 
-var _clientGl = Module["_clientGl"] = 87128;
+var _clientGl = Module["_clientGl"] = 91920;
 
-var _clientAudio = Module["_clientAudio"] = 87296;
+var _clientAudio = Module["_clientAudio"] = 92088;
 
-var _inputEvents = Module["_inputEvents"] = 87320;
+var _inputEvents = Module["_inputEvents"] = 92112;
 
-var _ping = Module["_ping"] = 87352;
+var _ping = Module["_ping"] = 92144;
 
-var _lastTickTime = Module["_lastTickTime"] = 87344;
+var _lastTickTime = Module["_lastTickTime"] = 92136;
 
 function invoke_vii(index, a1, a2) {
  var sp = stackSave();
@@ -9311,6 +9370,28 @@ function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  }
 }
 
+function invoke_viiiii(index, a1, a2, a3, a4, a5) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_fffff(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_viiii(index, a1, a2, a3, a4) {
  var sp = stackSave();
  try {
@@ -9355,17 +9436,6 @@ function invoke_viifi(index, a1, a2, a3, a4) {
  }
 }
 
-function invoke_viiiii(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
 function invoke_viiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
  var sp = stackSave();
  try {
@@ -9392,6 +9462,17 @@ function invoke_iiiff(index, a1, a2, a3, a4) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1, a2, a3, a4);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_vifff(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

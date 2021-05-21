@@ -1,5 +1,5 @@
 # Blender MTL File: 'ShootingRange.blend'
-# Material Count: 6
+# Material Count: 8
 
 newmtl Bricks
 Ns 225.000000
@@ -17,12 +17,14 @@ map_Ns ..\\textures\\Bricks059_1K-JPG\\Bricks059_1K_Roughness.jpg
 newmtl Default_OBJ
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.000000 0.178487 0.800000
+Kd 0.800000 0.800000 0.800000
 Ks 0.500000 0.500000 0.500000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+map_Bump ..\\textures\\WoodFloor040_1K-JPG\\WoodFloor040_1K_Normal.jpg
+map_Kd ..\\textures\\WoodFloor040_1K-JPG\\WoodFloor040_1K_Color.jpg
 
 newmtl Floor
 Ns 225.000000
@@ -33,6 +35,7 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+map_Kd ..\\textures\\Mountains.png
 
 newmtl Grass
 Ns 225.000000
@@ -44,15 +47,17 @@ Ni 1.450000
 d 1.000000
 illum 2
 
-newmtl Material
-Ns 323.999994
+newmtl Metal_Ramp
+Ns 225.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.800000 0.000000 0.000536
-Ks 0.500000 0.500000 0.500000
+Kd 0.800000 0.800000 0.800000
+Ks 0.200000 0.200000 0.200000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+map_Bump ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Normal.jpg
+map_Kd ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Color.jpg
 
 newmtl None
 Ns 500
@@ -61,3 +66,25 @@ Kd 0.8 0.8 0.8
 Ks 0.8 0.8 0.8
 d 1
 illum 2
+
+newmtl Water
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.234849 0.800000
+Ks 0.104545 0.104545 0.104545
+Ke 0.000000 0.000000 0.000000
+Ni 0.000000
+d 1.000000
+illum 2
+
+newmtl Wood
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\Wood026_1K-JPG\\Wood026_1K_Normal.jpg
+map_Kd ..\\textures\\Wood026_1K-JPG\\Wood026_1K_Color.jpg

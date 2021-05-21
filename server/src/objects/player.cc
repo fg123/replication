@@ -38,13 +38,10 @@ PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector3()) {
 
 PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game) {
     SetTag(Tag::PLAYER);
-    // SetTag(Tag::NO_GRAVITY);
 
     SetPosition(position);
 
     collisionExclusion |= (uint64_t) Tag::PLAYER;
-
-    // AddCollider(new CircleCollider(this, Vector3(0, -15, 0), 15.0));
 
     SetModel(game.GetModel("Player.obj"));
     GenerateAABBCollidersFromModel(this);

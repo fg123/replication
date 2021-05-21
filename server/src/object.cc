@@ -45,6 +45,18 @@ Object::Object(Game& game) :
 
 Object::~Object() {}
 
+void Object::HandleAllCollisions() {
+    Vector3 lastPosition = position;
+    for (size_t i = 0; i < 10; i++) {
+        game.HandleCollisions(this);
+        if (IsZero(lastPosition - position)) {
+            return;
+        }
+        lastPosition = position;
+    }
+    LOG_WARN("Object still unstable after 10 iterations of collision resolution!");
+}
+
 void Object::Tick(Time time) {
     // Tick my children
     for (auto& child : children) {
@@ -83,7 +95,7 @@ void Object::Tick(Time time) {
         Vector3 subStepDelta = positionDelta;
         for (int i = 0; i < divisions; i++) {
             position += subStepDelta / (float)divisions;
-            game.HandleCollisions(this);
+            HandleAllCollisions();
             if (IsStatic()) {
                 break;
             }
@@ -93,7 +105,7 @@ void Object::Tick(Time time) {
         if (divisions == 0) {
             // We did not call HandleCollisions so reporting won't be triggered
             //   above, so we additionally handle collisions here.
-            game.HandleCollisions(this);
+            HandleAllCollisions();
         }
 
         if (glm::abs(velocity.x) < EPSILON) {
@@ -133,17 +145,25 @@ void Object::Tick(Time time) {
     lastFramePosition = position;
 }
 
-void Object::ResolveCollision(const Vector3& difference) {
+void Object::ResolveCollision(Vector3 difference) {
     // if (isStatic) return;
     // TODO: this collision difference really should be negated
     if (std::isnan(difference.x) || std::isnan(difference.y) || std::isnan(difference.z)) {
         LOG_ERROR("ResolveCollision has nan difference " << difference);
         throw std::runtime_error("ResolveCollision has nan difference!");
     }
+    if (!IsZero(difference.x) && SameSign(difference.x, velocity.x)) {
+        difference.x = 0.f;
+    }
+    if (!IsZero(difference.y) && SameSign(difference.y, velocity.y)) {
+        difference.y = 0.f;
+    }
+    if (!IsZero(difference.z) && SameSign(difference.z, velocity.z)) {
+        difference.z = 0.f;
+    }
     if (IsTagged(Tag::PLAYER) && glm::length(difference) > 0.01f) {
         LOG_DEBUG("Player Correction Difference " << difference);
     }
-
     position += difference;
     // We had to adjust the collision in a certain direction.
     // If the velocity does not match the direction of resolution, do nothing

@@ -4,12 +4,12 @@
 #include "player.h"
 #include "vector.h"
 #include "client_shader.h"
+#include "bvh.h"
+#include "global.h"
 
 #include <vector>
 #include <fstream>
 #include <map>
-
-const static bool DRAW_COLLIDERS = true;
 
 ClientGL::ClientGL(Game& game, const char* selector) :
     canvasSelector(selector),
@@ -96,15 +96,41 @@ void ClientGL::DrawObject(Object* obj, int& lastProgram) {
             shaderPrograms[program]->Draw(*this, transform, &mesh);
         }
 
-        if (DRAW_COLLIDERS) {
+        if (GlobalSettings.Client_DrawColliders) {
             debugShaderProgram->Use();
             lastProgram = -1;
             for (auto& cptr : obj->GetCollider().children) {
                 if (AABBCollider* collider = dynamic_cast<AABBCollider*>(cptr)) {
                     // Transform locally first
                     Matrix4 model = collider->GetWorldTransform() * glm::scale(collider->size);
-
+                    debugShaderProgram->SetColor(Vector3(0, 0, 1));
                     debugShaderProgram->Draw(*this, model, &debugCube);
+                }
+                else if (StaticMeshCollider* collider = dynamic_cast<StaticMeshCollider*>(cptr)) {
+                    // Draw Broad
+                    Matrix4 model = collider->broad.GetWorldTransform() * glm::scale(collider->broad.size);
+                    debugShaderProgram->SetColor(Vector3(0, 0, 1));
+                    debugShaderProgram->Draw(*this, model, &debugCube);
+
+                    if (GlobalSettings.Client_DrawBVH) {
+                        // Draw all the BVHs
+                        std::queue<std::pair<BVHTree*, int>> nodes;
+                        nodes.emplace(collider->bvhTree, 0);
+                        while (!nodes.empty()) {
+                            auto pair = nodes.front();
+                            BVHTree* front = pair.first;
+                            nodes.pop();
+                            for (auto& child : front->children) {
+                                nodes.emplace(child, pair.second + 1);
+                            }
+                            if (front->children.empty()) {
+                                int level = pair.second;
+                                debugShaderProgram->SetColor(Vector3(level % 3 == 0, level % 3 == 1, level % 3 == 2));
+                                Matrix4 model = front->collider.GetWorldTransform() * glm::scale(front->collider.size);
+                                debugShaderProgram->Draw(*this, model, &debugCube);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -153,7 +179,7 @@ void ClientGL::Draw(int width, int height) {
         cameraPosition + cameraRotation, Vector::Up);
 
     Matrix4 projMat = glm::perspective(
-        glm::radians(45.0f),
+        glm::radians(55.0f),
         (float) width / (float) height,
         0.2f, 500.f
     );

@@ -1,6 +1,8 @@
 #include "collision.h"
 #include "object.h"
 #include "sat.h"
+#include "bvh.h"
+#include <queue>
 
 std::ostream& operator<<(std::ostream& out, const CollisionResult& result) {
     out << "CollisionResult: " <<
@@ -231,8 +233,10 @@ CollisionResult AABBAndMeshCollide(AABBCollider* rect, StaticMeshCollider* colli
     if (!AABBAndAABBCollide(rect, &collider->broad).isColliding) {
         return CollisionResult{};
     }
-    auto& indices = collider->mesh.indices;
-    auto& vertices = collider->mesh.vertices;
+    if (!collider->bvhTree) {
+        return CollisionResult{};
+    }
+    // Use BVH Tree to tell us which triangles to test
 
     Quaternion r1Rotation = rect->GetRotation();
     // LOG_DEBUG("AABB Mesh Collide");
@@ -244,74 +248,97 @@ CollisionResult AABBAndMeshCollide(AABBCollider* rect, StaticMeshCollider* colli
     Vector3 rax2 = r1Rotation * Vector::Left;
     Vector3 rax3 = r1Rotation * Vector::Forward;
 
-    for (size_t i = 0; i < indices.size(); i += 3) {
-        const Vector3& a = vertices[indices[i]].position;
-        const Vector3& b = vertices[indices[i+1]].position;
-        const Vector3& c = vertices[indices[i+2]].position;
+    std::queue<BVHTree*> checkQueue;
+    checkQueue.emplace(collider->bvhTree);
 
-        Vector3 normal = (
-            vertices[indices[i]].normal +
-            vertices[indices[i+1]].normal +
-            vertices[indices[i+2]].normal) / 3.f;
-// #ifdef BUILD_SERVER
-//         LOG_DEBUG("Test on Triangle " << a << " " << b << " " << c << " " << normal);
-// #endif
-        // Apply SAT
-        // 3 normals for each box
-        Vector3 e1 = b - a;
-        Vector3 e2 = c - b;
-        Vector3 e3 = a - c;
+    float minOverlap = INFINITY;
+    Vector3 minOverlapNormal;
+    Vector3 reverseVelocity = -collider->owner->GetVelocity();
 
-        Vector3 axes[] = {
-            rax1, rax2, rax3,
-            glm::cross(rax1, e1), glm::cross(rax1, e2), glm::cross(rax1, e3),
-            glm::cross(rax2, e1), glm::cross(rax2, e2), glm::cross(rax2, e3),
-            glm::cross(rax3, e1), glm::cross(rax3, e2), glm::cross(rax3, e3),
-            normal
-        };
+    CollisionResult result;
 
-        Vector3 r2Corners[] = { a, b, c };
-
-        float minOverlap = INFINITY;
-        Vector3 minOverlapNormal;
-        bool didCollide = true;
-        for (size_t i = 0; i < 13; i++) {
-            if (IsZero(axes[i])) {
-                continue;
+    while (!checkQueue.empty()) {
+        BVHTree* currNode = checkQueue.front();
+        checkQueue.pop();
+        if (currNode->tris.empty()) {
+            // Internal Node
+            if (AABBAndAABBCollide(rect, &currNode->collider).isColliding) {
+                for (const auto& p : currNode->children) {
+                    checkQueue.push(p);
+                }
             }
-            float shape1Min, shape1Max, shape2Min, shape2Max;
-            SATProject(axes[i], r1Corners, 8, shape1Min, shape1Max);
-            SATProject(axes[i], r2Corners, 3, shape2Min, shape2Max);
-            float overlap = SATOverlaps(shape1Min, shape1Max, shape2Min, shape2Max);
-            if (IsZero(overlap)) {
-                // No overlap on one axis means we are good
+        }
+        else {
+            // Test Triangles
+            for (const auto& tri : currNode->tris) {
                 // #ifdef BUILD_SERVER
-                // LOG_DEBUG("No overlap: axes " << axes[i] << " overlap " << overlap);
+                //         LOG_DEBUG("Test on Triangle " << tri.a << " " << tri.b <<
+                //         " " << tri.c << " " << tri.norm);
                 // #endif
-                didCollide = false;
-                break;
-            }
-            // #ifdef BUILD_SERVER
-            // LOG_DEBUG(shape1Min << " " << shape1Max << " " << shape2Min << " " << shape2Max);
-            // LOG_DEBUG("Axes " << axes[i] << " overlap " << overlap);
-            // #endif
-            if (i == 12) {
-                minOverlap = shape2Min - shape1Min;
-                minOverlapNormal = axes[i];
+                // Apply SAT
+                // 3 normals for each box
+                Vector3 e1 = tri->b - tri->a;
+                Vector3 e2 = tri->c - tri->b;
+                Vector3 e3 = tri->a - tri->c;
+
+                Vector3 axes[] = {
+                    rax1, rax2, rax3,
+                    glm::cross(rax1, e1), glm::cross(rax1, e2), glm::cross(rax1, e3),
+                    glm::cross(rax2, e1), glm::cross(rax2, e2), glm::cross(rax2, e3),
+                    glm::cross(rax3, e1), glm::cross(rax3, e2), glm::cross(rax3, e3),
+                    tri->norm
+                };
+
+                Vector3 r2Corners[] = { tri->a, tri->b, tri->c };
+
+                for (size_t i = 0; i < 13; i++) {
+                    if (IsZero(axes[i])) {
+                        continue;
+                    }
+                    float shape1Min, shape1Max, shape2Min, shape2Max;
+                    SATProject(axes[i], r1Corners, 8, shape1Min, shape1Max);
+                    SATProject(axes[i], r2Corners, 3, shape2Min, shape2Max);
+                    float overlap = SATOverlaps(shape1Min, shape1Max, shape2Min, shape2Max);
+                    if (IsZero(overlap)) {
+                        // No overlap on one axis means we are good
+                        // #ifdef BUILD_SERVER
+                        // LOG_DEBUG("No overlap: axes " << axes[i] << " overlap " << overlap);
+                        // #endif
+                        break;
+                    }
+                    // #ifdef BUILD_SERVER
+                    // LOG_DEBUG(shape1Min << " " << shape1Max << " " << shape2Min << " " << shape2Max);
+                    // LOG_DEBUG("Axes " << axes[i] << " overlap " << overlap);
+                    // #endif
+
+                    // Prioritize normals in the same direction as reverse velocity
+                    if (i == 12) {
+                        float overlapToUse = shape2Min - shape1Min;
+                        if (!IsZero(overlapToUse) &&
+                            glm::abs(overlapToUse) < glm::abs(minOverlap)) {
+                            minOverlap = overlapToUse;
+                            minOverlapNormal = axes[i];
+                            result.collisionDifference = minOverlapNormal * minOverlap;
+                            result.isColliding = true;
+                        }
+                    }
+                }
+
+                // LOG_DEBUG("Test on Triangle " << a << " " << b << " " << c << " " << normal);
             }
         }
-        if (!didCollide) {
-            // Goto next triangle
-            continue;
-        }
-        CollisionResult result;
-        result.isColliding = true;
-        result.collisionDifference = minOverlapNormal * minOverlap;
-        // LOG_DEBUG("=== Collision Diff " << minOverlapNormal << " " << minOverlap);
-        // LOG_DEBUG("Test on Triangle " << a << " " << b << " " << c << " " << normal);
-        return result;
     }
-    return CollisionResult{};
+    // if (didCollide) {
+    //     CollisionResult result;
+    //     result.isColliding = true;
+    //     result.collisionDifference = minOverlapNormal * minOverlap;
+    //     // LOG_DEBUG("=== Collision Diff " << minOverlapNormal << " " << minOverlap);
+    //     return result;
+    // }
+    // if (result.isColliding) {
+    //     LOG_DEBUG("=== Collision Diff " << minOverlapNormal << " " << minOverlap);
+    // }
+    return result;
 }
 
 CollisionResult TwoPhaseCollider::CollidesWith(Collider* mesh) {
@@ -419,22 +446,31 @@ bool RayIntersectTriangle(RayCastRequest& ray,
 }
 
 bool StaticMeshCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
-    auto& indices = mesh.indices;
-    auto& vertices = mesh.vertices;
-
     bool bresult = false;
 
-    for (size_t i = 0; i < indices.size(); i += 3) {
-        const Vector3& a = vertices[indices[i]].position;
-        const Vector3& b = vertices[indices[i+1]].position;
-        const Vector3& c = vertices[indices[i+2]].position;
+    std::queue<BVHTree*> checkQueue;
+    checkQueue.emplace(bvhTree);
 
-        Vector3 normal = (
-            vertices[indices[i]].normal +
-            vertices[indices[i+1]].normal +
-            vertices[indices[i+2]].normal) / 3.f;
-        bresult |= RayIntersectTriangle(ray, c, b, a, normal, result);
+    while (!checkQueue.empty()) {
+        BVHTree* currNode = checkQueue.front();
+        checkQueue.pop();
+        if (currNode->tris.empty()) {
+            // Internal Node
+            RayCastResult fake;
+            if (currNode->collider.CollidesWith(ray, fake)) {
+                for (const auto& p : currNode->children) {
+                    checkQueue.push(p);
+                }
+            }
+        }
+        else {
+            for (size_t i = 0; i < currNode->tris.size(); i++) {
+                bresult |= RayIntersectTriangle(ray, currNode->tris[i]->c,
+                    currNode->tris[i]->b, currNode->tris[i]->a, currNode->tris[i]->norm, result);
+            }
+        }
     }
+
     return bresult;
 }
 
@@ -533,3 +569,66 @@ bool AABBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
 //         }
 //     }
 // }
+
+StaticMeshCollider::StaticMeshCollider(Object* owner, Mesh& mesh) :
+    Collider(owner, Vector3{}, Quaternion{}),
+    broad(owner, Vector3{}, Vector3{}),
+    mesh(mesh) {
+
+    if (!mesh.vertices.empty()) {
+        Vector3 min = mesh.vertices[0].position;
+        Vector3 max = mesh.vertices[0].position;
+        for (size_t i = 1; i < mesh.vertices.size(); i++) {
+            min = glm::min(min, mesh.vertices[i].position);
+            max = glm::max(max, mesh.vertices[i].position);
+        }
+        glm::vec3 bounds = max - min;
+        broad = AABBCollider(owner, min, bounds);
+
+        int axis = 0;
+        if (bounds.y > bounds.x && bounds.y > bounds.z) axis = 1;
+        if (bounds.z > bounds.x && bounds.z > bounds.y) axis = 2;
+
+        std::vector<BVHTree::Triangle*> triangles;
+        if (mesh.indices.size() % 3 != 0) {
+            LOG_ERROR("Static Mesh Collider, mesh has non % 3 indices! Has " << mesh.indices.size());
+        }
+        for (size_t i = 0; i < mesh.indices.size(); i += 3) {
+            const Vector3& a = mesh.vertices[mesh.indices[i]].position;
+            const Vector3& b = mesh.vertices[mesh.indices[i+1]].position;
+            const Vector3& c = mesh.vertices[mesh.indices[i+2]].position;
+
+            Vector3 normal = (
+                mesh.vertices[mesh.indices[i]].normal +
+                mesh.vertices[mesh.indices[i+1]].normal +
+                mesh.vertices[mesh.indices[i+2]].normal) / 3.f;
+            triangles.push_back(new BVHTree::Triangle(a, b, c, normal));
+        }
+        bvhTree = BVHTree::Create(triangles, axis, 0);
+        for (auto& triangle : triangles) {
+            if (!triangle->parentVolume) {
+                LOG_ERROR("Triangle " << triangle->a << " " << triangle->b <<
+                    " " << triangle->c << " was not placed in a BVH volume!");
+            }
+            else {
+                AABBCollider& col = triangle->parentVolume->collider;
+                if (!IsPointInAABB(col.position, col.size, triangle->a)) {
+                    LOG_ERROR("A not in bound " << triangle->a);
+                    LOG_ERROR(col.position << " " << col.size);
+                }
+                if (!IsPointInAABB(col.position, col.size, triangle->b)) {
+                    LOG_ERROR("B not in bound " << triangle->b);
+                    LOG_ERROR(col.position << " " << col.size);
+                }
+                if (!IsPointInAABB(col.position, col.size, triangle->c)) {
+                    LOG_ERROR("C not in bound " << triangle->c);
+                    LOG_ERROR(col.position << " " << col.size);
+                }
+            }
+        }
+    }
+}
+
+StaticMeshCollider::~StaticMeshCollider() {
+    delete bvhTree;
+}

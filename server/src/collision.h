@@ -7,6 +7,7 @@
 #include "mesh.h"
 
 class Object;
+struct BVHTree;
 
 struct CollisionResult {
     bool isColliding = false;
@@ -63,9 +64,18 @@ public:
     // }
 };
 
+inline bool IsPointInAABB(const Vector3& RectPosition, const Vector3& RectSize, const Vector3& Point) {
+    return
+        (Point.x > RectPosition.x && Point.x < RectPosition.x + RectSize.x) &&
+        (Point.y > RectPosition.y && Point.y < RectPosition.y + RectSize.y) &&
+        (Point.z > RectPosition.z && Point.z < RectPosition.z + RectSize.z);
+}
+
 struct AABBCollider : public Collider {
     // REPLICATED(Vector3, size, "s");
     Vector3 size;
+
+    AABBCollider() : AABBCollider(nullptr, Vector3{}, Vector3{}) {}
 
     AABBCollider(Object* owner, Vector3 position, Vector3 size, Quaternion rotation) :
         Collider(owner, position, rotation), size(size) {}
@@ -76,14 +86,27 @@ struct AABBCollider : public Collider {
     virtual int GetType() override { return 2; }
     CollisionResult CollidesWith(Collider* other) override;
     bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
+
+    static AABBCollider FromPoints(const Vector3& pt1, const Vector3& pt2, const Vector3& pt3) {
+        Vector3 position = glm::min(pt1, pt2, pt3)  - 0.01f;
+        Vector3 size = glm::max(pt1, pt2, pt3) - position + 0.01f;
+        return AABBCollider(nullptr, position, size);
+    }
+
+    void ExpandToContain(const Vector3& pt) {
+        Vector3 oldMax = position + size;
+        position = glm::min(position, pt - 0.01f);
+        size = glm::max(oldMax, pt + 0.01f) - position;
+    }
+
+    static AABBCollider FromTwo(AABBCollider* a, AABBCollider* b) {
+        Vector3 pos = glm::min(a->position, b->position);
+        Vector3 size = glm::max(a->position + a->size, b->position + b->size) - pos;
+
+        return AABBCollider(nullptr, pos, size);
+    }
 };
 
-inline bool IsPointInAABB(const Vector3& RectPosition, const Vector3& RectSize, const Vector3& Point) {
-    return
-        (Point.x > RectPosition.x && Point.x < RectPosition.x + RectSize.x) &&
-        (Point.y > RectPosition.y && Point.y < RectPosition.y + RectSize.y) &&
-        (Point.z > RectPosition.z && Point.z < RectPosition.z + RectSize.z);
-}
 
 struct SphereCollider : public Collider {
     // REPLICATED(float, radius, "r");
@@ -99,24 +122,13 @@ struct SphereCollider : public Collider {
 
 struct StaticMeshCollider : public Collider {
     AABBCollider broad;
-
     Mesh& mesh;
 
-    StaticMeshCollider(Object* owner, Mesh& mesh) :
-        Collider(owner, Vector3{}, Quaternion{}),
-        broad(owner, Vector3{}, Vector3{}),
-        mesh(mesh) {
+    BVHTree* bvhTree = nullptr;
 
-        if (!mesh.vertices.empty()) {
-            Vector3 min = mesh.vertices[0].position;
-            Vector3 max = mesh.vertices[0].position;
-            for (size_t i = 1; i < mesh.vertices.size(); i++) {
-                min = glm::min(min, mesh.vertices[i].position);
-                max = glm::max(max, mesh.vertices[i].position);
-            }
-            broad = AABBCollider(owner, min, max - min);
-        }
-    }
+    StaticMeshCollider(Object* owner, Mesh& mesh);
+
+    ~StaticMeshCollider();
 
     virtual int GetType() override { return 4; }
     CollisionResult CollidesWith(Collider* other) override;
