@@ -80,7 +80,7 @@ module.exports = class UICanvas {
         if (weapon === undefined) return;
         if (weapon.blts === undefined) return;
         const bullets = weapon.blts;
-        const magazines = weapon.mags;
+        const inventoryAmmo = weapon.inventoryAmmo;
 
         this.context.fillStyle = "black";
         drawRoundedRectangle(this.context, width - 250, height - 150, 200, 100, 10, true, false);
@@ -89,7 +89,7 @@ module.exports = class UICanvas {
         this.context.textBaseline = "middle";
         this.context.textAlign = "center";
         this.context.fillStyle = "white";
-        this.context.fillText(`${bullets}/${magazines}`, width - 150, height - 100);
+        this.context.fillText(`${bullets}/${inventoryAmmo}`, width - 150, height - 100);
 
         const percentageReload = weapon.tsr / weapon.rlt;
         if (percentageReload > 0) {
@@ -101,7 +101,8 @@ module.exports = class UICanvas {
     DrawCrosshair(player, width, height) {
         if (!player.w) return;
         const weapon = this.clientState.GetObject(player.w);
-        if (weapon.spread === undefined) return 0;
+        if (weapon.spread === undefined) return;
+        if (weapon.ads) return;
         // Draw Crosshair
         const cwidth = 2;
         const clength = 15;
@@ -234,6 +235,14 @@ module.exports = class UICanvas {
         this.DrawGraph("TickTime", this.clientState.performance.tickTime, 20, 180);
 
 
+        Object.keys(this.clientState.animations).forEach(k => {
+            if (!this.clientState.animations[k].draw(this.context, this.clientState)) {
+                delete this.clientState.animations[k];
+            }
+        });
+
+        // console.log(player);
+        // debugger;
         this.DrawWeapon(player, width, height);
         this.DrawCrosshair(player, width, height);
 

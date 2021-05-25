@@ -1,6 +1,5 @@
 #include "weapon.h"
 #include "player.h"
-#include "bullet.h"
 #include "game.h"
 #include "logging.h"
 
@@ -51,8 +50,23 @@ void WeaponObject::Tick(Time time) {
     if (attachedTo) {
         // Attached!
         SetTag(Tag::NO_GRAVITY);
+        if (attachedTo->GetCurrentWeapon() == this) {
+            SetScale(Vector3(1));
+        }
+        else {
+            SetScale(Vector3(0));
+        }
+        SetPosition(attachedTo->GetAttachmentPoint(attachmentPoint));
+        SetVelocity(attachedTo->GetVelocity());
+        SetRotation(attachedTo->GetRotationWithPitch());
+        #ifdef BUILD_CLIENT
+            clientPosition = GetPosition();
+            clientRotation = GetRotation();
+        #endif
+        isDirty = true;
     }
     else {
+        SetScale(Vector3(1));
         RemoveTag(Tag::NO_GRAVITY);
     }
 }
@@ -91,6 +105,7 @@ void WeaponWithCooldown::Tick(Time time) {
     }
     // LOG_DEBUG("LUT: " << lastUseTime << " CD: " << currentCooldown);
 #endif
+
 }
 
 void WeaponWithCooldown::CooldownStart(Time time) {

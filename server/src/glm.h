@@ -11,6 +11,7 @@
 #include "glm/gtx/euler_angles.hpp"
 #include "glm/gtx/transform.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/vector_angle.hpp"
 
 #include <type_traits>
 

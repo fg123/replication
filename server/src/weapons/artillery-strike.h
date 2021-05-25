@@ -8,18 +8,20 @@ class ArtilleryObject : public Object {
     int damage = 100;
 
     Object* indicatorObject;
-
+    ObjectID playerId;
 public:
     CLASS_CREATE(ArtilleryObject)
 
-    ArtilleryObject(Game& game) : ArtilleryObject(game, nullptr) {}
+    ArtilleryObject(Game& game) : ArtilleryObject(game, 0, nullptr) {}
 
-    ArtilleryObject(Game& game, Object* indicator) : Object(game), indicatorObject(indicator) {
+    ArtilleryObject(Game& game, ObjectID playerId, Object* indicator) : Object(game),
+        indicatorObject(indicator), playerId(playerId) {
+
         collisionExclusion |= (uint64_t) Tag::WEAPON;
         collisionExclusion |= (uint64_t) Tag::PLAYER;
 
         SetModel(game.GetModel("Artillery.obj"));
-        GenerateAABBCollidersFromModel(this);
+        GenerateOBBCollidersFromModel(this);
 
         airFriction = Vector3(1, 1, 1);
     }
@@ -30,7 +32,7 @@ public:
             return;
         }
         #ifdef BUILD_SERVER
-            ExplosionObject* explode = new ExplosionObject(game, damageRange, damage);
+            ExplosionObject* explode = new ExplosionObject(game, playerId, damageRange, damage);
             explode->SetPosition(GetPosition());
             game.AddObject(explode);
             game.DestroyObject(GetId());
@@ -43,15 +45,16 @@ CLASS_REGISTER(ArtilleryObject);
 
 class ArtilleryIndObject : public Object {
     bool spawned = false;
+    ObjectID playerId;
 public:
     CLASS_CREATE(ArtilleryIndObject)
 
-    ArtilleryIndObject(Game& game) : ArtilleryIndObject(game, Vector3()) {}
-    ArtilleryIndObject(Game& game, Vector3 position) : Object(game) {
+    ArtilleryIndObject(Game& game) : ArtilleryIndObject(game, 0, Vector3()) {}
+    ArtilleryIndObject(Game& game, ObjectID playerId, Vector3 position) : Object(game), playerId(playerId) {
         SetPosition(position);
 
         SetModel(game.GetModel("ArtilleryIndicator.obj"));
-        ArtilleryObject* proj = new ArtilleryObject(game, this);
+        ArtilleryObject* proj = new ArtilleryObject(game, playerId, this);
         proj->SetPosition(Vector3(GetPosition().x, 100.0f, GetPosition().z));
         game.AddObject(proj);
     }
@@ -77,7 +80,7 @@ public:
 
         RayCastResult result = game.RayCastInWorld(request);
         if (result.isHit) {
-            ArtilleryIndObject* indicator = new ArtilleryIndObject(game, result.hitLocation);
+            ArtilleryIndObject* indicator = new ArtilleryIndObject(game, attachedTo->GetId(), result.hitLocation);
             indicator->SetRotation(DirectionToQuaternion(result.hitNormal));
             game.PlayAudio("incoming.wav", 1.0f, attachedTo);
 

@@ -1,5 +1,4 @@
-#ifndef INPUT_HOLD_THROW_H
-#define INPUT_HOLD_THROW_H
+#pragma once
 
 #include "weapon.h"
 #include "game.h"
@@ -9,7 +8,8 @@ class ThrownProjectile : public Object {
 public:
     // Could be null if the weapon / person doesn't exist anymore
     WeaponObject* firedBy = nullptr;
-    ThrownProjectile(Game& game) : Object(game) {}
+    ObjectID playerId;
+    ThrownProjectile(Game& game, ObjectID playerId) : Object(game), playerId(playerId) {}
     void SetFiredBy(WeaponObject* obj) { firedBy = obj; }
 
     virtual void Serialize(JSONWriter& obj) override {
@@ -99,7 +99,7 @@ public:
         Vector3 startPosition = GetPosition() + GetLookDirection() * 1.0f;
 
         #ifdef BUILD_SERVER
-            Projectile* proj = new Projectile(game);
+            Projectile* proj = new Projectile(game, attachedTo->GetId());
             proj->SetFiredBy(this);
             proj->SetPosition(startPosition);
             float totalPower = (power * (powerMax - powerMin)) + powerMin;
@@ -118,5 +118,3 @@ public:
         }
     }
 };
-
-#endif

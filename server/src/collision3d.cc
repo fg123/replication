@@ -16,68 +16,100 @@ std::ostream& operator<<(std::ostream& out, const CollisionResult& result) {
     return out;
 }
 
-CollisionResult AABBAndAABBCollideNoRotation(AABBCollider* rect1, AABBCollider* rect2) {
-    Vector3 position = rect1->GetPosition();
-    Vector3 otherPos = rect2->GetPosition();
+bool IsPointInTriangle(const Vector3& point, const Vector3& t1, const Vector3& t2, const Vector3& t3) {
+    // Lets define some local variables, we can change these
+    // without affecting the references passed in
+    Vector3 p = point;
+    Vector3 a = t1;
+    Vector3 b = t2;
+    Vector3 c = t3;
 
-    float x1 = position.x;
-    float x2 = otherPos.x;
-    float y1 = position.y;
-    float y2 = otherPos.y;
-    float z1 = position.z;
-    float z2 = otherPos.z;
+    // Move the triangle so that the point becomes the
+    // triangles origin
+    a -= p;
+    b -= p;
+    c -= p;
+    // Compute the normal vectors for triangles:
+    // u = normal of PBC
+    // v = normal of PCA
+    // w = normal of PAB
 
-    float w1 = rect1->size.x;
-    float w2 = rect2->size.x;
-    float h1 = rect1->size.y;
-    float h2 = rect2->size.y;
-    float d1 = rect1->size.z;
-    float d2 = rect2->size.z;
+    Vector3 u = glm::cross(b, c);
+    Vector3 v = glm::cross(c, a);
+    Vector3 w = glm::cross(a, b);
 
-    bool leftCollide = (x1 < x2 + w2);
-    bool rightCollide = (x1 + w1 > x2);
-    bool topCollide = (y1 < y2 + h2);
-    bool bottomCollide = (y1 + h1 > y2);
-    bool frontCollide = (z1 < z2 + d2);
-    bool backCollide = (z1 + d1 > z2);
-
-    Vector3 myCenter    (x1 + w1 / 2.0, y1 + h1 / 2.0, z1 + d1 / 2.0);
-    Vector3 otherCenter (x2 + w2 / 2.0, y2 + h2 / 2.0, z2 + d2 / 2.0);
-
-    bool biasX = myCenter.x < otherCenter.x;
-    bool biasY = myCenter.y < otherCenter.y;
-    bool biasZ = myCenter.z < otherCenter.z;
-
-    // LOG_DEBUG("Collides " << leftCollide << " " << rightCollide <<
-    //                   " " << topCollide << " " << bottomCollide <<
-    //                   " " << frontCollide << " " << backCollide);
-    CollisionResult r;
-    r.isColliding = (leftCollide && rightCollide) && (topCollide && bottomCollide) && (frontCollide && backCollide);
-    if (r.isColliding) {
-
-        r.collisionDifference.x = !biasX ? x2 + w2 - x1 : -(x1 + w1 - x2);
-        r.collisionDifference.y = !biasY ? y2 + h2 - y1 : -(y1 + h1 - y2);
-        r.collisionDifference.z = !biasZ ? z2 + d2 - z1 : -(z1 + d1 - z2);
-
-        // Each of the collision differences allow for the box to completely
-        //   come back out. Choose the smallest magnitude to resolve
-        if (glm::abs(r.collisionDifference.x) < glm::abs(r.collisionDifference.y) &&
-            glm::abs(r.collisionDifference.x) < glm::abs(r.collisionDifference.z)) {
-            r.collisionDifference.y = 0;
-            r.collisionDifference.z = 0;
-        }
-        else if (glm::abs(r.collisionDifference.y) < glm::abs(r.collisionDifference.x) &&
-                 glm::abs(r.collisionDifference.y) < glm::abs(r.collisionDifference.z)) {
-            r.collisionDifference.x = 0;
-            r.collisionDifference.z = 0;
-        }
-        else if (glm::abs(r.collisionDifference.z) < glm::abs(r.collisionDifference.x) &&
-                 glm::abs(r.collisionDifference.z) < glm::abs(r.collisionDifference.y)) {
-            r.collisionDifference.x = 0;
-            r.collisionDifference.y = 0;
-        }
+    // Test to see if the normals are facing
+    // the same direction, return false if not
+    if (glm::dot(u, v) < 0.0f) {
+        return false;
     }
-    return r;
+
+    if (glm::dot(u, w) < 0.0f) {
+        return false;
+    }
+
+    // All normals facing the same way, return true
+    return true;
+}
+
+/* Adapted from:
+** File: PolyRoots.c
+** Purpose: Find the roots of polynomials of degree 4 or less.
+** Author:  James Painter
+** Last Modified: 27 January 1988
+**
+**  Notes:  Stability of the solution is a major consideration here.
+**  See:      ``Solving Quartics and Cubics for Graphics'',
+**            Don Herbison-Evans
+**            University of Waterloo Research Report
+**            CS-86-56,  November, 1986
+**
+** Copyright (c), 1987 GRAIL, University of Washington
+*/
+size_t QuadraticRootsSolver(float A, float B, float C, float roots[2]) {
+	float D;
+	float q;
+
+	if (A == 0) {
+		if (B == 0) {
+			return 0;
+		}
+        else {
+			roots[0] = -C / B;
+			return 1;
+		}
+	}
+    else {
+		/*  Compute the discrimanant D=b^2 - 4ac */
+		D = B * B - 4 * A * C;
+		if (D < 0) {
+			return 0;
+		} else {
+			/* Two real roots */
+			q = -(B + glm::sign(B) * glm::sqrt(D)) / 2.0f;
+			roots[0] = q / A;
+			if (q != 0) {
+				roots[1] = C / q;
+			}
+            else {
+				roots[1] = roots[0];
+			}
+			return 2;
+		}
+	}
+}
+
+bool AABBAndAABBCollide(const AABB& a, const AABB& b) {
+    bool leftCollide = (a.ptMin.x < b.ptMax.x);
+    bool rightCollide = (a.ptMax.x > b.ptMin.x);
+
+    bool topCollide = (a.ptMin.y < b.ptMax.y);
+    bool bottomCollide = (a.ptMax.y > b.ptMin.y);
+
+    bool frontCollide = (a.ptMin.z < b.ptMax.z);
+    bool backCollide = (a.ptMax.z > b.ptMin.z);
+
+    return (leftCollide && rightCollide) && (topCollide && bottomCollide) && (frontCollide && backCollide);
 }
 
 void GenerateAABBRotatedCorners(Matrix4 transform, Vector3 size, Vector3* corners) {
@@ -94,13 +126,15 @@ void GenerateAABBRotatedCorners(Matrix4 transform, Vector3 size, Vector3* corner
     corners[7] = Vector3(transform * Vector4(x, y, z, 1));
 }
 
-CollisionResult AABBAndAABBCollide(AABBCollider* rect1, AABBCollider* rect2) {
+AABB OBBCollider::GetBroadAABB() {
+    Vector3 arr[8];
+    GenerateAABBRotatedCorners(GetWorldTransform(), size, arr);
+    return AABB {arr, 8};
+}
+
+CollisionResult OBBAndOBBCollide(OBBCollider* rect1, OBBCollider* rect2) {
     Quaternion r1Rotation = rect1->GetRotation();
     Quaternion r2Rotation = rect2->GetRotation();
-    if (IsZero(r1Rotation) && IsZero(r2Rotation)) {
-        // Fast Path
-        return AABBAndAABBCollideNoRotation(rect1, rect2);
-    }
     // Apply SAT
     // 3 normals for each box
     Vector3 ax1 = r1Rotation * Vector::Up;
@@ -157,87 +191,195 @@ CollisionResult SphereAndSphereCollide(SphereCollider* c1, SphereCollider* c2) {
     r.isColliding = distance < radii;
     if (r.isColliding) {
         Vector3 difference = glm::normalize(c2->GetPosition() - c1->GetPosition());
-        r.collisionDifference = difference * (radii - distance);
+        r.collisionDifference = -difference * (radii - distance);
     }
     return r;
 }
 
-Vector3 AABBSurfaceNormal(AABBCollider* rect, Vector3 point) {
-    Vector3 pt_min = rect->GetPosition();
-    Vector3 pt_max = rect->GetPosition() + rect->size;
-    Vector3 hitVec = point - ((pt_min + pt_max) / 2.0f);
-    Vector3 d = glm::abs(pt_min - pt_max) / 2.0f;
+Vector3 AABBSurfaceNormal(AABB& rect, Vector3 point) {
+    Vector3 hitVec = point - ((rect.ptMin + rect.ptMax) / 2.0f);
+    Vector3 d = glm::abs(rect.ptMin - rect.ptMax) / 2.0f;
     Vector3 norm = (hitVec / d) * 1.00001f;
     return glm::normalize(Vector3((int)norm.x, (int)norm.y, (int)norm.z));
 }
 
-bool CheckAABBAndSphereCollide(const Vector3& rpos, const Vector3& rsize,
-    const Vector3& cpos, const float& rad) {
-
-    Vector3 rectHalf = rsize / 2.0f;
-    Vector3 rectCenter = rpos + rectHalf;
-    Vector3 difference = cpos - rectCenter;
-    Vector3 closest = glm::clamp(difference, -rectHalf, rectHalf);
-
-    float distanceToClosest = glm::length(closest);
-    float distanceToCircle = glm::length(difference);
-
-    return distanceToCircle < distanceToClosest + rad;
-}
-
-CollisionResult AABBAndSphereCollide(AABBCollider* rect, SphereCollider* circle) {
-    Vector3 rectPosition = rect->GetPosition();
-    Vector3 circPosition = circle->GetPosition();
-
+CollisionResult AABBAndSphereCollide(Vector3 rectPosition, Vector3 rectSize,
+    Vector3 circPosition, float radius) {
+    // LOG_DEBUG("AABB AND SPHERE COLLIDE");
     // Find a position from
-    Vector3 rectHalf = rect->size / 2.0f;
+    Vector3 rectHalf = rectSize / 2.0f;
     Vector3 rectCenter = rectPosition + rectHalf;
 
     // get difference vector between both centers
     Vector3 difference = circPosition - rectCenter;
 
     Vector3 clamped = glm::clamp(difference, -rectHalf, rectHalf);
-    LOG_DEBUG("Clamped " << clamped);
     // add clamped value to AABB_center and we get the value of box closest to circle
     Vector3 closest = rectCenter + clamped;
-    if (IsPointInAABB(rectPosition, rect->size, circPosition)) {
-        closest = circPosition;
+    Vector3 offset = circPosition - closest;
+    // LOG_DEBUG("Closest " << closest);
+    // LOG_DEBUG("Offset " << offset);
+    if (!IsPointInAABB(rectPosition, rectSize, circPosition)) {
+        CollisionResult r;
+        r.isColliding = glm::length(offset) < radius;
+        if (r.isColliding) {
+            r.collisionDifference = (radius - glm::length(offset)) *
+                glm::normalize(offset);
+            // LOG_DEBUG("Difference " << r.collisionDifference);
+        }
+        return r;
     }
-    LOG_DEBUG("Closest " << closest);
-    LOG_DEBUG("Circ Position " << circPosition);
-    // retrieve vector between center circle and closest point AABB and check if length <= radius
-    // LOG_DEBUG("Difference " << closest << " " << circPosition);
-
-    // We want the circle to be at closest + radius * surface normal there
-    Vector3 normal = AABBSurfaceNormal(rect, closest);
-    // Vector3 desired = closest + glm::normalize() * circle->radius;
-
-    float distanceToClosest = glm::length(clamped);
-    float distanceToCircle = glm::length(difference);
-
-    bool colliding = distanceToCircle < distanceToClosest + circle->radius;
-
+    // Inside the rectangle
+    // LOG_DEBUG("Point inside");
     CollisionResult r;
-    r.isColliding = colliding;
+    r.isColliding = true;
+
+    // Find the shortest way out, clamp to each plane
+    Vector3 points[] = {
+        Vector3(rectHalf.x + radius, difference.y, difference.z),
+        Vector3(-rectHalf.x - radius, difference.y, difference.z),
+        Vector3(difference.x, rectHalf.y + radius, difference.z),
+        Vector3(difference.x, -rectHalf.y - radius, difference.z),
+        Vector3(difference.x, difference.y, rectHalf.z + radius),
+        Vector3(difference.x, difference.y, -rectHalf.z - radius)
+    };
+
+    int min = 0;
+    for (int i = 1; i < 6; i++) {
+        if (glm::distance(difference, points[i]) < glm::distance(difference, points[min])) {
+            min = i;
+        }
+    }
+
+    Vector3 desiredSphereLocation = rectCenter + points[min];
+    // LOG_DEBUG("Desired Location " << desiredSphereLocation);
+    r.collisionDifference = desiredSphereLocation - circPosition;
+    return r;
+}
+
+CollisionResult OBBAndSphereCollide(OBBCollider* rect, SphereCollider* circle) {
+    Matrix4 transform = rect->GetWorldTransform();
+
+    Matrix4 inverse = glm::inverse(transform);
+
+    // LOG_DEBUG("Rectangle: " << rect->GetPosition() << " " << rect->size);
+    // Vector3 points[8];
+    // GenerateAABBRotatedCorners(transform, rect->size, points);
+    // LOG_DEBUG("Points:");
+    // for (size_t i = 0; i < 8; i++) {
+    //     LOG_DEBUG(" - " << points[i]);
+    // }
+    // LOG_DEBUG("Post Inverse Transform: ");
+    // for (size_t i = 0; i < 8; i++) {
+    //     // Vector4 result = inverse * Vector4(points[i], 1);
+    //     LOG_DEBUG(" - " << Vector3(inverse * Vector4(points[i], 1)));
+    // }
+
+    // LOG_DEBUG("Transform " << transform);
+    // LOG_DEBUG("Inverse " << inverse);
+
+    // Bring Circle into Local Space
+    Vector3 circPosition = Vector3(inverse * Vector4(circle->GetPosition(), 1));
+    CollisionResult r = AABBAndSphereCollide(Vector3(0, 0, 0), rect->size, circPosition, circle->radius);
     if (r.isColliding) {
-        // LOG_DEBUG("Circ Rect " << difference << " " << overlapRange);
-        // r.collisionDifference = circPosition - desired;
+        r.collisionDifference = Vector3(transform * Vector4(r.collisionDifference, 0));
     }
     return r;
 }
 
-CollisionResult AABBAndMeshCollide(AABBCollider* rect, StaticMeshCollider* collider) {
+inline Vector3 ClosestPointOnPlane(const Vector3& planeNorm, float planeDist, const Vector3& point) {
+    float distance = glm::dot(planeNorm, point) - planeDist;
+    return point - distance * planeNorm;
+}
+
+inline Vector3 ClosestPointOnLineSegment(const Vector3& a, const Vector3& b, const Vector3& point) {
+    float t = glm::dot(point - a, b - a) / glm::dot(b - a, b - a);
+    t = glm::clamp(t, 0.f, 1.f);
+    return a + t * (b - a);
+}
+
+inline Vector3 ClosestPointOnTriangle(BVHTree::Triangle* t, const Vector3& point, Vector3& planePoint) {
+    // Construct a plane from triangle
+    Vector3 norm = glm::normalize(t->norm);
+    float distance = glm::dot(norm, t->a);
+    planePoint = ClosestPointOnPlane(norm, distance, point);
+    if (IsPointInTriangle(planePoint, t->a, t->b, t->c)) {
+        return planePoint;
+    }
+
+    // Closest Point on Each Edge
+    Vector3 c1 = ClosestPointOnLineSegment(t->a, t->b, point);
+    Vector3 c2 = ClosestPointOnLineSegment(t->b, t->c, point);
+    Vector3 c3 = ClosestPointOnLineSegment(t->c, t->a, point);
+
+    float mag1 = glm::distance(point, c1);
+    float mag2 = glm::distance(point, c2);
+    float mag3 = glm::distance(point, c3);
+
+    if (mag1 < mag2 && mag1 < mag3) return c1;
+    if (mag2 < mag1 && mag2 < mag3) return c2;
+    return c3;
+}
+
+
+CollisionResult SphereAndMeshCollide(SphereCollider* sphere, StaticMeshCollider* collider) {
+    if (!collider->bvhTree) {
+        return CollisionResult{};
+    }
+    Vector3 spherePosition = sphere->GetPosition();
+
+    AABB broadRect = sphere->GetBroadAABB();
+    // BVH Find Triangles to Test
+    std::queue<BVHTree*> checkQueue;
+    checkQueue.emplace(collider->bvhTree);
+
+    float minOverlap = INFINITY;
+    Vector3 reverseVelocity = -collider->owner->GetVelocity();
+
+    CollisionResult result;
+
+    while (!checkQueue.empty()) {
+        BVHTree* currNode = checkQueue.front();
+        checkQueue.pop();
+        if (currNode->tris.empty()) {
+            // Internal Node
+            if (AABBAndAABBCollide(broadRect, currNode->collider)) {
+                for (const auto& p : currNode->children) {
+                    checkQueue.push(p);
+                }
+            }
+        }
+        else {
+            for (const auto& tri : currNode->tris) {
+                Vector3 planePoint;
+                Vector3 point = ClosestPointOnTriangle(tri, spherePosition, planePoint);
+                float dist = glm::distance(point, sphere->GetPosition());
+                if (dist < sphere->radius) {
+                    // To move it out we move it from planePoint since that will allow
+                    //   us to move it away from the triangle
+                    float penetration = sphere->radius - glm::distance(planePoint, spherePosition);
+                    if (!IsZero(penetration) && penetration < minOverlap) {
+                        result.isColliding = true;
+                        minOverlap = penetration;
+                        result.collisionDifference = tri->norm * penetration;
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+
+CollisionResult OBBAndMeshCollide(OBBCollider* rect, StaticMeshCollider* collider) {
     // #ifdef BUILD_SERVER
     //     LOG_DEBUG("Start AABB & Mesh Collide " << collider->mesh.name);
     // #endif
-    if (!AABBAndAABBCollide(rect, &collider->broad).isColliding) {
-        return CollisionResult{};
-    }
     if (!collider->bvhTree) {
         return CollisionResult{};
     }
     // Use BVH Tree to tell us which triangles to test
 
+    AABB broadRect = rect->GetBroadAABB();
     Quaternion r1Rotation = rect->GetRotation();
     // LOG_DEBUG("AABB Mesh Collide");
 
@@ -262,7 +404,7 @@ CollisionResult AABBAndMeshCollide(AABBCollider* rect, StaticMeshCollider* colli
         checkQueue.pop();
         if (currNode->tris.empty()) {
             // Internal Node
-            if (AABBAndAABBCollide(rect, &currNode->collider).isColliding) {
+            if (AABBAndAABBCollide(broadRect, currNode->collider)) {
                 for (const auto& p : currNode->children) {
                     checkQueue.push(p);
                 }
@@ -311,7 +453,6 @@ CollisionResult AABBAndMeshCollide(AABBCollider* rect, StaticMeshCollider* colli
                     // LOG_DEBUG("Axes " << axes[i] << " overlap " << overlap);
                     // #endif
 
-                    // Prioritize normals in the same direction as reverse velocity
                     if (i == 12) {
                         float overlapToUse = shape2Min - shape1Min;
                         if (!IsZero(overlapToUse) &&
@@ -338,12 +479,39 @@ CollisionResult AABBAndMeshCollide(AABBCollider* rect, StaticMeshCollider* colli
     // if (result.isColliding) {
     //     LOG_DEBUG("=== Collision Diff " << minOverlapNormal << " " << minOverlap);
     // }
+    // if (result.isColliding) {
+    //     float factor1 = result.collisionDifference.x / reverseVelocity.x;
+
+    //     if (IsZero(reverseVelocity.x)) reverseVelocity.x = 1;
+    //     if (IsZero(reverseVelocity.y)) reverseVelocity.y = 1;
+    //     if (IsZero(reverseVelocity.z)) reverseVelocity.z = 1;
+
+    //     Vector3 factor = glm::max(Vector3(0, 0, 0), result.collisionDifference / reverseVelocity);
+    //     float f = glm::max(factor.x, factor.y, factor.z);
+    //     result.collisionDifference = f * reverseVelocity;
+
+    // }
+    // if (result.isColliding) {
+    //     if (!IsZero(reverseVelocity.x) && !SameSign(reverseVelocity.x, result.collisionDifference.x)) {
+    //         result.collisionDifference.x = 0;
+    //     }
+    //     if (!IsZero(reverseVelocity.y) && !SameSign(reverseVelocity.y, result.collisionDifference.y)) {
+    //         result.collisionDifference.y = 0;
+    //     }
+    //     if (!IsZero(reverseVelocity.z) && !SameSign(reverseVelocity.z, result.collisionDifference.z)) {
+    //         result.collisionDifference.z = 0;
+    //     }
+    // }
     return result;
 }
 
 CollisionResult TwoPhaseCollider::CollidesWith(Collider* mesh) {
     CollisionResult finalResult;
     for (auto& colliderOther: children) {
+        // AABB Early Exit Here
+        if (!AABBAndAABBCollide(colliderOther->GetBroadAABB(), mesh->GetBroadAABB())) {
+            continue;
+        }
         CollisionResult r = colliderOther->CollidesWith(mesh);
         if (r.isColliding) {
             finalResult.isColliding = true;
@@ -365,30 +533,33 @@ CollisionResult TwoPhaseAndTwoPhaseCollide(TwoPhaseCollider* tp1, TwoPhaseCollid
     return finalResult;
 }
 
-CollisionResult AABBCollider::CollidesWith(Collider* other) {
-    if (other->GetType() == 3) {
-        CollisionResult r = AABBAndSphereCollide(this, static_cast<SphereCollider*>(other));
+CollisionResult OBBCollider::CollidesWith(Collider* other) {
+    if (other->GetType() == ColliderType::SPHERE) {
+        CollisionResult r = OBBAndSphereCollide(this, static_cast<SphereCollider*>(other));
         r.collisionDifference *= -1;
         return r;
     }
-    else if (other->GetType() == 2) {
-        // AABB Collider vs AABB Collider
-        return AABBAndAABBCollide(this, static_cast<AABBCollider*>(other));
+    else if (other->GetType() == ColliderType::OBB) {
+        return OBBAndOBBCollide(this, static_cast<OBBCollider*>(other));
     }
-    else if (other->GetType() == 4) {
+    else if (other->GetType() == ColliderType::STATIC_MESH) {
         // AABB Collider vs Mesh
-        return AABBAndMeshCollide(this, static_cast<StaticMeshCollider*>(other));
+        return OBBAndMeshCollide(this, static_cast<StaticMeshCollider*>(other));
     }
+    return CollisionResult{};
 }
 
 CollisionResult SphereCollider::CollidesWith(Collider* other) {
-    if (other->GetType() == 2) {
-        return AABBAndSphereCollide(static_cast<AABBCollider*>(other), this);
+    if (other->GetType() == ColliderType::OBB) {
+        return OBBAndSphereCollide(static_cast<OBBCollider*>(other), this);
     }
-    else if (other->GetType() == 3) {
+    else if (other->GetType() == ColliderType::SPHERE) {
         return SphereAndSphereCollide(this, static_cast<SphereCollider*>(other));
     }
-    // Mesh?
+    else if (other->GetType() == ColliderType::STATIC_MESH) {
+        return SphereAndMeshCollide(this, static_cast<StaticMeshCollider*>(other));
+    }
+    return CollisionResult{};
 }
 
 CollisionResult StaticMeshCollider::CollidesWith(Collider* other) {
@@ -479,18 +650,16 @@ CollisionResult TwoPhaseCollider::CollidesWith(TwoPhaseCollider* other) {
     return TwoPhaseAndTwoPhaseCollide(this, other);
 }
 
-bool AABBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
-    Vector3 pt_min = GetPosition();
-    Vector3 pt_max = GetPosition() + size;
+bool AABB::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
     Vector3 invDirection = 1.0f / ray.direction;
 
     // r.org is origin of ray
-    float t1 = (pt_min.x - ray.startPoint.x) * invDirection.x;
-    float t2 = (pt_max.x - ray.startPoint.x) * invDirection.x;
-    float t3 = (pt_min.y - ray.startPoint.y) * invDirection.y;
-    float t4 = (pt_max.y - ray.startPoint.y) * invDirection.y;
-    float t5 = (pt_min.z - ray.startPoint.z) * invDirection.z;
-    float t6 = (pt_max.z - ray.startPoint.z) * invDirection.z;
+    float t1 = (ptMin.x - ray.startPoint.x) * invDirection.x;
+    float t2 = (ptMax.x - ray.startPoint.x) * invDirection.x;
+    float t3 = (ptMin.y - ray.startPoint.y) * invDirection.y;
+    float t4 = (ptMax.y - ray.startPoint.y) * invDirection.y;
+    float t5 = (ptMin.z - ray.startPoint.z) * invDirection.z;
+    float t6 = (ptMax.z - ray.startPoint.z) * invDirection.z;
 
     float tmin = glm::max(glm::max(glm::min(t1, t2), glm::min(t3, t4)), glm::min(t5, t6));
     float tmax = glm::min(glm::min(glm::max(t1, t2), glm::max(t3, t4)), glm::max(t5, t6));
@@ -513,66 +682,82 @@ bool AABBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
     result.hitLocation = ray.startPoint + ray.direction * tmin;
     result.zDepth = tmin;
 
-    result.hitNormal = AABBSurfaceNormal(this, result.hitLocation);
+    result.hitNormal = AABBSurfaceNormal(*this, result.hitLocation);
     // LOG_DEBUG("Hit Normal " << result.hitNormal);
     return true;
 }
 
-// void TwoPhaseCollider::Serialize(JSONWriter& obj) {
-//     Replicable::Serialize(obj);
-//     obj.Key("c");
-//     obj.StartArray();
-//     // LOG_DEBUG("Colliders:");
-//     for (auto& collider : children) {
-//         obj.StartObject();
-//         collider->Serialize(obj);
-//         obj.EndObject();
-//     }
-//     obj.EndArray();
-// }
+bool OBBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+    Matrix4 transform = GetWorldTransform();
+    Matrix4 inverse = glm::inverse(transform);
 
-// void TwoPhaseCollider::ProcessReplication(json& object) {
-//     Replicable::ProcessReplication(object);
-//     if (children.size() != object["c"].GetArray().Size()) {
-//         // LOG_WARN("Clearing colliders");
-//         for (auto& collider : children) {
-//             delete collider;
-//         }
-//         children.clear();
-//     }
-//     if (children.empty()) {
-//         for (json& colliderInfo : object["c"].GetArray()) {
-//             // if (colliderInfo["t"].GetInt() == 0) {
-//             //     children.push_back(new RectangleCollider(owner, Vector3(), Vector3()));
-//             // }
-//             // else if (colliderInfo["t"].GetInt() == 1) {
-//             //     children.push_back(new CircleCollider(owner, Vector3(), 0));
-//             // }
-//             // else
-//             if (colliderInfo["t"].GetInt() == 2) {
-//                 children.push_back(new AABBCollider(owner, Vector3(), Vector3()));
-//             }
-//             else if (colliderInfo["t"].GetInt() == 3) {
-//                 children.push_back(new SphereCollider(owner, Vector3(), 0));
-//             }
-//             else if (colliderInfo["t"].GetInt() == 4) {
-//                 children.push_back(new MeshCollider(owner, nullptr));
-//             }
-//         }
-//     }
-//     size_t i = 0;
-//     for (json& colliderInfo : object["c"].GetArray()) {
-//         children[i]->ProcessReplication(colliderInfo);
-//         i += 1;
-//         if (i >= children.size()) {
-//             break;
-//         }
-//     }
-// }
+    // Bring Ray into Local Space
+    RayCastRequest newRay {ray};
+    newRay.startPoint = Vector3(inverse * Vector4(ray.startPoint, 1));
+    newRay.direction = Vector3(inverse * Vector4(ray.direction, 0));
+    RayCastResult newResult;
+    if (AABB(Vector3(0, 0, 0), size).CollidesWith(newRay, newResult)) {
+        newResult.hitLocation = Vector3(transform * Vector4(newResult.hitLocation, 1));
+        newResult.hitNormal = Vector3(glm::transpose(inverse) * Vector4(newResult.hitNormal, 0));
+        newResult.zDepth = glm::distance(newResult.hitLocation, ray.startPoint);
+        if (!result.isHit || newResult.zDepth < result.zDepth) {
+            result = newResult;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SphereCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+    const Vector3& d = ray.direction;
+    const Vector3& e = ray.startPoint;
+    const Vector3& c = GetPosition();
+    const Vector3 eminusc = e - c;
+    float roots[2];
+    int answers = QuadraticRootsSolver(glm::dot(d, d), 2 * glm::dot(d, eminusc), glm::dot(eminusc, eminusc) - (radius * radius), roots);
+
+    // Only keep positive answers
+    if (answers == 2 && roots[0] < 0.f) {
+        answers -= 1;
+        roots[0] = roots[1];
+    }
+
+    if (answers == 1 && roots[0] < 0.f) {
+        answers = 0;
+    }
+
+    if (answers == 0) {
+        return false;
+    }
+
+    if (answers == 2) {
+        // Choose smallest one
+        answers = 1;
+        roots[0] = glm::min(roots[0], roots[1]);
+    }
+
+    if (answers == 1 && roots[0] >= 0.f) {
+        // One Root
+        if (result.isHit && result.zDepth < roots[0]) return false;
+        result.isHit = true;
+        result.zDepth = roots[0];
+        result.hitLocation = e + roots[0] * d;
+        result.hitNormal = glm::normalize(result.hitLocation - c);
+        return true;
+    }
+    return false;
+}
+
+bool CapsuleCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+    return GetBroadAABB().CollidesWith(ray, result);
+}
+
+CollisionResult CapsuleCollider::CollidesWith(Collider* other) {
+    return CollisionResult{};
+}
 
 StaticMeshCollider::StaticMeshCollider(Object* owner, Mesh& mesh) :
     Collider(owner, Vector3{}, Quaternion{}),
-    broad(owner, Vector3{}, Vector3{}),
     mesh(mesh) {
 
     if (!mesh.vertices.empty()) {
@@ -583,7 +768,7 @@ StaticMeshCollider::StaticMeshCollider(Object* owner, Mesh& mesh) :
             max = glm::max(max, mesh.vertices[i].position);
         }
         glm::vec3 bounds = max - min;
-        broad = AABBCollider(owner, min, bounds);
+        broad = AABB(min, max);
 
         int axis = 0;
         if (bounds.y > bounds.x && bounds.y > bounds.z) axis = 1;
@@ -610,21 +795,21 @@ StaticMeshCollider::StaticMeshCollider(Object* owner, Mesh& mesh) :
                 LOG_ERROR("Triangle " << triangle->a << " " << triangle->b <<
                     " " << triangle->c << " was not placed in a BVH volume!");
             }
-            else {
-                AABBCollider& col = triangle->parentVolume->collider;
-                if (!IsPointInAABB(col.position, col.size, triangle->a)) {
-                    LOG_ERROR("A not in bound " << triangle->a);
-                    LOG_ERROR(col.position << " " << col.size);
-                }
-                if (!IsPointInAABB(col.position, col.size, triangle->b)) {
-                    LOG_ERROR("B not in bound " << triangle->b);
-                    LOG_ERROR(col.position << " " << col.size);
-                }
-                if (!IsPointInAABB(col.position, col.size, triangle->c)) {
-                    LOG_ERROR("C not in bound " << triangle->c);
-                    LOG_ERROR(col.position << " " << col.size);
-                }
-            }
+            // else {
+            //     AABB& col = triangle->parentVolume->collider;
+            //     if (!IsPointInAABB(col.position, col.size, triangle->a)) {
+            //         LOG_ERROR("A not in bound " << triangle->a);
+            //         LOG_ERROR(col.position << " " << col.size);
+            //     }
+            //     if (!IsPointInAABB(col.position, col.size, triangle->b)) {
+            //         LOG_ERROR("B not in bound " << triangle->b);
+            //         LOG_ERROR(col.position << " " << col.size);
+            //     }
+            //     if (!IsPointInAABB(col.position, col.size, triangle->c)) {
+            //         LOG_ERROR("C not in bound " << triangle->c);
+            //         LOG_ERROR(col.position << " " << col.size);
+            //     }
+            // }
         }
     }
 }

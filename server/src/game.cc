@@ -13,6 +13,15 @@
 
 #include "static-mesh.h"
 
+#include "collision-test-objects.h"
+
+// Loot
+#include "weapons/grenade-thrower.h"
+#include "weapons/artillery-strike.h"
+#include "weapons/assault-rifle.h"
+#include "weapons/pistol.h"
+#include "ammo.h"
+
 #include <fstream>
 #include <exception>
 
@@ -71,6 +80,28 @@ void Game::LoadMap(std::string mapPath) {
         assetManager.LoadAudio(audioName, audioPath);
     }
     #endif
+
+    // Loot Table / Pool
+    AddObject(new AssaultRifleObject(*this, Vector3(2, 10, 2)));
+    AddObject(new PistolObject(*this, Vector3(2, 10, 4)));
+    AddObject(new GrenadeThrower(*this, Vector3(2, 10, 6)));
+    AddObject(new AmmoObject(*this, Vector3(2, 10, 8)));
+    AddObject(new AmmoObject(*this, Vector3(2, 10, 10)));
+    AddObject(new AmmoObject(*this, Vector3(2, 10, 12)));
+    AddObject(new AmmoObject(*this, Vector3(2, 10, 14)));
+    AddObject(new AmmoObject(*this, Vector3(2, 10, 16)));
+
+    // Collision Testing
+    auto obj1 = new SphereObject(*this);
+    obj1->SetPosition(Vector3(20, 20, 20));
+    obj1->SetIsStatic(true);
+
+    auto obj2 = new BoxObject(*this);
+    obj2->SetPosition(Vector3(25, 20, 25));
+    obj2->SetRotation(DirectionToQuaternion(Vector3(1, 1, 1)));
+    obj2->SetIsStatic(true);
+    AddObject(obj1);
+    AddObject(obj2);
 }
 
 Game::~Game() {
@@ -447,15 +478,13 @@ void Game::HandleCollisions(Object* obj) {
         if (r.isColliding) {
             r.collidedWith = object.second;
             if (!shouldExclude) {
-                collisionResolution += r.collisionDifference;
+                obj->ResolveCollision(r.collisionDifference);
             }
             if (shouldReport) {
                 obj->OnCollide(r);
             }
         }
     }
-    // LOG_DEBUG(collisionResolution);
-    obj->ResolveCollision(collisionResolution);
 }
 
 void Game::ChangeId(ObjectID oldId, ObjectID newId) {
@@ -558,20 +587,11 @@ void Game::RemovePlayer(PlayerSocketData* data) {
 #endif
 
 void Game::GetUnitsInRange(const Vector3& position, float range,
-    bool includeBoundingBox, std::vector<RangeQueryResult>& results) {
-
-    SphereCollider collider { nullptr, position, range };
-
+    std::vector<RangeQueryResult>& results) {
     for (auto& pair : gameObjects) {
         Object* obj = pair.second;
         double actualRange = glm::distance(position, obj->GetPosition());
-        if (includeBoundingBox) {
-            CollisionResult result = obj->CollidesWith(&collider);
-            if (result.isColliding) {
-                results.emplace_back(obj, actualRange);
-            }
-        }
-        else if (actualRange < range) {
+        if (actualRange < range) {
             results.emplace_back(obj, actualRange);
         }
     }

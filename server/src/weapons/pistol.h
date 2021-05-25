@@ -1,9 +1,7 @@
-#ifndef PISTOL_H
-#define PISTOL_H
+#pragma once
 
 #include "gun.h"
 #include "game.h"
-#include "bullet.h"
 
 class PistolObject : public GunBase {
 public:
@@ -13,20 +11,16 @@ public:
     PistolObject(Game& game, Vector3 position) : GunBase(game, position) {
         fireRate = 3;
         magazineSize = 7;
-        magazines = 8;
         bullets = magazineSize;
         damage = 45;
         reloadTime = 1000;
         automaticFire = false;
-        fireOffset = 1;
+        fireOffset = Vector3(0, 0, 1);
+        name = "Wingboy";
 
-    #ifdef BUILD_SERVER
         SetModel(game.GetModel("Pistol.obj"));
-    #endif
-
+        GenerateOBBCollidersFromModel(this);
     }
 };
 
 CLASS_REGISTER(PistolObject);
-
-#endif

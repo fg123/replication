@@ -16,11 +16,55 @@ struct CollisionResult {
 };
 std::ostream& operator<<(std::ostream& out, const CollisionResult& result);
 
+struct AABB {
+    Vector3 ptMin;
+    Vector3 ptMax;
+
+    AABB() {}
+    AABB(const Vector3& ptMin, const Vector3& ptMax) :
+        ptMin(ptMin), ptMax(ptMax) {}
+
+    AABB(const Vector3* arr, size_t size) {
+        if (size == 0) return;
+        Vector3 min = arr[0], max = arr[0];
+
+        for (size_t i = 1; i < size; i++) {
+            min = glm::min(min, arr[i]);
+            max = glm::max(max, arr[i]);
+        }
+        ptMax = max;
+        ptMin = min;
+    }
+
+    static AABB FromPoints(const Vector3& pt1, const Vector3& pt2, const Vector3& pt3) {
+        Vector3 ptMin = glm::min(pt1, pt2, pt3) - 0.01f;
+        Vector3 ptMax = glm::max(pt1, pt2, pt3) + 0.01f;
+        return AABB(ptMin, ptMax);
+    }
+
+    void ExpandToContain(const Vector3& pt) {
+        ptMin = glm::min(ptMin, pt - 0.01f);
+        ptMax = glm::max(ptMax, pt + 0.01f);
+    }
+
+    static AABB FromTwo(AABB& a, AABB& b) {
+        return AABB(glm::min(a.ptMin, b.ptMin), glm::max(a.ptMax, b.ptMax));
+    }
+
+    bool CollidesWith(RayCastRequest& ray, RayCastResult& result);
+};
+
+enum class ColliderType : int {
+    OBB,
+    SPHERE,
+    STATIC_MESH,
+    CAPSULE
+};
+
 struct Collider {
     // Attached to a game object with position offset
     Object* owner;
-    // REPLICATED(Vector3, position, "p");
-    // REPLICATED(Quaternion, rotation, "r");
+
     Vector3 position;
     Quaternion rotation;
 
@@ -29,7 +73,9 @@ public:
         owner(owner), position(position), rotation(rotation) { }
 
     virtual ~Collider() { }
-    virtual int GetType() = 0;
+    virtual ColliderType GetType() = 0;
+
+    virtual AABB GetBroadAABB() = 0;
 
     // Narrow Phase Collision
     virtual CollisionResult CollidesWith(Collider* other) = 0;
@@ -47,9 +93,7 @@ public:
         return result.zDepth < glm::distance(p1, p2);
     }
 
-    virtual bool CollidesWith(RayCastRequest& ray, RayCastResult& result) {
-        throw "Not implemented ray cast!";
-    }
+    virtual bool CollidesWith(RayCastRequest& ray, RayCastResult& result) = 0;
 
     Vector3 GetPosition();
     Quaternion GetRotation();
@@ -57,11 +101,6 @@ public:
     Matrix4 GetWorldTransform();
 
     Object* GetOwner() { return owner; }
-    // virtual void Serialize(JSONWriter& obj) override {
-    //     Replicable::Serialize(obj);
-    //     obj.Key("t");
-    //     obj.Int(GetType());
-    // }
 };
 
 inline bool IsPointInAABB(const Vector3& RectPosition, const Vector3& RectSize, const Vector3& Point) {
@@ -71,40 +110,24 @@ inline bool IsPointInAABB(const Vector3& RectPosition, const Vector3& RectSize, 
         (Point.z > RectPosition.z && Point.z < RectPosition.z + RectSize.z);
 }
 
-struct AABBCollider : public Collider {
+struct OBBCollider : public Collider {
     // REPLICATED(Vector3, size, "s");
     Vector3 size;
 
-    AABBCollider() : AABBCollider(nullptr, Vector3{}, Vector3{}) {}
+    OBBCollider() : OBBCollider(nullptr, Vector3{}, Vector3{}) {}
 
-    AABBCollider(Object* owner, Vector3 position, Vector3 size, Quaternion rotation) :
+    OBBCollider(Object* owner, Vector3 position, Vector3 size, Quaternion rotation) :
         Collider(owner, position, rotation), size(size) {}
 
-    AABBCollider(Object* owner, Vector3 position, Vector3 size) :
-        AABBCollider(owner, position, size, Quaternion{}) {}
+    OBBCollider(Object* owner, Vector3 position, Vector3 size) :
+        OBBCollider(owner, position, size, Quaternion{}) {}
 
-    virtual int GetType() override { return 2; }
+    virtual ColliderType GetType() override { return ColliderType::OBB; }
+
+    virtual AABB GetBroadAABB() override;
+
     CollisionResult CollidesWith(Collider* other) override;
     bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
-
-    static AABBCollider FromPoints(const Vector3& pt1, const Vector3& pt2, const Vector3& pt3) {
-        Vector3 position = glm::min(pt1, pt2, pt3)  - 0.01f;
-        Vector3 size = glm::max(pt1, pt2, pt3) - position + 0.01f;
-        return AABBCollider(nullptr, position, size);
-    }
-
-    void ExpandToContain(const Vector3& pt) {
-        Vector3 oldMax = position + size;
-        position = glm::min(position, pt - 0.01f);
-        size = glm::max(oldMax, pt + 0.01f) - position;
-    }
-
-    static AABBCollider FromTwo(AABBCollider* a, AABBCollider* b) {
-        Vector3 pos = glm::min(a->position, b->position);
-        Vector3 size = glm::max(a->position + a->size, b->position + b->size) - pos;
-
-        return AABBCollider(nullptr, pos, size);
-    }
 };
 
 
@@ -116,12 +139,17 @@ struct SphereCollider : public Collider {
         Collider(owner, position, Quaternion{}),
         radius(radius) {}
 
-    virtual int GetType() override { return 3; }
+    virtual AABB GetBroadAABB() override {
+        return AABB(GetPosition() - radius, GetPosition() + radius);
+    }
+
+    virtual ColliderType GetType() override { return ColliderType::SPHERE; }
     CollisionResult CollidesWith(Collider* other) override;
+    bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
 };
 
 struct StaticMeshCollider : public Collider {
-    AABBCollider broad;
+    AABB broad;
     Mesh& mesh;
 
     BVHTree* bvhTree = nullptr;
@@ -130,18 +158,40 @@ struct StaticMeshCollider : public Collider {
 
     ~StaticMeshCollider();
 
-    virtual int GetType() override { return 4; }
+    virtual AABB GetBroadAABB() override {
+        return broad;
+    }
+
+    virtual ColliderType GetType() override { return ColliderType::STATIC_MESH; }
     CollisionResult CollidesWith(Collider* other) override;
     bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
 };
 
-struct TwoPhaseCollider  {
-    AABBCollider aabbBroad;
+struct CapsuleCollider : public Collider {
+    Vector3 position2;
+    float radius;
+
+    CapsuleCollider(Object* owner, Vector3 position,
+        Vector3 position2, float radius) : Collider(owner, position, Quaternion{}),
+        position2(position2), radius(radius) {}
+
+    ~CapsuleCollider() {}
+
+    virtual AABB GetBroadAABB() override {
+        return AABB(glm::min(position - radius, position2 - radius),
+            glm::max(position + radius, position + radius));
+    }
+
+    virtual ColliderType GetType() override { return ColliderType::CAPSULE; }
+    CollisionResult CollidesWith(Collider* other) override;
+    bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
+};
+
+struct TwoPhaseCollider {
     std::vector<Collider*> children;
     Object* owner;
 
     TwoPhaseCollider(Object* owner) :
-        aabbBroad(owner, Vector3(), Vector3()),
         owner(owner) {}
 
     ~TwoPhaseCollider() {
@@ -165,33 +215,17 @@ struct TwoPhaseCollider  {
     bool CollidesWith(RayCastRequest& ray, RayCastResult& result) {
         bool ret = false;
         for (auto& child : children) {
+            RayCastResult fakeResult;
+            if (!child->GetBroadAABB().CollidesWith(ray, fakeResult)) continue;
             ret |= child->CollidesWith(ray, result);
         }
         return ret;
     }
 
-    void ExpandBroadIfNeeded(AABBCollider* aabb) {
-        if (children.size() == 1) {
-            aabbBroad.position = aabb->position;
-            aabbBroad.size = aabb->size;
-        }
-        else {
-            aabbBroad.position = glm::min(aabbBroad.position, aabb->GetPosition());
-            aabbBroad.size = glm::max(aabbBroad.position + aabbBroad.size,
-                aabb->position + aabb->size) - aabbBroad.position;
-        }
-    }
     void AddCollider(Collider* collider) {
         children.push_back(collider);
-        if (AABBCollider* aabb = dynamic_cast<AABBCollider*>(collider)) {
-            ExpandBroadIfNeeded(aabb);
-        }
-        else if (StaticMeshCollider* mesh = dynamic_cast<StaticMeshCollider*>(collider)) {
-            ExpandBroadIfNeeded(&mesh->broad);
-        }
     }
-
 };
 
-void GenerateAABBCollidersFromModel(Object* obj);
+void GenerateOBBCollidersFromModel(Object* obj);
 void GenerateStaticMeshCollidersFromModel(Object* obj);

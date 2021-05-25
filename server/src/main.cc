@@ -33,6 +33,7 @@ void Usage(char* arg0) {
     std::cout << "        --test                    : run only tests" << std::endl;
     std::cout << "        --client-draw-bvh         : draw bvh on client" << std::endl;
     std::cout << "        --client-draw-colliders   : draw colliders on client" << std::endl;
+    std::cout << "        --client-draw-debug       : draw debug data on client" << std::endl;
     std::cout << "        --help                    : shows this message" << std::endl;
 }
 
@@ -52,6 +53,9 @@ int main(int argc, char** argv) {
             }
             else if (arg == "--client-draw-colliders") {
                 GlobalSettings.Client_DrawColliders = true;
+            }
+            else if (arg == "--client-draw-debug") {
+                GlobalSettings.Client_DrawDebugLines = true;
             }
             else if (arg == "--help") {
                 Usage(argv[0]);
@@ -143,6 +147,10 @@ int main(int argc, char** argv) {
                     data->nextRespawnCharacter = charName;
                     LOG_DEBUG("Changing character to " << charName);
                     ws->send("{\"char-selected\": \"" + charName + "\"}", uWS::OpCode::TEXT);
+                }
+                else if (obj["event"] == "inventoryDrop") {
+                    int dropId = obj["id"].GetInt();
+                    data->playerObject->InventoryDrop(dropId);
                 }
                 else {
                     data->playerObject->OnInput(obj);

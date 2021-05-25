@@ -18,6 +18,10 @@ module.exports = class ClientState {
         this.showColliders = false;
         this.localPlayerObjectId = undefined;
         this.localPlayerObject = undefined;
+        this.game = undefined;
+
+        this.wasmVector3Location = this.wasm._malloc(3 * 4);
+
         this.isPaused = true;
         this.events = {};
 
@@ -107,6 +111,8 @@ module.exports = class ClientState {
                 this.wasm._LoadGlobalSettings(heapString);
                 this.wasm._free(heapString);
 
+                // Map has been loaded, setup opengl
+                this.wasm._SetupClientGL();
                 this.StartGame();
             }
             else if (event["event"] === "hb") {
@@ -127,8 +133,10 @@ module.exports = class ClientState {
                 if (event["objs"]) {
                     event["objs"].forEach(obj => {
                         if (animations[obj.k]) {
-                            const constructor = animations[obj.k];
-                            this.animations[this.nextAnimationKey++] = new constructor(obj, this.resourceManager);
+                            if (obj.player === this.localPlayerObjectId || obj.player === 0) {
+                                const constructor = animations[obj.k];
+                                this.animations[this.nextAnimationKey++] = new constructor(obj, this.resourceManager);
+                            }
                         }
                         else {
                             console.error(obj.k, "is not a valid animation key!");
@@ -167,6 +175,22 @@ module.exports = class ClientState {
                 "event":"setchar",
                 "char": selection
             }));
+    }
+
+    WorldToScreenCoordinates(location) {
+        // console.log("INPUT", location);
+        const offset = this.wasmVector3Location / 4;
+        this.wasm.HEAPF32[offset] = location.x;
+        this.wasm.HEAPF32[offset + 1] = location.y;
+        this.wasm.HEAPF32[offset + 2] = location.z;
+        this.wasm._WorldToScreenCoordinates(this.wasmVector3Location);
+
+        const output = {
+            x: this.wasm.HEAPF32[offset],
+            y: this.wasm.HEAPF32[offset + 1]
+        };
+        // console.log("OUTPUT", output);
+        return output;
     }
 
     SendInputPacket(input) {
@@ -222,15 +246,27 @@ module.exports = class ClientState {
         }, tickInterval);
 
         window.addEventListener('keydown', e => {
-            if (!e.repeat) {
-                this.SendInputPacket({
-                    event: "kd",
-                    key: e.keyCode
-                });
+            if (!this.isPaused) {
+                e.preventDefault();
+                if (!e.repeat) {
+                    this.SendInputPacket({
+                        event: "kd",
+                        key: e.keyCode
+                    });
+                }
+            }
+            if (e.keyCode === 9) {
+                if (!this.isPaused) {
+                    document.exitPointerLock();
+                }
+                else {
+                    this.game.canvas.requestPointerLock();
+                }
             }
         });
 
         window.addEventListener('keyup', e => {
+            e.preventDefault();
             this.SendInputPacket({
                 event: "ku",
                 key: e.keyCode
@@ -241,10 +277,12 @@ module.exports = class ClientState {
         });
 
         window.addEventListener('mousemove', e => {
-            this.rawMousePos.x = e.pageX;
-            this.rawMousePos.y = e.pageY;
-            this.mouseMovement.x += e.movementX;
-            this.mouseMovement.y += e.movementY;
+            if (!this.isPaused) {
+                this.rawMousePos.x = e.pageX;
+                this.rawMousePos.y = e.pageY;
+                this.mouseMovement.x += e.movementX;
+                this.mouseMovement.y += e.movementY;
+            }
         });
 
         window.addEventListener('mousedown', e => {
@@ -257,12 +295,10 @@ module.exports = class ClientState {
         });
 
         window.addEventListener('mouseup', e => {
-            if (!this.isPaused) {
-                this.SendInputPacket({
-                    event: "mu",
-                    button: e.which
-                });
-            }
+            this.SendInputPacket({
+                event: "mu",
+                button: e.which
+            });
         });
     }
 
@@ -285,6 +321,7 @@ module.exports = class ClientState {
     }
 
     GetObject(id) {
+        if (id === undefined) return undefined;
         if (!this.wasm._IsObjectAlive(id)) {
             delete this.cachedObjects[id];
             return undefined;
@@ -298,5 +335,13 @@ module.exports = class ClientState {
             this.cachedObjects[id] = serializedObject;
         }
         return this.cachedObjects[id];
+    }
+
+    InventoryDrop(id) {
+        this.SendData(JSON.stringify(
+            {
+                "event": "inventoryDrop",
+                "id": id
+            }));
     }
 };

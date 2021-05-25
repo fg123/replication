@@ -1,7 +1,10 @@
+* {
+    font-family: "Prompt";
+}
+
 html, body {
     margin: 0px;
     position: relative;
-    font-family: Arial, Helvetica, sans-serif;
 }
 
 canvas {
@@ -30,7 +33,7 @@ div.escapeMenu {
 
 div.characterSelect {
     position: absolute;
-    top: 50%;
+    top: 150px;
     left: 50%;
     transform: translate(-50%, -50%);
 }
@@ -66,4 +69,39 @@ div.settingsMenu {
     padding: 10px;
     border-radius: 20px;
     background: #FFF;
+}
+
+div.inventory table {
+    border-radius: 10px;
+}
+
+div.inventory table, div.inventory td {
+    border: 2px solid white;
+    border-collapse: collapse;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+div.inventory {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.primary, .secondary {
+    width: 400px;
+    height: 200px;
+}
+
+.slot {
+    width: calc(400px / 3);
+    height: calc(400px / 3);
+}
+
+.dropBtn {
+    font-size: 30px;
+    font-weight: bold;
 }

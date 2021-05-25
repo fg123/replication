@@ -13,3 +13,11 @@ inline std::string ToLower(std::string data) {
 inline bool Contains(const std::string& haystack, const std::string& needle) {
     return haystack.find(needle) != std::string::npos;
 }
+
+template<typename T>
+inline bool Contains(const std::vector<T>& haystack, const T& needle) {
+    for (auto& obj : haystack) {
+        if (obj == needle) return true;
+    }
+    return false;
+}

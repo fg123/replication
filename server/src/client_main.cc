@@ -70,9 +70,12 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     void SetupClientContext() {
         clientGl.SetupContext();
-        clientGl.SetupGL();
-
         clientAudio.SetupContext();
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    void SetupClientGL() {
+        clientGl.SetupGL();
     }
 
     EMSCRIPTEN_KEEPALIVE
@@ -150,6 +153,13 @@ extern "C" {
         object.Parse(settings);
         GlobalSettings.ProcessReplication(object["globalSettings"]);
         game.LoadMap(GlobalSettings.MapPath);
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    void WorldToScreenCoordinates(float* arr) {
+        Vector2 result = clientGl.WorldToScreenCoordinates(Vector3(arr[0], arr[1], arr[2]));
+        arr[0] = result.x;
+        arr[1] = result.y;
     }
 
     EMSCRIPTEN_KEEPALIVE

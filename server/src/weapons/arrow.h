@@ -15,7 +15,8 @@ class ArrowObject : public ThrownProjectile {
 public:
     CLASS_CREATE(ArrowObject)
 
-    ArrowObject(Game& game);
+    ArrowObject(Game& game) : ArrowObject(game, 0) {}
+    ArrowObject(Game& game, ObjectID playerId);
 
     virtual void OnCollide(CollisionResult& result) override;
     virtual void Tick(Time time) override;

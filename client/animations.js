@@ -56,11 +56,11 @@ class FloatingTextAnimation {
         this.start = Date.now();
         this.lastTick = Date.now();
 
-        this.xDelta = (Math.random() - 0.5) * 5;
-        this.yDelta = -2;
+        this.xDelta = (Math.random() - 0.5) * 0.2;
+        this.yDelta = 0.15;
     }
 
-    draw(context) {
+    draw(context, clientState) {
         const currTick = Date.now();
         if (currTick - this.start > this.popupDuration) {
             return false;
@@ -74,18 +74,21 @@ class FloatingTextAnimation {
         context.textAlign = 'center';
         context.textBaseline = 'middle';
 
-        context.font = 'bold 20px Prompt';
+        context.font = 'bold 26px Prompt';
         context.fillStyle = "#000";
-        context.fillText(this.text, this.location.x + 2, this.location.y + 2);
+
+        const screenLocation = clientState.WorldToScreenCoordinates(this.location);
+
+        context.fillText(this.text, screenLocation.x + 2, screenLocation.y + 2);
         context.fillStyle = this.color;
-        context.fillText(this.text, this.location.x, this.location.y);
+        context.fillText(this.text, screenLocation.x, screenLocation.y);
 
         context.globalAlpha = oldOpacity;
 
         this.location.x += this.xDelta;
         this.location.y += this.yDelta;
 
-        this.yDelta += 0.1;
+        this.yDelta -= 0.01;
         this.xDelta *= 0.99;
 
         this.lastTick = currTick;

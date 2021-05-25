@@ -47,102 +47,111 @@ Object::~Object() {}
 
 void Object::HandleAllCollisions() {
     Vector3 lastPosition = position;
-    for (size_t i = 0; i < 10; i++) {
+    for (size_t i = 0; i < 5; i++) {
         game.HandleCollisions(this);
         if (IsZero(lastPosition - position)) {
             return;
         }
         lastPosition = position;
     }
-    LOG_WARN("Object still unstable after 10 iterations of collision resolution!");
+    // LOG_WARN("Object still unstable after 1 iterations of collision resolution!");
 }
 
 void Object::Tick(Time time) {
+    #ifdef BUILD_CLIENT
+        debugLines.clear();
+    #endif
+
+    Time delta = DeltaTime(time);
+    if (delta != 0) {
+
+        // Apply Physics
+        float timeFactor = delta / 1000.0;
+
+        Vector3 positionDelta = GetVelocity() * timeFactor;
+        isGrounded = false;
+        if (!isStatic) {
+            if (GetColliderCount() > 0 && !IsTagged(Tag::NO_GRAVITY)) {
+                velocity.y -= GRAVITY * timeFactor;
+            }
+
+            velocity.x *= airFriction.x;
+            if (velocity.y > 0) {
+                velocity.y *= airFriction.y;
+            }
+            velocity.z *= airFriction.z;
+
+            // No Tunneling
+            position += positionDelta;
+            HandleAllCollisions();
+
+            // // Minimize Tunnelling by Creating Divisions
+            // float AABBSize = glm::abs(glm::min(
+            //     collider.aabbBroad.size.x,
+            //     collider.aabbBroad.size.y,
+            //     collider.aabbBroad.size.z));
+            // float movement = glm::length(positionDelta);
+
+            // int divisions = AABBSize < EPSILON ? 1 : glm::ceil(movement / AABBSize);
+
+            // Vector3 subStepDelta = positionDelta;
+            // for (int i = 0; i < divisions; i++) {
+            //     position += subStepDelta / (float)divisions;
+            //     HandleAllCollisions();
+            //     if (IsStatic()) {
+            //         break;
+            //     }
+            //     subStepDelta = GetVelocity() * timeFactor;
+            // }
+
+            // if (divisions == 0) {
+            //     // We did not call HandleCollisions so reporting won't be triggered
+            //     //   above, so we additionally handle collisions here.
+            //     HandleAllCollisions();
+            // }
+
+            if (glm::abs(velocity.x) < EPSILON) {
+                velocity.x = 0;
+            }
+            if (glm::abs(velocity.y) < EPSILON) {
+                velocity.y = 0;
+            }
+            if (glm::abs(velocity.z) < EPSILON) {
+                velocity.z = 0;
+            }
+        }
+
+        #ifdef BUILD_SERVER
+            // We are dirty if velocity changed last frame
+            //    or position changed significantly
+            if (position - positionDelta != lastFramePosition ||
+                GetVelocity() != lastFrameVelocity) {
+                SetDirty(true);
+            }
+        #endif
+
+        #ifdef BUILD_CLIENT
+            // Interpolate Over
+            clientPosition += (position - clientPosition) / 2.0f;
+            clientRotation = glm::slerp(clientRotation, rotation, 0.5f);
+
+            // clientPosition = position;
+            // clientRotation = rotation;
+
+            // Always set dirty for client because we want client
+            //   GetObjectSerialized to work properly
+            SetDirty(true);
+        #endif
+
+        lastFrameVelocity = velocity;
+        lastFramePosition = position;
+    }
     // Tick my children
     for (auto& child : children) {
         child->Tick(time);
     }
-    Time delta = DeltaTime(time);
-    if (delta == 0) return;
 
-    // Apply Physics
-    float timeFactor = delta / 1000.0;
-
-    Vector3 positionDelta = GetVelocity() * timeFactor;
-    isGrounded = false;
-    if (!isStatic) {
-        if (GetColliderCount() > 0 && !IsTagged(Tag::NO_GRAVITY)) {
-            velocity.y -= GRAVITY * timeFactor;
-        }
-
-        velocity.x *= airFriction.x;
-        if (velocity.y > 0) {
-            velocity.y *= airFriction.y;
-        }
-        velocity.z *= airFriction.z;
-
-        // Minimize Tunnelling by Creating Divisions
-        // position += positionDelta;
-
-        float AABBSize = glm::abs(glm::min(
-            collider.aabbBroad.size.x,
-            collider.aabbBroad.size.y,
-            collider.aabbBroad.size.z));
-        float movement = glm::length(positionDelta);
-
-        int divisions = AABBSize < EPSILON ? 1 : glm::ceil(movement / AABBSize);
-
-        Vector3 subStepDelta = positionDelta;
-        for (int i = 0; i < divisions; i++) {
-            position += subStepDelta / (float)divisions;
-            HandleAllCollisions();
-            if (IsStatic()) {
-                break;
-            }
-            subStepDelta = GetVelocity() * timeFactor;
-        }
-
-        if (divisions == 0) {
-            // We did not call HandleCollisions so reporting won't be triggered
-            //   above, so we additionally handle collisions here.
-            HandleAllCollisions();
-        }
-
-        if (glm::abs(velocity.x) < EPSILON) {
-            velocity.x = 0;
-        }
-        if (glm::abs(velocity.y) < EPSILON) {
-            velocity.y = 0;
-        }
-        if (glm::abs(velocity.z) < EPSILON) {
-            velocity.z = 0;
-        }
-    }
-
-    #ifdef BUILD_SERVER
-        // We are dirty if velocity changed last frame
-        //    or position changed significantly
-        if (position - positionDelta != lastFramePosition ||
-            GetVelocity() != lastFrameVelocity) {
-            SetDirty(true);
-        }
-    #endif
-
-    #ifdef BUILD_CLIENT
-        // Interpolate Over
-        clientPosition += (position - clientPosition) / 2.0f;
-        clientRotation = glm::slerp(clientRotation, rotation, 0.5f);
-
-        // clientPosition = position;
-        // clientRotation = rotation;
-
-        // Always set dirty for client because we want client
-        //   GetObjectSerialized to work properly
-        SetDirty(true);
-    #endif
-
-    lastFrameVelocity = velocity;
-    lastFramePosition = position;
+    AddDebugLine(position, position + GetLookDirection(), Vector3(1, 0, 1));
 }
 
 void Object::ResolveCollision(Vector3 difference) {
@@ -180,8 +189,10 @@ void Object::ResolveCollision(Vector3 difference) {
     }
 }
 
+
 void Object::OnCollide(CollisionResult& result) {
-    if (result.collidedWith->IsTagged(Tag::GROUND)) {
+    if (result.collidedWith->IsTagged(Tag::GROUND) &&
+        result.collisionDifference.y > 0) {
         isGrounded = true;
     }
 }

@@ -1,5 +1,4 @@
-#ifndef ASSAULT_RIFLE_H
-#define ASSAULT_RIFLE_H
+#pragma once
 
 #include "gun.h"
 #include "game.h"
@@ -12,17 +11,16 @@ public:
     AssaultRifleObject(Game& game, Vector3 position) : GunBase(game, position) {
         fireRate = 14;
         magazineSize = 25;
-        magazines = 8;
         bullets = magazineSize;
         damage = 14;
         reloadTime = 1000;
         automaticFire = true;
-        fireOffset = 1.873;
+        fireOffset = Vector3(0, -0.17, 1.873);
+        name = "R-303";
 
         SetModel(game.GetModel("Rifle.obj"));
+        GenerateOBBCollidersFromModel(this);
     }
 };
 
 CLASS_REGISTER(AssaultRifleObject);
-
-#endif

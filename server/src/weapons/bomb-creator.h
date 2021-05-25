@@ -7,20 +7,21 @@
 class Bomb : public Object {
     int damageRange = 5;
     int damage = 70;
+    ObjectID playerId;
 
 public:
     CLASS_CREATE(Bomb);
-    Bomb(Game& game) : Bomb(game, Vector3()) {}
-    Bomb(Game& game, Vector3 position) : Object(game) {
+    Bomb(Game& game) : Bomb(game, 0, Vector3()) {}
+    Bomb(Game& game, ObjectID playerId, Vector3 position) : Object(game), playerId(playerId) {
         SetPosition(position);
         SetModel(game.GetModel("BombCrate.obj"));
-        GenerateAABBCollidersFromModel(this);
+        GenerateOBBCollidersFromModel(this);
         SetTag(Tag::GROUND);
     }
 
     void Explode() {
     #ifdef BUILD_SERVER
-        ExplosionObject* explode = new ExplosionObject(game, damageRange, damage);
+        ExplosionObject* explode = new ExplosionObject(game, playerId, damageRange, damage);
         explode->SetPosition(GetPosition());
         game.AddObject(explode);
         game.DestroyObject(GetId());
@@ -65,7 +66,7 @@ public:
             }
         }
 
-        Bomb* bomb = new Bomb(game, rayCastEnd);
+        Bomb* bomb = new Bomb(game, attachedTo->GetId(), rayCastEnd);
         bombs.push_back(bomb);
         game.AddObject(bomb);
         CooldownStart(time);

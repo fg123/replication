@@ -3,6 +3,7 @@
  "models": [
     "ShootingRange.obj",
     "Player.obj",
+    "NewPlayer.obj",
     "Pistol.obj",
     "Rifle.obj",
     "Bullet.obj",
@@ -18,7 +19,9 @@
     "Arrow.obj",
     "BombCrate.obj",
     "Plane.obj",
-    "Heaven.obj"
+    "Ammo.obj",
+    "Icosphere.obj",
+    "Cube.obj"
  ],
  "sounds": [
     "bang.wav",

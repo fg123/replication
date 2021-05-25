@@ -15,9 +15,7 @@ public:
         powerMax = 60.f;
         maxDistance = HookObject::MaxLength;
 
-        #ifdef BUILD_SERVER
-            SetModel(game.GetModel("HookThrower.obj"));
-        #endif
+        SetModel(game.GetModel("HookThrower.obj"));
     }
 };
 

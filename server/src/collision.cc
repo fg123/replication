@@ -32,7 +32,7 @@ Matrix4 Collider::GetWorldTransform() {
     return model;
 }
 
-void GenerateAABBCollidersFromModel(Object* obj) {
+void GenerateOBBCollidersFromModel(Object* obj) {
     // Each Mesh Becomes a Collider
     // LOG_DEBUG("Generating Map Colliders");
     Model* model = obj->GetModel();
@@ -47,7 +47,7 @@ void GenerateAABBCollidersFromModel(Object* obj) {
                     max = glm::max(max, mesh.vertices[i].position);
                 }
 
-                obj->AddCollider(new AABBCollider(obj, min, max - min));
+                obj->AddCollider(new OBBCollider(obj, min, max - min));
             }
         }
     }

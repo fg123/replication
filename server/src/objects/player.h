@@ -1,8 +1,8 @@
-#ifndef PLAYER_OBJECT_H
-#define PLAYER_OBJECT_H
+#pragma once
 
 #include "object.h"
 #include "vector.h"
+#include "inventory.h"
 #include "weapons/weapon.h"
 
 #include <mutex>
@@ -10,11 +10,10 @@
 #include <queue>
 
 class Game;
+
 class PlayerObject : public Object {
 protected:
     int health = 100;
-
-    Time canPickupTime = 0;
 
     // Yaw Pitch in degrees
     REPLICATED_D(float, rotationYaw, "ry", 0.0f);
@@ -23,9 +22,12 @@ protected:
     REPLICATED(Vector3, inputVelocity, "iv");
 
 public:
+    REPLICATED_D(Time, canPickupTime, "cpt", 0);
+
     REPLICATED(Vector2, pitchYawVelocity, "pyv");
 
-    WeaponObject* currentWeapon = nullptr;
+    REPLICATED(InventoryManager, inventoryManager, "im");
+
     WeaponObject* qWeapon = nullptr;
     WeaponObject* zWeapon = nullptr;
 
@@ -58,7 +60,10 @@ public:
     void OnInput(const JSONDocument& obj);
     void ProcessInputData(const JSONDocument& obj);
 
-    WeaponObject* GetWeapon() { return currentWeapon; }
+    WeaponObject* GetCurrentWeapon() {
+        return inventoryManager.GetCurrentWeapon();
+    }
+
     virtual Vector3 GetVelocity() override { return velocity + inputVelocity; }
     Quaternion GetRotationWithPitch() const {
         Matrix4 matrix;
@@ -71,15 +76,19 @@ public:
         return glm::normalize(Vector::Forward * GetRotationWithPitch());
     }
     void PickupWeapon(WeaponObject* weapon);
-    void DropWeapon();
+    void DropWeapon(WeaponObject* weapon);
 
-    void DealDamage(int damage);
+    // Client Side Call from UI
+    void InventoryDrop(int id);
+
+    void DealDamage(int damage, ObjectID from);
 
     // TODO: add damage source
     virtual void OnTakeDamage(int damage) {};
 
     Vector3 GetLeftAttachmentPoint() const;
     Vector3 GetRightAttachmentPoint() const;
+    Vector3 GetCenterAttachmentPoint() const;
 
     Vector3 GetAttachmentPoint(WeaponAttachmentPoint attachmentPoint) const;
 
@@ -92,5 +101,3 @@ public:
 
 };
 
-
-#endif

@@ -8,8 +8,8 @@
 void Tests::RunRotatedAABBCollisionTest() {
     GameObject main { game };
     GameObject side { game };
-    main.AddCollider(new AABBCollider(&main, Vector3(-0.5), Vector3(1)));
-    side.AddCollider(new AABBCollider(&side, Vector3(-0.5), Vector3(1)));
+    main.AddCollider(new OBBCollider(&main, Vector3(-0.5), Vector3(1)));
+    side.AddCollider(new OBBCollider(&side, Vector3(-0.5), Vector3(1)));
     CollisionResult r;
     side.SetRotation(DirectionToQuaternion(Vector::Forward));
     LOG_INFO("Side Quat: " << side.GetRotation());
@@ -60,7 +60,7 @@ void Tests::RunStaticMeshCollisionTest() {
     LOG_INFO("Side Quat: " << side.GetRotation());
 
     main.AddCollider(new StaticMeshCollider(&main, mesh));
-    side.AddCollider(new AABBCollider(&side, Vector3(-0.5), Vector3(1)));
+    side.AddCollider(new OBBCollider(&side, Vector3(-0.5), Vector3(1)));
 
     side.SetPosition(Vector3(0, 0.8, 0));
     CollisionResult r;

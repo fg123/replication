@@ -19,6 +19,9 @@ class ClientGL {
     Vector3 cameraPosition;
     Vector3 cameraRotation;
 
+    int windowWidth;
+    int windowHeight;
+
     Game& game;
 
     std::vector<ShaderProgram*> shaderPrograms;
@@ -30,7 +33,11 @@ class ClientGL {
 
     DebugShaderProgram* debugShaderProgram;
     Mesh debugCube;
+    Mesh debugLine;
+    Mesh debugCircle;
 
+    Matrix4 viewMat;
+    Matrix4 projMat;
 public:
     ClientGL(Game& game, const char* selector);
 
@@ -45,4 +52,6 @@ public:
     void Draw(int width, int height);
     void DrawObject(Object* obj, int& lastProgram);
     void DrawObjects();
+
+    Vector2 WorldToScreenCoordinates(Vector3 worldCoord);
 };

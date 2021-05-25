@@ -5,6 +5,7 @@
 #include "floating-text.h"
 
 static const int LEFT_MOUSE_BUTTON = 1;
+static const int RIGHT_MOUSE_BUTTON = 3;
 static const int A_KEY = 65;
 static const int S_KEY = 83;
 static const int D_KEY = 68;
@@ -36,29 +37,30 @@ std::unordered_map<int, size_t> KEY_MAP = {
 PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector3()) {
 }
 
-PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game) {
+PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game),
+    inventoryManager(game, this) {
     SetTag(Tag::PLAYER);
+
+    SetTag(Tag::NO_GRAVITY);
 
     SetPosition(position);
 
     collisionExclusion |= (uint64_t) Tag::PLAYER;
 
-    SetModel(game.GetModel("Player.obj"));
-    GenerateAABBCollidersFromModel(this);
+    SetModel(game.GetModel("NewPlayer.obj"));
+    // GenerateOBBCollidersFromModel(this);
+    AddCollider(new SphereCollider(this, Vector3(0, 0, 0), 0.25f));
+    AddCollider(new OBBCollider(this, Vector3(-0.375, -1.6, -0.125), Vector3(0.75, 1.30, 0.25)));
     SetScale(Vector3(1, 1, 1));
 }
 
 void PlayerObject::OnDeath() {
     // This calls before you get destructed, but client will already know you're
     //   dead (but you don't actually get GCed until next tick)
-    LOG_DEBUG("Player Death " << currentWeapon);
+    LOG_DEBUG("Player Death " << GetCurrentWeapon());
 
 #ifdef BUILD_SERVER
-    if (currentWeapon) {
-        game.DestroyObject(currentWeapon->GetId());
-        currentWeapon->Detach();
-        currentWeapon = nullptr;
-    }
+    inventoryManager.ClearInventory();
     if (qWeapon) {
         game.DestroyObject(qWeapon->GetId());
         qWeapon->Detach();
@@ -80,13 +82,16 @@ PlayerObject::~PlayerObject() {
 }
 
 void PlayerObject::PickupWeapon(WeaponObject* weapon) {
-    weapon->AttachToPlayer(this);
-    currentWeapon = weapon;
+    if (inventoryManager.CanPickup(weapon)) {
+        inventoryManager.Pickup(weapon);
+    }
+}
+
+void PlayerObject::InventoryDrop(int id) {
+    inventoryManager.Drop(id);
 }
 
 void PlayerObject::Tick(Time time) {
-    Object::Tick(time);
-
     {
         #ifdef BUILD_SERVER
             Time clientTime = lastClientInputTime + (ticksSinceLastProcessed * TickInterval);
@@ -170,12 +175,12 @@ void PlayerObject::Tick(Time time) {
 
     if (keyboardState[KEY_MAP[K_KEY]]) {
         if (!lastKeyboardState[KEY_MAP[K_KEY]]) {
-            DealDamage(100);
+            DealDamage(100, GetId());
         }
     }
-    // if (keyboardState[G_KEY]) {
-    //     DropWeapon();
-    // }
+    if (keyboardState[KEY_MAP[G_KEY]] && !lastKeyboardState[KEY_MAP[G_KEY]]) {
+        DropWeapon(GetCurrentWeapon());
+    }
     if (keyboardState[KEY_MAP[SPACE_KEY]]) {
         // Can only jump if touching ground
         if (IsGrounded()) {
@@ -185,6 +190,7 @@ void PlayerObject::Tick(Time time) {
         // velocity.y = -300;
     }
 
+    WeaponObject* currentWeapon = inventoryManager.GetCurrentWeapon();
     if (currentWeapon) {
         if (mouseState[LEFT_MOUSE_BUTTON]) {
             if (!lastMouseState[LEFT_MOUSE_BUTTON]) {
@@ -199,6 +205,15 @@ void PlayerObject::Tick(Time time) {
             if (!lastKeyboardState[KEY_MAP[R_KEY]]) {
                 currentWeapon->StartReload(time);
             }
+        }
+
+        if (mouseState[RIGHT_MOUSE_BUTTON]) {
+            if (!lastMouseState[RIGHT_MOUSE_BUTTON]) {
+                currentWeapon->StartAlternateFire(time);
+            }
+        }
+        else if (lastMouseState[RIGHT_MOUSE_BUTTON]) {
+            currentWeapon->ReleaseAlternateFire(time);
         }
     }
 
@@ -238,35 +253,7 @@ void PlayerObject::Tick(Time time) {
     // matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
     rotation = glm::quat_cast(matrix);
 
-    if (currentWeapon) {
-        currentWeapon->SetPosition(GetAttachmentPoint(currentWeapon->attachmentPoint));
-        currentWeapon->SetVelocity(GetVelocity());
-        currentWeapon->SetRotation(GetRotationWithPitch());
-        #ifdef BUILD_CLIENT
-            currentWeapon->clientPosition = currentWeapon->GetPosition();
-            currentWeapon->clientRotation = currentWeapon->GetRotation();
-        #endif
-    }
-
-    if (zWeapon) {
-        zWeapon->SetPosition(GetAttachmentPoint(zWeapon->attachmentPoint));
-        zWeapon->SetVelocity(GetVelocity());
-        zWeapon->SetRotation(GetRotationWithPitch());
-        #ifdef BUILD_CLIENT
-            zWeapon->clientPosition = zWeapon->GetPosition();
-            zWeapon->clientRotation = zWeapon->GetRotation();
-        #endif
-    }
-
-    if (qWeapon) {
-        qWeapon->SetPosition(GetAttachmentPoint(qWeapon->attachmentPoint));
-        qWeapon->SetVelocity(GetVelocity());
-        qWeapon->SetRotation(GetRotationWithPitch());
-        #ifdef BUILD_CLIENT
-            qWeapon->clientPosition = qWeapon->GetPosition();
-            qWeapon->clientRotation = qWeapon->GetRotation();
-        #endif
-    }
+    Object::Tick(time);
 
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;
@@ -281,10 +268,6 @@ void PlayerObject::Serialize(JSONWriter& obj) {
     obj.Key("h");
     obj.Int(health);
 
-    if (currentWeapon) {
-        obj.Key("w");
-        obj.Uint(currentWeapon->GetId());
-    }
     if (qWeapon) {
         obj.Key("wq");
         obj.Uint(qWeapon->GetId());
@@ -300,6 +283,13 @@ void PlayerObject::Serialize(JSONWriter& obj) {
     }
     obj.EndArray();
 
+    obj.Key("ms");
+    obj.StartArray();
+    for (const bool &ms : mouseState) {
+        obj.Bool(ms);
+    }
+    obj.EndArray();
+
 #ifdef BUILD_CLIENT
     obj.Key("client_p");
     Vector3 cp = GetClientPosition();
@@ -308,6 +298,11 @@ void PlayerObject::Serialize(JSONWriter& obj) {
     obj.Key("ld");
     Vector3 ld = GetLookDirection();
     SerializeDispatch(ld, obj);
+
+    if (WeaponObject* currentWeapon = GetCurrentWeapon()) {
+        obj.Key("w");
+        obj.Uint(currentWeapon->GetId());
+    }
 #endif
 
     // LOG_DEBUG("Player Object Serialize - End");
@@ -323,12 +318,6 @@ void PlayerObject::ProcessReplication(json& obj) {
     }
     health = obj["h"].GetInt();
 
-    if (obj.HasMember("w")) {
-        currentWeapon = game.GetObject<WeaponObject>(obj["w"].GetUint());
-    }
-    else {
-        currentWeapon = nullptr;
-    }
     if (obj.HasMember("wq")) {
         qWeapon = game.GetObject<WeaponObject>(obj["wq"].GetUint());
     }
@@ -346,20 +335,19 @@ void PlayerObject::ProcessReplication(json& obj) {
         keyboardState[i] = kb.GetBool();
         i++;
     }
-}
-
-void PlayerObject::DropWeapon()  {
-    if (currentWeapon) {
-        // Throw Weapon
-        currentWeapon->Detach();
-        currentWeapon->SetVelocity(GetLookDirection() * 500.0f);
-        currentWeapon = nullptr;
-        canPickupTime = game.GetGameTime() + 500;
+    i = 0;
+    for (const json &ms : obj["ms"].GetArray()) {
+        mouseState[i] = ms.GetBool();
+        i++;
     }
 }
 
+void PlayerObject::DropWeapon(WeaponObject* weapon)  {
+    inventoryManager.Drop(weapon);
+}
+
 void PlayerObject::OnCollide(CollisionResult& result) {
-    if (!currentWeapon && result.collidedWith->IsTagged(Tag::WEAPON)) {
+    if (result.collidedWith->IsTagged(Tag::WEAPON)) {
         if (game.GetGameTime() > canPickupTime) {
             PickupWeapon(static_cast<WeaponObject*>(result.collidedWith));
         }
@@ -367,10 +355,12 @@ void PlayerObject::OnCollide(CollisionResult& result) {
     Object::OnCollide(result);
 }
 
-void PlayerObject::DealDamage(int damage) {
+void PlayerObject::DealDamage(int damage, ObjectID from) {
     game.PlayAudio("ueh.wav", 1.0f, this);
 #ifdef BUILD_SERVER
     health -= damage;
+    game.QueueAnimation(new FloatingTextAnimation(from,
+        GetPosition(), std::to_string(damage), "#FFF"));
     if (health <= 0) {
         ObjectID id = GetId();
         game.DestroyObject(id);
@@ -432,23 +422,29 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
 
 Vector3 PlayerObject::GetRightAttachmentPoint() const {
     Vector3 left = glm::normalize(Vector::Left * rotation);
-    Vector3 up = glm::normalize(Vector::Up * rotation);
+    // Vector3 up = glm::normalize(Vector::Up * rotation);
 
     return GetPosition()
         - left * 0.5f
-        + GetLookDirection() * 1.0f
-        - up * 0.2f;
+        + GetLookDirection() * 1.0f;
 }
 
 Vector3 PlayerObject::GetLeftAttachmentPoint() const {
     Vector3 left = glm::normalize(Vector::Left * rotation);
-    Vector3 up = glm::normalize(Vector::Up * rotation);
+    // Vector3 up = glm::normalize(Vector::Up * rotation);
 
     return GetPosition()
         + left * 0.5f
-        + GetLookDirection() * 1.0f
-        - up * 0.2f;
+        + GetLookDirection() * 1.0f;
 }
+
+Vector3 PlayerObject::GetCenterAttachmentPoint() const {
+    Vector3 up = glm::normalize(Vector::Up * rotation);
+
+    return GetPosition() +
+        + GetLookDirection() * 1.0f;
+}
+
 
 Vector3 PlayerObject::GetAttachmentPoint(WeaponAttachmentPoint attachmentPoint) const {
     if (attachmentPoint == WeaponAttachmentPoint::LEFT)
@@ -456,5 +452,5 @@ Vector3 PlayerObject::GetAttachmentPoint(WeaponAttachmentPoint attachmentPoint) 
     else if (attachmentPoint == WeaponAttachmentPoint::RIGHT)
         return GetRightAttachmentPoint();
     else
-        return GetPosition();
+        return GetCenterAttachmentPoint();
 }

@@ -166,466 +166,506 @@ Module.expectedDataFileDownloads++;
   "files": [ {
    "filename": "/maps/map1.json",
    "start": 0,
-   "end": 921,
+   "end": 977,
+   "audio": 0
+  }, {
+   "filename": "/models/Ammo.mtl",
+   "start": 977,
+   "end": 1637,
+   "audio": 0
+  }, {
+   "filename": "/models/Ammo.obj",
+   "start": 1637,
+   "end": 29177,
    "audio": 0
   }, {
    "filename": "/models/Arrow.mtl",
-   "start": 921,
-   "end": 1585,
+   "start": 29177,
+   "end": 29841,
    "audio": 0
   }, {
    "filename": "/models/Arrow.obj",
-   "start": 1585,
-   "end": 8274,
+   "start": 29841,
+   "end": 36530,
    "audio": 0
   }, {
    "filename": "/models/Artillery.mtl",
-   "start": 8274,
-   "end": 8565,
+   "start": 36530,
+   "end": 36821,
    "audio": 0
   }, {
    "filename": "/models/Artillery.obj",
-   "start": 8565,
-   "end": 1664003,
+   "start": 36821,
+   "end": 1692259,
    "audio": 0
   }, {
    "filename": "/models/ArtilleryIndicator.mtl",
-   "start": 1664003,
-   "end": 1664255,
+   "start": 1692259,
+   "end": 1692511,
    "audio": 0
   }, {
    "filename": "/models/ArtilleryIndicator.obj",
-   "start": 1664255,
-   "end": 1710681,
+   "start": 1692511,
+   "end": 1738937,
    "audio": 0
   }, {
    "filename": "/models/BombCrate.mtl",
-   "start": 1710681,
-   "end": 1711046,
+   "start": 1738937,
+   "end": 1739302,
    "audio": 0
   }, {
    "filename": "/models/BombCrate.obj",
-   "start": 1711046,
-   "end": 1712137,
+   "start": 1739302,
+   "end": 1740393,
    "audio": 0
   }, {
    "filename": "/models/Bow.mtl",
-   "start": 1712137,
-   "end": 1712799,
+   "start": 1740393,
+   "end": 1741055,
    "audio": 0
   }, {
    "filename": "/models/Bow.obj",
-   "start": 1712799,
-   "end": 1726394,
+   "start": 1741055,
+   "end": 1754650,
    "audio": 0
   }, {
    "filename": "/models/Bullet.mtl",
-   "start": 1726394,
-   "end": 1726635,
+   "start": 1754650,
+   "end": 1754891,
    "audio": 0
   }, {
    "filename": "/models/Bullet.obj",
-   "start": 1726635,
-   "end": 1754904,
+   "start": 1754891,
+   "end": 1783160,
    "audio": 0
   }, {
    "filename": "/models/BulletTracer.mtl",
-   "start": 1754904,
-   "end": 1755185,
+   "start": 1783160,
+   "end": 1783441,
    "audio": 0
   }, {
    "filename": "/models/BulletTracer.obj",
-   "start": 1755185,
-   "end": 1764614,
+   "start": 1783441,
+   "end": 1792870,
    "audio": 0
   }, {
-   "filename": "/models/cube.obj",
-   "start": 1764614,
-   "end": 1765155,
+   "filename": "/models/Cube.mtl",
+   "start": 1792870,
+   "end": 1793099,
+   "audio": 0
+  }, {
+   "filename": "/models/Cube.obj",
+   "start": 1793099,
+   "end": 1794126,
    "audio": 0
   }, {
    "filename": "/models/Explosion.mtl",
-   "start": 1765155,
-   "end": 1765576,
+   "start": 1794126,
+   "end": 1794547,
    "audio": 0
   }, {
    "filename": "/models/Explosion.obj",
-   "start": 1765576,
-   "end": 2433214,
+   "start": 1794547,
+   "end": 2462185,
    "audio": 0
   }, {
    "filename": "/models/Grenade.mtl",
-   "start": 2433214,
-   "end": 2433813,
+   "start": 2462185,
+   "end": 2462784,
    "audio": 0
   }, {
    "filename": "/models/Grenade.obj",
-   "start": 2433813,
-   "end": 2680772,
+   "start": 2462784,
+   "end": 2709743,
    "audio": 0
   }, {
    "filename": "/models/Heaven.mtl",
-   "start": 2680772,
-   "end": 2681928,
+   "start": 2709743,
+   "end": 2710899,
    "audio": 0
   }, {
    "filename": "/models/Heaven.obj",
-   "start": 2681928,
-   "end": 2963195,
+   "start": 2710899,
+   "end": 2992166,
    "audio": 0
   }, {
    "filename": "/models/HookThrower.mtl",
-   "start": 2963195,
-   "end": 2963560,
+   "start": 2992166,
+   "end": 2992531,
    "audio": 0
   }, {
    "filename": "/models/HookThrower.obj",
-   "start": 2963560,
-   "end": 2965919,
+   "start": 2992531,
+   "end": 2994890,
+   "audio": 0
+  }, {
+   "filename": "/models/Icosphere.mtl",
+   "start": 2994890,
+   "end": 2995014,
+   "audio": 0
+  }, {
+   "filename": "/models/Icosphere.obj",
+   "start": 2995014,
+   "end": 3110672,
    "audio": 0
   }, {
    "filename": "/models/island.obj",
-   "start": 2965919,
-   "end": 4398493,
+   "start": 3110672,
+   "end": 4543246,
+   "audio": 0
+  }, {
+   "filename": "/models/NewPlayer.mtl",
+   "start": 4543246,
+   "end": 4544014,
+   "audio": 0
+  }, {
+   "filename": "/models/NewPlayer.obj",
+   "start": 4544014,
+   "end": 4596336,
    "audio": 0
   }, {
    "filename": "/models/Pistol.mtl",
-   "start": 4398493,
-   "end": 4398853,
+   "start": 4596336,
+   "end": 4596696,
    "audio": 0
   }, {
    "filename": "/models/Pistol.obj",
-   "start": 4398853,
-   "end": 4401241,
+   "start": 4596696,
+   "end": 4599084,
    "audio": 0
   }, {
    "filename": "/models/Plane.mtl",
-   "start": 4401241,
-   "end": 4401365,
+   "start": 4599084,
+   "end": 4599208,
    "audio": 0
   }, {
    "filename": "/models/Plane.obj",
-   "start": 4401365,
-   "end": 4401733,
+   "start": 4599208,
+   "end": 4599576,
    "audio": 0
   }, {
    "filename": "/models/Player.mtl",
-   "start": 4401733,
-   "end": 4401973,
+   "start": 4599576,
+   "end": 4599816,
    "audio": 0
   }, {
    "filename": "/models/Player.obj",
-   "start": 4401973,
-   "end": 5174096,
+   "start": 4599816,
+   "end": 5371939,
    "audio": 0
   }, {
    "filename": "/models/Portal.mtl",
-   "start": 5174096,
-   "end": 5174519,
+   "start": 5371939,
+   "end": 5372362,
    "audio": 0
   }, {
    "filename": "/models/Portal.obj",
-   "start": 5174519,
-   "end": 5202817,
+   "start": 5372362,
+   "end": 5400660,
    "audio": 0
   }, {
    "filename": "/models/Quad.obj",
-   "start": 5202817,
-   "end": 5203161,
+   "start": 5400660,
+   "end": 5401004,
    "audio": 0
   }, {
    "filename": "/models/Rifle.mtl",
-   "start": 5203161,
-   "end": 5203646,
+   "start": 5401004,
+   "end": 5401489,
    "audio": 0
   }, {
    "filename": "/models/Rifle.obj",
-   "start": 5203646,
-   "end": 5218249,
+   "start": 5401489,
+   "end": 5424986,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.mtl",
-   "start": 5218249,
-   "end": 5220261,
+   "start": 5424986,
+   "end": 5427356,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.obj",
-   "start": 5220261,
-   "end": 6757518,
+   "start": 5427356,
+   "end": 7574477,
    "audio": 0
   }, {
    "filename": "/models/suzanne.obj",
-   "start": 6757518,
-   "end": 6836274,
+   "start": 7574477,
+   "end": 7653233,
    "audio": 0
   }, {
    "filename": "/shaders/Debug.fs",
-   "start": 6836274,
-   "end": 6836422,
+   "start": 7653233,
+   "end": 7653381,
    "audio": 0
   }, {
    "filename": "/shaders/Debug.vs",
-   "start": 6836422,
-   "end": 6836653,
+   "start": 7653381,
+   "end": 7653612,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.fs",
-   "start": 6836653,
-   "end": 6840457,
+   "start": 7653612,
+   "end": 7657416,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.vs",
-   "start": 6840457,
-   "end": 6841314,
+   "start": 7657416,
+   "end": 7658273,
    "audio": 0
   }, {
    "filename": "/sounds/bang.wav",
-   "start": 6841314,
-   "end": 6968900,
+   "start": 7658273,
+   "end": 7785859,
    "audio": 1
   }, {
    "filename": "/sounds/boom-old1.wav",
-   "start": 6968900,
-   "end": 7040624,
+   "start": 7785859,
+   "end": 7857583,
    "audio": 1
   }, {
    "filename": "/sounds/boom.wav",
-   "start": 7040624,
-   "end": 7112348,
+   "start": 7857583,
+   "end": 7929307,
    "audio": 1
   }, {
    "filename": "/sounds/GrenadeOut.wav",
-   "start": 7112348,
-   "end": 7192264,
+   "start": 7929307,
+   "end": 8009223,
    "audio": 1
   }, {
    "filename": "/sounds/HookReel.wav",
-   "start": 7192264,
-   "end": 7250676,
+   "start": 8009223,
+   "end": 8067635,
    "audio": 1
   }, {
    "filename": "/sounds/HookThrow.wav",
-   "start": 7250676,
-   "end": 7278368,
+   "start": 8067635,
+   "end": 8095327,
    "audio": 1
   }, {
    "filename": "/sounds/incoming.wav",
-   "start": 7278368,
-   "end": 7433090,
+   "start": 8095327,
+   "end": 8250049,
    "audio": 1
   }, {
    "filename": "/sounds/PortalEnd.wav",
-   "start": 7433090,
-   "end": 7504814,
+   "start": 8250049,
+   "end": 8321773,
    "audio": 1
   }, {
    "filename": "/sounds/PortalStart.wav",
-   "start": 7504814,
-   "end": 7577562,
+   "start": 8321773,
+   "end": 8394521,
    "audio": 1
   }, {
    "filename": "/sounds/reload.wav",
-   "start": 7577562,
-   "end": 7691270,
+   "start": 8394521,
+   "end": 8508229,
    "audio": 1
   }, {
    "filename": "/sounds/ueh.wav",
-   "start": 7691270,
-   "end": 7726130,
+   "start": 8508229,
+   "end": 8543089,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-jump.wav",
-   "start": 7726130,
-   "end": 7996578,
+   "start": 8543089,
+   "end": 8813537,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-pullback.wav",
-   "start": 7996578,
-   "end": 8144150,
+   "start": 8813537,
+   "end": 8961109,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-shoot.wav",
-   "start": 8144150,
-   "end": 8258950,
+   "start": 8961109,
+   "end": 9075909,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-ulti-activate.wav",
-   "start": 8258950,
-   "end": 8582654,
+   "start": 9075909,
+   "end": 9399613,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-ulti-shoot.wav",
-   "start": 8582654,
-   "end": 8734324,
+   "start": 9399613,
+   "end": 9551283,
    "audio": 1
   }, {
    "filename": "/textures/Artillery.png",
-   "start": 8734324,
-   "end": 9851551,
+   "start": 9551283,
+   "end": 10668510,
    "audio": 0
   }, {
    "filename": "/textures/BulletTracer.png",
-   "start": 9851551,
-   "end": 9885318,
+   "start": 10668510,
+   "end": 10702277,
    "audio": 0
   }, {
    "filename": "/textures/Mountains.png",
-   "start": 9885318,
-   "end": 9962136,
+   "start": 10702277,
+   "end": 10779095,
    "audio": 0
   }, {
    "filename": "/textures/Skydome.png",
-   "start": 9962136,
-   "end": 11634307,
+   "start": 10779095,
+   "end": 12451266,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_AmbientOcclusion.jpg",
-   "start": 11634307,
-   "end": 12234641,
+   "start": 12451266,
+   "end": 13051600,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Color.jpg",
-   "start": 12234641,
-   "end": 13656331,
+   "start": 13051600,
+   "end": 14473290,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Displacement.jpg",
-   "start": 13656331,
-   "end": 14040760,
+   "start": 14473290,
+   "end": 14857719,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Normal.jpg",
-   "start": 14040760,
-   "end": 15707315,
+   "start": 14857719,
+   "end": 16524274,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Roughness.jpg",
-   "start": 15707315,
-   "end": 16387408,
+   "start": 16524274,
+   "end": 17204367,
    "audio": 0
   }, {
    "filename": "/textures/BulletHole/BulletHole.png",
-   "start": 16387408,
-   "end": 16419612,
+   "start": 17204367,
+   "end": 17236571,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Color.jpg",
-   "start": 16419612,
-   "end": 17753043,
+   "start": 17236571,
+   "end": 18570002,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Displacement.jpg",
-   "start": 17753043,
-   "end": 18049879,
+   "start": 18570002,
+   "end": 18866838,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Emission.jpg",
-   "start": 18049879,
-   "end": 19380862,
+   "start": 18866838,
+   "end": 20197821,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Normal.jpg",
-   "start": 19380862,
-   "end": 21077223,
+   "start": 20197821,
+   "end": 21894182,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Roughness.jpg",
-   "start": 21077223,
-   "end": 21648085,
+   "start": 21894182,
+   "end": 22465044,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Color.jpg",
-   "start": 21648085,
-   "end": 22741069,
+   "start": 22465044,
+   "end": 23558028,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Displacement.jpg",
-   "start": 22741069,
-   "end": 23531629,
+   "start": 23558028,
+   "end": 24348588,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Normal.jpg",
-   "start": 23531629,
-   "end": 23871478,
+   "start": 24348588,
+   "end": 24688437,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Roughness.jpg",
-   "start": 23871478,
-   "end": 24451578,
+   "start": 24688437,
+   "end": 25268537,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Color.jpg",
-   "start": 24451578,
-   "end": 24981403,
+   "start": 25268537,
+   "end": 25798362,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Displacement.jpg",
-   "start": 24981403,
-   "end": 25410617,
+   "start": 25798362,
+   "end": 26227576,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Metalness.jpg",
-   "start": 25410617,
-   "end": 25540621,
+   "start": 26227576,
+   "end": 26357580,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Normal.jpg",
-   "start": 25540621,
-   "end": 26606163,
+   "start": 26357580,
+   "end": 27423122,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Roughness.jpg",
-   "start": 26606163,
-   "end": 26978440,
+   "start": 27423122,
+   "end": 27795399,
+   "audio": 0
+  }, {
+   "filename": "/textures/Metal038_1K-JPG/MetalGreen.jpg",
+   "start": 27795399,
+   "end": 28536304,
    "audio": 0
   }, {
    "filename": "/textures/Wood026_1K-JPG/Wood026_1K_Color.jpg",
-   "start": 26978440,
-   "end": 27964075,
+   "start": 28536304,
+   "end": 29521939,
    "audio": 0
   }, {
    "filename": "/textures/Wood026_1K-JPG/Wood026_1K_Normal.jpg",
-   "start": 27964075,
-   "end": 29199343,
+   "start": 29521939,
+   "end": 30757207,
    "audio": 0
   }, {
    "filename": "/textures/WoodenCrate/Wood_Crate_001_basecolor.jpg",
-   "start": 29199343,
-   "end": 29239154,
+   "start": 30757207,
+   "end": 30797018,
    "audio": 0
   }, {
    "filename": "/textures/WoodenCrate/Wood_Crate_001_normal.jpg",
-   "start": 29239154,
-   "end": 29499411,
+   "start": 30797018,
+   "end": 31057275,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_AmbientOcclusion.jpg",
-   "start": 29499411,
-   "end": 29879132,
+   "start": 31057275,
+   "end": 31436996,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Color.jpg",
-   "start": 29879132,
-   "end": 30679213,
+   "start": 31436996,
+   "end": 32237077,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Displacement.jpg",
-   "start": 30679213,
-   "end": 31196108,
+   "start": 32237077,
+   "end": 32753972,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Normal.jpg",
-   "start": 31196108,
-   "end": 32220597,
+   "start": 32753972,
+   "end": 33778461,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Roughness.jpg",
-   "start": 32220597,
-   "end": 32594619,
+   "start": 33778461,
+   "end": 34152483,
    "audio": 0
   } ],
-  "remote_package_size": 32594619,
-  "package_uuid": "d5e395db-7ca7-44ca-a7bb-cdfe6a04541d"
+  "remote_package_size": 34152483,
+  "package_uuid": "3b54e87b-83fa-47dc-8268-1c5fd6e82a81"
  });
 })();
 
@@ -2303,43 +2343,6 @@ function ___cxa_find_matching_catch_2() {
 }
 
 function ___cxa_find_matching_catch_3() {
- var thrown = exceptionLast;
- if (!thrown) {
-  setTempRet0(0 | 0);
-  return 0 | 0;
- }
- var info = new ExceptionInfo(thrown);
- var thrownType = info.get_type();
- var catchInfo = new CatchInfo();
- catchInfo.set_base_ptr(thrown);
- if (!thrownType) {
-  setTempRet0(0 | 0);
-  return catchInfo.ptr | 0;
- }
- var typeArray = Array.prototype.slice.call(arguments);
- var stackTop = stackSave();
- var exceptionThrowBuf = stackAlloc(4);
- SAFE_HEAP_STORE(exceptionThrowBuf | 0, thrown | 0, 4);
- for (var i = 0; i < typeArray.length; i++) {
-  var caughtType = typeArray[i];
-  if (caughtType === 0 || caughtType === thrownType) {
-   break;
-  }
-  if (___cxa_can_catch(caughtType, thrownType, exceptionThrowBuf)) {
-   var adjusted = SAFE_HEAP_LOAD(exceptionThrowBuf | 0, 4, 0) | 0;
-   if (thrown !== adjusted) {
-    catchInfo.set_adjusted_ptr(adjusted);
-   }
-   setTempRet0(caughtType | 0);
-   return catchInfo.ptr | 0;
-  }
- }
- stackRestore(stackTop);
- setTempRet0(thrownType | 0);
- return catchInfo.ptr | 0;
-}
-
-function ___cxa_find_matching_catch_4() {
  var thrown = exceptionLast;
  if (!thrown) {
   setTempRet0(0 | 0);
@@ -8556,10 +8559,6 @@ function _glViewport(x0, x1, x2, x3) {
  GLctx["viewport"](x0, x1, x2, x3);
 }
 
-function _llvm_eh_typeid_for(type) {
- return type;
-}
-
 function _setTempRet0($i) {
  setTempRet0($i | 0);
 }
@@ -9008,7 +9007,6 @@ var asmLibraryArg = {
  "__cxa_end_catch": ___cxa_end_catch,
  "__cxa_find_matching_catch_2": ___cxa_find_matching_catch_2,
  "__cxa_find_matching_catch_3": ___cxa_find_matching_catch_3,
- "__cxa_find_matching_catch_4": ___cxa_find_matching_catch_4,
  "__cxa_free_exception": ___cxa_free_exception,
  "__cxa_rethrow": ___cxa_rethrow,
  "__cxa_throw": ___cxa_throw,
@@ -9085,13 +9083,10 @@ var asmLibraryArg = {
  "glVertexAttribPointer": _glVertexAttribPointer,
  "glViewport": _glViewport,
  "invoke_diii": invoke_diii,
- "invoke_fffff": invoke_fffff,
- "invoke_fii": invoke_fii,
  "invoke_fiii": invoke_fiii,
  "invoke_i": invoke_i,
  "invoke_ii": invoke_ii,
  "invoke_iii": invoke_iii,
- "invoke_iiiff": invoke_iiiff,
  "invoke_iiii": invoke_iiii,
  "invoke_iiiii": invoke_iiiii,
  "invoke_iiiiii": invoke_iiiiii,
@@ -9101,25 +9096,16 @@ var asmLibraryArg = {
  "invoke_iiiiiiiiiiii": invoke_iiiiiiiiiiii,
  "invoke_iiiiiiiiiiiii": invoke_iiiiiiiiiiiii,
  "invoke_iiiiij": invoke_iiiiij,
- "invoke_iij": invoke_iij,
- "invoke_j": invoke_j,
  "invoke_jii": invoke_jii,
  "invoke_jiiii": invoke_jiiii,
  "invoke_v": invoke_v,
  "invoke_vi": invoke_vi,
- "invoke_vifff": invoke_vifff,
  "invoke_vii": invoke_vii,
- "invoke_viifi": invoke_viifi,
- "invoke_viifii": invoke_viifii,
  "invoke_viii": invoke_viii,
  "invoke_viiii": invoke_viiii,
- "invoke_viiiii": invoke_viiiii,
- "invoke_viiiiii": invoke_viiiiii,
  "invoke_viiiiiii": invoke_viiiiiii,
  "invoke_viiiiiiiiii": invoke_viiiiiiiiii,
  "invoke_viiiiiiiiiiiiiii": invoke_viiiiiiiiiiiiiii,
- "invoke_vij": invoke_vij,
- "llvm_eh_typeid_for": _llvm_eh_typeid_for,
  "segfault": segfault,
  "setTempRet0": _setTempRet0,
  "strftime_l": _strftime_l,
@@ -9148,6 +9134,8 @@ var _GetLastTickTime = Module["_GetLastTickTime"] = createExportWrapper("GetLast
 
 var _SetupClientContext = Module["_SetupClientContext"] = createExportWrapper("SetupClientContext");
 
+var _SetupClientGL = Module["_SetupClientGL"] = createExportWrapper("SetupClientGL");
+
 var _TickGame = Module["_TickGame"] = createExportWrapper("TickGame");
 
 var _IsObjectAlive = Module["_IsObjectAlive"] = createExportWrapper("IsObjectAlive");
@@ -9159,6 +9147,8 @@ var _GetObjectSerialized = Module["_GetObjectSerialized"] = createExportWrapper(
 var _HandleLocalInput = Module["_HandleLocalInput"] = createExportWrapper("HandleLocalInput");
 
 var _LoadGlobalSettings = Module["_LoadGlobalSettings"] = createExportWrapper("LoadGlobalSettings");
+
+var _WorldToScreenCoordinates = Module["_WorldToScreenCoordinates"] = createExportWrapper("WorldToScreenCoordinates");
 
 var _HandleReplicate = Module["_HandleReplicate"] = createExportWrapper("HandleReplicate");
 
@@ -9196,23 +9186,13 @@ var _emscripten_stack_get_end = Module["_emscripten_stack_get_end"] = function()
 
 var _setThrew = Module["_setThrew"] = createExportWrapper("setThrew");
 
-var __ZSt18uncaught_exceptionv = Module["__ZSt18uncaught_exceptionv"] = createExportWrapper("_ZSt18uncaught_exceptionv");
-
-var ___cxa_can_catch = Module["___cxa_can_catch"] = createExportWrapper("__cxa_can_catch");
-
-var ___cxa_is_pointer_type = Module["___cxa_is_pointer_type"] = createExportWrapper("__cxa_is_pointer_type");
-
 var _sbrk = Module["_sbrk"] = createExportWrapper("sbrk");
 
 var _emscripten_get_sbrk_ptr = Module["_emscripten_get_sbrk_ptr"] = createExportWrapper("emscripten_get_sbrk_ptr");
 
-var dynCall_j = Module["dynCall_j"] = createExportWrapper("dynCall_j");
-
-var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
-
 var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
 
-var dynCall_iij = Module["dynCall_iij"] = createExportWrapper("dynCall_iij");
+var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
 
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 
@@ -9226,39 +9206,17 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 91672;
+var _game = Module["_game"] = 95392;
 
-var _clientGl = Module["_clientGl"] = 91920;
+var _clientGl = Module["_clientGl"] = 95640;
 
-var _clientAudio = Module["_clientAudio"] = 92088;
+var _clientAudio = Module["_clientAudio"] = 96056;
 
-var _inputEvents = Module["_inputEvents"] = 92112;
+var _inputEvents = Module["_inputEvents"] = 96080;
 
-var _ping = Module["_ping"] = 92144;
+var _ping = Module["_ping"] = 96112;
 
-var _lastTickTime = Module["_lastTickTime"] = 92136;
-
-function invoke_vii(index, a1, a2) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
+var _lastTickTime = Module["_lastTickTime"] = 96104;
 
 function invoke_iii(index, a1, a2) {
  var sp = stackSave();
@@ -9271,10 +9229,43 @@ function invoke_iii(index, a1, a2) {
  }
 }
 
+function invoke_i(index) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)();
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_vii(index, a1, a2) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_iiii(index, a1, a2, a3) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_v(index) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)();
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -9304,87 +9295,10 @@ function invoke_vi(index, a1) {
  }
 }
 
-function invoke_viiiiii(index, a1, a2, a3, a4, a5, a6) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viii(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_fii(index, a1, a2) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_v(index) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)();
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
 function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiiii(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_fffff(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -9403,10 +9317,10 @@ function invoke_viiii(index, a1, a2, a3, a4) {
  }
 }
 
-function invoke_i(index) {
+function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)();
+  return wasmTable.get(index)(a1, a2, a3, a4, a5);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -9414,65 +9328,10 @@ function invoke_i(index) {
  }
 }
 
-function invoke_iiiii(index, a1, a2, a3, a4) {
+function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
  var sp = stackSave();
  try {
-  return wasmTable.get(index)(a1, a2, a3, a4);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viifi(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viifii(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiff(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_vifff(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4);
+  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -9484,6 +9343,17 @@ function invoke_iiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {
  var sp = stackSave();
  try {
   return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
+function invoke_iiiii(index, a1, a2, a3, a4) {
+ var sp = stackSave();
+ try {
+  return wasmTable.get(index)(a1, a2, a3, a4);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;
@@ -9524,6 +9394,17 @@ function invoke_diii(index, a1, a2, a3) {
  }
 }
 
+function invoke_viiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_iiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) {
  var sp = stackSave();
  try {
@@ -9546,43 +9427,21 @@ function invoke_viiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {
  }
 }
 
+function invoke_viii(index, a1, a2, a3) {
+ var sp = stackSave();
+ try {
+  wasmTable.get(index)(a1, a2, a3);
+ } catch (e) {
+  stackRestore(sp);
+  if (e !== e + 0 && e !== "longjmp") throw e;
+  _setThrew(1, 0);
+ }
+}
+
 function invoke_viiiiiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) {
  var sp = stackSave();
  try {
   wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_j(index) {
- var sp = stackSave();
- try {
-  return dynCall_j(index);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_vij(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  dynCall_vij(index, a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iij(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  return dynCall_iij(index, a1, a2, a3);
  } catch (e) {
   stackRestore(sp);
   if (e !== e + 0 && e !== "longjmp") throw e;

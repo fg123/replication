@@ -2,11 +2,11 @@
 #include "game.h"
 #include "explosion.h"
 
-GrenadeObject::GrenadeObject(Game& game) : ThrownProjectile(game) {
+GrenadeObject::GrenadeObject(Game& game, ObjectID playerId) : ThrownProjectile(game, playerId) {
     // Don't Collide with Weapons
     collisionExclusion |= (uint64_t) Tag::WEAPON;
     SetModel(game.GetModel("Grenade.obj"));
-    GenerateAABBCollidersFromModel(this);
+    GenerateOBBCollidersFromModel(this);
     game.PlayAudio("GrenadeOut.wav", 1.f, this);
     // airFriction = Vector3(1, 1, 1);
 }
@@ -39,7 +39,7 @@ void GrenadeObject::Tick(Time time) {
 
 void GrenadeObject::Explode() {
 #ifdef BUILD_SERVER
-    ExplosionObject* explode = new ExplosionObject(game, damageRange, damage);
+    ExplosionObject* explode = new ExplosionObject(game, playerId, damageRange, damage);
     explode->SetPosition(GetPosition());
     game.AddObject(explode);
     game.DestroyObject(GetId());

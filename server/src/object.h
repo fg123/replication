@@ -65,6 +65,14 @@ enum Tag : uint64_t {
     DRAW_FOREGROUND     = 0b0000000000010000000,
 };
 
+struct DebugLine {
+    Vector3 from;
+    Vector3 to;
+    Vector3 color;
+    DebugLine(Vector3 from, Vector3 to, Vector3 color) : from(from),
+        to(to), color(color) {}
+};
+
 class Object : public Replicable {
 protected:
     Game& game;
@@ -110,7 +118,9 @@ public:
     Quaternion clientRotation;
     bool clientRotationSet = false;
 
+    std::vector<DebugLine> debugLines;
 #endif
+
     // For object hierarchy, this is all managed from the game, used for
     //   knowing who ticks(). Parents tick their own children.
     std::unordered_set<Object*> children;
@@ -213,6 +223,13 @@ public:
 
     Model* GetModel() {
         return model;
+    }
+
+    // Debug Data
+    void AddDebugLine(const Vector3& from, const Vector3& to, const Vector3& color) {
+        #ifdef BUILD_CLIENT
+            debugLines.emplace_back(from, to, color);
+        #endif
     }
 };
 

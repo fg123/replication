@@ -196,11 +196,8 @@ public:
 #endif
 
     using RangeQueryResult = std::pair<Object*, double>;
-    // Gets all units within a certain radial range (by position), if
-    //   includeBoundingBox is set, counts unit if any part of bounding box
-    //   is part of that range.
+    // Gets all units within a certain radial range (by position)
     void GetUnitsInRange(const Vector3& position, float range,
-        bool includeBoundingBox,
         std::vector<RangeQueryResult>& results);
 
     bool CheckLineSegmentCollide(const Vector3& start,

@@ -2,9 +2,9 @@
 #include "game.h"
 #include "player.h"
 
-ArrowObject::ArrowObject(Game& game) : ThrownProjectile(game) {
+ArrowObject::ArrowObject(Game& game, ObjectID playerId) : ThrownProjectile(game, playerId) {
     SetModel(game.GetModel("Arrow.obj"));
-    AddCollider(new AABBCollider(this, Vector3(-0.15, -0.15, -0.15), Vector3(0.3, 0.3, 0.3)));
+    AddCollider(new OBBCollider(this, Vector3(-0.15, -0.15, -0.15), Vector3(0.3, 0.3, 0.3)));
     airFriction = Vector3(1, 1, 1);
 }
 
@@ -12,7 +12,7 @@ void ArrowObject::OnCollide(CollisionResult& result) {
     // Check Player Hit
     if (!hitPlayer && result.collidedWith->IsTagged(Tag::PLAYER)) {
         hitPlayer = true;
-        static_cast<PlayerObject*>(result.collidedWith)->DealDamage(50);
+        static_cast<PlayerObject*>(result.collidedWith)->DealDamage(50, playerId);
         SetVelocity(Vector3());
     }
     else if (result.collidedWith->IsStatic() && !IsStatic()) {

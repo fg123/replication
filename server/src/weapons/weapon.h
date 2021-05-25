@@ -24,6 +24,7 @@ class WeaponObject : public Object {
 protected:
     PlayerObject* attachedTo = nullptr;
 public:
+    REPLICATED(std::string, name, "name");
     REPLICATED(WeaponAttachmentPoint, attachmentPoint, "atp");
     REPLICATED_D(float, currentSpread, "spread", 0.f);
 
@@ -39,6 +40,9 @@ public:
     virtual void StartFire(Time time) {}
     virtual void Fire(Time time) {}
     virtual void ReleaseFire(Time time) {}
+
+    virtual void StartAlternateFire(Time time) {}
+    virtual void ReleaseAlternateFire(Time time) {}
 
     virtual void StartReload(Time time) {}
 

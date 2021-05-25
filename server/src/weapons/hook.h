@@ -11,7 +11,8 @@ public:
 
     CLASS_CREATE(HookObject)
 
-    HookObject(Game& game);
+    HookObject(Game& game) : HookObject(game, 0) {}
+    HookObject(Game& game, ObjectID playerId);
 
     virtual void OnCollide(CollisionResult& result) override;
     virtual void Tick(Time time) override;

@@ -17,7 +17,8 @@ class GrenadeObject : public ThrownProjectile {
 public:
     CLASS_CREATE(GrenadeObject)
 
-    GrenadeObject(Game& game);
+    GrenadeObject(Game& game) : GrenadeObject(game, 0) {}
+    GrenadeObject(Game& game, ObjectID playerId);
 
     void Explode();
 

@@ -28,7 +28,7 @@ public:
         SetTag(Tag::NO_GRAVITY);
 
         SetModel(game.GetModel("Portal.obj"));
-        GenerateAABBCollidersFromModel(this);
+        GenerateOBBCollidersFromModel(this);
     }
 
     virtual void Tick(Time time) override {

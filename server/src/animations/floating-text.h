@@ -1,5 +1,4 @@
-#ifndef FLOATING_TEXT_H
-#define FLOATING_TEXT_H
+#pragma once
 
 #include "animation.h"
 #include "vector.h"
@@ -9,8 +8,8 @@ struct FloatingTextAnimation : public Animation {
     std::string text;
     std::string color;
 
-    FloatingTextAnimation(Vector3 position, std::string text, std::string color)
-        : position(position), text(text), color(color) { }
+    FloatingTextAnimation(ObjectID player, Vector3 position, std::string text, std::string color)
+        : Animation(player), position(position), text(text), color(color) { }
 
     virtual const char* GetKey() override { return "FloatingText"; }
 
@@ -23,6 +22,3 @@ struct FloatingTextAnimation : public Animation {
         SerializeDispatch(color, obj);
     }
 };
-
-#endif
-

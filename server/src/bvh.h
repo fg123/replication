@@ -17,7 +17,7 @@ struct BVHTree {
             a(a), b(b), c(c), norm(norm), center((a + b + c) / 3.0f) {}
     };
 
-    AABBCollider collider;
+    AABB collider;
     std::vector<BVHTree*> children;
     // Leaf if we have some triangles in here
     std::vector<Triangle*> tris;

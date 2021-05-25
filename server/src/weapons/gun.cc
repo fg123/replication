@@ -1,5 +1,4 @@
 #include "gun.h"
-#include "bullet.h"
 #include "bullet-tracer.h"
 #include "player.h"
 #include "bullet-hole.h"
@@ -14,10 +13,9 @@ void GunBase::Tick(Time time) {
 
     if (reloadStartTime != 0 && time >= reloadStartTime + reloadTime) {
         reloadStartTime = 0;
-        if (magazines > 0) {
+        if (attachedTo->inventoryManager.GetAmmoCount() > 0) {
         #ifdef BUILD_SERVER
-            magazines -= 1;
-            bullets = magazineSize;
+            bullets = attachedTo->inventoryManager.RemoveAmmo(magazineSize);
             game.RequestReplication(GetId());
         #endif
         }
@@ -28,6 +26,13 @@ void GunBase::Tick(Time time) {
         if (currentSpread < 0.f) {
             currentSpread = 0;
         }
+    }
+
+    if (isADS) {
+        attachmentPoint = WeaponAttachmentPoint::CENTER;
+    }
+    else {
+        attachmentPoint = WeaponAttachmentPoint::RIGHT;
     }
 
 #ifdef BUILD_CLIENT
@@ -43,6 +48,14 @@ void GunBase::Tick(Time time) {
 #endif
 
     WeaponObject::Tick(time);
+}
+
+void GunBase::Serialize(JSONWriter& obj) {
+    WeaponObject::Serialize(obj);
+    #ifdef BUILD_CLIENT
+        obj.Key("inventoryAmmo");
+        obj.Uint(attachedTo->inventoryManager.GetAmmoCount());
+    #endif
 }
 
 void GunBase::Fire(Time time) {
@@ -97,15 +110,8 @@ void GunBase::ActualFire(Time time) {
     }
 
     // Ray Cast
-    // BulletObject* bullet = new BulletObject(game, damage, result);
-    // // LOG_DEBUG(GetLookDirection() << " " << fireOffset);
-    // Vector3 startPosition = GetPosition() + GetLookDirection() * fireOffset;
-    // bullet->SetPosition(startPosition);
-    // bullet->SetVelocity(glm::normalize(bulletEnd - startPosition) * 50.0f);
-    // game.AddObject(bullet);
-    // game.RequestReplication(GetId());
 
-    Vector3 startPosition = GetPosition() + GetLookDirection() * fireOffset;
+    Vector3 startPosition = GetPosition() + fireOffset * GetRotation();
 
 #ifdef BUILD_SERVER
     BulletTracer* bullet = new BulletTracer(game, startPosition, bulletEnd);
@@ -114,7 +120,7 @@ void GunBase::ActualFire(Time time) {
 
     if (result.isHit) {
         if (result.hitObject->IsTagged(Tag::PLAYER)) {
-            static_cast<PlayerObject*>(result.hitObject)->DealDamage(damage);
+            static_cast<PlayerObject*>(result.hitObject)->DealDamage(damage, attachedTo->GetId());
         }
         else {
             #ifdef BUILD_SERVER
@@ -137,7 +143,7 @@ void GunBase::ActualFire(Time time) {
 }
 
 void GunBase::StartReload(Time time) {
-    if (reloadStartTime == 0 && magazines > 0 && bullets != magazineSize) {
+    if (reloadStartTime == 0 && attachedTo->inventoryManager.GetAmmoCount() > 0 && bullets != magazineSize) {
         reloadStartTime = time;
         game.PlayAudio("reload.wav", 1.0f, this);
     }

@@ -37,6 +37,7 @@ window.Module['onRuntimeInitialized'] = function() {
             console.log('Starting Game');
             const clientState = new ClientState(webSocket, instance, resourceManager);
             const game = new GameCanvas(clientState, gameCanvas);
+            clientState.game = game;
             new UICanvas(clientState, uiCanvas, uiContext);
             new EscapeMenu(clientState, document.getElementById('escapeMenu'), game);
         });

@@ -1,10 +1,10 @@
 #include "explosion.h"
 #include "player.h"
 
-ExplosionObject::ExplosionObject(Game& game) : ExplosionObject(game, 0.f, 0.f) { }
+ExplosionObject::ExplosionObject(Game& game) : ExplosionObject(game, 0, 0.f, 0.f) { }
 
-ExplosionObject::ExplosionObject(Game& game, float radius, float damage) :
-    Object(game), radius(radius), damage(damage) {
+ExplosionObject::ExplosionObject(Game& game, ObjectID playerId, float radius, float damage) :
+    Object(game), radius(radius), damage(damage), playerId(playerId) {
 
     SetModel(game.GetModel("Explosion.obj"));
 }
@@ -26,12 +26,12 @@ void ExplosionObject::Tick(Time time) {
     SetScale(Vector3(scale, scale, scale));
 
     std::vector<Game::RangeQueryResult> results;
-    game.GetUnitsInRange(GetPosition(), scale, false, results);
+    game.GetUnitsInRange(GetPosition(), scale, results);
 
     for (auto& result : results) {
         // Flat Damage for now
         if (result.first->IsTagged(Tag::PLAYER) && damaged.find(result.first) == damaged.end()) {
-            static_cast<PlayerObject*>(result.first)->DealDamage(damage);
+            static_cast<PlayerObject*>(result.first)->DealDamage(damage, playerId);
             damaged.insert(result.first);
         }
     }

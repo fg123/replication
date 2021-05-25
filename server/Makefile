@@ -2,12 +2,23 @@ EXE = game
 SRC_DIR = src
 SRC = $(shell find src/ -name "*.cc" | grep -v "main" | grep -v "client")
 SERVER_SRC = $(SRC) src/main.cc
+COLLLIDER_TEST_SRC = $(SRC) src/collider-test-main.cc
 CLIENT_SRC = $(SRC) src/client_main.cc src/client_gl.cc src/client_shader.cc src/client_audio.cc
-SERVER_OBJ = $(SERVER_SRC:%.cc=%.o)
+
+
+DATA_DIRS = $(shell find ../data/ -type d)
+DATA_FILES = $(shell find ../data/ -type f -name '*')
+
 # Use .wo for webassembly
-CLIENT_OBJ = $(CLIENT_SRC:%.cc=%.wo)
+SERVER_OBJ = $(SERVER_SRC:%.cc=%.o)
 SERVER_DEPS = $(SERVER_OBJ:%.o=%.d)
+
+COLLIDER_TEST_OBJ = $(COLLLIDER_TEST_SRC:%.cc=%.o)
+COLLIDER_TEST_DEPS = $(COLLIDER_TEST_OBJ:%.o=%.d)
+
+CLIENT_OBJ = $(CLIENT_SRC:%.cc=%.wo)
 CLIENT_DEPS = $(CLIENT_OBJ:%.wo=%.wd)
+
 HEADERS = $(shell find src/ -name "*.h") Makefile
 
 USOCKET = $(SRC_DIR)/uWebSocket/uSocket
@@ -25,8 +36,17 @@ LDLIBS = -L/usr/lib
 SERVER_DEBUG = -g
 SERVER_PROD = -O2
 SERVER_LDLIBS = $(LDLIBS) -lz -lpthread
+COLLIDER_TEST_LDLIBS = $(SERVER_LDLIBS) -lglfw -lGL -lGLEW
 WASM_DEBUG = -g4 -s ASSERTIONS=2 -s SAFE_HEAP=1 -s STACK_OVERFLOW_CHECK=1
-WASM_FLAGS = \
+WASM_FLAGS =
+
+WASM_LINKING_FLAGS = \
+	-lopenal \
+	--preload-file ../data/maps@/maps \
+	--preload-file ../data/models@/models \
+	--preload-file ../data/shaders@/shaders \
+	--preload-file ../data/sounds@/sounds \
+	--preload-file ../data/textures@/textures \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s DISABLE_EXCEPTION_CATCHING=0 \
@@ -35,34 +55,42 @@ WASM_FLAGS = \
 	-s MAX_WEBGL_VERSION=2 \
 	--source-map-base http://localhost:8000/
 
-WASM_LINKING_FLAGS = \
-	-lopenal \
-	--preload-file ../data/maps@/maps \
-	--preload-file ../data/models@/models \
-	--preload-file ../data/shaders@/shaders \
-	--preload-file ../data/sounds@/sounds \
-	--preload-file ../data/textures@/textures
-
 GCC_FLAGS = -Wno-class-memaccess -fmax-errors=5
 
-all: server client
+SERVER_OUTPUT = bin/$(EXE)_server
+SERVER_OUTPUT_PROD = bin/$(EXE)_server_prod
 
-server: $(SERVER_OBJ) $(USOCKET)/uSockets.a
+CLIENT_OUTPUT = bin/$(EXE)_client.js
+CLIENT_OUTPUT_PROD = bin/$(EXE)_client_prod.js
+
+COLLIDER_TEST_OUTPUT = bin/$(EXE)_collider
+
+all: $(SERVER_OUTPUT) $(CLIENT_OUTPUT) $(COLLIDER_TEST_OUTPUT)
+
+server_prod: $(SERVER_OUTPUT_PROD)
+
+client_prod: $(CLIENT_OUTPUT_PROD)
+
+$(SERVER_OUTPUT): $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
-	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_DEBUG) -o bin/$(EXE)_server
+	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_DEBUG) -o $(SERVER_OUTPUT)
 
-server_prod: $(SERVER_OBJ) $(USOCKET)/uSockets.a
+$(COLLIDER_TEST_OUTPUT): $(COLLIDER_TEST_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
-	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o bin/$(EXE)_server_prod
+	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(COLLIDER_TEST_LDLIBS) $(SERVER_DEBUG) -o $(COLLIDER_TEST_OUTPUT)
 
-client: $(CLIENT_OBJ)
-	em++ -O3 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o bin/$(EXE)_client.js
+$(SERVER_OUTPUT_PROD): $(SERVER_OBJ) $(USOCKET)/uSockets.a
+	mkdir -p bin
+	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o $(SERVER_OUTPUT_PROD)
+
+$(CLIENT_OUTPUT): $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
+	em++ -O0 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
 	cp bin/$(EXE)_client.wasm ../client/dist/
 	cp bin/$(EXE)_client.js ../client/dist/
 	cp bin/$(EXE)_client.data ../client/dist/
 
-client_prod: $(CLIENT_OBJ)
-	em++ -O3 $(LDFLAGS) $^ $(LDLIBS) $(WASM_FLAGS) $(WASM_LINKING_FLAGS) -o bin/$(EXE)_client_prod.js
+$(CLIENT_OUTPUT_PROD): $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
+	em++ -O3 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT_PROD)
 	cp bin/$(EXE)_client_prod.wasm ../client/dist/
 	cp bin/$(EXE)_client_prod.js ../client/dist/
 	cp bin/$(EXE)_client_prod.data ../client/dist/

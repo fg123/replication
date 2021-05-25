@@ -9,13 +9,12 @@ protected:
     // Changable by underlying guns
     REPLICATED_D(float, fireRate, "fr", 10);
     REPLICATED(int, magazineSize, "magsize");
-    REPLICATED(int, magazines, "mags");
     REPLICATED(int, bullets, "blts");
     REPLICATED(int, damage, "dmg");
     REPLICATED(Time, reloadTime, "rlt");
 
     bool automaticFire = false;
-    float fireOffset;
+    Vector3 fireOffset;
 
     float spreadReduction = 0.5f;
     float spreadIncreasePerShot = 2;
@@ -23,6 +22,8 @@ protected:
 
     float recoilRotationPitch = 0;
     float recoilRotationPitchVel = 0;
+
+    REPLICATED_D(bool, isADS, "ads", false);
 
 private:
     Time lastFireTime = 0;
@@ -41,6 +42,16 @@ public:
     virtual void Tick(Time time) override;
     virtual void StartFire(Time time) override;
     virtual void Fire(Time time) override;
+
+    virtual void Serialize(JSONWriter& obj) override;
+
+    virtual void StartAlternateFire(Time time) override {
+        isADS = true;
+    }
+    virtual void ReleaseAlternateFire(Time time) override {
+        isADS = false;
+    }
+
     #ifdef BUILD_CLIENT
     virtual const Matrix4 GetTransform() override {
         Matrix4 recoilMatrix;

@@ -13,6 +13,16 @@ public:
         cooldown = 2000;
         powerMin = 70;
         powerMax = 70;
+        name = "Grenade";
+
+        SetModel(game.GetModel("Grenade.obj"));
+        GenerateOBBCollidersFromModel(this);
+    }
+
+    virtual void FireProjectile(Time time) override {
+        InputHoldThrower<GrenadeObject>::FireProjectile(time);
+        attachedTo->DropWeapon(this);
+        game.DestroyObject(GetId());
     }
 };
 

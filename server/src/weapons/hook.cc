@@ -1,14 +1,14 @@
 #include "hook.h"
 #include "hook-thrower.h"
 
-HookObject::HookObject(Game& game) : ThrownProjectile(game) {
+HookObject::HookObject(Game& game, ObjectID playerId) : ThrownProjectile(game, playerId) {
     // Don't Collide with Weapons
     collisionExclusion |= (uint64_t) Tag::WEAPON;
     collisionExclusion |= (uint64_t) Tag::PLAYER;
     SetTag(Tag::NO_GRAVITY);
     #ifdef BUILD_SERVER
         SetModel(game.GetModel("BulletTracer.obj"));
-        AddCollider(new AABBCollider(this, Vector3(-0.1, -0.1, -0.1), Vector3(0.2, 0.2, 0.2)));
+        AddCollider(new OBBCollider(this, Vector3(-0.1, -0.1, -0.1), Vector3(0.2, 0.2, 0.2)));
     #endif
 
     game.PlayAudio("HookThrow.wav", 1.f, this);
