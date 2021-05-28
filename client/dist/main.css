@@ -33,7 +33,7 @@ div.escapeMenu {
 
 div.characterSelect {
     position: absolute;
-    top: 150px;
+    top: 180px;
     left: 50%;
     transform: translate(-50%, -50%);
 }
@@ -101,7 +101,26 @@ div.inventory {
     height: calc(400px / 3);
 }
 
-.dropBtn {
+.dropBtn, .swapBtn {
     font-size: 30px;
     font-weight: bold;
+}
+
+.optionWrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.optionWrapper button {
+    flex-grow: 1;
+}
+
+.slotWrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.slotContent {
+    flex-grow: 1;
 }

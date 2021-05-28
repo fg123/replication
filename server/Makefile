@@ -33,7 +33,7 @@ CPPFLAGS = -std=c++17 -Wall \
 # -I lib/assimp-4.1.0/include
 
 LDLIBS = -L/usr/lib
-SERVER_DEBUG = -g
+SERVER_DEBUG = -g -O2
 SERVER_PROD = -O2
 SERVER_LDLIBS = $(LDLIBS) -lz -lpthread
 COLLIDER_TEST_LDLIBS = $(SERVER_LDLIBS) -lglfw -lGL -lGLEW
@@ -84,7 +84,7 @@ $(SERVER_OUTPUT_PROD): $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o $(SERVER_OUTPUT_PROD)
 
 $(CLIENT_OUTPUT): $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
-	em++ -O0 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
+	em++ -O3 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
 	cp bin/$(EXE)_client.wasm ../client/dist/
 	cp bin/$(EXE)_client.js ../client/dist/
 	cp bin/$(EXE)_client.data ../client/dist/
@@ -96,7 +96,7 @@ $(CLIENT_OUTPUT_PROD): $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
 	cp bin/$(EXE)_client_prod.data ../client/dist/
 
 %.o: %.cc
-	$(CXX) $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
+	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
 %.wo: %.cc
 	em++ -O3 $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -g4 -MMD -MF $(<:%.cc=%.wd) -c $< -o $@

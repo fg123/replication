@@ -2,6 +2,7 @@
 #include "player.h"
 #include "game.h"
 #include "weapons/gun.h"
+#include "weapons/grenade-thrower.h"
 #include "util.h"
 #include "ammo.h"
 
@@ -44,6 +45,12 @@ void InventoryManager::Drop(int id) {
     else if (id == 7 && objects.size() > 5) Drop(objects[5]);
 }
 
+void InventoryManager::Swap() {
+    WeaponObject* tmp = primary;
+    primary = secondary;
+    secondary = tmp;
+}
+
 void InventoryManager::Drop(WeaponObject* weapon) {
     if (!weapon) return;
     weapon->Detach();
@@ -62,6 +69,7 @@ void InventoryManager::Drop(WeaponObject* weapon) {
 }
 
 void InventoryManager::ChooseNewCurrentWeapon() {
+    if (currentWeapon && (currentWeapon == primary || currentWeapon == secondary)) return;
     if (primary) currentWeapon = primary;
     else if (secondary) currentWeapon = secondary;
     else if (!objects.empty()) currentWeapon = objects[0];
@@ -89,15 +97,39 @@ void InventoryManager::EquipSecondary() {
     currentWeapon = secondary;
 }
 
+void InventoryManager::EquipMedicalSupplies() {
+    // TODO;
+}
+
+void InventoryManager::EquipPrevious() {
+    if (!currentWeapon) EquipSecondary();
+    if (primary && currentWeapon == secondary) EquipPrimary();
+    else if (secondary && currentWeapon == primary) EquipSecondary();
+}
+
+void InventoryManager::EquipNext() {
+    if (!currentWeapon) EquipPrimary();
+    if (primary && currentWeapon == secondary) EquipPrimary();
+    else if (secondary && currentWeapon == primary) EquipSecondary();
+}
+
 void InventoryManager::EquipGrenade() {
-    // TODO
+    for (auto& object : objects) {
+        if (GrenadeThrower* am = dynamic_cast<GrenadeThrower*>(object)) {
+            currentWeapon = am;
+            return;
+        }
+    }
+}
+
+void InventoryManager::HolsterAll() {
+    currentWeapon = nullptr;
 }
 
 void InventoryManager::DropCurrentWeapon() {
     Drop(currentWeapon);
     ChooseNewCurrentWeapon();
 }
-
 
 void InventoryManager::Serialize(JSONWriter& obj) {
     // LOG_DEBUG("Player Object Serialize - Start");

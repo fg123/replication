@@ -80,9 +80,13 @@ int main(int argc, char** argv) {
             TickInterval
         );
 
-        gameTimer.ScheduleInterval([gameTick](Time time) {
-            LOG_INFO("Average Tick Interval: " << gameTick->performance.GetAverage());
-        }, 3000);
+        gameTimer.ScheduleInterval([gameTick, &game](Time time) {
+            LOG_INFO("Average Tick Interval (Per Object): " <<
+                gameTick->performance.GetAverage() << " (" <<
+                game.averageObjectTickTime.GetAverage() << ")");
+            // PrintCollisionStatistics();
+            ClearCollisionStatistics();
+        }, 5000);
 
     #ifdef BUILD_SERVER
         gameTimer.ScheduleInterval(std::bind(&Game::QueueAllDirtyForReplication, &game, std::placeholders::_1),
@@ -151,6 +155,9 @@ int main(int argc, char** argv) {
                 else if (obj["event"] == "inventoryDrop") {
                     int dropId = obj["id"].GetInt();
                     data->playerObject->InventoryDrop(dropId);
+                }
+                else if (obj["event"] == "inventorySwap") {
+                    data->playerObject->InventorySwap();
                 }
                 else {
                     data->playerObject->OnInput(obj);

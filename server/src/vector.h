@@ -40,10 +40,10 @@ inline Quaternion DirectionToQuaternion(const Vector3& direction) {
 }
 
 inline bool IsZero(float a) {
-    return glm::abs(a) < 0.00001f;
+    return glm::abs(a) < 0.0001f;
 }
 inline bool IsZero(Vector3 a) {
-    return glm::length(a) < 0.00001f;
+    return glm::length(a) < 0.0001f;
 }
 inline bool IsZero(Quaternion a) {
     return IsZero(Vector3(a.x, a.y, a.z));

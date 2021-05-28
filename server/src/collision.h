@@ -42,12 +42,21 @@ struct AABB {
         return AABB(ptMin, ptMax);
     }
 
+    static AABB FromMesh(const Mesh& mesh) {
+        if (mesh.vertices.empty()) return AABB{};
+        AABB first { mesh.vertices[0].position, mesh.vertices[0].position };
+        for (size_t i = 1; i < mesh.vertices.size(); i++) {
+            first.ExpandToContain(mesh.vertices[i].position);
+        }
+        return first;
+    }
+
     void ExpandToContain(const Vector3& pt) {
         ptMin = glm::min(ptMin, pt - 0.01f);
         ptMax = glm::max(ptMax, pt + 0.01f);
     }
 
-    static AABB FromTwo(AABB& a, AABB& b) {
+    static AABB FromTwo(const AABB& a, const AABB& b) {
         return AABB(glm::min(a.ptMin, b.ptMin), glm::max(a.ptMax, b.ptMax));
     }
 
@@ -99,6 +108,7 @@ public:
     Quaternion GetRotation();
 
     Matrix4 GetWorldTransform();
+    Matrix4 GetWorldTransformForLocalPoint(const Vector3&);
 
     Object* GetOwner() { return owner; }
 };
@@ -178,13 +188,24 @@ struct CapsuleCollider : public Collider {
     ~CapsuleCollider() {}
 
     virtual AABB GetBroadAABB() override {
-        return AABB(glm::min(position - radius, position2 - radius),
-            glm::max(position + radius, position + radius));
+        Vector3 pt1 = Vector3(GetWorldTransform() * Vector4(0, 0, 0, 1));
+        Vector3 pt2 = Vector3(GetWorldTransformForLocalPoint(position2) * Vector4(0, 0, 0, 1));
+
+        return AABB(glm::min(pt1 - radius, pt2 - radius),
+                glm::max(pt1 + radius, pt2 + radius));
     }
 
     virtual ColliderType GetType() override { return ColliderType::CAPSULE; }
     CollisionResult CollidesWith(Collider* other) override;
     bool CollidesWith(RayCastRequest& ray, RayCastResult& result) override;
+
+    Vector3 GetWorldPoint1() {
+        return GetPosition();
+    }
+
+    Vector3 GetWorldPoint2() {
+        return Vector3(GetWorldTransformForLocalPoint(position2) * Vector4(0, 0, 0, 1));
+    }
 };
 
 struct TwoPhaseCollider {
@@ -229,3 +250,6 @@ struct TwoPhaseCollider {
 
 void GenerateOBBCollidersFromModel(Object* obj);
 void GenerateStaticMeshCollidersFromModel(Object* obj);
+
+void ClearCollisionStatistics();
+void PrintCollisionStatistics();

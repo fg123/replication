@@ -17,6 +17,8 @@ public:
 
         SetModel(game.GetModel("Grenade.obj"));
         GenerateOBBCollidersFromModel(this);
+        AABB broad = collider.children[0]->GetBroadAABB();
+        LOG_DEBUG(broad.ptMin << " " << broad.ptMax);
     }
 
     virtual void FireProjectile(Time time) override {

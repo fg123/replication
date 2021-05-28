@@ -18,6 +18,10 @@ static const int Z_KEY = 90;
 static const int W_KEY = 87;
 static const int K_KEY = 75;
 static const int SPACE_KEY = 32;
+static const int D1_KEY = 49;
+static const int D2_KEY = 50;
+static const int D3_KEY = 51;
+static const int D4_KEY = 52;
 
 std::unordered_map<int, size_t> KEY_MAP = {
     { D_KEY, 0 },
@@ -31,7 +35,11 @@ std::unordered_map<int, size_t> KEY_MAP = {
     { W_KEY, 8 },
     { SPACE_KEY, 9 },
     { K_KEY, 10 },
-    { V_KEY, 11 }
+    { V_KEY, 11 },
+    { D1_KEY, 12 },
+    { D2_KEY, 13 },
+    { D3_KEY, 14 },
+    { D4_KEY, 15 }
 };
 
 PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector3()) {
@@ -41,16 +49,17 @@ PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game),
     inventoryManager(game, this) {
     SetTag(Tag::PLAYER);
 
-    SetTag(Tag::NO_GRAVITY);
+    // SetTag(Tag::NO_GRAVITY);
 
     SetPosition(position);
 
-    collisionExclusion |= (uint64_t) Tag::PLAYER;
+    // collisionExclusion |= (uint64_t) Tag::PLAYER;
 
     SetModel(game.GetModel("NewPlayer.obj"));
     // GenerateOBBCollidersFromModel(this);
-    AddCollider(new SphereCollider(this, Vector3(0, 0, 0), 0.25f));
-    AddCollider(new OBBCollider(this, Vector3(-0.375, -1.6, -0.125), Vector3(0.75, 1.30, 0.25)));
+    AddCollider(new CapsuleCollider(this, Vector3(0, 0, 0), Vector3(0, -1.35, 0), 0.5f));
+    // AddCollider(new SphereCollider(this, Vector3(0, 0, 0), 0.25f));
+    // AddCollider(new OBBCollider(this, Vector3(-0.375, -1.6, -0.25), Vector3(0.75, 1.30, 0.5)));
     SetScale(Vector3(1, 1, 1));
 }
 
@@ -89,6 +98,10 @@ void PlayerObject::PickupWeapon(WeaponObject* weapon) {
 
 void PlayerObject::InventoryDrop(int id) {
     inventoryManager.Drop(id);
+}
+
+void PlayerObject::InventorySwap() {
+    inventoryManager.Swap();
 }
 
 void PlayerObject::Tick(Time time) {
@@ -178,8 +191,25 @@ void PlayerObject::Tick(Time time) {
             DealDamage(100, GetId());
         }
     }
-    if (keyboardState[KEY_MAP[G_KEY]] && !lastKeyboardState[KEY_MAP[G_KEY]]) {
-        DropWeapon(GetCurrentWeapon());
+    if (keyboardState[KEY_MAP[D1_KEY]]) {
+        inventoryManager.EquipPrimary();
+    }
+    if (keyboardState[KEY_MAP[D2_KEY]]) {
+        inventoryManager.EquipSecondary();
+    }
+    if (keyboardState[KEY_MAP[D3_KEY]]) {
+        inventoryManager.HolsterAll();
+    }
+    if (keyboardState[KEY_MAP[G_KEY]]) {
+        inventoryManager.EquipGrenade();
+    }
+    if (mouseWheelDelta < 0) {
+        inventoryManager.EquipPrevious();
+        mouseWheelDelta = 0;
+    }
+    if (mouseWheelDelta > 0) {
+        inventoryManager.EquipNext();
+        mouseWheelDelta = 0;
     }
     if (keyboardState[KEY_MAP[SPACE_KEY]]) {
         // Can only jump if touching ground
@@ -360,7 +390,7 @@ void PlayerObject::DealDamage(int damage, ObjectID from) {
 #ifdef BUILD_SERVER
     health -= damage;
     game.QueueAnimation(new FloatingTextAnimation(from,
-        GetPosition(), std::to_string(damage), "#FFF"));
+        GetPosition(), std::to_string(damage), "red"));
     if (health <= 0) {
         ObjectID id = GetId();
         game.DestroyObject(id);
@@ -411,6 +441,9 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
         if (button >= 0 && button < 5) {
             mouseState[button] = false;
         }
+    }
+    else if (obj["event"] == "mw") {
+        mouseWheelDelta = obj["delta"].GetInt();
     }
     #ifdef BUILD_SERVER
         // LOG_DEBUG("Setting last client input time: " << obj["time"]);

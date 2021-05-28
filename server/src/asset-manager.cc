@@ -1,6 +1,7 @@
 #include "asset-manager.h"
 #include "logging.h"
 #include "timer.h"
+#include "util.h"
 
 #include "external/OBJ_Loader.h"
 
@@ -70,7 +71,17 @@ ModelID AssetManager::LoadModel(const std::string& name, const std::string& path
     modelMap[name] = model;
 
     for (auto& loadedMesh : loader.LoadedMeshes) {
-        Mesh& mesh = model->meshes.emplace_back();
+        std::string name = ToLower(loadedMesh.MeshName);
+        Mesh* _mesh = nullptr;
+        // LOG_DEBUG(name << " " << Contains(name, "nomesh"));
+        if (Contains(name, "nomesh")) {
+            _mesh = &model->otherMeshes.emplace_back();
+        }
+        else {
+            _mesh = &model->meshes.emplace_back();
+        }
+        Mesh& mesh = *_mesh;
+
         mesh.name = loadedMesh.MeshName;
         mesh.indices = loadedMesh.Indices;
         std::vector<std::vector<Vector3>> tangents { loadedMesh.Vertices.size() };

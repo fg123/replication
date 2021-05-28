@@ -1,5 +1,4 @@
-#ifndef PERF_H
-#define PERF_H
+#pragma once
 
 #include <vector>
 #include "logging.h"
@@ -40,5 +39,3 @@ public:
         return fullSum / size;
     }
 };
-
-#endif

@@ -8,7 +8,7 @@ GrenadeObject::GrenadeObject(Game& game, ObjectID playerId) : ThrownProjectile(g
     SetModel(game.GetModel("Grenade.obj"));
     GenerateOBBCollidersFromModel(this);
     game.PlayAudio("GrenadeOut.wav", 1.f, this);
-    // airFriction = Vector3(1, 1, 1);
+    airFriction = Vector3(0.95);
 }
 
 void GrenadeObject::OnCollide(CollisionResult& result) {

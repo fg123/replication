@@ -4,6 +4,36 @@
 #include "bvh.h"
 #include <queue>
 
+size_t AABBAndAABBCollideCount;
+size_t OBBAndOBBCollideCount;
+size_t SphereAndSphereCollideCount;
+size_t AABBAndSphereCollideCount;
+size_t OBBAndSphereCollideCount;
+size_t SphereAndMeshCollideCount;
+size_t OBBAndMeshCollideCount;
+
+
+void ClearCollisionStatistics() {
+    AABBAndAABBCollideCount = 0;
+    OBBAndOBBCollideCount = 0;
+    SphereAndSphereCollideCount = 0;
+    AABBAndSphereCollideCount = 0;
+    OBBAndSphereCollideCount = 0;
+    SphereAndMeshCollideCount = 0;
+    OBBAndMeshCollideCount = 0;
+}
+
+void PrintCollisionStatistics() {
+    LOG_DEBUG("====================================================");
+    LOG_DEBUG("AABBAndAABBCollideCount: " << AABBAndAABBCollideCount);
+    LOG_DEBUG("OBBAndOBBCollideCount: " << OBBAndOBBCollideCount);
+    LOG_DEBUG("SphereAndSphereCollideCount: " << SphereAndSphereCollideCount);
+    LOG_DEBUG("AABBAndSphereCollideCount: " << AABBAndSphereCollideCount);
+    LOG_DEBUG("OBBAndSphereCollideCount: " << OBBAndSphereCollideCount);
+    LOG_DEBUG("SphereAndMeshCollideCount: " << SphereAndMeshCollideCount);
+    LOG_DEBUG("OBBAndMeshCollideCount: " << OBBAndMeshCollideCount);
+}
+
 std::ostream& operator<<(std::ostream& out, const CollisionResult& result) {
     out << "CollisionResult: " <<
         (result.isColliding ? "YES" : "NO");
@@ -100,6 +130,7 @@ size_t QuadraticRootsSolver(float A, float B, float C, float roots[2]) {
 }
 
 bool AABBAndAABBCollide(const AABB& a, const AABB& b) {
+    AABBAndAABBCollideCount++;
     bool leftCollide = (a.ptMin.x < b.ptMax.x);
     bool rightCollide = (a.ptMax.x > b.ptMin.x);
 
@@ -133,6 +164,7 @@ AABB OBBCollider::GetBroadAABB() {
 }
 
 CollisionResult OBBAndOBBCollide(OBBCollider* rect1, OBBCollider* rect2) {
+    OBBAndOBBCollideCount++;
     Quaternion r1Rotation = rect1->GetRotation();
     Quaternion r2Rotation = rect2->GetRotation();
     // Apply SAT
@@ -184,16 +216,22 @@ CollisionResult OBBAndOBBCollide(OBBCollider* rect1, OBBCollider* rect2) {
     return result;
 }
 
-CollisionResult SphereAndSphereCollide(SphereCollider* c1, SphereCollider* c2) {
-    float distance = glm::distance(c1->GetPosition(), c2->GetPosition());
-    float radii = (c1->radius + c2->radius);
+CollisionResult SphereAndSphereCollide(const Vector3& sphere1Pos, float sphere1Rad,
+    const Vector3& sphere2Pos, float sphere2Rad) {
+
+    SphereAndSphereCollideCount++;
+    float distance = glm::distance(sphere1Pos, sphere2Pos);
+    float radii = (sphere1Rad + sphere2Rad);
     CollisionResult r;
     r.isColliding = distance < radii;
     if (r.isColliding) {
-        Vector3 difference = glm::normalize(c2->GetPosition() - c1->GetPosition());
+        Vector3 difference = IsZero(distance) ? Vector::Forward : glm::normalize(sphere2Pos - sphere1Pos);
         r.collisionDifference = -difference * (radii - distance);
     }
     return r;
+}
+CollisionResult SphereAndSphereCollide(SphereCollider* sphere1, SphereCollider* sphere2) {
+    return SphereAndSphereCollide(sphere1->GetPosition(), sphere1->radius, sphere2->GetPosition(), sphere2->radius);
 }
 
 Vector3 AABBSurfaceNormal(AABB& rect, Vector3 point) {
@@ -205,6 +243,9 @@ Vector3 AABBSurfaceNormal(AABB& rect, Vector3 point) {
 
 CollisionResult AABBAndSphereCollide(Vector3 rectPosition, Vector3 rectSize,
     Vector3 circPosition, float radius) {
+
+    AABBAndSphereCollideCount++;
+
     // LOG_DEBUG("AABB AND SPHERE COLLIDE");
     // Find a position from
     Vector3 rectHalf = rectSize / 2.0f;
@@ -258,6 +299,7 @@ CollisionResult AABBAndSphereCollide(Vector3 rectPosition, Vector3 rectSize,
 }
 
 CollisionResult OBBAndSphereCollide(OBBCollider* rect, SphereCollider* circle) {
+    OBBAndSphereCollideCount++;
     Matrix4 transform = rect->GetWorldTransform();
 
     Matrix4 inverse = glm::inverse(transform);
@@ -321,8 +363,8 @@ inline Vector3 ClosestPointOnTriangle(BVHTree::Triangle* t, const Vector3& point
     return c3;
 }
 
-
 CollisionResult SphereAndMeshCollide(SphereCollider* sphere, StaticMeshCollider* collider) {
+    SphereAndMeshCollideCount++;
     if (!collider->bvhTree) {
         return CollisionResult{};
     }
@@ -334,7 +376,7 @@ CollisionResult SphereAndMeshCollide(SphereCollider* sphere, StaticMeshCollider*
     checkQueue.emplace(collider->bvhTree);
 
     float minOverlap = INFINITY;
-    Vector3 reverseVelocity = -collider->owner->GetVelocity();
+    // Vector3 reverseVelocity = -collider->owner->GetVelocity();
 
     CollisionResult result;
 
@@ -370,7 +412,109 @@ CollisionResult SphereAndMeshCollide(SphereCollider* sphere, StaticMeshCollider*
     return result;
 }
 
+// Returns 0 if parallel, 1 if 1 intersection or 2 if fully inside
+int CheckLineAndPlaneIntersection(
+    BVHTree::Triangle* t,
+    const Vector3& lpt1, const Vector3& lpt2,
+    Vector3& outputIntersection) {
+
+    Vector3 norm = glm::normalize(t->norm);
+    const Vector3 lineDir = lpt2 - lpt1;
+
+    float top = glm::dot(t->a - lpt1, norm);
+    float bottom = glm::dot(lineDir, norm);
+    if (IsZero(bottom)) {
+        // Line and Plane are Parallel
+        if (IsZero(top)) {
+            outputIntersection = t->center;
+            return 2;
+        }
+        outputIntersection = t->center;
+        return 0;
+    }
+    float d = top / bottom;
+    outputIntersection = lpt1 + lineDir * d;
+    return 1;
+}
+
+CollisionResult CapsuleAndMeshCollide(CapsuleCollider* capsule, StaticMeshCollider* collider) {
+    if (!collider->bvhTree) {
+        return CollisionResult{};
+    }
+    AABB broadRect = capsule->GetBroadAABB();
+
+    // Get World Position of Two Points of the Capsule Segment
+    Vector3 pt1 = Vector3(capsule->GetWorldTransform() * Vector4(0, 0, 0, 1));
+    Vector3 pt2 = Vector3(capsule->GetWorldTransformForLocalPoint(capsule->position2) * Vector4(0, 0, 0, 1));
+    // LOG_DEBUG(capsule->GetOwner()->GetPosition() << " " << pt1 << " " << pt2);
+
+    std::queue<BVHTree*> checkQueue;
+    checkQueue.emplace(collider->bvhTree);
+
+    float minOverlap = INFINITY;
+    // Vector3 reverseVelocity = -collider->owner->GetVelocity();
+
+    CollisionResult result;
+
+    while (!checkQueue.empty()) {
+        BVHTree* currNode = checkQueue.front();
+        checkQueue.pop();
+        if (currNode->tris.empty()) {
+            // Internal Node
+            if (AABBAndAABBCollide(broadRect, currNode->collider)) {
+                for (const auto& p : currNode->children) {
+                    checkQueue.push(p);
+                }
+            }
+        }
+        else {
+            // Test Triangles
+            for (const auto& tri : currNode->tris) {
+                Vector3 outIntersection;
+                // int lineTriResult =
+                CheckLineAndPlaneIntersection(tri, pt1, pt2, outIntersection);
+
+                // if (lineTriResult == 1) {
+                    // LOG_DEBUG("Triangle " << tri->a << " " << tri->b << " " << tri->c);
+                    // LOG_DEBUG("Points " << pt1 << " " << pt2);
+
+                    // Handle just this one for now
+                    Vector3 planePoint;
+
+                    // Clamp plane intersection onto triangle
+                    Vector3 point = ClosestPointOnTriangle(tri, outIntersection, planePoint);
+                    // LOG_DEBUG("Closest Point on Triangle " << point);
+                    // Project back onto line segment
+                    Vector3 reference = ClosestPointOnLineSegment(pt1, pt2, point);
+                    point = ClosestPointOnTriangle(tri, reference, planePoint);
+
+                    float dist = glm::distance(point, reference);
+                    // LOG_DEBUG("Dist " << dist);
+                    if (!IsZero(dist - capsule->radius) && dist < capsule->radius) {
+                        // LOG_DEBUG(dist - capsule->radius);
+                        // LOG_DEBUG("Dist " << dist);
+                        // LOG_DEBUG("Points " << pt1 << " " << pt2);
+                        // LOG_DEBUG("OnSegment " << reference);
+                        float penetration = capsule->radius - glm::distance(planePoint, reference);
+                        // LOG_DEBUG("Penetration " << penetration << tri->norm);
+                        if (penetration < minOverlap) {
+                            result.isColliding = true;
+                            minOverlap = penetration;
+                            result.collisionDifference = tri->norm * penetration;
+                        }
+                    }
+                // }
+            }
+        }
+    }
+    // if (result.isColliding) {
+    //     LOG_DEBUG("========");
+    // }
+    return result;
+}
+
 CollisionResult OBBAndMeshCollide(OBBCollider* rect, StaticMeshCollider* collider) {
+    OBBAndMeshCollideCount++;
     // #ifdef BUILD_SERVER
     //     LOG_DEBUG("Start AABB & Mesh Collide " << collider->mesh.name);
     // #endif
@@ -395,7 +539,7 @@ CollisionResult OBBAndMeshCollide(OBBCollider* rect, StaticMeshCollider* collide
 
     float minOverlap = INFINITY;
     Vector3 minOverlapNormal;
-    Vector3 reverseVelocity = -collider->owner->GetVelocity();
+    // Vector3 reverseVelocity = -collider->owner->GetVelocity();
 
     CollisionResult result;
 
@@ -505,21 +649,6 @@ CollisionResult OBBAndMeshCollide(OBBCollider* rect, StaticMeshCollider* collide
     return result;
 }
 
-CollisionResult TwoPhaseCollider::CollidesWith(Collider* mesh) {
-    CollisionResult finalResult;
-    for (auto& colliderOther: children) {
-        // AABB Early Exit Here
-        if (!AABBAndAABBCollide(colliderOther->GetBroadAABB(), mesh->GetBroadAABB())) {
-            continue;
-        }
-        CollisionResult r = colliderOther->CollidesWith(mesh);
-        if (r.isColliding) {
-            finalResult.isColliding = true;
-            finalResult.collisionDifference += r.collisionDifference;
-        }
-    }
-    return finalResult;
-}
 
 CollisionResult TwoPhaseAndTwoPhaseCollide(TwoPhaseCollider* tp1, TwoPhaseCollider* tp2) {
     CollisionResult finalResult;
@@ -533,33 +662,18 @@ CollisionResult TwoPhaseAndTwoPhaseCollide(TwoPhaseCollider* tp1, TwoPhaseCollid
     return finalResult;
 }
 
-CollisionResult OBBCollider::CollidesWith(Collider* other) {
-    if (other->GetType() == ColliderType::SPHERE) {
-        CollisionResult r = OBBAndSphereCollide(this, static_cast<SphereCollider*>(other));
-        r.collisionDifference *= -1;
-        return r;
+CollisionResult CapsuleAndSphereCollide(CapsuleCollider* capsule, SphereCollider* sphere) {
+    Vector3 capsulePt1 = capsule->GetWorldPoint1();
+    Vector3 capsulePt2 = capsule->GetWorldPoint2();
+    Vector3 point = ClosestPointOnLineSegment(capsulePt1, capsulePt2, sphere->GetPosition());
+    Vector3 diff = sphere->GetPosition() - point;
+    float penetration = sphere->radius + capsule->radius - glm::length(diff);
+    CollisionResult result;
+    if (penetration > 0) {
+        result.isColliding = true;
+        result.collisionDifference = -penetration * glm::normalize(diff);
     }
-    else if (other->GetType() == ColliderType::OBB) {
-        return OBBAndOBBCollide(this, static_cast<OBBCollider*>(other));
-    }
-    else if (other->GetType() == ColliderType::STATIC_MESH) {
-        // AABB Collider vs Mesh
-        return OBBAndMeshCollide(this, static_cast<StaticMeshCollider*>(other));
-    }
-    return CollisionResult{};
-}
-
-CollisionResult SphereCollider::CollidesWith(Collider* other) {
-    if (other->GetType() == ColliderType::OBB) {
-        return OBBAndSphereCollide(static_cast<OBBCollider*>(other), this);
-    }
-    else if (other->GetType() == ColliderType::SPHERE) {
-        return SphereAndSphereCollide(this, static_cast<SphereCollider*>(other));
-    }
-    else if (other->GetType() == ColliderType::STATIC_MESH) {
-        return SphereAndMeshCollide(this, static_cast<StaticMeshCollider*>(other));
-    }
-    return CollisionResult{};
+    return result;
 }
 
 CollisionResult StaticMeshCollider::CollidesWith(Collider* other) {
@@ -687,31 +801,10 @@ bool AABB::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
     return true;
 }
 
-bool OBBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
-    Matrix4 transform = GetWorldTransform();
-    Matrix4 inverse = glm::inverse(transform);
-
-    // Bring Ray into Local Space
-    RayCastRequest newRay {ray};
-    newRay.startPoint = Vector3(inverse * Vector4(ray.startPoint, 1));
-    newRay.direction = Vector3(inverse * Vector4(ray.direction, 0));
-    RayCastResult newResult;
-    if (AABB(Vector3(0, 0, 0), size).CollidesWith(newRay, newResult)) {
-        newResult.hitLocation = Vector3(transform * Vector4(newResult.hitLocation, 1));
-        newResult.hitNormal = Vector3(glm::transpose(inverse) * Vector4(newResult.hitNormal, 0));
-        newResult.zDepth = glm::distance(newResult.hitLocation, ray.startPoint);
-        if (!result.isHit || newResult.zDepth < result.zDepth) {
-            result = newResult;
-            return true;
-        }
-    }
-    return false;
-}
-
-bool SphereCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+bool SphereAndRayCollide(const Vector3& sphereCenter, float radius, RayCastRequest& ray, RayCastResult& result) {
     const Vector3& d = ray.direction;
     const Vector3& e = ray.startPoint;
-    const Vector3& c = GetPosition();
+    const Vector3& c = sphereCenter;
     const Vector3 eminusc = e - c;
     float roots[2];
     int answers = QuadraticRootsSolver(glm::dot(d, d), 2 * glm::dot(d, eminusc), glm::dot(eminusc, eminusc) - (radius * radius), roots);
@@ -748,12 +841,90 @@ bool SphereCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
     return false;
 }
 
-bool CapsuleCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
-    return GetBroadAABB().CollidesWith(ray, result);
+
+Vector3 ProjectPointToPlane(const Vector3& point, const Vector3& planePoint, const Vector3& planeNorm) {
+    float t = (glm::dot(planeNorm, planePoint) - glm::dot(planeNorm, point)) / glm::length2(planeNorm);
+    return point + t * planeNorm;
 }
 
-CollisionResult CapsuleCollider::CollidesWith(Collider* other) {
-    return CollisionResult{};
+CollisionResult CapsuleAndCapsuleCollide(CapsuleCollider* capsule, CapsuleCollider* capsule2) {
+    Vector3 capsulePt1 = capsule->GetWorldPoint1();
+    Vector3 capsulePt2 = capsule->GetWorldPoint2();
+
+    Vector3 capsulePtC = capsule2->GetWorldPoint1();
+    Vector3 capsulePtD = capsule2->GetWorldPoint2();
+
+    // Do plane projectino first
+    Vector3 inPlaneA = ProjectPointToPlane(capsulePt1, capsulePtC, glm::normalize(capsulePtD - capsulePtC));
+    Vector3 inPlaneB = ProjectPointToPlane(capsulePt2, capsulePtC, glm::normalize(capsulePtD - capsulePtC));
+    Vector3 inPlaneBA = inPlaneB - inPlaneA;
+
+    float t = glm::dot(capsulePtC - inPlaneA, inPlaneBA) / glm::dot(inPlaneBA, inPlaneBA);
+    t = (inPlaneA != inPlaneB) ? t : 0.f; // Zero's t if parallel
+
+    // Closest point on capsule1
+    Vector3 segABtoLineCD = glm::lerp(capsulePt1, capsulePt2, glm::clamp(t, 0.f, 1.f));
+
+    // Closest point on capsule 2
+    Vector3 point = ClosestPointOnLineSegment(capsulePtC, capsulePtD, segABtoLineCD);
+    // LOG_DEBUG(segABtoLineCD << " " << point);
+    return SphereAndSphereCollide(segABtoLineCD, capsule->radius, point, capsule2->radius);
+}
+
+
+CollisionResult CapsuleAndOBBCollide(CapsuleCollider* capsule, OBBCollider* obb) {
+    Matrix4 transform = obb->GetWorldTransform();
+    Matrix4 inverse = glm::inverse(transform);
+
+    // Capsule Points into OBB space
+    Vector3 capsulePt1 = Vector3(inverse * Vector4(capsule->GetWorldPoint1(), 1));
+    Vector3 capsulePt2 = Vector3(inverse * Vector4(capsule->GetWorldPoint2(), 1));
+
+    Vector3 cap1[] = {
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, 1), 1, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 1, 0), 1, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(1, 0, 0), 1, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, -1), 0, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, -1, 0), 0, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(-1, 0, 0), 0, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+    };
+    Vector3 cap2[] = {
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, 1), 1, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 1, 0), 1, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(1, 0, 0), 1, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, -1), 0, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, -1, 0), 0, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(-1, 0, 0), 0, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+    };
+
+
+    float distance = INFINITY;
+    Vector3 planePoint;
+    for (size_t i = 0; i < 6; i++) {
+        float d = glm::distance(cap1[i], capsulePt1);
+        if (d < distance) {
+            distance = d;
+            planePoint = cap1[i];
+        }
+    }
+    for (size_t i = 0; i < 6; i++) {
+        float d = glm::distance(cap2[i], capsulePt2);
+        if (d < distance) {
+            distance = d;
+            planePoint = cap2[i];
+        }
+    }
+
+    CollisionResult result;
+    if (distance < capsule->radius) {
+        result.isColliding = true;
+        AABB rect {Vector3(0, 0, 0), Vector3(1, 1, 1)};
+        result.collisionDifference = (capsule->radius - distance) * AABBSurfaceNormal(rect, planePoint);
+
+        // Translate back to world space
+        result.collisionDifference = Vector3(transform * Vector4(result.collisionDifference, 0));
+    }
+    return result;
 }
 
 StaticMeshCollider::StaticMeshCollider(Object* owner, Mesh& mesh) :
@@ -816,4 +987,120 @@ StaticMeshCollider::StaticMeshCollider(Object* owner, Mesh& mesh) :
 
 StaticMeshCollider::~StaticMeshCollider() {
     delete bvhTree;
+}
+
+
+CollisionResult TwoPhaseCollider::CollidesWith(Collider* mesh) {
+    CollisionResult finalResult;
+    for (auto& colliderOther: children) {
+        // AABB Early Exit Here
+        if (!AABBAndAABBCollide(colliderOther->GetBroadAABB(), mesh->GetBroadAABB())) {
+            continue;
+        }
+        CollisionResult r = colliderOther->CollidesWith(mesh);
+        if (r.isColliding) {
+            finalResult.isColliding = true;
+            finalResult.collisionDifference += r.collisionDifference;
+        }
+    }
+    return finalResult;
+}
+
+
+CollisionResult OBBCollider::CollidesWith(Collider* other) {
+    if (other->GetType() == ColliderType::SPHERE) {
+        CollisionResult r = OBBAndSphereCollide(this, static_cast<SphereCollider*>(other));
+        r.collisionDifference *= -1;
+        return r;
+    }
+    else if (other->GetType() == ColliderType::OBB) {
+        return OBBAndOBBCollide(this, static_cast<OBBCollider*>(other));
+    }
+    else if (other->GetType() == ColliderType::STATIC_MESH) {
+        // AABB Collider vs Mesh
+        return OBBAndMeshCollide(this, static_cast<StaticMeshCollider*>(other));
+    }
+    else if (other->GetType() == ColliderType::CAPSULE) {
+        CollisionResult r = CapsuleAndOBBCollide(static_cast<CapsuleCollider*>(other), this);
+        r.collisionDifference *= -1;
+        return r;
+    }
+    return CollisionResult{};
+}
+
+
+CollisionResult SphereCollider::CollidesWith(Collider* other) {
+    if (other->GetType() == ColliderType::OBB) {
+        return OBBAndSphereCollide(static_cast<OBBCollider*>(other), this);
+    }
+    else if (other->GetType() == ColliderType::SPHERE) {
+        return SphereAndSphereCollide(this, static_cast<SphereCollider*>(other));
+    }
+    else if (other->GetType() == ColliderType::STATIC_MESH) {
+        return SphereAndMeshCollide(this, static_cast<StaticMeshCollider*>(other));
+    }
+    else if (other->GetType() == ColliderType::CAPSULE) {
+        CollisionResult r = CapsuleAndSphereCollide(static_cast<CapsuleCollider*>(other), this);
+        r.collisionDifference *= -1;
+        return r;
+    }
+    return CollisionResult{};
+}
+
+
+bool OBBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+    Matrix4 transform = GetWorldTransform();
+    Matrix4 inverse = glm::inverse(transform);
+
+    // Bring Ray into Local Space
+    RayCastRequest newRay {ray};
+    newRay.startPoint = Vector3(inverse * Vector4(ray.startPoint, 1));
+    newRay.direction = Vector3(inverse * Vector4(ray.direction, 0));
+    RayCastResult newResult;
+    if (AABB(Vector3(0, 0, 0), size).CollidesWith(newRay, newResult)) {
+        newResult.hitLocation = Vector3(transform * Vector4(newResult.hitLocation, 1));
+        newResult.hitNormal = Vector3(glm::transpose(inverse) * Vector4(newResult.hitNormal, 0));
+        newResult.zDepth = glm::distance(newResult.hitLocation, ray.startPoint);
+        if (!result.isHit || newResult.zDepth < result.zDepth) {
+            result = newResult;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SphereCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+    return SphereAndRayCollide(GetPosition(), radius, ray, result);
+}
+
+bool CapsuleCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
+    Vector3 capsulePt1 = GetWorldPoint1();
+    Vector3 capsulePt2 = GetWorldPoint2();
+
+    Vector3 inPlaneA = ProjectPointToPlane(capsulePt1, ray.startPoint, glm::normalize(ray.direction));
+    Vector3 inPlaneB = ProjectPointToPlane(capsulePt2, ray.startPoint, glm::normalize(ray.direction));
+    Vector3 inPlaneBA = inPlaneB - inPlaneA;
+
+    float t = glm::dot(ray.startPoint - inPlaneA, inPlaneBA) / glm::dot(inPlaneBA, inPlaneBA);
+    t = (inPlaneA != inPlaneB) ? t : 0.f; // Zero's t if parallel
+
+    Vector3 segABtoLineCD = glm::lerp(capsulePt1, capsulePt2, glm::clamp(t, 0.f, 1.f));
+    // LOG_DEBUG(capsulePt1 << " " << capsulePt2 << " " << segABtoLineCD);
+    return SphereAndRayCollide(segABtoLineCD, radius, ray, result);
+}
+
+CollisionResult CapsuleCollider::CollidesWith(Collider* other) {
+    if (other->GetType() == ColliderType::OBB) {
+        return CapsuleAndOBBCollide(this, static_cast<OBBCollider*>(other));
+    }
+    else if (other->GetType() == ColliderType::SPHERE) {
+        return CapsuleAndSphereCollide(this, static_cast<SphereCollider*>(other));
+    }
+    else if (other->GetType() == ColliderType::STATIC_MESH) {
+        return CapsuleAndMeshCollide(this, static_cast<StaticMeshCollider*>(other));
+    }
+    else if (other->GetType() == ColliderType::CAPSULE) {
+        return CapsuleAndCapsuleCollide(this, static_cast<CapsuleCollider*>(other));
+    }
+    return CollisionResult{};
 }

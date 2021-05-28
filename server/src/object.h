@@ -181,16 +181,17 @@ public:
     virtual void Serialize(JSONWriter& obj) override;
     void ProcessReplication(json& object) override;
 
+    const Model* GetModel() const { return model; }
     const Vector3& GetPosition() const { return position; }
     const Vector3& GetScale() const { return scale; }
     const Quaternion& GetRotation() const { return rotation; }
     virtual Vector3 GetVelocity() { return velocity; }
     virtual Vector3 GetLookDirection() const { return glm::normalize(Vector::Forward * rotation); }
 
-    void SetPosition(const Vector3& in) { position = in; }
-    void SetRotation(const Quaternion& in) { rotation = in; }
-    void SetScale(const Vector3& in) { scale = in; }
-    void SetVelocity(const Vector3& in) { velocity = in; }
+    void SetPosition(const Vector3& in);
+    void SetRotation(const Quaternion& in);
+    void SetScale(const Vector3& in);
+    void SetVelocity(const Vector3& in);
 
     bool IsStatic() const { return isStatic; }
     void SetIsStatic(bool isStatic);

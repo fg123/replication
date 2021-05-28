@@ -75,26 +75,58 @@ module.exports = class UICanvas {
 
     DrawWeapon(player, width, height) {
         // Bottom Right
-        if (!player.w) return;
-        const weapon = this.clientState.GetObject(player.w);
-        if (weapon === undefined) return;
-        if (weapon.blts === undefined) return;
-        const bullets = weapon.blts;
-        const inventoryAmmo = weapon.inventoryAmmo;
-
         this.context.fillStyle = "black";
         drawRoundedRectangle(this.context, width - 250, height - 150, 200, 100, 10, true, false);
+        drawRoundedRectangle(this.context, width - 250, height - 253, 97, 97, 10, true, false);
+        drawRoundedRectangle(this.context, width - 147, height - 253, 97, 97, 10, true, false);
 
+        this.context.strokeStyle = "dodgerblue";
+        this.context.lineWidth = 5;
+        let shouldStroke;
+        shouldStroke = (player.w && player.im && player.im.s && player.w === player.im.s) ? true : false;
+        drawRoundedRectangle(this.context, width - 250, height - 359, 200, 100, 10, true, shouldStroke);
+
+        shouldStroke = (player.w && player.im && player.im.p && player.w === player.im.p) ? true : false;
+        drawRoundedRectangle(this.context, width - 250, height - 465, 200, 100, 10, true, shouldStroke);
         this.context.font = "30px Prompt";
         this.context.textBaseline = "middle";
         this.context.textAlign = "center";
         this.context.fillStyle = "white";
-        this.context.fillText(`${bullets}/${inventoryAmmo}`, width - 150, height - 100);
+        if (player.w) {
+            const weapon = this.clientState.GetObject(player.w);
+            if (weapon !== undefined) {
+                if (weapon.blts !== undefined) {
+                    const bullets = weapon.blts;
+                    const inventoryAmmo = weapon.inventoryAmmo;
 
-        const percentageReload = weapon.tsr / weapon.rlt;
-        if (percentageReload > 0) {
-            this.context.fillStyle = "green";
-            drawRoundedRectangle(this.context, width - 250, height - 150, 200 * percentageReload, 20, 10, true, false);
+                    this.context.fillText(`${bullets}/${inventoryAmmo}`, width - 150, height - 100);
+
+                    const percentageReload = weapon.tsr / weapon.rlt;
+                    if (percentageReload > 0) {
+                        this.context.fillStyle = "green";
+                        drawRoundedRectangle(this.context, width - 250, height - 150, 200 * percentageReload, 20, 10, true, false);
+                    }
+                }
+            }
+        }
+
+        this.context.fillStyle = "white";
+
+        if (player.im) {
+            const primary = this.clientState.GetObject(player.im.p);
+            const secondary = this.clientState.GetObject(player.im.s);
+            const slot0 = this.clientState.GetObject(player.im.o[0]);
+            const slot1 = this.clientState.GetObject(player.im.o[1]);
+            const slot2 = this.clientState.GetObject(player.im.o[2]);
+            const slot3 = this.clientState.GetObject(player.im.o[3]);
+            const slot4 = this.clientState.GetObject(player.im.o[4]);
+            const slot5 = this.clientState.GetObject(player.im.o[5]);
+            if (primary) {
+                this.context.fillText(`(1) ${primary.name}`, width - 150, height - 415);
+            }
+            if (secondary) {
+                this.context.fillText(`(2) ${secondary.name}`, width - 150, height - 309);
+            }
         }
     }
 
@@ -233,6 +265,7 @@ module.exports = class UICanvas {
         this.DrawGraph("HandleReplicate", this.clientState.performance.handleReplicateTime, 20, 100);
 
         this.DrawGraph("TickTime", this.clientState.performance.tickTime, 20, 180);
+        this.DrawGraph("Replication Count", this.clientState.performance.replicateObjectCount, 20, 260);
 
 
         Object.keys(this.clientState.animations).forEach(k => {

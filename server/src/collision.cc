@@ -21,9 +21,11 @@ Quaternion Collider::GetRotation() {
 }
 
 Matrix4 Collider::GetWorldTransform() {
-    // Transform locally first
-    Matrix4 model = glm::translate(position)
-        * glm::transpose(glm::toMat4(rotation));
+    return GetWorldTransformForLocalPoint(position);
+}
+
+Matrix4 Collider::GetWorldTransformForLocalPoint(const Vector3& point) {
+    Matrix4 model = glm::translate(point) * glm::transpose(glm::toMat4(rotation));
     if (owner) {
         // Transform to owner space
         model = glm::translate(owner->GetPosition()) *
@@ -54,7 +56,6 @@ void GenerateOBBCollidersFromModel(Object* obj) {
 }
 
 void GenerateStaticMeshCollidersFromModel(Object* obj) {
-    LOG_DEBUG("GENERATING STATIC MESHES");
     Model* model = obj->GetModel();
     if (model) {
         for (Mesh& mesh : model->meshes) {

@@ -8,6 +8,7 @@
 #include "characters/dummy.h"
 #include "characters/archer.h"
 #include "collision.h"
+#include "map.h"
 
 #include "json/json.hpp"
 
@@ -39,11 +40,16 @@ Game::Game() : nextId(1) {
         }
 
         LoadMap(RESOURCE_PATH(GlobalSettings.MapPath));
-
-        // Models[0] is always the base map
-        StaticMeshObject* baseMap = new StaticMeshObject(*this, "ShootingRange.obj");
-        AddObject(baseMap);
+        CreateMapBaseObject("ShootingRange.obj");
     #endif
+}
+
+void Game::CreateMapBaseObject(std::string obj) {
+    // Models[0] is always the base map
+    MapObject* map = new MapObject(*this, obj);
+    // Model* mapModel = GetModel(obj);
+    // StaticMeshObject* baseMap = new StaticMeshObject(*this, "ShootingRange.obj");
+    AddObject(map);
 }
 
 void Game::LoadMap(std::string mapPath) {
@@ -82,26 +88,28 @@ void Game::LoadMap(std::string mapPath) {
     #endif
 
     // Loot Table / Pool
-    AddObject(new AssaultRifleObject(*this, Vector3(2, 10, 2)));
-    AddObject(new PistolObject(*this, Vector3(2, 10, 4)));
-    AddObject(new GrenadeThrower(*this, Vector3(2, 10, 6)));
-    AddObject(new AmmoObject(*this, Vector3(2, 10, 8)));
-    AddObject(new AmmoObject(*this, Vector3(2, 10, 10)));
-    AddObject(new AmmoObject(*this, Vector3(2, 10, 12)));
-    AddObject(new AmmoObject(*this, Vector3(2, 10, 14)));
-    AddObject(new AmmoObject(*this, Vector3(2, 10, 16)));
+    // AddObject(new AssaultRifleObject(*this, Vector3(2, 10, 2)));
+    // AddObject(new PistolObject(*this, Vector3(2, 10, 4)));
+    // AddObject(new GrenadeThrower(*this, Vector3(2, 10, 6)));
+    // AddObject(new AmmoObject(*this, Vector3(2, 10, 8)));
+    // AddObject(new AmmoObject(*this, Vector3(2, 10, 10)));
+    // AddObject(new AmmoObject(*this, Vector3(2, 10, 12)));
+    // AddObject(new AmmoObject(*this, Vector3(2, 10, 14)));
+    // AddObject(new AmmoObject(*this, Vector3(2, 10, 16)));
 
     // Collision Testing
-    auto obj1 = new SphereObject(*this);
-    obj1->SetPosition(Vector3(20, 20, 20));
-    obj1->SetIsStatic(true);
+    if (!GlobalSettings.IsProduction) {
+        auto obj1 = new SphereObject(*this);
+        obj1->SetPosition(Vector3(20, 20, 20));
+        obj1->SetIsStatic(true);
 
-    auto obj2 = new BoxObject(*this);
-    obj2->SetPosition(Vector3(25, 20, 25));
-    obj2->SetRotation(DirectionToQuaternion(Vector3(1, 1, 1)));
-    obj2->SetIsStatic(true);
-    AddObject(obj1);
-    AddObject(obj2);
+        auto obj2 = new BoxObject(*this);
+        obj2->SetPosition(Vector3(25, 20, 25));
+        obj2->SetRotation(DirectionToQuaternion(Vector3(1, 1, 1)));
+        obj2->SetIsStatic(true);
+        AddObject(obj1);
+        AddObject(obj2);
+    }
 }
 
 Game::~Game() {
@@ -159,12 +167,21 @@ void Game::Tick(Time time) {
     for (auto& object : gameObjects) {
         // Only tick on root objects
         if (object.second->parent == nullptr) {
+            Time start = Timer::NowMicro();
             object.second->Tick(time);
+            Time end = Timer::NowMicro();
+            averageObjectTickTime.InsertValue(end - start);
         }
     }
-
 #ifdef BUILD_SERVER
     for (auto& object : gameObjects) {
+        // if (!IsZero(GetVelocity() - lastFrameVelocity)) {
+        //     if (IsTagged(Tag::WEAPON)) {
+        //         LOG_DEBUG(GetId() << ": Velocity " << GetVelocity() << " " << lastFrameVelocity);
+        //     }
+        //     SetDirty(true);
+        // }
+
         if (!object.second->IsStatic() &&
             !IsPointInAABB(liveBoxStart, liveBoxSize, object.second->GetPosition()) &&
             !object.second->IsTagged(Tag::NO_KILLPLANE)) {
@@ -469,11 +486,17 @@ void Game::HandleCollisions(Object* obj) {
     for (auto& object : gameObjects) {
         if (obj == object.second) continue;
 
+        bool isGround = object.second->IsTagged(Tag::GROUND);
+        if (!isGround && glm::distance(obj->GetPosition(), object.second->GetPosition()) > 10) {
+            continue;
+        }
+
         bool shouldExclude = obj->IsCollisionExcluded(object.second->GetTags()) ||
             object.second->IsCollisionExcluded(obj->GetTags());
 
         bool shouldReport = obj->ShouldReportCollision(object.second->GetTags());
         // Check for Collision Exclusion
+        if (!isGround && shouldExclude && !shouldReport) continue;
         CollisionResult r = obj->CollidesWith(object.second);
         if (r.isColliding) {
             r.collidedWith = object.second;

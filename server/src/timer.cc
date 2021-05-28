@@ -17,6 +17,14 @@ Time Timer::Now() {
         steady_clock::now()).time_since_epoch().count();
 }
 
+
+Time Timer::NowMicro() {
+    using namespace std::chrono;
+    return time_point_cast<microseconds>(
+        steady_clock::now()).time_since_epoch().count();
+}
+
+
 void Timer::Tick() {
     Time current = Now();
     for (auto it = schedule.begin(); it != schedule.end(); it++) {

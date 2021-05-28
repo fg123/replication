@@ -1,5 +1,4 @@
-#ifndef TIMER_H
-#define TIMER_H
+#pragma once
 
 #include <chrono>
 #include <functional>
@@ -42,6 +41,7 @@ class Timer {
 
 public:
     static Time Now();
+    static Time NowMicro();
 
     Timer();
     ~Timer();
@@ -54,4 +54,3 @@ public:
 };
 
 std::string TimeToString(Time time);
-#endif

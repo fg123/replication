@@ -35,6 +35,7 @@ class ClientGL {
     Mesh debugCube;
     Mesh debugLine;
     Mesh debugCircle;
+    Mesh debugCylinder;
 
     Matrix4 viewMat;
     Matrix4 projMat;

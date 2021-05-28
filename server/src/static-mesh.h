@@ -19,10 +19,12 @@ public:
         SetTag(Tag::NO_GRAVITY);
         SetIsStatic(true);
         SetTag(Tag::GROUND);
-        SetModel(game.GetModel(model));
-        #ifdef BUILD_SERVER
-            GenerateStaticMeshCollidersFromModel(this);
-        #endif
+        if (!model.empty()) {
+            SetModel(game.GetModel(model));
+            #ifdef BUILD_SERVER
+                GenerateStaticMeshCollidersFromModel(this);
+            #endif
+        }
     }
 
     virtual void ProcessReplication(json& obj) override {

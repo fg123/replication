@@ -88,6 +88,17 @@ void ClientGL::SetupGL() {
         newIndices.push_back(debugCircle.indices[i]);
     }
     debugCircle.indices = std::move(newIndices);
+
+    debugCylinder = game.GetAssetManager().GetModel("Cylinder.obj")->meshes[0];
+    // Copied over, reorder indices to work with GL_LINES
+    newIndices.clear();
+    for (size_t i = 0; i < debugCylinder.indices.size(); i += 3) {
+        newIndices.push_back(debugCylinder.indices[i]);
+        newIndices.push_back(debugCylinder.indices[i + 1]);
+        newIndices.push_back(debugCylinder.indices[i + 2]);
+        newIndices.push_back(debugCylinder.indices[i]);
+    }
+    debugCylinder.indices = std::move(newIndices);
 }
 
 void ClientGL::DrawObject(Object* obj, int& lastProgram) {
@@ -160,6 +171,25 @@ void ClientGL::DrawObject(Object* obj, int& lastProgram) {
                     Matrix4 model = collider->GetWorldTransform() * glm::scale(Vector3(collider->radius));
                     debugShaderProgram->SetColor(Vector3(0, 0, 1));
                     debugShaderProgram->Draw(*this, model, &debugCircle);
+                }
+                else if (CapsuleCollider* collider = dynamic_cast<CapsuleCollider*>(cptr)) {
+                    Matrix4 model = collider->GetWorldTransform() * glm::scale(Vector3(collider->radius));
+                    debugShaderProgram->SetColor(Vector3(0, 0, 1));
+                    debugShaderProgram->Draw(*this, model, &debugCircle);
+
+                    model = collider->GetWorldTransformForLocalPoint(collider->position2) * glm::scale(Vector3(collider->radius));
+                    debugShaderProgram->SetColor(Vector3(0, 0, 1));
+                    debugShaderProgram->Draw(*this, model, &debugCircle);
+
+                    Vector3 pt1 = Vector3(collider->GetWorldTransform() * Vector4(0, 0, 0, 1));
+                    Vector3 pt2 = Vector3(collider->GetWorldTransformForLocalPoint(collider->position2) * Vector4(0, 0, 0, 1));
+
+
+                    model = glm::translate(pt1) * glm::transpose(glm::toMat4(DirectionToQuaternion(pt2 - pt1))) * glm::scale(Vector3(collider->radius,
+                        collider->radius, glm::distance(collider->position, collider->position2)));
+
+                    debugShaderProgram->SetColor(Vector3(0, 0, 1));
+                    debugShaderProgram->Draw(*this, model, &debugCylinder);
                 }
             }
         }

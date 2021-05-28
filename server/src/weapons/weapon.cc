@@ -63,11 +63,14 @@ void WeaponObject::Tick(Time time) {
             clientPosition = GetPosition();
             clientRotation = GetRotation();
         #endif
-        isDirty = true;
+        SetDirty(true);
     }
     else {
-        SetScale(Vector3(1));
-        RemoveTag(Tag::NO_GRAVITY);
+        if (IsTagged(Tag::NO_GRAVITY) || IsZero(scale)) {
+            SetScale(Vector3(1));
+            RemoveTag(Tag::NO_GRAVITY);
+            SetDirty(true);
+        }
     }
 }
 
@@ -92,7 +95,6 @@ void WeaponObject::ProcessReplication(json& obj) {
 
 void WeaponWithCooldown::Tick(Time time) {
     WeaponObject::Tick(time);
-
     // Let server dictate
 #ifdef BUILD_SERVER
     // LOG_DEBUG("CD " << cooldown);
@@ -101,6 +103,8 @@ void WeaponWithCooldown::Tick(Time time) {
     }
     else {
         currentCooldown = (lastUseTime + cooldown) - time;
+    }
+    if (attachedTo) {
         SetDirty(true);
     }
     // LOG_DEBUG("LUT: " << lastUseTime << " CD: " << currentCooldown);

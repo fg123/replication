@@ -45,6 +45,12 @@ module.exports = class EscapeMenu {
         $(".secondary .dropBtn").on("click", () => {
             this.clientState.InventoryDrop(1);
         });
+        $(".primary .swapBtn").on("click", () => {
+            this.clientState.SwapPrimaryAndSecondary();
+        });
+        $(".secondary .swapBtn").on("click", () => {
+            this.clientState.SwapPrimaryAndSecondary();
+        });
         $(".slot0 .dropBtn").on("click", () => {
             this.clientState.InventoryDrop(2);
         });
@@ -79,13 +85,13 @@ module.exports = class EscapeMenu {
         const slot4 = this.clientState.GetObject(player.im.o[4]);
         const slot5 = this.clientState.GetObject(player.im.o[5]);
 
-        $(".primary div").html(primary ? primary.name : "");
-        $(".secondary div").html(secondary ? secondary.name : "");
-        $(".slot0 div").html(slot0 ? slot0.name : "");
-        $(".slot1 div").html(slot1 ? slot1.name : "");
-        $(".slot2 div").html(slot2 ? slot2.name : "");
-        $(".slot3 div").html(slot3 ? slot3.name : "");
-        $(".slot4 div").html(slot4 ? slot4.name : "");
-        $(".slot5 div").html(slot5 ? slot5.name : "");
+        $(".primary .slotWrapper .slotContent").html(primary ? primary.name : "");
+        $(".secondary .slotWrapper .slotContent").html(secondary ? secondary.name : "");
+        $(".slot0 .slotWrapper .slotContent").html(slot0 ? slot0.name : "");
+        $(".slot1 .slotWrapper .slotContent").html(slot1 ? slot1.name : "");
+        $(".slot2 .slotWrapper .slotContent").html(slot2 ? slot2.name : "");
+        $(".slot3 .slotWrapper .slotContent").html(slot3 ? slot3.name : "");
+        $(".slot4 .slotWrapper .slotContent").html(slot4 ? slot4.name : "");
+        $(".slot5 .slotWrapper .slotContent").html(slot5 ? slot5.name : "");
     }
 };

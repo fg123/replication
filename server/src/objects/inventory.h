@@ -28,6 +28,8 @@ public:
     void Drop(WeaponObject* weapon);
     void Drop(int id);
 
+    void Swap();
+
     void ClearInventory();
 
     WeaponObject* GetCurrentWeapon();
@@ -35,9 +37,14 @@ public:
     void ChooseNewCurrentWeapon();
 
     // Events
+    void EquipPrevious();
+    void EquipNext();
+
     void EquipPrimary();
     void EquipSecondary();
     void EquipGrenade();
+    void EquipMedicalSupplies();
+    void HolsterAll();
 
     void DropCurrentWeapon();
 

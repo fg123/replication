@@ -68,11 +68,9 @@ class Game {
     std::unordered_set<Object*> newObjects;
 
     std::unordered_set<ObjectID> replicateNextTick;
-
 #endif
 
     Time gameTime;
-
     AssetManager assetManager;
 
 public:
@@ -98,10 +96,13 @@ public:
     std::vector<AudioRequest> audioRequests;
 #endif
 
+    PerformanceBuffer<Time> averageObjectTickTime { 100 };
+
     ~Game();
 
     // Load Map from JSON File, data-path
     void LoadMap(std::string mapPath);
+    void CreateMapBaseObject(std::string obj);
 
     // Simulate a tick of physics
     void Tick(Time time);
@@ -147,6 +148,10 @@ public:
     RayCastResult RayCastInWorld(RayCastRequest request);
 
     Time GetGameTime() const { return gameTime; }
+
+    bool ObjectExists(ObjectID id) const {
+        return gameObjects.find(id) != gameObjects.end();
+    }
 
     Object* GetObjectImpl(ObjectID id) {
         if (gameObjects.find(id) != gameObjects.end())

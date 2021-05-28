@@ -54,7 +54,8 @@ module.exports = class ClientState {
 
         this.performance = {
             handleReplicateTime: new PerfTracker(100),
-            tickTime: new PerfTracker(100)
+            tickTime: new PerfTracker(100),
+            replicateObjectCount: new PerfTracker(100)
         };
 
         this.SetupSocketHandler();
@@ -124,6 +125,7 @@ module.exports = class ClientState {
             else if (event["event"] === "r") {
                 const curr = Date.now();
                 this.performance.handleReplicateTime.pushValue(curr - lastReplicate);
+                this.performance.replicateObjectCount.pushValue(event["objs"].length);
                 lastReplicate = curr;
                 const heapString = this.ToHeapString(this.wasm, ev.data);
                 this.wasm._HandleReplicate(heapString);
@@ -239,10 +241,12 @@ module.exports = class ClientState {
         const tickInterval = this.wasm._GetTickInterval();
         let lastTick = Date.now();
         setInterval(() => {
-            const curr = Date.now();
-            this.performance.tickTime.pushValue(curr - lastTick);
-            lastTick = curr;
-            this.wasm._TickGame();
+            if (document.hasFocus()) {
+                const curr = Date.now();
+                this.performance.tickTime.pushValue(curr - lastTick);
+                lastTick = curr;
+                this.wasm._TickGame();
+            }
         }, tickInterval);
 
         window.addEventListener('keydown', e => {
@@ -300,6 +304,15 @@ module.exports = class ClientState {
                 button: e.which
             });
         });
+
+        window.addEventListener('wheel', e => {
+            if (!this.isPaused) {
+                this.SendInputPacket({
+                    event: "mw",
+                    delta: e.deltaY
+                });
+            }
+        });
     }
 
     SendMouseMoveEvent() {
@@ -342,6 +355,13 @@ module.exports = class ClientState {
             {
                 "event": "inventoryDrop",
                 "id": id
+            }));
+    }
+
+    SwapPrimaryAndSecondary() {
+        this.SendData(JSON.stringify(
+            {
+                "event": "inventorySwap"
             }));
     }
 };

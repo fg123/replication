@@ -13,7 +13,12 @@ using ModelID = uint32_t;
 class Model {
 public:
     ModelID id;
+
+    // Meshes to be rendered
     std::vector<Mesh> meshes;
+
+    // Meshes marked otherwise
+    std::vector<Mesh> otherMeshes;
 
     ModelID GetId() { return id; }
 };

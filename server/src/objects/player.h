@@ -41,11 +41,13 @@ public:
     // Ticks since we processed the last client input frame
     Time ticksSinceLastProcessed = 0;
 
-    std::array<bool, 12> keyboardState {};
-    std::array<bool, 12> lastKeyboardState {};
+    std::array<bool, 20> keyboardState {};
+    std::array<bool, 20> lastKeyboardState {};
 
     std::array<bool, 5> mouseState {};
     std::array<bool, 5> lastMouseState {};
+
+    REPLICATED_D(int, mouseWheelDelta, "mwd", 0);
 
     PlayerObject(Game& game);
     PlayerObject(Game& game, Vector3 position);
@@ -80,6 +82,7 @@ public:
 
     // Client Side Call from UI
     void InventoryDrop(int id);
+    void InventorySwap();
 
     void DealDamage(int damage, ObjectID from);
 

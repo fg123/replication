@@ -16,9 +16,9 @@ public:
             game.AddObject(qWeapon);
             qWeapon->AttachToPlayer(this);
 
-            PistolObject* pistol = new PistolObject(game);
-            game.AddObject(pistol);
-            PickupWeapon(pistol);
+            // PistolObject* pistol = new PistolObject(game);
+            // game.AddObject(pistol);
+            // PickupWeapon(pistol);
 
             zWeapon = new BombExploder { game };
             game.AddObject(zWeapon);

@@ -16,9 +16,9 @@ public:
             game.AddObject(qWeapon);
             qWeapon->AttachToPlayer(this, WeaponAttachmentPoint::LEFT);
 
-            PistolObject* pistol = new PistolObject(game);
-            game.AddObject(pistol);
-            PickupWeapon(pistol);
+            // PistolObject* pistol = new PistolObject(game);
+            // game.AddObject(pistol);
+            // PickupWeapon(pistol);
 
             zWeapon = new PortalAbility { game };
             game.AddObject(zWeapon);

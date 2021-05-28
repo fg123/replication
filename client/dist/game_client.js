@@ -166,506 +166,511 @@ Module.expectedDataFileDownloads++;
   "files": [ {
    "filename": "/maps/map1.json",
    "start": 0,
-   "end": 977,
+   "end": 997,
    "audio": 0
   }, {
    "filename": "/models/Ammo.mtl",
-   "start": 977,
-   "end": 1637,
+   "start": 997,
+   "end": 1657,
    "audio": 0
   }, {
    "filename": "/models/Ammo.obj",
-   "start": 1637,
-   "end": 29177,
+   "start": 1657,
+   "end": 29197,
    "audio": 0
   }, {
    "filename": "/models/Arrow.mtl",
-   "start": 29177,
-   "end": 29841,
+   "start": 29197,
+   "end": 29861,
    "audio": 0
   }, {
    "filename": "/models/Arrow.obj",
-   "start": 29841,
-   "end": 36530,
+   "start": 29861,
+   "end": 36550,
    "audio": 0
   }, {
    "filename": "/models/Artillery.mtl",
-   "start": 36530,
-   "end": 36821,
+   "start": 36550,
+   "end": 36841,
    "audio": 0
   }, {
    "filename": "/models/Artillery.obj",
-   "start": 36821,
-   "end": 1692259,
+   "start": 36841,
+   "end": 1692279,
    "audio": 0
   }, {
    "filename": "/models/ArtilleryIndicator.mtl",
-   "start": 1692259,
-   "end": 1692511,
+   "start": 1692279,
+   "end": 1692531,
    "audio": 0
   }, {
    "filename": "/models/ArtilleryIndicator.obj",
-   "start": 1692511,
-   "end": 1738937,
+   "start": 1692531,
+   "end": 1738957,
    "audio": 0
   }, {
    "filename": "/models/BombCrate.mtl",
-   "start": 1738937,
-   "end": 1739302,
+   "start": 1738957,
+   "end": 1739322,
    "audio": 0
   }, {
    "filename": "/models/BombCrate.obj",
-   "start": 1739302,
-   "end": 1740393,
+   "start": 1739322,
+   "end": 1740413,
    "audio": 0
   }, {
    "filename": "/models/Bow.mtl",
-   "start": 1740393,
-   "end": 1741055,
+   "start": 1740413,
+   "end": 1741075,
    "audio": 0
   }, {
    "filename": "/models/Bow.obj",
-   "start": 1741055,
-   "end": 1754650,
+   "start": 1741075,
+   "end": 1754670,
    "audio": 0
   }, {
    "filename": "/models/Bullet.mtl",
-   "start": 1754650,
-   "end": 1754891,
+   "start": 1754670,
+   "end": 1754911,
    "audio": 0
   }, {
    "filename": "/models/Bullet.obj",
-   "start": 1754891,
-   "end": 1783160,
+   "start": 1754911,
+   "end": 1783180,
    "audio": 0
   }, {
    "filename": "/models/BulletTracer.mtl",
-   "start": 1783160,
-   "end": 1783441,
+   "start": 1783180,
+   "end": 1783461,
    "audio": 0
   }, {
    "filename": "/models/BulletTracer.obj",
-   "start": 1783441,
-   "end": 1792870,
+   "start": 1783461,
+   "end": 1792890,
    "audio": 0
   }, {
    "filename": "/models/Cube.mtl",
-   "start": 1792870,
-   "end": 1793099,
+   "start": 1792890,
+   "end": 1793119,
    "audio": 0
   }, {
    "filename": "/models/Cube.obj",
-   "start": 1793099,
-   "end": 1794126,
+   "start": 1793119,
+   "end": 1794146,
+   "audio": 0
+  }, {
+   "filename": "/models/Cylinder.obj",
+   "start": 1794146,
+   "end": 1799797,
    "audio": 0
   }, {
    "filename": "/models/Explosion.mtl",
-   "start": 1794126,
-   "end": 1794547,
+   "start": 1799797,
+   "end": 1800218,
    "audio": 0
   }, {
    "filename": "/models/Explosion.obj",
-   "start": 1794547,
-   "end": 2462185,
+   "start": 1800218,
+   "end": 2467856,
    "audio": 0
   }, {
    "filename": "/models/Grenade.mtl",
-   "start": 2462185,
-   "end": 2462784,
+   "start": 2467856,
+   "end": 2468455,
    "audio": 0
   }, {
    "filename": "/models/Grenade.obj",
-   "start": 2462784,
-   "end": 2709743,
+   "start": 2468455,
+   "end": 2715414,
    "audio": 0
   }, {
    "filename": "/models/Heaven.mtl",
-   "start": 2709743,
-   "end": 2710899,
+   "start": 2715414,
+   "end": 2716570,
    "audio": 0
   }, {
    "filename": "/models/Heaven.obj",
-   "start": 2710899,
-   "end": 2992166,
+   "start": 2716570,
+   "end": 2997837,
    "audio": 0
   }, {
    "filename": "/models/HookThrower.mtl",
-   "start": 2992166,
-   "end": 2992531,
+   "start": 2997837,
+   "end": 2998202,
    "audio": 0
   }, {
    "filename": "/models/HookThrower.obj",
-   "start": 2992531,
-   "end": 2994890,
+   "start": 2998202,
+   "end": 3000561,
    "audio": 0
   }, {
    "filename": "/models/Icosphere.mtl",
-   "start": 2994890,
-   "end": 2995014,
+   "start": 3000561,
+   "end": 3000685,
    "audio": 0
   }, {
    "filename": "/models/Icosphere.obj",
-   "start": 2995014,
-   "end": 3110672,
+   "start": 3000685,
+   "end": 3116343,
    "audio": 0
   }, {
    "filename": "/models/island.obj",
-   "start": 3110672,
-   "end": 4543246,
+   "start": 3116343,
+   "end": 4548917,
    "audio": 0
   }, {
    "filename": "/models/NewPlayer.mtl",
-   "start": 4543246,
-   "end": 4544014,
+   "start": 4548917,
+   "end": 4549685,
    "audio": 0
   }, {
    "filename": "/models/NewPlayer.obj",
-   "start": 4544014,
-   "end": 4596336,
+   "start": 4549685,
+   "end": 4602007,
    "audio": 0
   }, {
    "filename": "/models/Pistol.mtl",
-   "start": 4596336,
-   "end": 4596696,
+   "start": 4602007,
+   "end": 4602367,
    "audio": 0
   }, {
    "filename": "/models/Pistol.obj",
-   "start": 4596696,
-   "end": 4599084,
+   "start": 4602367,
+   "end": 4604755,
    "audio": 0
   }, {
    "filename": "/models/Plane.mtl",
-   "start": 4599084,
-   "end": 4599208,
+   "start": 4604755,
+   "end": 4604879,
    "audio": 0
   }, {
    "filename": "/models/Plane.obj",
-   "start": 4599208,
-   "end": 4599576,
+   "start": 4604879,
+   "end": 4605219,
    "audio": 0
   }, {
    "filename": "/models/Player.mtl",
-   "start": 4599576,
-   "end": 4599816,
+   "start": 4605219,
+   "end": 4605459,
    "audio": 0
   }, {
    "filename": "/models/Player.obj",
-   "start": 4599816,
-   "end": 5371939,
+   "start": 4605459,
+   "end": 5377582,
    "audio": 0
   }, {
    "filename": "/models/Portal.mtl",
-   "start": 5371939,
-   "end": 5372362,
+   "start": 5377582,
+   "end": 5378005,
    "audio": 0
   }, {
    "filename": "/models/Portal.obj",
-   "start": 5372362,
-   "end": 5400660,
+   "start": 5378005,
+   "end": 5406303,
    "audio": 0
   }, {
    "filename": "/models/Quad.obj",
-   "start": 5400660,
-   "end": 5401004,
+   "start": 5406303,
+   "end": 5406647,
    "audio": 0
   }, {
    "filename": "/models/Rifle.mtl",
-   "start": 5401004,
-   "end": 5401489,
+   "start": 5406647,
+   "end": 5407132,
    "audio": 0
   }, {
    "filename": "/models/Rifle.obj",
-   "start": 5401489,
-   "end": 5424986,
+   "start": 5407132,
+   "end": 5430629,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.mtl",
-   "start": 5424986,
-   "end": 5427356,
+   "start": 5430629,
+   "end": 5432999,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.obj",
-   "start": 5427356,
-   "end": 7574477,
+   "start": 5432999,
+   "end": 7578376,
    "audio": 0
   }, {
    "filename": "/models/suzanne.obj",
-   "start": 7574477,
-   "end": 7653233,
+   "start": 7578376,
+   "end": 7657132,
    "audio": 0
   }, {
    "filename": "/shaders/Debug.fs",
-   "start": 7653233,
-   "end": 7653381,
+   "start": 7657132,
+   "end": 7657280,
    "audio": 0
   }, {
    "filename": "/shaders/Debug.vs",
-   "start": 7653381,
-   "end": 7653612,
+   "start": 7657280,
+   "end": 7657511,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.fs",
-   "start": 7653612,
-   "end": 7657416,
+   "start": 7657511,
+   "end": 7661315,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.vs",
-   "start": 7657416,
-   "end": 7658273,
+   "start": 7661315,
+   "end": 7662172,
    "audio": 0
   }, {
    "filename": "/sounds/bang.wav",
-   "start": 7658273,
-   "end": 7785859,
+   "start": 7662172,
+   "end": 7789758,
    "audio": 1
   }, {
    "filename": "/sounds/boom-old1.wav",
-   "start": 7785859,
-   "end": 7857583,
+   "start": 7789758,
+   "end": 7861482,
    "audio": 1
   }, {
    "filename": "/sounds/boom.wav",
-   "start": 7857583,
-   "end": 7929307,
+   "start": 7861482,
+   "end": 7933206,
    "audio": 1
   }, {
    "filename": "/sounds/GrenadeOut.wav",
-   "start": 7929307,
-   "end": 8009223,
+   "start": 7933206,
+   "end": 8013122,
    "audio": 1
   }, {
    "filename": "/sounds/HookReel.wav",
-   "start": 8009223,
-   "end": 8067635,
+   "start": 8013122,
+   "end": 8071534,
    "audio": 1
   }, {
    "filename": "/sounds/HookThrow.wav",
-   "start": 8067635,
-   "end": 8095327,
+   "start": 8071534,
+   "end": 8099226,
    "audio": 1
   }, {
    "filename": "/sounds/incoming.wav",
-   "start": 8095327,
-   "end": 8250049,
+   "start": 8099226,
+   "end": 8253948,
    "audio": 1
   }, {
    "filename": "/sounds/PortalEnd.wav",
-   "start": 8250049,
-   "end": 8321773,
+   "start": 8253948,
+   "end": 8325672,
    "audio": 1
   }, {
    "filename": "/sounds/PortalStart.wav",
-   "start": 8321773,
-   "end": 8394521,
+   "start": 8325672,
+   "end": 8398420,
    "audio": 1
   }, {
    "filename": "/sounds/reload.wav",
-   "start": 8394521,
-   "end": 8508229,
+   "start": 8398420,
+   "end": 8512128,
    "audio": 1
   }, {
    "filename": "/sounds/ueh.wav",
-   "start": 8508229,
-   "end": 8543089,
+   "start": 8512128,
+   "end": 8546988,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-jump.wav",
-   "start": 8543089,
-   "end": 8813537,
+   "start": 8546988,
+   "end": 8817436,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-pullback.wav",
-   "start": 8813537,
-   "end": 8961109,
+   "start": 8817436,
+   "end": 8965008,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-shoot.wav",
-   "start": 8961109,
-   "end": 9075909,
+   "start": 8965008,
+   "end": 9079808,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-ulti-activate.wav",
-   "start": 9075909,
-   "end": 9399613,
+   "start": 9079808,
+   "end": 9403512,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-ulti-shoot.wav",
-   "start": 9399613,
-   "end": 9551283,
+   "start": 9403512,
+   "end": 9555182,
    "audio": 1
   }, {
    "filename": "/textures/Artillery.png",
-   "start": 9551283,
-   "end": 10668510,
+   "start": 9555182,
+   "end": 10672409,
    "audio": 0
   }, {
    "filename": "/textures/BulletTracer.png",
-   "start": 10668510,
-   "end": 10702277,
+   "start": 10672409,
+   "end": 10706176,
    "audio": 0
   }, {
    "filename": "/textures/Mountains.png",
-   "start": 10702277,
-   "end": 10779095,
+   "start": 10706176,
+   "end": 10782994,
    "audio": 0
   }, {
    "filename": "/textures/Skydome.png",
-   "start": 10779095,
-   "end": 12451266,
+   "start": 10782994,
+   "end": 12455165,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_AmbientOcclusion.jpg",
-   "start": 12451266,
-   "end": 13051600,
+   "start": 12455165,
+   "end": 13055499,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Color.jpg",
-   "start": 13051600,
-   "end": 14473290,
+   "start": 13055499,
+   "end": 14477189,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Displacement.jpg",
-   "start": 14473290,
-   "end": 14857719,
+   "start": 14477189,
+   "end": 14861618,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Normal.jpg",
-   "start": 14857719,
-   "end": 16524274,
+   "start": 14861618,
+   "end": 16528173,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Roughness.jpg",
-   "start": 16524274,
-   "end": 17204367,
+   "start": 16528173,
+   "end": 17208266,
    "audio": 0
   }, {
    "filename": "/textures/BulletHole/BulletHole.png",
-   "start": 17204367,
-   "end": 17236571,
+   "start": 17208266,
+   "end": 17240470,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Color.jpg",
-   "start": 17236571,
-   "end": 18570002,
+   "start": 17240470,
+   "end": 18573901,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Displacement.jpg",
-   "start": 18570002,
-   "end": 18866838,
+   "start": 18573901,
+   "end": 18870737,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Emission.jpg",
-   "start": 18866838,
-   "end": 20197821,
+   "start": 18870737,
+   "end": 20201720,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Normal.jpg",
-   "start": 20197821,
-   "end": 21894182,
+   "start": 20201720,
+   "end": 21898081,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Roughness.jpg",
-   "start": 21894182,
-   "end": 22465044,
+   "start": 21898081,
+   "end": 22468943,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Color.jpg",
-   "start": 22465044,
-   "end": 23558028,
+   "start": 22468943,
+   "end": 23561927,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Displacement.jpg",
-   "start": 23558028,
-   "end": 24348588,
+   "start": 23561927,
+   "end": 24352487,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Normal.jpg",
-   "start": 24348588,
-   "end": 24688437,
+   "start": 24352487,
+   "end": 24692336,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Roughness.jpg",
-   "start": 24688437,
-   "end": 25268537,
+   "start": 24692336,
+   "end": 25272436,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Color.jpg",
-   "start": 25268537,
-   "end": 25798362,
+   "start": 25272436,
+   "end": 25802261,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Displacement.jpg",
-   "start": 25798362,
-   "end": 26227576,
+   "start": 25802261,
+   "end": 26231475,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Metalness.jpg",
-   "start": 26227576,
-   "end": 26357580,
+   "start": 26231475,
+   "end": 26361479,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Normal.jpg",
-   "start": 26357580,
-   "end": 27423122,
+   "start": 26361479,
+   "end": 27427021,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Roughness.jpg",
-   "start": 27423122,
-   "end": 27795399,
+   "start": 27427021,
+   "end": 27799298,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/MetalGreen.jpg",
-   "start": 27795399,
-   "end": 28536304,
+   "start": 27799298,
+   "end": 28540203,
    "audio": 0
   }, {
    "filename": "/textures/Wood026_1K-JPG/Wood026_1K_Color.jpg",
-   "start": 28536304,
-   "end": 29521939,
+   "start": 28540203,
+   "end": 29525838,
    "audio": 0
   }, {
    "filename": "/textures/Wood026_1K-JPG/Wood026_1K_Normal.jpg",
-   "start": 29521939,
-   "end": 30757207,
+   "start": 29525838,
+   "end": 30761106,
    "audio": 0
   }, {
    "filename": "/textures/WoodenCrate/Wood_Crate_001_basecolor.jpg",
-   "start": 30757207,
-   "end": 30797018,
+   "start": 30761106,
+   "end": 30800917,
    "audio": 0
   }, {
    "filename": "/textures/WoodenCrate/Wood_Crate_001_normal.jpg",
-   "start": 30797018,
-   "end": 31057275,
+   "start": 30800917,
+   "end": 31061174,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_AmbientOcclusion.jpg",
-   "start": 31057275,
-   "end": 31436996,
+   "start": 31061174,
+   "end": 31440895,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Color.jpg",
-   "start": 31436996,
-   "end": 32237077,
+   "start": 31440895,
+   "end": 32240976,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Displacement.jpg",
-   "start": 32237077,
-   "end": 32753972,
+   "start": 32240976,
+   "end": 32757871,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Normal.jpg",
-   "start": 32753972,
-   "end": 33778461,
+   "start": 32757871,
+   "end": 33782360,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Roughness.jpg",
-   "start": 33778461,
-   "end": 34152483,
+   "start": 33782360,
+   "end": 34156382,
    "audio": 0
   } ],
-  "remote_package_size": 34152483,
-  "package_uuid": "3b54e87b-83fa-47dc-8268-1c5fd6e82a81"
+  "remote_package_size": 34156382,
+  "package_uuid": "215ae878-4662-4175-ba0f-17fe94bb1a47"
  });
 })();
 
@@ -8237,6 +8242,16 @@ function _getTempRet0() {
  return getTempRet0() | 0;
 }
 
+function _getentropy(buffer, size) {
+ if (!_getentropy.randomDevice) {
+  _getentropy.randomDevice = getRandomDevice();
+ }
+ for (var i = 0; i < size; i++) {
+  SAFE_HEAP_STORE(buffer + i | 0, _getentropy.randomDevice() | 0, 1);
+ }
+ return 0;
+}
+
 function _glActiveTexture(x0) {
  GLctx["activeTexture"](x0);
 }
@@ -9045,6 +9060,7 @@ var asmLibraryArg = {
  "fd_seek": _fd_seek,
  "fd_write": _fd_write,
  "getTempRet0": _getTempRet0,
+ "getentropy": _getentropy,
  "glActiveTexture": _glActiveTexture,
  "glAttachShader": _glAttachShader,
  "glBindBuffer": _glBindBuffer,
@@ -9206,17 +9222,17 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 95392;
+var _game = Module["_game"] = 97608;
 
-var _clientGl = Module["_clientGl"] = 95640;
+var _clientGl = Module["_clientGl"] = 97888;
 
-var _clientAudio = Module["_clientAudio"] = 96056;
+var _clientAudio = Module["_clientAudio"] = 98360;
 
-var _inputEvents = Module["_inputEvents"] = 96080;
+var _inputEvents = Module["_inputEvents"] = 98384;
 
-var _ping = Module["_ping"] = 96112;
+var _ping = Module["_ping"] = 98416;
 
-var _lastTickTime = Module["_lastTickTime"] = 96104;
+var _lastTickTime = Module["_lastTickTime"] = 98408;
 
 function invoke_iii(index, a1, a2) {
  var sp = stackSave();
