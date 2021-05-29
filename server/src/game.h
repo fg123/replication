@@ -48,8 +48,10 @@ struct PlayerSocketData {
 class Game {
     std::atomic<ObjectID> nextId;
 
+#ifdef BUILD_SERVER
     std::mutex queuedCallsMutex;
     std::vector<std::function<void(Game& game)>> queuedCalls;
+#endif
 
     std::unordered_map<ObjectID, Object*> gameObjects;
 
@@ -184,11 +186,13 @@ public:
 
     void ChangeId(ObjectID oldId, ObjectID newId);
 
+#ifdef BUILD_SERVER
     void QueueNextTick(const std::function <void(Game& game)>& func) {
         queuedCallsMutex.lock();
         queuedCalls.push_back(func);
         queuedCallsMutex.unlock();
     }
+#endif
 
     void PlayAudio(const std::string& audio, float volume, const Vector3& position);
     void PlayAudio(const std::string& audio, float volume, Object* boundObject);

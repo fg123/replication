@@ -264,6 +264,7 @@ Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
 
 void ClientGL::DrawObjects() {
     int lastProgram = -1;
+    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     for (auto& obj : opaque) {
         DrawObject(obj, lastProgram);
@@ -272,6 +273,7 @@ void ClientGL::DrawObjects() {
         DrawObject(it->second, lastProgram);
     }
     glClear(GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_CULL_FACE);
     for (auto& obj : foreground) {
         DrawObject(obj, lastProgram);
     }

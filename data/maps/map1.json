@@ -22,7 +22,8 @@
     "Ammo.obj",
     "Icosphere.obj",
     "Cube.obj",
-    "Cylinder.obj"
+    "Cylinder.obj",
+    "Shotgun.obj"
  ],
  "sounds": [
     "bang.wav",

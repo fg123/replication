@@ -15,13 +15,7 @@
 #include "static-mesh.h"
 
 #include "collision-test-objects.h"
-
-// Loot
-#include "weapons/grenade-thrower.h"
-#include "weapons/artillery-strike.h"
-#include "weapons/assault-rifle.h"
-#include "weapons/pistol.h"
-#include "ammo.h"
+#include "objects.h"
 
 #include <fstream>
 #include <exception>
@@ -92,7 +86,7 @@ void Game::LoadMap(std::string mapPath) {
     // AddObject(new PistolObject(*this, Vector3(2, 10, 4)));
     // AddObject(new GrenadeThrower(*this, Vector3(2, 10, 6)));
     // AddObject(new AmmoObject(*this, Vector3(2, 10, 8)));
-    // AddObject(new AmmoObject(*this, Vector3(2, 10, 10)));
+    // AddObject(new AmmoObject(*this, Vector3(4.65f, 20, -17.f)));
     // AddObject(new AmmoObject(*this, Vector3(2, 10, 12)));
     // AddObject(new AmmoObject(*this, Vector3(2, 10, 14)));
     // AddObject(new AmmoObject(*this, Vector3(2, 10, 16)));
@@ -147,6 +141,8 @@ void Game::DetachParent(Object* child) {
 
 void Game::Tick(Time time) {
     gameTime = time;
+
+#ifdef BUILD_SERVER
     queuedCallsMutex.lock();
     for (auto& call : queuedCalls) {
         call(*this);
@@ -154,7 +150,6 @@ void Game::Tick(Time time) {
     queuedCalls.clear();
     queuedCallsMutex.unlock();
 
-#ifdef BUILD_SERVER
     // New objects get queued in from HandleReplication and EnsureObjectExists
     //   on the client, not through this set.
     for (auto& newObject : newObjects) {
@@ -173,6 +168,8 @@ void Game::Tick(Time time) {
             averageObjectTickTime.InsertValue(end - start);
         }
     }
+    // if (time % 1024 == 0) LOG_DEBUG("Average Object Tick Time: " << averageObjectTickTime.GetAverage());
+
 #ifdef BUILD_SERVER
     for (auto& object : gameObjects) {
         // if (!IsZero(GetVelocity() - lastFrameVelocity)) {
@@ -481,8 +478,22 @@ RayCastResult Game::RayCastInWorld(RayCastRequest request) {
     return result;
 }
 
+void CollideBetween(Object* primary, Object* secondary, bool isGround,
+        bool shouldExclude, bool shouldReport) {
+    if (!isGround && shouldExclude && !shouldReport) return;
+    CollisionResult r = primary->CollidesWith(secondary);
+    if (r.isColliding) {
+        r.collidedWith = secondary;
+        if (!shouldExclude) {
+            primary->ResolveCollision(r.collisionDifference);
+        }
+        if (shouldReport) {
+            primary->OnCollide(r);
+        }
+    }
+}
+
 void Game::HandleCollisions(Object* obj) {
-    Vector3 collisionResolution;
     for (auto& object : gameObjects) {
         if (obj == object.second) continue;
 
@@ -495,16 +506,20 @@ void Game::HandleCollisions(Object* obj) {
             object.second->IsCollisionExcluded(obj->GetTags());
 
         bool shouldReport = obj->ShouldReportCollision(object.second->GetTags());
-        // Check for Collision Exclusion
-        if (!isGround && shouldExclude && !shouldReport) continue;
-        CollisionResult r = obj->CollidesWith(object.second);
-        if (r.isColliding) {
-            r.collidedWith = object.second;
-            if (!shouldExclude) {
-                obj->ResolveCollision(r.collisionDifference);
-            }
-            if (shouldReport) {
-                obj->OnCollide(r);
+
+        if (!isGround) {
+            // Colliders are only convex
+            CollideBetween(obj, object.second, isGround, shouldExclude, shouldReport);
+        }
+        else {
+            // Do up to 3 collisions between concave static mesh
+            Vector3 lastPosition = obj->GetPosition();
+            for (size_t i = 0; i < 3; i++) {
+                CollideBetween(obj, object.second, isGround, shouldExclude, shouldReport);
+                if (IsZero(lastPosition - obj->GetPosition())) {
+                    break;
+                }
+                lastPosition = obj->GetPosition();
             }
         }
     }
@@ -622,7 +637,6 @@ void Game::GetUnitsInRange(const Vector3& position, float range,
 
 bool Game::CheckLineSegmentCollide(const Vector3& start,
     const Vector3& end, uint64_t includeTags) {
-    CollisionResult result;
     for (auto& object : gameObjects) {
         if (((uint64_t)object.second->GetTags() & includeTags) != 0) {
             bool r = object.second->CollidesWith(start, end);

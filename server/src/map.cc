@@ -6,7 +6,9 @@ std::unordered_map<std::string, size_t> LootTable = {
     { "AssaultRifleObject", 10 },
     { "PistolObject", 10 },
     { "AmmoObject", 50 },
-    { "GrenadeThrower", 20 }
+    { "GrenadeThrower", 10 },
+    // { "BowObject", 10 },
+    { "ShotgunObject", 10 }
 };
 
 void MapObject::InitializeMap() {
@@ -29,6 +31,8 @@ void MapObject::InitializeMap() {
             throw std::runtime_error("Class Table Mismatch");
         }
     }
+
+    SpawnLoot(0);
 }
 
 bool IsAttachedWeapon(Game& game, ObjectID id) {
@@ -36,40 +40,44 @@ bool IsAttachedWeapon(Game& game, ObjectID id) {
     return obj && obj->GetAttachedTo();
 }
 
-void MapObject::Tick(Time time) {
-    // Server Only
-#ifdef BUILD_SERVER
-    if (time - lastLootSpawnTime > 100000) {
-        lastLootSpawnTime = time;
-        for (LootSpawnZone& zone : lootSpawnZones) {
-            AABB& box = zone.spawnZone;
-            for (auto it = zone.objects.begin(); it != zone.objects.end(); ) {
-                ObjectID id = *it;
-                if (!game.ObjectExists(id) || IsAttachedWeapon(game, id)) {
-                    it = zone.objects.erase(it);
-                }
-                else {
-                    it++;
-                }
+void MapObject::SpawnLoot(Time time) {
+    lastLootSpawnTime = time;
+    for (LootSpawnZone& zone : lootSpawnZones) {
+        AABB& box = zone.spawnZone;
+        for (auto it = zone.objects.begin(); it != zone.objects.end(); ) {
+            ObjectID id = *it;
+            if (!game.ObjectExists(id) || IsAttachedWeapon(game, id)) {
+                it = zone.objects.erase(it);
             }
-
-            int total = 7 - zone.objects.size();
-            std::uniform_real_distribution<float> distribX(box.ptMin.x, box.ptMax.x);
-            std::uniform_real_distribution<float> distribY(box.ptMin.y, box.ptMax.y);
-            std::uniform_real_distribution<float> distribZ(box.ptMin.z, box.ptMax.z);
-
-            for (int i = 0; i < total; i++) {
-                Vector3 location {
-                    distribX(gen), distribY(gen), distribZ(gen),
-                };
-                Object* obj = LootSpawn();
-                obj->SetPosition(location);
-                game.AddObject(obj);
-                zone.objects.insert(obj->GetId());
+            else {
+                it++;
             }
         }
+
+        int total = 7 - zone.objects.size();
+        std::uniform_real_distribution<float> distribX(box.ptMin.x, box.ptMax.x);
+        std::uniform_real_distribution<float> distribY(box.ptMin.y, box.ptMax.y);
+        std::uniform_real_distribution<float> distribZ(box.ptMin.z, box.ptMax.z);
+
+        for (int i = 0; i < total; i++) {
+            Vector3 location {
+                distribX(gen), distribY(gen), distribZ(gen),
+            };
+            Object* obj = LootSpawn();
+            obj->SetPosition(location);
+            game.AddObject(obj);
+            zone.objects.insert(obj->GetId());
+        }
     }
-#endif
+}
+
+void MapObject::Tick(Time time) {
+    // Server Only
+// #ifdef BUILD_SERVER
+//     if (time - lastLootSpawnTime > 60000) {
+//         SpawnLoot(time);
+//     }
+// #endif
 }
 
 Object* MapObject::LootSpawn() {

@@ -46,14 +46,15 @@ Object::Object(Game& game) :
 Object::~Object() {}
 
 void Object::HandleAllCollisions() {
-    Vector3 lastPosition = position;
-    for (size_t i = 0; i < 3; i++) {
-        game.HandleCollisions(this);
-        if (IsZero(lastPosition - position)) {
-            return;
-        }
-        lastPosition = position;
-    }
+    game.HandleCollisions(this);
+    // Vector3 lastPosition = position;
+    // for (size_t i = 0; i < 1; i++) {
+    //     game.HandleCollisions(this);
+    //     if (IsZero(lastPosition - position)) {
+    //         return;
+    //     }
+    //     lastPosition = position;
+    // }
     // LOG_WARN("Object still unstable after 1 iterations of collision resolution!");
 }
 
@@ -89,32 +90,40 @@ void Object::Tick(Time time) {
             velocity.z *= airFriction.z;
 
             // No Tunneling
-            // position += positionDelta;
-            // HandleAllCollisions();
+            // #ifdef BUILD_CLIENT
+            //     position += positionDelta;
+            //     HandleAllCollisions();
+            // #endif
 
-            // Minimize Tunnelling by Creating Divisions
-            Vector3 size = aabbBroad.ptMax - aabbBroad.ptMin;
-            float AABBSize = glm::abs(glm::min(
-                size.x, size.y, size.z));
-            float movement = glm::length(positionDelta);
+            // #ifdef BUILD_SERVER
+                // Minimize Tunnelling by Creating Divisions
+                Vector3 size = glm::abs(aabbBroad.ptMax - aabbBroad.ptMin);
 
-            int divisions = AABBSize < EPSILON ? 1 : glm::ceil(movement / AABBSize);
+                int divX = size.x < EPSILON ? 1 : glm::ceil(glm::abs(positionDelta.x) / size.x);
+                int divY = size.y < EPSILON ? 1 : glm::ceil(glm::abs(positionDelta.y) / size.y);
+                int divZ = size.z < EPSILON ? 1 : glm::ceil(glm::abs(positionDelta.z) / size.z);
 
-            Vector3 subStepDelta = positionDelta;
-            for (int i = 0; i < divisions; i++) {
-                position += subStepDelta / (float)divisions;
-                HandleAllCollisions();
-                if (IsStatic()) {
-                    break;
+                int divisions = glm::max(divX, divY, divZ);
+                // if (IsTagged(Tag::WEAPON)) {
+                //     LOG_DEBUG(position.y << ": " << divisions << " " << positionDelta << " " << size);
+                // }
+
+                Vector3 subStepDelta = positionDelta;
+                for (int i = 0; i < divisions; i++) {
+                    position += subStepDelta / (float)divisions;
+                    HandleAllCollisions();
+                    if (IsStatic()) {
+                        break;
+                    }
+                    subStepDelta = GetVelocity() * timeFactor;
                 }
-                subStepDelta = GetVelocity() * timeFactor;
-            }
 
-            if (divisions == 0) {
-                // We did not call HandleCollisions so reporting won't be triggered
-                //   above, so we additionally handle collisions here.
-                HandleAllCollisions();
-            }
+                if (divisions == 0) {
+                    // We did not call HandleCollisions so reporting won't be triggered
+                    //   above, so we additionally handle collisions here.
+                    HandleAllCollisions();
+                }
+            // #endif
 
             if (glm::abs(velocity.x) < EPSILON) {
                 velocity.x = 0;
@@ -125,6 +134,13 @@ void Object::Tick(Time time) {
             if (glm::abs(velocity.z) < EPSILON) {
                 velocity.z = 0;
             }
+        }
+
+        if (!IsZero(lastFramePosition - position)) {
+            // if (IsTagged(Tag::WEAPON)) {
+            //     LOG_DEBUG(lastFramePosition << " " << position);
+            // }
+            SetDirty(true);
         }
 
         #ifdef BUILD_CLIENT
@@ -148,7 +164,7 @@ void Object::Tick(Time time) {
         child->Tick(time);
     }
 
-    AddDebugLine(position, position + GetLookDirection(), Vector3(1, 0, 1));
+    // AddDebugLine(position, position + GetLookDirection(), Vector3(1, 0, 1));
 }
 
 void Object::ResolveCollision(Vector3 difference) {

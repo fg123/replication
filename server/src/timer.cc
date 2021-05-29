@@ -31,7 +31,8 @@ void Timer::Tick() {
         auto& event = *it;
         if (current > event->nextScheduled) {
             event->function(event->nextScheduled);
-            event->performance.InsertValue(current - event->lastRealtimeTick);
+            event->intervalTime.InsertValue(current - event->lastRealtimeTick);
+            event->callRuntime.InsertValue(Now() - current);
 
             event->lastRealtimeTick = current;
 

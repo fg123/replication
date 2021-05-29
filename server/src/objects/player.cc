@@ -220,6 +220,7 @@ void PlayerObject::Tick(Time time) {
         // velocity.y = -300;
     }
 
+    canPickup = time - lastPickupTime > 500;
     WeaponObject* currentWeapon = inventoryManager.GetCurrentWeapon();
     if (currentWeapon) {
         if (mouseState[LEFT_MOUSE_BUTTON]) {
@@ -378,7 +379,7 @@ void PlayerObject::DropWeapon(WeaponObject* weapon)  {
 
 void PlayerObject::OnCollide(CollisionResult& result) {
     if (result.collidedWith->IsTagged(Tag::WEAPON)) {
-        if (game.GetGameTime() > canPickupTime) {
+        if (canPickup) {
             PickupWeapon(static_cast<WeaponObject*>(result.collidedWith));
         }
     }
@@ -459,7 +460,7 @@ Vector3 PlayerObject::GetRightAttachmentPoint() const {
 
     return GetPosition()
         - left * 0.5f
-        + GetLookDirection() * 1.0f;
+        + GetLookDirection() * 0.5f;
 }
 
 Vector3 PlayerObject::GetLeftAttachmentPoint() const {
@@ -468,14 +469,11 @@ Vector3 PlayerObject::GetLeftAttachmentPoint() const {
 
     return GetPosition()
         + left * 0.5f
-        + GetLookDirection() * 1.0f;
+        + GetLookDirection() * 0.5f;
 }
 
 Vector3 PlayerObject::GetCenterAttachmentPoint() const {
-    Vector3 up = glm::normalize(Vector::Up * rotation);
-
-    return GetPosition() +
-        + GetLookDirection() * 1.0f;
+    return GetPosition() + GetLookDirection() * 0.5f;
 }
 
 

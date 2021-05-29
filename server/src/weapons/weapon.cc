@@ -34,6 +34,7 @@ void WeaponObject::AttachToPlayer(PlayerObject* player, WeaponAttachmentPoint in
     // No Collision
     collisionExclusion |= (uint64_t)Tag::OBJECT;
     SetTag(Tag::NO_KILLPLANE);
+    SetTag(Tag::NO_GRAVITY);
 }
 
 void WeaponObject::Detach() {
@@ -42,6 +43,7 @@ void WeaponObject::Detach() {
     SetVelocity(Vector3());
     collisionExclusion &= ~(uint64_t)Tag::OBJECT;
     RemoveTag(Tag::NO_KILLPLANE);
+    RemoveTag(Tag::NO_GRAVITY);
     SetDirty(true);
 }
 
@@ -49,13 +51,6 @@ void WeaponObject::Tick(Time time) {
     Object::Tick(time);
     if (attachedTo) {
         // Attached!
-        SetTag(Tag::NO_GRAVITY);
-        if (attachedTo->GetCurrentWeapon() == this) {
-            SetScale(Vector3(1));
-        }
-        else {
-            SetScale(Vector3(0));
-        }
         SetPosition(attachedTo->GetAttachmentPoint(attachmentPoint));
         SetVelocity(attachedTo->GetVelocity());
         SetRotation(attachedTo->GetRotationWithPitch());
@@ -63,12 +58,19 @@ void WeaponObject::Tick(Time time) {
             clientPosition = GetPosition();
             clientRotation = GetRotation();
         #endif
-        SetDirty(true);
+
+        if (attachedTo->GetCurrentWeapon() == this) {
+            SetScale(Vector3(1));
+            SetDirty(true);
+        }
+        else if (!IsZero(GetScale())) {
+            SetScale(Vector3(0));
+            SetDirty(true);
+        }
     }
     else {
-        if (IsTagged(Tag::NO_GRAVITY) || IsZero(scale)) {
+        if (IsZero(GetScale())) {
             SetScale(Vector3(1));
-            RemoveTag(Tag::NO_GRAVITY);
             SetDirty(true);
         }
     }

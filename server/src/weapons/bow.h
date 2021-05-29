@@ -15,6 +15,7 @@ public:
         powerMax = 100;
 
         SetModel(game.GetModel("Bow.obj"));
+        GenerateOBBCollidersFromModel(this);
     }
 
     void SetInstantFire(bool fire) { instantFire = fire; }

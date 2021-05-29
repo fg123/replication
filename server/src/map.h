@@ -57,7 +57,7 @@ public:
     void InitializeMap();
 
     Object* LootSpawn();
-
+    void SpawnLoot(Time time);
     virtual void Tick(Time time) override;
 };
 

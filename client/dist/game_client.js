@@ -166,511 +166,521 @@ Module.expectedDataFileDownloads++;
   "files": [ {
    "filename": "/maps/map1.json",
    "start": 0,
-   "end": 997,
+   "end": 1016,
    "audio": 0
   }, {
    "filename": "/models/Ammo.mtl",
-   "start": 997,
-   "end": 1657,
+   "start": 1016,
+   "end": 1676,
    "audio": 0
   }, {
    "filename": "/models/Ammo.obj",
-   "start": 1657,
-   "end": 29197,
+   "start": 1676,
+   "end": 29216,
    "audio": 0
   }, {
    "filename": "/models/Arrow.mtl",
-   "start": 29197,
-   "end": 29861,
+   "start": 29216,
+   "end": 29880,
    "audio": 0
   }, {
    "filename": "/models/Arrow.obj",
-   "start": 29861,
-   "end": 36550,
+   "start": 29880,
+   "end": 36569,
    "audio": 0
   }, {
    "filename": "/models/Artillery.mtl",
-   "start": 36550,
-   "end": 36841,
+   "start": 36569,
+   "end": 36860,
    "audio": 0
   }, {
    "filename": "/models/Artillery.obj",
-   "start": 36841,
-   "end": 1692279,
+   "start": 36860,
+   "end": 1692298,
    "audio": 0
   }, {
    "filename": "/models/ArtilleryIndicator.mtl",
-   "start": 1692279,
-   "end": 1692531,
+   "start": 1692298,
+   "end": 1692550,
    "audio": 0
   }, {
    "filename": "/models/ArtilleryIndicator.obj",
-   "start": 1692531,
-   "end": 1738957,
+   "start": 1692550,
+   "end": 1738976,
    "audio": 0
   }, {
    "filename": "/models/BombCrate.mtl",
-   "start": 1738957,
-   "end": 1739322,
+   "start": 1738976,
+   "end": 1739341,
    "audio": 0
   }, {
    "filename": "/models/BombCrate.obj",
-   "start": 1739322,
-   "end": 1740413,
+   "start": 1739341,
+   "end": 1740432,
    "audio": 0
   }, {
    "filename": "/models/Bow.mtl",
-   "start": 1740413,
-   "end": 1741075,
+   "start": 1740432,
+   "end": 1741094,
    "audio": 0
   }, {
    "filename": "/models/Bow.obj",
-   "start": 1741075,
-   "end": 1754670,
+   "start": 1741094,
+   "end": 1754689,
    "audio": 0
   }, {
    "filename": "/models/Bullet.mtl",
-   "start": 1754670,
-   "end": 1754911,
+   "start": 1754689,
+   "end": 1754930,
    "audio": 0
   }, {
    "filename": "/models/Bullet.obj",
-   "start": 1754911,
-   "end": 1783180,
+   "start": 1754930,
+   "end": 1783199,
    "audio": 0
   }, {
    "filename": "/models/BulletTracer.mtl",
-   "start": 1783180,
-   "end": 1783461,
+   "start": 1783199,
+   "end": 1783480,
    "audio": 0
   }, {
    "filename": "/models/BulletTracer.obj",
-   "start": 1783461,
-   "end": 1792890,
+   "start": 1783480,
+   "end": 1792909,
    "audio": 0
   }, {
    "filename": "/models/Cube.mtl",
-   "start": 1792890,
-   "end": 1793119,
+   "start": 1792909,
+   "end": 1793138,
    "audio": 0
   }, {
    "filename": "/models/Cube.obj",
-   "start": 1793119,
-   "end": 1794146,
+   "start": 1793138,
+   "end": 1794165,
    "audio": 0
   }, {
    "filename": "/models/Cylinder.obj",
-   "start": 1794146,
-   "end": 1799797,
+   "start": 1794165,
+   "end": 1799816,
    "audio": 0
   }, {
    "filename": "/models/Explosion.mtl",
-   "start": 1799797,
-   "end": 1800218,
+   "start": 1799816,
+   "end": 1800237,
    "audio": 0
   }, {
    "filename": "/models/Explosion.obj",
-   "start": 1800218,
-   "end": 2467856,
+   "start": 1800237,
+   "end": 2467875,
    "audio": 0
   }, {
    "filename": "/models/Grenade.mtl",
-   "start": 2467856,
-   "end": 2468455,
+   "start": 2467875,
+   "end": 2468474,
    "audio": 0
   }, {
    "filename": "/models/Grenade.obj",
-   "start": 2468455,
-   "end": 2715414,
+   "start": 2468474,
+   "end": 2715433,
    "audio": 0
   }, {
    "filename": "/models/Heaven.mtl",
-   "start": 2715414,
-   "end": 2716570,
+   "start": 2715433,
+   "end": 2716589,
    "audio": 0
   }, {
    "filename": "/models/Heaven.obj",
-   "start": 2716570,
-   "end": 2997837,
+   "start": 2716589,
+   "end": 2997856,
    "audio": 0
   }, {
    "filename": "/models/HookThrower.mtl",
-   "start": 2997837,
-   "end": 2998202,
+   "start": 2997856,
+   "end": 2998221,
    "audio": 0
   }, {
    "filename": "/models/HookThrower.obj",
-   "start": 2998202,
-   "end": 3000561,
+   "start": 2998221,
+   "end": 3000580,
    "audio": 0
   }, {
    "filename": "/models/Icosphere.mtl",
-   "start": 3000561,
-   "end": 3000685,
+   "start": 3000580,
+   "end": 3000704,
    "audio": 0
   }, {
    "filename": "/models/Icosphere.obj",
-   "start": 3000685,
-   "end": 3116343,
+   "start": 3000704,
+   "end": 3116362,
    "audio": 0
   }, {
    "filename": "/models/island.obj",
-   "start": 3116343,
-   "end": 4548917,
+   "start": 3116362,
+   "end": 4548936,
    "audio": 0
   }, {
    "filename": "/models/NewPlayer.mtl",
-   "start": 4548917,
-   "end": 4549685,
+   "start": 4548936,
+   "end": 4549704,
    "audio": 0
   }, {
    "filename": "/models/NewPlayer.obj",
-   "start": 4549685,
-   "end": 4602007,
+   "start": 4549704,
+   "end": 4602026,
    "audio": 0
   }, {
    "filename": "/models/Pistol.mtl",
-   "start": 4602007,
-   "end": 4602367,
+   "start": 4602026,
+   "end": 4602572,
    "audio": 0
   }, {
    "filename": "/models/Pistol.obj",
-   "start": 4602367,
-   "end": 4604755,
+   "start": 4602572,
+   "end": 4615066,
    "audio": 0
   }, {
    "filename": "/models/Plane.mtl",
-   "start": 4604755,
-   "end": 4604879,
+   "start": 4615066,
+   "end": 4615190,
    "audio": 0
   }, {
    "filename": "/models/Plane.obj",
-   "start": 4604879,
-   "end": 4605219,
+   "start": 4615190,
+   "end": 4615530,
    "audio": 0
   }, {
    "filename": "/models/Player.mtl",
-   "start": 4605219,
-   "end": 4605459,
+   "start": 4615530,
+   "end": 4615770,
    "audio": 0
   }, {
    "filename": "/models/Player.obj",
-   "start": 4605459,
-   "end": 5377582,
+   "start": 4615770,
+   "end": 5387893,
    "audio": 0
   }, {
    "filename": "/models/Portal.mtl",
-   "start": 5377582,
-   "end": 5378005,
+   "start": 5387893,
+   "end": 5388316,
    "audio": 0
   }, {
    "filename": "/models/Portal.obj",
-   "start": 5378005,
-   "end": 5406303,
+   "start": 5388316,
+   "end": 5416614,
    "audio": 0
   }, {
    "filename": "/models/Quad.obj",
-   "start": 5406303,
-   "end": 5406647,
+   "start": 5416614,
+   "end": 5416958,
    "audio": 0
   }, {
    "filename": "/models/Rifle.mtl",
-   "start": 5406647,
-   "end": 5407132,
+   "start": 5416958,
+   "end": 5417443,
    "audio": 0
   }, {
    "filename": "/models/Rifle.obj",
-   "start": 5407132,
-   "end": 5430629,
+   "start": 5417443,
+   "end": 5440940,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.mtl",
-   "start": 5430629,
-   "end": 5432999,
+   "start": 5440940,
+   "end": 5443310,
    "audio": 0
   }, {
    "filename": "/models/ShootingRange.obj",
-   "start": 5432999,
-   "end": 7578376,
+   "start": 5443310,
+   "end": 7588687,
+   "audio": 0
+  }, {
+   "filename": "/models/Shotgun.mtl",
+   "start": 7588687,
+   "end": 7589360,
+   "audio": 0
+  }, {
+   "filename": "/models/Shotgun.obj",
+   "start": 7589360,
+   "end": 7619307,
    "audio": 0
   }, {
    "filename": "/models/suzanne.obj",
-   "start": 7578376,
-   "end": 7657132,
+   "start": 7619307,
+   "end": 7698063,
    "audio": 0
   }, {
    "filename": "/shaders/Debug.fs",
-   "start": 7657132,
-   "end": 7657280,
+   "start": 7698063,
+   "end": 7698211,
    "audio": 0
   }, {
    "filename": "/shaders/Debug.vs",
-   "start": 7657280,
-   "end": 7657511,
+   "start": 7698211,
+   "end": 7698442,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.fs",
-   "start": 7657511,
-   "end": 7661315,
+   "start": 7698442,
+   "end": 7702246,
    "audio": 0
   }, {
    "filename": "/shaders/Mesh.vs",
-   "start": 7661315,
-   "end": 7662172,
+   "start": 7702246,
+   "end": 7703103,
    "audio": 0
   }, {
    "filename": "/sounds/bang.wav",
-   "start": 7662172,
-   "end": 7789758,
+   "start": 7703103,
+   "end": 7830689,
    "audio": 1
   }, {
    "filename": "/sounds/boom-old1.wav",
-   "start": 7789758,
-   "end": 7861482,
+   "start": 7830689,
+   "end": 7902413,
    "audio": 1
   }, {
    "filename": "/sounds/boom.wav",
-   "start": 7861482,
-   "end": 7933206,
+   "start": 7902413,
+   "end": 7974137,
    "audio": 1
   }, {
    "filename": "/sounds/GrenadeOut.wav",
-   "start": 7933206,
-   "end": 8013122,
+   "start": 7974137,
+   "end": 8054053,
    "audio": 1
   }, {
    "filename": "/sounds/HookReel.wav",
-   "start": 8013122,
-   "end": 8071534,
+   "start": 8054053,
+   "end": 8112465,
    "audio": 1
   }, {
    "filename": "/sounds/HookThrow.wav",
-   "start": 8071534,
-   "end": 8099226,
+   "start": 8112465,
+   "end": 8140157,
    "audio": 1
   }, {
    "filename": "/sounds/incoming.wav",
-   "start": 8099226,
-   "end": 8253948,
+   "start": 8140157,
+   "end": 8294879,
    "audio": 1
   }, {
    "filename": "/sounds/PortalEnd.wav",
-   "start": 8253948,
-   "end": 8325672,
+   "start": 8294879,
+   "end": 8366603,
    "audio": 1
   }, {
    "filename": "/sounds/PortalStart.wav",
-   "start": 8325672,
-   "end": 8398420,
+   "start": 8366603,
+   "end": 8439351,
    "audio": 1
   }, {
    "filename": "/sounds/reload.wav",
-   "start": 8398420,
-   "end": 8512128,
+   "start": 8439351,
+   "end": 8553059,
    "audio": 1
   }, {
    "filename": "/sounds/ueh.wav",
-   "start": 8512128,
-   "end": 8546988,
+   "start": 8553059,
+   "end": 8587919,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-jump.wav",
-   "start": 8546988,
-   "end": 8817436,
+   "start": 8587919,
+   "end": 8858367,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-pullback.wav",
-   "start": 8817436,
-   "end": 8965008,
+   "start": 8858367,
+   "end": 9005939,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-shoot.wav",
-   "start": 8965008,
-   "end": 9079808,
+   "start": 9005939,
+   "end": 9120739,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-ulti-activate.wav",
-   "start": 9079808,
-   "end": 9403512,
+   "start": 9120739,
+   "end": 9444443,
    "audio": 1
   }, {
    "filename": "/sounds/Archer/arrow-ulti-shoot.wav",
-   "start": 9403512,
-   "end": 9555182,
+   "start": 9444443,
+   "end": 9596113,
    "audio": 1
   }, {
    "filename": "/textures/Artillery.png",
-   "start": 9555182,
-   "end": 10672409,
+   "start": 9596113,
+   "end": 10713340,
    "audio": 0
   }, {
    "filename": "/textures/BulletTracer.png",
-   "start": 10672409,
-   "end": 10706176,
+   "start": 10713340,
+   "end": 10747107,
    "audio": 0
   }, {
    "filename": "/textures/Mountains.png",
-   "start": 10706176,
-   "end": 10782994,
+   "start": 10747107,
+   "end": 10823925,
    "audio": 0
   }, {
    "filename": "/textures/Skydome.png",
-   "start": 10782994,
-   "end": 12455165,
+   "start": 10823925,
+   "end": 12496096,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_AmbientOcclusion.jpg",
-   "start": 12455165,
-   "end": 13055499,
+   "start": 12496096,
+   "end": 13096430,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Color.jpg",
-   "start": 13055499,
-   "end": 14477189,
+   "start": 13096430,
+   "end": 14518120,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Displacement.jpg",
-   "start": 14477189,
-   "end": 14861618,
+   "start": 14518120,
+   "end": 14902549,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Normal.jpg",
-   "start": 14861618,
-   "end": 16528173,
+   "start": 14902549,
+   "end": 16569104,
    "audio": 0
   }, {
    "filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Roughness.jpg",
-   "start": 16528173,
-   "end": 17208266,
+   "start": 16569104,
+   "end": 17249197,
    "audio": 0
   }, {
    "filename": "/textures/BulletHole/BulletHole.png",
-   "start": 17208266,
-   "end": 17240470,
+   "start": 17249197,
+   "end": 17281401,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Color.jpg",
-   "start": 17240470,
-   "end": 18573901,
+   "start": 17281401,
+   "end": 18614832,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Displacement.jpg",
-   "start": 18573901,
-   "end": 18870737,
+   "start": 18614832,
+   "end": 18911668,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Emission.jpg",
-   "start": 18870737,
-   "end": 20201720,
+   "start": 18911668,
+   "end": 20242651,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Normal.jpg",
-   "start": 20201720,
-   "end": 21898081,
+   "start": 20242651,
+   "end": 21939012,
    "audio": 0
   }, {
    "filename": "/textures/Lava004_1K-JPG/Lava004_1K_Roughness.jpg",
-   "start": 21898081,
-   "end": 22468943,
+   "start": 21939012,
+   "end": 22509874,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Color.jpg",
-   "start": 22468943,
-   "end": 23561927,
+   "start": 22509874,
+   "end": 23602858,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Displacement.jpg",
-   "start": 23561927,
-   "end": 24352487,
+   "start": 23602858,
+   "end": 24393418,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Normal.jpg",
-   "start": 24352487,
-   "end": 24692336,
+   "start": 24393418,
+   "end": 24733267,
    "audio": 0
   }, {
    "filename": "/textures/Marble012_1K-JPG/Marble012_1K_Roughness.jpg",
-   "start": 24692336,
-   "end": 25272436,
+   "start": 24733267,
+   "end": 25313367,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Color.jpg",
-   "start": 25272436,
-   "end": 25802261,
+   "start": 25313367,
+   "end": 25843192,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Displacement.jpg",
-   "start": 25802261,
-   "end": 26231475,
+   "start": 25843192,
+   "end": 26272406,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Metalness.jpg",
-   "start": 26231475,
-   "end": 26361479,
+   "start": 26272406,
+   "end": 26402410,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Normal.jpg",
-   "start": 26361479,
-   "end": 27427021,
+   "start": 26402410,
+   "end": 27467952,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/Metal038_1K_Roughness.jpg",
-   "start": 27427021,
-   "end": 27799298,
+   "start": 27467952,
+   "end": 27840229,
    "audio": 0
   }, {
    "filename": "/textures/Metal038_1K-JPG/MetalGreen.jpg",
-   "start": 27799298,
-   "end": 28540203,
+   "start": 27840229,
+   "end": 28581134,
    "audio": 0
   }, {
    "filename": "/textures/Wood026_1K-JPG/Wood026_1K_Color.jpg",
-   "start": 28540203,
-   "end": 29525838,
+   "start": 28581134,
+   "end": 29566769,
    "audio": 0
   }, {
    "filename": "/textures/Wood026_1K-JPG/Wood026_1K_Normal.jpg",
-   "start": 29525838,
-   "end": 30761106,
+   "start": 29566769,
+   "end": 30802037,
    "audio": 0
   }, {
    "filename": "/textures/WoodenCrate/Wood_Crate_001_basecolor.jpg",
-   "start": 30761106,
-   "end": 30800917,
+   "start": 30802037,
+   "end": 30841848,
    "audio": 0
   }, {
    "filename": "/textures/WoodenCrate/Wood_Crate_001_normal.jpg",
-   "start": 30800917,
-   "end": 31061174,
+   "start": 30841848,
+   "end": 31102105,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_AmbientOcclusion.jpg",
-   "start": 31061174,
-   "end": 31440895,
+   "start": 31102105,
+   "end": 31481826,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Color.jpg",
-   "start": 31440895,
-   "end": 32240976,
+   "start": 31481826,
+   "end": 32281907,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Displacement.jpg",
-   "start": 32240976,
-   "end": 32757871,
+   "start": 32281907,
+   "end": 32798802,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Normal.jpg",
-   "start": 32757871,
-   "end": 33782360,
+   "start": 32798802,
+   "end": 33823291,
    "audio": 0
   }, {
    "filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Roughness.jpg",
-   "start": 33782360,
-   "end": 34156382,
+   "start": 33823291,
+   "end": 34197313,
    "audio": 0
   } ],
-  "remote_package_size": 34156382,
-  "package_uuid": "215ae878-4662-4175-ba0f-17fe94bb1a47"
+  "remote_package_size": 34197313,
+  "package_uuid": "d1496a6f-d311-4143-80a3-a50dedde32f5"
  });
 })();
 
@@ -2211,205 +2221,16 @@ function ExceptionInfo(excPtr) {
  };
 }
 
-function CatchInfo(ptr) {
- this.free = function() {
-  _free(this.ptr);
-  this.ptr = 0;
- };
- this.set_base_ptr = function(basePtr) {
-  SAFE_HEAP_STORE(this.ptr | 0, basePtr | 0, 4);
- };
- this.get_base_ptr = function() {
-  return SAFE_HEAP_LOAD(this.ptr | 0, 4, 0) | 0;
- };
- this.set_adjusted_ptr = function(adjustedPtr) {
-  var ptrSize = 4;
-  SAFE_HEAP_STORE(this.ptr + ptrSize | 0, adjustedPtr | 0, 4);
- };
- this.get_adjusted_ptr = function() {
-  var ptrSize = 4;
-  return SAFE_HEAP_LOAD(this.ptr + ptrSize | 0, 4, 0) | 0;
- };
- this.get_exception_ptr = function() {
-  var isPointer = ___cxa_is_pointer_type(this.get_exception_info().get_type());
-  if (isPointer) {
-   return SAFE_HEAP_LOAD(this.get_base_ptr() | 0, 4, 0) | 0;
-  }
-  var adjusted = this.get_adjusted_ptr();
-  if (adjusted !== 0) return adjusted;
-  return this.get_base_ptr();
- };
- this.get_exception_info = function() {
-  return new ExceptionInfo(this.get_base_ptr());
- };
- if (ptr === undefined) {
-  this.ptr = _malloc(8);
-  this.set_adjusted_ptr(0);
- } else {
-  this.ptr = ptr;
- }
-}
-
-var exceptionCaught = [];
-
-function exception_addRef(info) {
- info.add_ref();
-}
-
-var uncaughtExceptionCount = 0;
-
-function ___cxa_begin_catch(ptr) {
- var catchInfo = new CatchInfo(ptr);
- var info = catchInfo.get_exception_info();
- if (!info.get_caught()) {
-  info.set_caught(true);
-  uncaughtExceptionCount--;
- }
- info.set_rethrown(false);
- exceptionCaught.push(catchInfo);
- exception_addRef(info);
- return catchInfo.get_exception_ptr();
-}
-
 var exceptionLast = 0;
 
-function ___cxa_free_exception(ptr) {
- try {
-  return _free(new ExceptionInfo(ptr).ptr);
- } catch (e) {
-  err("exception during cxa_free_exception: " + e);
- }
-}
-
-function exception_decRef(info) {
- if (info.release_ref() && !info.get_rethrown()) {
-  var destructor = info.get_destructor();
-  if (destructor) {
-   wasmTable.get(destructor)(info.excPtr);
-  }
-  ___cxa_free_exception(info.excPtr);
- }
-}
-
-function ___cxa_end_catch() {
- _setThrew(0);
- assert(exceptionCaught.length > 0);
- var catchInfo = exceptionCaught.pop();
- exception_decRef(catchInfo.get_exception_info());
- catchInfo.free();
- exceptionLast = 0;
-}
-
-function ___resumeException(catchInfoPtr) {
- var catchInfo = new CatchInfo(catchInfoPtr);
- var ptr = catchInfo.get_base_ptr();
- if (!exceptionLast) {
-  exceptionLast = ptr;
- }
- catchInfo.free();
- throw ptr;
-}
-
-function ___cxa_find_matching_catch_2() {
- var thrown = exceptionLast;
- if (!thrown) {
-  setTempRet0(0 | 0);
-  return 0 | 0;
- }
- var info = new ExceptionInfo(thrown);
- var thrownType = info.get_type();
- var catchInfo = new CatchInfo();
- catchInfo.set_base_ptr(thrown);
- if (!thrownType) {
-  setTempRet0(0 | 0);
-  return catchInfo.ptr | 0;
- }
- var typeArray = Array.prototype.slice.call(arguments);
- var stackTop = stackSave();
- var exceptionThrowBuf = stackAlloc(4);
- SAFE_HEAP_STORE(exceptionThrowBuf | 0, thrown | 0, 4);
- for (var i = 0; i < typeArray.length; i++) {
-  var caughtType = typeArray[i];
-  if (caughtType === 0 || caughtType === thrownType) {
-   break;
-  }
-  if (___cxa_can_catch(caughtType, thrownType, exceptionThrowBuf)) {
-   var adjusted = SAFE_HEAP_LOAD(exceptionThrowBuf | 0, 4, 0) | 0;
-   if (thrown !== adjusted) {
-    catchInfo.set_adjusted_ptr(adjusted);
-   }
-   setTempRet0(caughtType | 0);
-   return catchInfo.ptr | 0;
-  }
- }
- stackRestore(stackTop);
- setTempRet0(thrownType | 0);
- return catchInfo.ptr | 0;
-}
-
-function ___cxa_find_matching_catch_3() {
- var thrown = exceptionLast;
- if (!thrown) {
-  setTempRet0(0 | 0);
-  return 0 | 0;
- }
- var info = new ExceptionInfo(thrown);
- var thrownType = info.get_type();
- var catchInfo = new CatchInfo();
- catchInfo.set_base_ptr(thrown);
- if (!thrownType) {
-  setTempRet0(0 | 0);
-  return catchInfo.ptr | 0;
- }
- var typeArray = Array.prototype.slice.call(arguments);
- var stackTop = stackSave();
- var exceptionThrowBuf = stackAlloc(4);
- SAFE_HEAP_STORE(exceptionThrowBuf | 0, thrown | 0, 4);
- for (var i = 0; i < typeArray.length; i++) {
-  var caughtType = typeArray[i];
-  if (caughtType === 0 || caughtType === thrownType) {
-   break;
-  }
-  if (___cxa_can_catch(caughtType, thrownType, exceptionThrowBuf)) {
-   var adjusted = SAFE_HEAP_LOAD(exceptionThrowBuf | 0, 4, 0) | 0;
-   if (thrown !== adjusted) {
-    catchInfo.set_adjusted_ptr(adjusted);
-   }
-   setTempRet0(caughtType | 0);
-   return catchInfo.ptr | 0;
-  }
- }
- stackRestore(stackTop);
- setTempRet0(thrownType | 0);
- return catchInfo.ptr | 0;
-}
-
-function ___cxa_rethrow() {
- var catchInfo = exceptionCaught.pop();
- var info = catchInfo.get_exception_info();
- var ptr = catchInfo.get_base_ptr();
- if (!info.get_rethrown()) {
-  exceptionCaught.push(catchInfo);
-  info.set_rethrown(true);
-  info.set_caught(false);
-  uncaughtExceptionCount++;
- } else {
-  catchInfo.free();
- }
- exceptionLast = ptr;
- throw ptr;
-}
+var uncaughtExceptionCount = 0;
 
 function ___cxa_throw(ptr, type, destructor) {
  var info = new ExceptionInfo(ptr);
  info.init(type, destructor);
  exceptionLast = ptr;
  uncaughtExceptionCount++;
- throw ptr;
-}
-
-function ___cxa_uncaught_exceptions() {
- return uncaughtExceptionCount;
+ throw ptr + " - Exception catching is disabled, this exception cannot be caught. Compile with -s DISABLE_EXCEPTION_CATCHING=0 or DISABLE_EXCEPTION_CATCHING=2 to catch.";
 }
 
 function _tzset() {
@@ -8238,10 +8059,6 @@ function _fd_write(fd, iov, iovcnt, pnum) {
  }
 }
 
-function _getTempRet0() {
- return getTempRet0() | 0;
-}
-
 function _getentropy(buffer, size) {
  if (!_getentropy.randomDevice) {
   _getentropy.randomDevice = getRandomDevice();
@@ -8321,6 +8138,10 @@ function _glCreateShader(shaderType) {
 
 function _glCullFace(x0) {
  GLctx["cullFace"](x0);
+}
+
+function _glDisable(x0) {
+ GLctx["disable"](x0);
 }
 
 function _glDrawElements(mode, count, type, indices) {
@@ -9018,16 +8839,8 @@ var asmLibraryArg = {
  "__assert_fail": ___assert_fail,
  "__cxa_allocate_exception": ___cxa_allocate_exception,
  "__cxa_atexit": ___cxa_atexit,
- "__cxa_begin_catch": ___cxa_begin_catch,
- "__cxa_end_catch": ___cxa_end_catch,
- "__cxa_find_matching_catch_2": ___cxa_find_matching_catch_2,
- "__cxa_find_matching_catch_3": ___cxa_find_matching_catch_3,
- "__cxa_free_exception": ___cxa_free_exception,
- "__cxa_rethrow": ___cxa_rethrow,
  "__cxa_throw": ___cxa_throw,
- "__cxa_uncaught_exceptions": ___cxa_uncaught_exceptions,
  "__localtime_r": ___localtime_r,
- "__resumeException": ___resumeException,
  "__sys_fcntl64": ___sys_fcntl64,
  "__sys_ioctl": ___sys_ioctl,
  "__sys_open": ___sys_open,
@@ -9059,7 +8872,6 @@ var asmLibraryArg = {
  "fd_read": _fd_read,
  "fd_seek": _fd_seek,
  "fd_write": _fd_write,
- "getTempRet0": _getTempRet0,
  "getentropy": _getentropy,
  "glActiveTexture": _glActiveTexture,
  "glAttachShader": _glAttachShader,
@@ -9074,6 +8886,7 @@ var asmLibraryArg = {
  "glCreateProgram": _glCreateProgram,
  "glCreateShader": _glCreateShader,
  "glCullFace": _glCullFace,
+ "glDisable": _glDisable,
  "glDrawElements": _glDrawElements,
  "glEnable": _glEnable,
  "glEnableVertexAttribArray": _glEnableVertexAttribArray,
@@ -9098,30 +8911,6 @@ var asmLibraryArg = {
  "glUseProgram": _glUseProgram,
  "glVertexAttribPointer": _glVertexAttribPointer,
  "glViewport": _glViewport,
- "invoke_diii": invoke_diii,
- "invoke_fiii": invoke_fiii,
- "invoke_i": invoke_i,
- "invoke_ii": invoke_ii,
- "invoke_iii": invoke_iii,
- "invoke_iiii": invoke_iiii,
- "invoke_iiiii": invoke_iiiii,
- "invoke_iiiiii": invoke_iiiiii,
- "invoke_iiiiiii": invoke_iiiiiii,
- "invoke_iiiiiiii": invoke_iiiiiiii,
- "invoke_iiiiiiiiiii": invoke_iiiiiiiiiii,
- "invoke_iiiiiiiiiiii": invoke_iiiiiiiiiiii,
- "invoke_iiiiiiiiiiiii": invoke_iiiiiiiiiiiii,
- "invoke_iiiiij": invoke_iiiiij,
- "invoke_jii": invoke_jii,
- "invoke_jiiii": invoke_jiiii,
- "invoke_v": invoke_v,
- "invoke_vi": invoke_vi,
- "invoke_vii": invoke_vii,
- "invoke_viii": invoke_viii,
- "invoke_viiii": invoke_viiii,
- "invoke_viiiiiii": invoke_viiiiiii,
- "invoke_viiiiiiiiii": invoke_viiiiiiiiii,
- "invoke_viiiiiiiiiiiiiii": invoke_viiiiiiiiiiiiiii,
  "segfault": segfault,
  "setTempRet0": _setTempRet0,
  "strftime_l": _strftime_l,
@@ -9212,291 +9001,23 @@ var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
 
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 
-var dynCall_jii = Module["dynCall_jii"] = createExportWrapper("dynCall_jii");
-
 var dynCall_iiiiij = Module["dynCall_iiiiij"] = createExportWrapper("dynCall_iiiiij");
-
-var dynCall_jiiii = Module["dynCall_jiiii"] = createExportWrapper("dynCall_jiiii");
 
 var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_iiiiijj");
 
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module["_game"] = 97608;
+var _game = Module["_game"] = 97056;
 
-var _clientGl = Module["_clientGl"] = 97888;
+var _clientGl = Module["_clientGl"] = 97296;
 
-var _clientAudio = Module["_clientAudio"] = 98360;
+var _clientAudio = Module["_clientAudio"] = 97768;
 
-var _inputEvents = Module["_inputEvents"] = 98384;
+var _inputEvents = Module["_inputEvents"] = 97792;
 
-var _ping = Module["_ping"] = 98416;
+var _ping = Module["_ping"] = 97824;
 
-var _lastTickTime = Module["_lastTickTime"] = 98408;
-
-function invoke_iii(index, a1, a2) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_i(index) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)();
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_vii(index, a1, a2) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiii(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_v(index) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)();
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_ii(index, a1) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_vi(index, a1) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiiii(index, a1, a2, a3, a4, a5, a6) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiii(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiii(index, a1, a2, a3, a4, a5) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiii(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_fiii(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_diii(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiiiiii(index, a1, a2, a3, a4, a5, a6, a7) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11) {
- var sp = stackSave();
- try {
-  return wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viii(index, a1, a2, a3) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_viiiiiiiiiiiiiii(index, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15) {
- var sp = stackSave();
- try {
-  wasmTable.get(index)(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_jii(index, a1, a2) {
- var sp = stackSave();
- try {
-  return dynCall_jii(index, a1, a2);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_iiiiij(index, a1, a2, a3, a4, a5, a6) {
- var sp = stackSave();
- try {
-  return dynCall_iiiiij(index, a1, a2, a3, a4, a5, a6);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
-
-function invoke_jiiii(index, a1, a2, a3, a4) {
- var sp = stackSave();
- try {
-  return dynCall_jiiii(index, a1, a2, a3, a4);
- } catch (e) {
-  stackRestore(sp);
-  if (e !== e + 0 && e !== "longjmp") throw e;
-  _setThrew(1, 0);
- }
-}
+var _lastTickTime = Module["_lastTickTime"] = 97816;
 
 if (!Object.getOwnPropertyDescriptor(Module, "intArrayFromString")) Module["intArrayFromString"] = function() {
  abort("'intArrayFromString' was not exported. add it to EXTRA_EXPORTED_RUNTIME_METHODS (see the FAQ)");

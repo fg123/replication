@@ -15,7 +15,6 @@ module.exports = class ClientState {
 
         this.cachedObjects = {};
 
-        this.showColliders = false;
         this.localPlayerObjectId = undefined;
         this.localPlayerObject = undefined;
         this.game = undefined;
@@ -88,7 +87,6 @@ module.exports = class ClientState {
             lastHeartbeatAcked = currTime;
         }, 1000);
 
-        let lastReplicate = Date.now();
         const handler = (ev) => {
             // console.log(ev.data);
             const event = JSON.parse(ev.data);
@@ -123,13 +121,13 @@ module.exports = class ClientState {
                 return;
             }
             else if (event["event"] === "r") {
-                const curr = Date.now();
-                this.performance.handleReplicateTime.pushValue(curr - lastReplicate);
                 this.performance.replicateObjectCount.pushValue(event["objs"].length);
-                lastReplicate = curr;
+                const startTime = Date.now();
                 const heapString = this.ToHeapString(this.wasm, ev.data);
                 this.wasm._HandleReplicate(heapString);
                 this.wasm._free(heapString);
+                const endTime = Date.now();
+                this.performance.handleReplicateTime.pushValue(endTime - startTime);
             }
             else if (event["event"] === "a") {
                 if (event["objs"]) {
@@ -239,14 +237,15 @@ module.exports = class ClientState {
         }));
 
         const tickInterval = this.wasm._GetTickInterval();
-        let lastTick = Date.now();
         setInterval(() => {
-            if (document.hasFocus()) {
-                const curr = Date.now();
-                this.performance.tickTime.pushValue(curr - lastTick);
-                lastTick = curr;
+            // console.log("Is there focus", document.hasFocus());
+            // if (document.hasFocus()) {
+            //     console.log("Tick Start");
+                const preTick = Date.now();
                 this.wasm._TickGame();
-            }
+                this.performance.tickTime.pushValue(Date.now() - preTick);
+            //     console.log("Tick End");
+            // }
         }, tickInterval);
 
         window.addEventListener('keydown', e => {
@@ -275,9 +274,6 @@ module.exports = class ClientState {
                 event: "ku",
                 key: e.keyCode
             });
-            if (e.key === "1") {
-                this.showColliders = !this.showColliders;
-            }
         });
 
         window.addEventListener('mousemove', e => {

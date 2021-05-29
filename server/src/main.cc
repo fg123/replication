@@ -1,10 +1,7 @@
 #include "game.h"
 #include "timer.h"
 #include "tests.h"
-#include "characters/marine.h"
-#include "characters/archer.h"
-#include "characters/hookman.h"
-#include "characters/bombmaker.h"
+#include "objects.h"
 #include "logging.h"
 #include "global.h"
 
@@ -81,8 +78,9 @@ int main(int argc, char** argv) {
         );
 
         gameTimer.ScheduleInterval([gameTick, &game](Time time) {
-            LOG_INFO("Average Tick Interval (Per Object): " <<
-                gameTick->performance.GetAverage() << " (" <<
+            LOG_INFO("Tick Runtime (Interval Time) (Per Object): " <<
+                gameTick->callRuntime.GetAverage() << " (" <<
+                gameTick->intervalTime.GetAverage() << ") (" <<
                 game.averageObjectTickTime.GetAverage() << ")");
             // PrintCollisionStatistics();
             ClearCollisionStatistics();

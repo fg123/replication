@@ -20,6 +20,9 @@ protected:
     float spreadIncreasePerShot = 2;
     int cooldownBeforeSpreadReduction = 100;
 
+    int shotsPerFire = 1;
+    float multishotSpreadRadius = 0.3f;
+
     float recoilRotationPitch = 0;
     float recoilRotationPitchVel = 0;
 
@@ -43,11 +46,14 @@ public:
     virtual void StartFire(Time time) override;
     virtual void Fire(Time time) override;
 
+    void FireBullet(const Vector3& from, const Vector3& direction);
+
     virtual void Serialize(JSONWriter& obj) override;
 
     virtual void StartAlternateFire(Time time) override {
         isADS = true;
     }
+
     virtual void ReleaseAlternateFire(Time time) override {
         isADS = false;
     }

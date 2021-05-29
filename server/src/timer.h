@@ -18,7 +18,8 @@ struct ScheduledCall {
     Time lastRealtimeTick;
     bool shouldRepeat;
 
-    PerformanceBuffer<Time> performance { 100 };
+    PerformanceBuffer<Time> callRuntime { 100 };
+    PerformanceBuffer<Time> intervalTime { 100 };
 
     ScheduledCall(std::function<void(Time)> function, Time nextScheduled) :
         function(function),

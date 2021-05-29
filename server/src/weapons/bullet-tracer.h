@@ -32,7 +32,7 @@ public:
     virtual void Tick(Time time) override {
         Object::Tick(time);
         float timeSince = glm::max(0.0f, (time - spawnTime) - 100.f);
-        float travel = (timeSince / 1000.f) * 100.0f;
+        float travel = (timeSince / 500.f) * 100.0f;
         float totalTravel = glm::distance(from, to);
 
         float progress = 1.0f - glm::clamp(travel / totalTravel, 0.f, 1.f);

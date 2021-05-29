@@ -15,11 +15,7 @@
 #include "client_audio.h"
 #include "global.h"
 
-// We probably need to include all these so it registers
-#include "characters/marine.h"
-#include "characters/archer.h"
-#include "characters/hookman.h"
-#include "characters/bombmaker.h"
+#include "objects.h"
 
 static const size_t MAX_INPUT_EVENT_QUEUE = 256;
 
@@ -80,6 +76,7 @@ extern "C" {
 
     EMSCRIPTEN_KEEPALIVE
     void TickGame() {
+        // LOG_DEBUG("Tick Game");
         try {
             // Don't worry about slow ticks here, each tick
             //   is guaranteed to be fixed interval, but when

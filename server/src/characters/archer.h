@@ -17,13 +17,13 @@ public:
             game.AddObject(qWeapon);
             qWeapon->AttachToPlayer(this);
 
-            BowObject* bow = new BowObject(game);
-            game.AddObject(bow);
-            PickupWeapon(bow);
+            // BowObject* bow = new BowObject(game);
+            // game.AddObject(bow);
+            // PickupWeapon(bow);
 
-            zWeapon = new ArrowChargeUpAbility { game };
-            game.AddObject(zWeapon);
-            zWeapon->AttachToPlayer(this);
+            // zWeapon = new ArrowChargeUpAbility { game };
+            // game.AddObject(zWeapon);
+            // zWeapon->AttachToPlayer(this);
         #endif
     }
 };

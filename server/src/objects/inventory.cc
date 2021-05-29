@@ -1,10 +1,8 @@
 #include "inventory.h"
 #include "player.h"
 #include "game.h"
-#include "weapons/gun.h"
-#include "weapons/grenade-thrower.h"
+#include "objects.h"
 #include "util.h"
-#include "ammo.h"
 
 const size_t INVENTORY_MAX_SIZE = 6;
 
@@ -56,7 +54,7 @@ void InventoryManager::Drop(WeaponObject* weapon) {
     weapon->Detach();
     weapon->SetVelocity(owner->GetLookDirection() * 15.0f);
     weapon->SetRotation(Quaternion{});
-    owner->canPickupTime = game.GetGameTime() + 500;
+    owner->lastPickupTime = game.GetGameTime();
     if (primary == weapon) {
         primary = nullptr;
     }

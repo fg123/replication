@@ -22,7 +22,9 @@ protected:
     REPLICATED(Vector3, inputVelocity, "iv");
 
 public:
-    REPLICATED_D(Time, canPickupTime, "cpt", 0);
+    Time lastPickupTime = 0;
+
+    REPLICATED_D(bool, canPickup, "cpt", true);
 
     REPLICATED(Vector2, pitchYawVelocity, "pyv");
 
