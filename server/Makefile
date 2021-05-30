@@ -60,15 +60,12 @@ SERVER_OUTPUT = bin/$(EXE)_server
 SERVER_OUTPUT_PROD = bin/$(EXE)_server_prod
 
 CLIENT_OUTPUT = bin/$(EXE)_client.js
-CLIENT_OUTPUT_PROD = bin/$(EXE)_client_prod.js
 
 COLLIDER_TEST_OUTPUT = bin/$(EXE)_collider
 
 all: $(SERVER_OUTPUT) $(CLIENT_OUTPUT) $(COLLIDER_TEST_OUTPUT)
 
 server_prod: $(SERVER_OUTPUT_PROD)
-
-client_prod: $(CLIENT_OUTPUT_PROD)
 
 $(SERVER_OUTPUT): $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
@@ -88,11 +85,11 @@ $(CLIENT_OUTPUT): $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
 	cp bin/$(EXE)_client.js ../client/dist/
 	cp bin/$(EXE)_client.data ../client/dist/
 
-$(CLIENT_OUTPUT_PROD): $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
-	em++ -O2 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT_PROD)
-	cp bin/$(EXE)_client_prod.wasm ../client/dist/
-	cp bin/$(EXE)_client_prod.js ../client/dist/
-	cp bin/$(EXE)_client_prod.data ../client/dist/
+client_prod: $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
+	em++ -O2 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
+	cp bin/$(EXE)_client.wasm ../client/dist/
+	cp bin/$(EXE)_client.js ../client/dist/
+	cp bin/$(EXE)_client.data ../client/dist/
 
 %.o: %.cc
 	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@

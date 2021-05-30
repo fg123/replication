@@ -873,6 +873,7 @@ CollisionResult CapsuleAndCapsuleCollide(CapsuleCollider* capsule, CapsuleCollid
 
 
 CollisionResult CapsuleAndOBBCollide(CapsuleCollider* capsule, OBBCollider* obb) {
+    // LOG_DEBUG("Capsule and OBB Collide");
     Matrix4 transform = obb->GetWorldTransform();
     Matrix4 inverse = glm::inverse(transform);
 
@@ -880,21 +881,23 @@ CollisionResult CapsuleAndOBBCollide(CapsuleCollider* capsule, OBBCollider* obb)
     Vector3 capsulePt1 = Vector3(inverse * Vector4(capsule->GetWorldPoint1(), 1));
     Vector3 capsulePt2 = Vector3(inverse * Vector4(capsule->GetWorldPoint2(), 1));
 
+    Vector3 size = obb->size;
+
     Vector3 cap1[] = {
-        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, 1), 1, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
-        glm::clamp(ClosestPointOnPlane(Vector3(0, 1, 0), 1, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
-        glm::clamp(ClosestPointOnPlane(Vector3(1, 0, 0), 1, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
-        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, -1), 0, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
-        glm::clamp(ClosestPointOnPlane(Vector3(0, -1, 0), 0, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
-        glm::clamp(ClosestPointOnPlane(Vector3(-1, 0, 0), 0, capsulePt1), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, 1), size.z, capsulePt1), Vector3(0, 0, 0), size),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 1, 0), size.y, capsulePt1), Vector3(0, 0, 0), size),
+        glm::clamp(ClosestPointOnPlane(Vector3(1, 0, 0), size.x, capsulePt1), Vector3(0, 0, 0), size),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, -1), 0, capsulePt1), Vector3(0, 0, 0), size),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, -1, 0), 0, capsulePt1), Vector3(0, 0, 0), size),
+        glm::clamp(ClosestPointOnPlane(Vector3(-1, 0, 0), 0, capsulePt1), Vector3(0, 0, 0), size),
     };
     Vector3 cap2[] = {
-        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, 1), 1, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
-        glm::clamp(ClosestPointOnPlane(Vector3(0, 1, 0), 1, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
-        glm::clamp(ClosestPointOnPlane(Vector3(1, 0, 0), 1, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
-        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, -1), 0, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
-        glm::clamp(ClosestPointOnPlane(Vector3(0, -1, 0), 0, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
-        glm::clamp(ClosestPointOnPlane(Vector3(-1, 0, 0), 0, capsulePt2), Vector3(0, 0, 0), Vector3(1, 1, 1)),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, 1), size.z, capsulePt2), Vector3(0, 0, 0), size),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 1, 0), size.y, capsulePt2), Vector3(0, 0, 0), size),
+        glm::clamp(ClosestPointOnPlane(Vector3(1, 0, 0), size.x, capsulePt2), Vector3(0, 0, 0), size),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, 0, -1), 0, capsulePt2), Vector3(0, 0, 0), size),
+        glm::clamp(ClosestPointOnPlane(Vector3(0, -1, 0), 0, capsulePt2), Vector3(0, 0, 0), size),
+        glm::clamp(ClosestPointOnPlane(Vector3(-1, 0, 0), 0, capsulePt2), Vector3(0, 0, 0), size),
     };
 
 
@@ -918,7 +921,7 @@ CollisionResult CapsuleAndOBBCollide(CapsuleCollider* capsule, OBBCollider* obb)
     CollisionResult result;
     if (distance < capsule->radius) {
         result.isColliding = true;
-        AABB rect {Vector3(0, 0, 0), Vector3(1, 1, 1)};
+        AABB rect {Vector3(0, 0, 0), size};
         result.collisionDifference = (capsule->radius - distance) * AABBSurfaceNormal(rect, planePoint);
 
         // Translate back to world space

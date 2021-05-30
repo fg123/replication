@@ -12,6 +12,7 @@ struct _GlobalSettings : Replicable {
     REPLICATED_D(bool, Client_DrawDebugLines, "Client_DrawDebugLines", false);
     REPLICATED_D(bool, Client_DrawColliders, "Client_DrawColliders", false);
     REPLICATED_D(bool, Client_DrawBVH, "Client_DrawBVH", false);
+    REPLICATED_D(bool, Client_IgnoreServer, "Client_IgnoreServer", false);
 };
 
 extern _GlobalSettings GlobalSettings;

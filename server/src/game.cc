@@ -99,7 +99,7 @@ void Game::LoadMap(std::string mapPath) {
 
         auto obj2 = new BoxObject(*this);
         obj2->SetPosition(Vector3(25, 20, 25));
-        obj2->SetRotation(DirectionToQuaternion(Vector3(1, 1, 1)));
+        // obj2->SetRotation(DirectionToQuaternion(Vector3(1, 1, 1)));
         obj2->SetIsStatic(true);
         AddObject(obj1);
         AddObject(obj2);
@@ -581,7 +581,7 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
                 p->nextRespawnCharacter = "Archer";
             }
             Object* obj = GetClassLookup()[p->nextRespawnCharacter](*this);
-            obj->SetPosition(Vector3(0, 30, 0));
+            obj->SetPosition(Vector3(0, 50, 0));
 
             static_cast<PlayerObject*>(obj)->lastClientInputTime = playerObject->lastClientInputTime;
             static_cast<PlayerObject*>(obj)->ticksSinceLastProcessed = playerObject->ticksSinceLastProcessed;

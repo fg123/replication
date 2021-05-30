@@ -19,7 +19,6 @@
 
 static const size_t MAX_INPUT_EVENT_QUEUE = 256;
 
-static const bool CLIENT_ONLY = false;
 static bool hasInitialReplication = false;
 
 extern "C" {
@@ -126,7 +125,7 @@ extern "C" {
     void HandleLocalInput(ObjectID object, const char* input) {
         Object* obj = game.GetObject(object);
         if (obj) {
-            if (!CLIENT_ONLY) {
+            if (!GlobalSettings.Client_IgnoreServer) {
                 if (inputEvents.size() > MAX_INPUT_EVENT_QUEUE) {
                     LOG_WARN("Local input queue > " << MAX_INPUT_EVENT_QUEUE << ", server crashed?");
                     return;
@@ -162,7 +161,7 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE
     void HandleReplicate(const char* input) {
         // LOG_DEBUG("Handle Replicate");
-        if (hasInitialReplication && CLIENT_ONLY) {
+        if (hasInitialReplication && GlobalSettings.Client_IgnoreServer) {
             return;
         }
         hasInitialReplication = true;
@@ -259,6 +258,7 @@ extern "C" {
                     nextTick += TickInterval;
                 }
             }
+
             // LOG_DEBUG("To Present Done!");
 
             // Make sure this is never negative!!!

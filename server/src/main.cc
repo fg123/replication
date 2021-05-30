@@ -31,6 +31,7 @@ void Usage(char* arg0) {
     std::cout << "        --client-draw-bvh         : draw bvh on client" << std::endl;
     std::cout << "        --client-draw-colliders   : draw colliders on client" << std::endl;
     std::cout << "        --client-draw-debug       : draw debug data on client" << std::endl;
+    std::cout << "        --client-ignore-server    : client-only" << std::endl;
     std::cout << "        --help                    : shows this message" << std::endl;
 }
 
@@ -53,6 +54,9 @@ int main(int argc, char** argv) {
             }
             else if (arg == "--client-draw-debug") {
                 GlobalSettings.Client_DrawDebugLines = true;
+            }
+            else if (arg == "--client-ignore-server") {
+                GlobalSettings.Client_IgnoreServer = true;
             }
             else if (arg == "--help") {
                 Usage(argv[0]);
@@ -109,7 +113,7 @@ int main(int argc, char** argv) {
                 data->ws = ws;
                 data->eventLoop = uWS::Loop::get();
                 data->nextRespawnCharacter = "Marine";
-                PlayerObject* playerObject = new Marine(game, Vector3(0, 30, 0));
+                PlayerObject* playerObject = new Marine(game, Vector3(0, 50, 0));
                 data->playerObject = playerObject;
 
                 game.AddPlayer(data, playerObject);

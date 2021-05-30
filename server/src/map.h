@@ -39,6 +39,7 @@ public:
             #ifdef BUILD_SERVER
                 InitializeMap();
                 GenerateStaticMeshCollidersFromModel(this);
+                // GenerateOBBCollidersFromModel(this);
             #endif
         }
     }
@@ -49,6 +50,7 @@ public:
         if (!collidersSetup) {
             collidersSetup = true;
             GenerateStaticMeshCollidersFromModel(this);
+            // GenerateOBBCollidersFromModel(this);
         }
     #endif
     }
