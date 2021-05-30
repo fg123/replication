@@ -3,7 +3,7 @@
 set -e
 
 echo "Building Server Binary"
-cd server && make server_prod
+cd server && make server_prod -j5
 cd ..
 
 echo "Deploying to Git"
