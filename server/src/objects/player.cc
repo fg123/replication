@@ -446,6 +446,13 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
     else if (obj["event"] == "mw") {
         mouseWheelDelta = obj["delta"].GetInt();
     }
+    else if (obj["event"] == "inventoryDrop") {
+        InventoryDrop(obj["id"].GetInt());
+    }
+    else if (obj["event"] == "inventorySwap") {
+        InventorySwap();
+    }
+
     #ifdef BUILD_SERVER
         // LOG_DEBUG("Setting last client input time: " << obj["time"]);
         // TODO: assert this is monotonically growing

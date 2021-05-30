@@ -104,7 +104,7 @@ void Object::Tick(Time time) {
                 int divZ = size.z < EPSILON ? 1 : glm::ceil(glm::abs(positionDelta.z) / size.z);
 
                 int divisions = glm::max(divX, divY, divZ);
-                // if (IsTagged(Tag::WEAPON)) {
+                // if (IsTagged(Tag::PLAYER)) {
                 //     LOG_DEBUG(position.y << ": " << divisions << " " << positionDelta << " " << size);
                 // }
 

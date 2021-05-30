@@ -437,15 +437,75 @@ int CheckLineAndPlaneIntersection(
     return 1;
 }
 
+bool RayIntersectTriangle(RayCastRequest& ray,
+    const glm::vec3& a, const glm::vec3& b,
+    const glm::vec3& c, const glm::vec3& norm, RayCastResult& result) {
+
+    const glm::vec3& d = ray.direction;
+    const glm::vec3& e = ray.startPoint;
+
+    const glm::vec3 ab = a - b;
+    const glm::vec3 ac = a - c;
+
+    // Column Major
+    glm::mat3x3 A = { ab, ac, d };
+
+    float detA = glm::determinant(A);
+
+    if (detA < 0.00001f) {
+        return false;
+    }
+
+    const glm::vec3 ae = a - e;
+    float t = glm::determinant(glm::mat3x3 { ab, ac, ae }) / detA;
+    if (t < 0) return false;
+
+    float gamma = glm::determinant(glm::mat3x3 { ab, ae, d }) / detA;
+    if (gamma < 0 || gamma > 1) return false;
+
+    float B = glm::determinant(glm::mat3x3 { ae, ac, d }) / detA;
+    if (B < 0 || B + gamma > 1) return false;
+
+    // if (outB) {
+    //     *outB = B;
+    // }
+    // if (outGamma) {
+    //     *outGamma = gamma;
+    // }
+
+    if (result.isHit && result.zDepth < t) {
+        // Already have a result that's closer than ours
+        return false;
+    }
+    result.isHit = true;
+    result.hitLocation = e + t * d;
+    result.hitNormal = norm;
+    result.zDepth = t;
+
+    return true;
+}
+
+bool DoesLineSegmentPenetrateTriangle(BVHTree::Triangle* tri, const Vector3& pt1,
+    const Vector3& pt2, Vector3& penetratePoint) {
+    RayCastRequest request;
+    request.startPoint = pt1;
+    request.direction = glm::normalize(pt2 - pt1);
+    RayCastResult result;
+    bool rayCastResult = RayIntersectTriangle(request, tri->a, tri->b, tri->c, tri->norm, result);
+    penetratePoint = result.hitLocation;
+    return rayCastResult && result.zDepth < glm::distance(pt1, pt2);
+}
+
 CollisionResult CapsuleAndMeshCollide(CapsuleCollider* capsule, StaticMeshCollider* collider) {
     if (!collider->bvhTree) {
         return CollisionResult{};
     }
+    Vector3 velocity = capsule->GetOwner()->GetVelocity();
     AABB broadRect = capsule->GetBroadAABB();
 
     // Get World Position of Two Points of the Capsule Segment
-    Vector3 pt1 = Vector3(capsule->GetWorldTransform() * Vector4(0, 0, 0, 1));
-    Vector3 pt2 = Vector3(capsule->GetWorldTransformForLocalPoint(capsule->position2) * Vector4(0, 0, 0, 1));
+    Vector3 pt1 = capsule->GetWorldPoint1();
+    Vector3 pt2 = capsule->GetWorldPoint2();
     // LOG_DEBUG(capsule->GetOwner()->GetPosition() << " " << pt1 << " " << pt2);
 
     std::queue<BVHTree*> checkQueue;
@@ -470,39 +530,76 @@ CollisionResult CapsuleAndMeshCollide(CapsuleCollider* capsule, StaticMeshCollid
         else {
             // Test Triangles
             for (const auto& tri : currNode->tris) {
-                Vector3 outIntersection;
-                // int lineTriResult =
-                CheckLineAndPlaneIntersection(tri, pt1, pt2, outIntersection);
+                // The basic principle here is that if the capsule line segment
+                //   does not penetrate the triangle, the max movement to resolve
+                //   is radius amount.
 
-                // if (lineTriResult == 1) {
-                    // LOG_DEBUG("Triangle " << tri->a << " " << tri->b << " " << tri->c);
-                    // LOG_DEBUG("Points " << pt1 << " " << pt2);
+                // If it penetrates then we gotta do more stuff
+                // Vector3 penetratePoint;
+                // if (DoesLineSegmentPenetrateTriangle(tri, pt1, pt2, penetratePoint)) {
+                //     // Find two vectors to the penetration point
+                //     // these two vectors go in opposite directions
+                //     result.isColliding = true;
+                //     Vector3 pv1 = penetratePoint - pt1;
+                //     Vector3 pv2 = penetratePoint - pt2;
+                //     LOG_DEBUG("============FULL PENETRATION ");
+                //     LOG_DEBUG("Points " << pt1 << " " << pt2);
+                //     LOG_DEBUG("Penetration point " << penetratePoint);
+                //     LOG_DEBUG("Triangle " << tri->a << " " << tri->b << " " << tri->c);
+                //     // LOG_DEBUG("Penetration " << penetration << tri->norm);
+                //     // LOG_DEBUG("Triangle
+                //     float length;
+                //     if (glm::dot(pv1, tri->norm) > 0) {
+                //         // Same direction, shift pt1 to penetrate point
+                //         length = glm::dot(pv1, tri->norm) / glm::length(tri->norm);
+                //     }
+                //     else {
+                //         length = glm::dot(pv2, tri->norm) / glm::length(tri->norm);
+                //     }
 
-                    // Handle just this one for now
-                    Vector3 planePoint;
+                //     if (length < minOverlap) {
+                //         minOverlap = length;
+                //         result.collisionDifference = tri->norm * length;
+                //     }
+                // }
+                // else {
+                    // Regular Test
+                    Vector3 outIntersection;
+                    // int lineTriResult =
+                    CheckLineAndPlaneIntersection(tri, pt1, pt2, outIntersection);
 
-                    // Clamp plane intersection onto triangle
-                    Vector3 point = ClosestPointOnTriangle(tri, outIntersection, planePoint);
-                    // LOG_DEBUG("Closest Point on Triangle " << point);
-                    // Project back onto line segment
-                    Vector3 reference = ClosestPointOnLineSegment(pt1, pt2, point);
-                    point = ClosestPointOnTriangle(tri, reference, planePoint);
+                    // if (lineTriResult == 1) {
+                        // LOG_DEBUG("Triangle " << tri->a << " " << tri->b << " " << tri->c);
 
-                    float dist = glm::distance(point, reference);
-                    // LOG_DEBUG("Dist " << dist);
-                    if (!IsZero(dist - capsule->radius) && dist < capsule->radius) {
-                        // LOG_DEBUG(dist - capsule->radius);
+                        // Handle just this one for now
+                        Vector3 planePoint;
+
+                        // Clamp plane intersection onto triangle
+                        Vector3 point = ClosestPointOnTriangle(tri, outIntersection, planePoint);
+                        // LOG_DEBUG("Closest Point on Triangle " << point);
+                        // Project back onto line segment
+                        Vector3 reference = ClosestPointOnLineSegment(pt1, pt2, point);
+                        point = ClosestPointOnTriangle(tri, reference, planePoint);
+
+                        float dist = glm::distance(point, reference);
                         // LOG_DEBUG("Dist " << dist);
-                        // LOG_DEBUG("Points " << pt1 << " " << pt2);
-                        // LOG_DEBUG("OnSegment " << reference);
-                        float penetration = capsule->radius - glm::distance(planePoint, reference);
-                        // LOG_DEBUG("Penetration " << penetration << tri->norm);
-                        if (penetration < minOverlap) {
-                            result.isColliding = true;
-                            minOverlap = penetration;
-                            result.collisionDifference = tri->norm * penetration;
+                        if (!IsZero(dist - capsule->radius) && dist < capsule->radius) {
+                            float penetration = capsule->radius - glm::distance(planePoint, reference);
+                            float sign = glm::sign(glm::dot(reference - planePoint, tri->norm));
+                            // LOG_DEBUG("========Regular Test");
+                            // LOG_DEBUG("Plane Point " << planePoint);
+                            // LOG_DEBUG("Points " << pt1 << " " << pt2);
+                            // LOG_DEBUG("Reference " << reference);
+                            // LOG_DEBUG("Penetration " << penetration << tri->norm);
+                            // LOG_DEBUG("Triangle " << tri->a << " " << tri->b << " " << tri->c);
+
+                            if (penetration < minOverlap) {
+                                result.isColliding = true;
+                                minOverlap = penetration;
+                                result.collisionDifference = sign * tri->norm * penetration;
+                            }
                         }
-                    }
+                // }
                 // }
             }
         }
@@ -680,54 +777,6 @@ CollisionResult StaticMeshCollider::CollidesWith(Collider* other) {
     // It never moves so this shouldn't be called
     // LOG_DEBUG("Test Static Mesh Collider");
     return CollisionResult{};
-}
-
-bool RayIntersectTriangle(RayCastRequest& ray,
-    const glm::vec3& a, const glm::vec3& b,
-    const glm::vec3& c, const glm::vec3& norm, RayCastResult& result) {
-
-    const glm::vec3& d = ray.direction;
-    const glm::vec3& e = ray.startPoint;
-
-    const glm::vec3 ab = a - b;
-    const glm::vec3 ac = a - c;
-
-    // Column Major
-    glm::mat3x3 A = { ab, ac, d };
-
-    float detA = glm::determinant(A);
-
-    if (detA < 0.00001f) {
-        return false;
-    }
-
-    const glm::vec3 ae = a - e;
-    float t = glm::determinant(glm::mat3x3 { ab, ac, ae }) / detA;
-    if (t < 0) return false;
-
-    float gamma = glm::determinant(glm::mat3x3 { ab, ae, d }) / detA;
-    if (gamma < 0 || gamma > 1) return false;
-
-    float B = glm::determinant(glm::mat3x3 { ae, ac, d }) / detA;
-    if (B < 0 || B + gamma > 1) return false;
-
-    // if (outB) {
-    //     *outB = B;
-    // }
-    // if (outGamma) {
-    //     *outGamma = gamma;
-    // }
-
-    if (result.isHit && result.zDepth < t) {
-        // Already have a result that's closer than ours
-        return false;
-    }
-    result.isHit = true;
-    result.hitLocation = e + t * d;
-    result.hitNormal = norm;
-    result.zDepth = t;
-
-    return true;
 }
 
 bool StaticMeshCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {

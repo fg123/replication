@@ -154,13 +154,6 @@ int main(int argc, char** argv) {
                     LOG_DEBUG("Changing character to " << charName);
                     ws->send("{\"char-selected\": \"" + charName + "\"}", uWS::OpCode::TEXT);
                 }
-                else if (obj["event"] == "inventoryDrop") {
-                    int dropId = obj["id"].GetInt();
-                    data->playerObject->InventoryDrop(dropId);
-                }
-                else if (obj["event"] == "inventorySwap") {
-                    data->playerObject->InventorySwap();
-                }
                 else {
                     data->playerObject->OnInput(obj);
                 }

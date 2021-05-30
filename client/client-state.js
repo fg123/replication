@@ -347,17 +347,25 @@ module.exports = class ClientState {
     }
 
     InventoryDrop(id) {
-        this.SendData(JSON.stringify(
-            {
-                "event": "inventoryDrop",
-                "id": id
-            }));
+        this.SendInputPacket({
+            event: "inventoryDrop",
+            id: id
+        });
+        // this.SendData(JSON.stringify(
+        //     {
+        //         "event": "inventoryDrop",
+        //         "id": id
+        //     }));
     }
 
     SwapPrimaryAndSecondary() {
-        this.SendData(JSON.stringify(
-            {
-                "event": "inventorySwap"
-            }));
+        this.SendInputPacket({
+            event: "inventorySwap",
+            id: id
+        });
+        // this.SendData(JSON.stringify(
+        //     {
+        //         "event": "inventorySwap"
+        //     }));
     }
 };
