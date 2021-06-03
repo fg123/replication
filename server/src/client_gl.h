@@ -11,6 +11,22 @@
 #include <emscripten/html5.h>
 #include <emscripten/fetch.h>
 
+struct DrawParams {
+    ObjectID id;
+    Mesh* mesh = nullptr;
+    Matrix4 transform;
+};
+
+struct DrawLayer {
+    std::vector<DrawParams> opaque;
+    std::map<float, DrawParams> transparent;
+
+    void Clear() {
+        opaque.clear();
+        transparent.clear();
+    }
+};
+
 class ClientGL {
     EMSCRIPTEN_WEBGL_CONTEXT_HANDLE glContext;
 
@@ -22,16 +38,16 @@ class ClientGL {
     int windowWidth;
     int windowHeight;
 
-    Game& game;
-
     std::vector<ShaderProgram*> shaderPrograms;
 
     // Drawing Maps
-    std::unordered_set<Object*> opaque;
-    std::map<float, Object*> transparent;
-    std::unordered_set<Object*> foreground;
+    DrawLayer foregroundLayer;
+    DrawLayer backgroundLayer;
 
     DebugShaderProgram* debugShaderProgram;
+    ShadowMapShaderProgram* shadowMapShaderProgram;
+    QuadShaderProgram* quadDrawShaderProgram;
+
     Mesh debugCube;
     Mesh debugLine;
     Mesh debugCircle;
@@ -40,6 +56,8 @@ class ClientGL {
     Matrix4 viewMat;
     Matrix4 projMat;
 public:
+    Game& game;
+
     ClientGL(Game& game, const char* selector);
 
     // Client Communication
@@ -51,7 +69,9 @@ public:
     void SetupGL();
 
     void Draw(int width, int height);
-    void DrawObject(Object* obj, int& lastProgram);
+    void DrawDebugLine(const Vector3& color, const Vector3& from, const Vector3& to);
+    void DrawObject(DrawParams& param, int& lastProgram);
+    void DrawDebug(Object* obj);
     void DrawObjects();
 
     Vector2 WorldToScreenCoordinates(Vector3 worldCoord);

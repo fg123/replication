@@ -89,6 +89,7 @@ GLint ShaderProgram::GetUniformLocation(const std::string& uniName) {
 }
 
 void DefaultMaterialShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {
+    glUniform1f(uniformRandSeed, (float) client.game.GetGameTime() / 16);
     // Set Model Transform
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -170,9 +171,38 @@ void DefaultMaterialShaderProgram::PreDraw(Game& game,
     for (int i = 0; i < numLights; i++) {
         GLint lightPosition = GetUniformLocation("u_Lights[" + std::to_string(i) + "].position");
         GLint lightColor = GetUniformLocation("u_Lights[" + std::to_string(i) + "].color");
+        GLint depthBiasMVPNear = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPNear");
+        GLint depthBiasMVPMid = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPMid");
+        GLint depthBiasMVPFar = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPFar");
         glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
         glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
+        glUniformMatrix4fv(depthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPNear));
+        glUniformMatrix4fv(depthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPMid));
+        glUniformMatrix4fv(depthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPFar));
+
+        // See client_shader.h:83
+        glActiveTexture(GL_TEXTURE7 + i);
+        glBindTexture(GL_TEXTURE_2D, lights[i].shadowDepthMap);
     }
+}
+
+void ShadowMapShaderProgram::PreDraw(Game& game,
+                const Vector3& viewPos,
+                const Matrix4& view,
+                const Matrix4& proj) {
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
+}
+
+void ShadowMapShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {
+    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+    glBindVertexArray(mesh->renderInfo.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
+    glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
 }
 
 void DebugShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {

@@ -49,7 +49,7 @@ PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game),
     inventoryManager(game, this) {
     SetTag(Tag::PLAYER);
 
-    // SetTag(Tag::NO_GRAVITY);
+    SetTag(Tag::NO_GRAVITY);
 
     SetPosition(position);
 
@@ -171,13 +171,15 @@ void PlayerObject::Tick(Time time) {
     }
 
     // TODO: move speed
+    float moveSpeed = 20.0f;
     if (hasMovement) {
         if (!IsTagged(Tag::NO_GRAVITY)) {
             leftRightComponent.y = 0;
             forwardBackwardComponent.y = 0;
+            moveSpeed = 8.0f;
         }
         inputVelocity = glm::normalize(leftRightComponent +
-            forwardBackwardComponent + upDownComponent) * 8.0f;
+            forwardBackwardComponent + upDownComponent) * moveSpeed;
     }
     else {
         inputVelocity *= 0.8;

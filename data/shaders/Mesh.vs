@@ -13,10 +13,12 @@ out vec3 FragmentNormal;
 out vec3 FragmentPos;
 out vec2 FragmentTexCoords;
 out mat3 FragmentTBN;
+out vec3 FragmentPosClipSpace;
 
 void main() {
   gl_Position = u_Projection * u_View * u_Model * vec4(v_position, 1.0);
   // gl_Position = vec4(v_position, 1.0);
+
   FragmentTexCoords = v_texCoords;
   FragmentNormal = vec3(transpose(inverse(u_Model)) * vec4(normalize(v_normal), 1.0));
 
@@ -26,4 +28,7 @@ void main() {
   FragmentTBN = mat3(tangent, bitangent, FragmentNormal);
 
 	FragmentPos = vec3(u_Model * vec4(v_position, 1.0));
+
+  // gl_Position gets converted, this wont
+  FragmentPosClipSpace = vec3(u_View * u_Model * vec4(v_position, 1.0));
 }

@@ -19,8 +19,6 @@ public:
         // Make a Copy
         customQuad = *game.GetModel("Quad.obj");
 
-        // Tell client it might have transparency parts
-        SetTag(Tag::DRAW_TRANSPARENCY);
         isStatic = true;
     }
 

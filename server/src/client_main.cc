@@ -227,6 +227,7 @@ extern "C" {
                 // All inputs are non relevant anyway, shift client to present and just call it.
                 inputEvents.clear();
                 lastTickTime = ((serverCurrentTickTime + ping) / TickInterval) * TickInterval;
+                game.RollbackTime(lastTickTime);
                 return;
             }
 
@@ -253,9 +254,15 @@ extern "C" {
 
                 // LOG_DEBUG("Bringing to present (" << serverLastProcessedTime << ", " << serverCurrentTickTime << ") " << nextTick << " -> " << ending);
                 // LOG_DEBUG("Bringing to present with " << (ending - nextTick) / TickInterval << " ticks!");
+
+                // Maximum 30 ticks forward-wind
+                size_t i = 0;
                 while (nextTick < ending) {
                     obj->Tick(nextTick);
                     nextTick += TickInterval;
+                    if (i++ > 20) {
+                        break;
+                    }
                 }
             }
 

@@ -68,12 +68,13 @@ void Game::LoadMap(std::string mapPath) {
         }
         assetManager.LoadModel(modelName, modelPath, modelStream);
     }
+    #ifdef BUILD_CLIENT
     for (json& lightJson : obj["lights"].GetArray()) {
         // Light is an array that is serializable to Light
         Light& light = assetManager.lights.emplace_back();
         ProcessReplicationDispatch(light, lightJson);
+        light.InitializeLight();
     }
-    #ifdef BUILD_CLIENT
     for (json& audio : obj["sounds"].GetArray()) {
         std::string audioName = audio.GetString();
         std::string audioPath = RESOURCE_PATH("sounds/" + audioName);
@@ -500,7 +501,7 @@ void Game::HandleCollisions(Object* obj) {
         else {
             // Do up to 3 collisions between concave static mesh
             Vector3 lastPosition = obj->GetPosition();
-            for (size_t i = 0; i < 3; i++) {
+            for (size_t i = 0; i < 10; i++) {
                 CollideBetween(obj, object.second, isGround, shouldExclude, shouldReport);
                 if (IsZero(lastPosition - obj->GetPosition())) {
                     break;

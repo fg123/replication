@@ -9,6 +9,10 @@
 
 #ifdef BUILD_CLIENT
     #include <GLES3/gl3.h>
+    #include <GLES3/gl2ext.h>
+
+const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+
 #endif
 
 // Handles Meshes and Vertex Data for Rendering
@@ -27,10 +31,23 @@ struct Vertex {
             normal(nx, ny, nz) {}
 };
 
+#ifdef BUILD_CLIENT
 struct Light {
     Vector3 position;
     Vector3 color;
+    Vector3 direction;
+
+    GLuint shadowFrameBuffer = 0;
+    GLuint shadowDepthMap = 0;
+    GLuint shadowColorMap = 0;
+
+    Matrix4 depthBiasMVPNear;
+    Matrix4 depthBiasMVPMid;
+    Matrix4 depthBiasMVPFar;
+
+    void InitializeLight();
 };
+
 template<>
 inline void SerializeDispatch(Light& object, JSONWriter& obj) {
     obj.StartArray();
@@ -40,6 +57,9 @@ inline void SerializeDispatch(Light& object, JSONWriter& obj) {
     obj.Double(object.color.r);
     obj.Double(object.color.g);
     obj.Double(object.color.b);
+    obj.Double(object.direction.r);
+    obj.Double(object.direction.g);
+    obj.Double(object.direction.b);
     obj.EndArray();
 }
 
@@ -51,8 +71,11 @@ inline void ProcessReplicationDispatch(Light& object, json& obj) {
     object.color.r = obj[3].GetDouble();
     object.color.g = obj[4].GetDouble();
     object.color.b = obj[5].GetDouble();
+    object.direction.x = obj[6].GetDouble();
+    object.direction.y = obj[7].GetDouble();
+    object.direction.z = obj[8].GetDouble();
 }
-#ifdef BUILD_CLIENT
+
 struct Texture {
     unsigned char* data = nullptr;
     int width = 0;
@@ -69,6 +92,7 @@ struct Texture {
 
 struct Material {
     virtual int GetShaderProgram() = 0;
+    virtual bool IsTransparent() = 0;
 };
 
 struct DefaultMaterial : public Material {
@@ -104,6 +128,9 @@ struct DefaultMaterial : public Material {
     Texture* map_refl = nullptr;
 
     int GetShaderProgram() override { return 0; }
+    bool IsTransparent() override {
+        return illum == -1 || d < 1.0f || map_d != nullptr;
+    }
 };
 #endif
 
@@ -120,6 +147,8 @@ public:
 	std::string name;
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+
+    Vector3 center;
 #ifdef BUILD_CLIENT
     Material* material = nullptr;
     MeshRenderInfo renderInfo;

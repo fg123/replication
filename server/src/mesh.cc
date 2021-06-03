@@ -36,6 +36,10 @@ void Mesh::InitializeMesh() {
         indices.data(), GL_STATIC_DRAW);
     renderInfo.iboCount = indices.size();
 #endif
+    for (size_t i = 0; i < vertices.size(); i++) {
+        center += vertices[i].position;
+    }
+    center /= vertices.size();
 }
 
 #ifdef BUILD_CLIENT
@@ -46,7 +50,7 @@ void Texture::InitializeTexture() {
     // Texture Settings
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     GLenum internal_fmt = (format == Texture::Format::RGB) ? GL_RGB : GL_RGBA;
@@ -54,4 +58,39 @@ void Texture::InitializeTexture() {
     glTexImage2D(GL_TEXTURE_2D, 0, internal_fmt, width, height, 0, fmt, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 }
+
+void Light::InitializeLight() {
+    // We use SHADOW_WIDTH * 2 due to cascading shadow map and SHADOW_HEIGHT * 2
+
+    glGenTextures(1, &shadowColorMap);
+    glBindTexture(GL_TEXTURE_2D, shadowColorMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glGenTextures(1, &shadowDepthMap);
+    glBindTexture(GL_TEXTURE_2D, shadowDepthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
+                SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glGenFramebuffers(1, &shadowFrameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowFrameBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, shadowColorMap, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowDepthMap, 0);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LOG_ERROR("FB error, status: " << status);
+    }
+}
+
 #endif
