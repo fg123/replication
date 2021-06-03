@@ -15,6 +15,7 @@ struct DrawParams {
     ObjectID id;
     Mesh* mesh = nullptr;
     Matrix4 transform;
+    bool castShadows;
 };
 
 struct DrawLayer {

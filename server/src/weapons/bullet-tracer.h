@@ -19,6 +19,7 @@ public:
         collisionExclusion = (uint64_t) Tag::OBJECT;
 
         SetTag(Tag::NO_GRAVITY);
+        SetTag(Tag::NO_CAST_SHADOWS);
 
 
         SetModel(game.GetModel("BulletTracer.obj"));

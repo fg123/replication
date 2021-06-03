@@ -61,6 +61,7 @@ enum Tag : uint64_t {
 
     // Draws after opaque
     // DRAW_TRANSPARENCY   = 0b0000000000001000000,
+    NO_CAST_SHADOWS     = 0b0000000000001000000,
 
     // Draws after transparency (no z-buffer)
     DRAW_FOREGROUND     = 0b0000000000010000000,

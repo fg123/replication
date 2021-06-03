@@ -32,6 +32,7 @@ void Usage(char* arg0) {
     std::cout << "        --client-draw-colliders   : draw colliders on client" << std::endl;
     std::cout << "        --client-draw-debug       : draw debug data on client" << std::endl;
     std::cout << "        --client-ignore-server    : client-only" << std::endl;
+    std::cout << "        --client-draw-shadow-maps : draw shadow maps on client" << std::endl;
     std::cout << "        --help                    : shows this message" << std::endl;
 }
 
@@ -57,6 +58,9 @@ int main(int argc, char** argv) {
             }
             else if (arg == "--client-ignore-server") {
                 GlobalSettings.Client_IgnoreServer = true;
+            }
+            else if (arg == "--client-draw-shadow-maps") {
+                GlobalSettings.Client_DrawShadowMaps = true;
             }
             else if (arg == "--help") {
                 Usage(argv[0]);

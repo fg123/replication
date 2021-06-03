@@ -267,12 +267,14 @@ void ClientGL::Draw(int width, int height) {
                     params.id = obj->GetId();
                     params.mesh = &mesh;
                     params.transform = transform;
+                    params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
                 }
                 else {
                     DrawParams& params = layerToDraw.opaque.emplace_back();
                     params.id = obj->GetId();
                     params.mesh = &mesh;
                     params.transform = transform;
+                    params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
                 }
             }
         }
@@ -341,9 +343,11 @@ void ClientGL::Draw(int width, int height) {
         shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
 
         for (auto& param : backgroundLayer.opaque) {
+            if (!param.castShadows) continue;
             shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
         }
         for (auto& param : foregroundLayer.opaque) {
+            if (!param.castShadows) continue;
             shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
         }
 
@@ -362,9 +366,11 @@ void ClientGL::Draw(int width, int height) {
         glViewport(SHADOW_WIDTH, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 
         for (auto& param : backgroundLayer.opaque) {
+            if (!param.castShadows) continue;
             shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
         }
         for (auto& param : foregroundLayer.opaque) {
+            if (!param.castShadows) continue;
             shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
         }
 
@@ -383,9 +389,11 @@ void ClientGL::Draw(int width, int height) {
         glViewport(0, SHADOW_HEIGHT, SHADOW_WIDTH, SHADOW_HEIGHT);
 
         for (auto& param : backgroundLayer.opaque) {
+            if (!param.castShadows) continue;
             shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
         }
         for (auto& param : foregroundLayer.opaque) {
+            if (!param.castShadows) continue;
             shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
         }
 
@@ -417,9 +425,11 @@ void ClientGL::Draw(int width, int height) {
 
     DrawObjects();
 
-    for (auto& light : game.GetAssetManager().lights) {
-        quadDrawShaderProgram->Use();
-        quadDrawShaderProgram->DrawQuad(light.shadowColorMap, Matrix4{});
+    if (GlobalSettings.Client_DrawShadowMaps) {
+        for (auto& light : game.GetAssetManager().lights) {
+            quadDrawShaderProgram->Use();
+            quadDrawShaderProgram->DrawQuad(light.shadowColorMap, Matrix4{});
+        }
     }
 }
 
