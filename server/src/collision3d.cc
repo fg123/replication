@@ -340,7 +340,7 @@ inline Vector3 ClosestPointOnLineSegment(const Vector3& a, const Vector3& b, con
     return a + t * (b - a);
 }
 
-inline Vector3 ClosestPointOnTriangle(BVHTree::Triangle* t, const Vector3& point, Vector3& planePoint) {
+inline Vector3 ClosestPointOnTriangle(BVHTriangle* t, const Vector3& point, Vector3& planePoint) {
     // Construct a plane from triangle
     Vector3 norm = glm::normalize(t->norm);
     float distance = glm::dot(norm, t->a);
@@ -372,7 +372,7 @@ CollisionResult SphereAndMeshCollide(SphereCollider* sphere, StaticMeshCollider*
 
     AABB broadRect = sphere->GetBroadAABB();
     // BVH Find Triangles to Test
-    std::queue<BVHTree*> checkQueue;
+    std::queue<BVHTree<BVHTriangle>*> checkQueue;
     checkQueue.emplace(collider->bvhTree);
 
     float minOverlap = INFINITY;
@@ -381,7 +381,7 @@ CollisionResult SphereAndMeshCollide(SphereCollider* sphere, StaticMeshCollider*
     CollisionResult result;
 
     while (!checkQueue.empty()) {
-        BVHTree* currNode = checkQueue.front();
+        BVHTree<BVHTriangle>* currNode = checkQueue.front();
         checkQueue.pop();
         if (currNode->tris.empty()) {
             // Internal Node
@@ -414,7 +414,7 @@ CollisionResult SphereAndMeshCollide(SphereCollider* sphere, StaticMeshCollider*
 
 // Returns 0 if parallel, 1 if 1 intersection or 2 if fully inside
 int CheckLineAndPlaneIntersection(
-    BVHTree::Triangle* t,
+    BVHTriangle* t,
     const Vector3& lpt1, const Vector3& lpt2,
     Vector3& outputIntersection) {
 
@@ -485,7 +485,7 @@ bool RayIntersectTriangle(RayCastRequest& ray,
     return true;
 }
 
-bool DoesLineSegmentPenetrateTriangle(BVHTree::Triangle* tri, const Vector3& pt1,
+bool DoesLineSegmentPenetrateTriangle(BVHTriangle* tri, const Vector3& pt1,
     const Vector3& pt2, Vector3& penetratePoint) {
     RayCastRequest request;
     request.startPoint = pt1;
@@ -508,7 +508,7 @@ CollisionResult CapsuleAndMeshCollide(CapsuleCollider* capsule, StaticMeshCollid
     Vector3 pt2 = capsule->GetWorldPoint2();
     // LOG_DEBUG(capsule->GetOwner()->GetPosition() << " " << pt1 << " " << pt2);
 
-    std::queue<BVHTree*> checkQueue;
+    std::queue<BVHTree<BVHTriangle>*> checkQueue;
     checkQueue.emplace(collider->bvhTree);
 
     float minOverlap = INFINITY;
@@ -517,7 +517,7 @@ CollisionResult CapsuleAndMeshCollide(CapsuleCollider* capsule, StaticMeshCollid
     CollisionResult result;
 
     while (!checkQueue.empty()) {
-        BVHTree* currNode = checkQueue.front();
+        BVHTree<BVHTriangle>* currNode = checkQueue.front();
         checkQueue.pop();
         if (currNode->tris.empty()) {
             // Internal Node
@@ -631,7 +631,7 @@ CollisionResult OBBAndMeshCollide(OBBCollider* rect, StaticMeshCollider* collide
     Vector3 rax2 = r1Rotation * Vector::Left;
     Vector3 rax3 = r1Rotation * Vector::Forward;
 
-    std::queue<BVHTree*> checkQueue;
+    std::queue<BVHTree<BVHTriangle>*> checkQueue;
     checkQueue.emplace(collider->bvhTree);
 
     float minOverlap = INFINITY;
@@ -641,7 +641,7 @@ CollisionResult OBBAndMeshCollide(OBBCollider* rect, StaticMeshCollider* collide
     CollisionResult result;
 
     while (!checkQueue.empty()) {
-        BVHTree* currNode = checkQueue.front();
+        BVHTree<BVHTriangle>* currNode = checkQueue.front();
         checkQueue.pop();
         if (currNode->tris.empty()) {
             // Internal Node
@@ -782,11 +782,11 @@ CollisionResult StaticMeshCollider::CollidesWith(Collider* other) {
 bool StaticMeshCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
     bool bresult = false;
 
-    std::queue<BVHTree*> checkQueue;
+    std::queue<BVHTree<BVHTriangle>*> checkQueue;
     checkQueue.emplace(bvhTree);
 
     while (!checkQueue.empty()) {
-        BVHTree* currNode = checkQueue.front();
+        BVHTree<BVHTriangle>* currNode = checkQueue.front();
         checkQueue.pop();
         if (currNode->tris.empty()) {
             // Internal Node
@@ -979,16 +979,15 @@ CollisionResult CapsuleAndOBBCollide(CapsuleCollider* capsule, OBBCollider* obb)
     return result;
 }
 
-StaticMeshCollider::StaticMeshCollider(Object* owner, Mesh& mesh) :
-    Collider(owner, Vector3{}, Quaternion{}),
-    mesh(mesh) {
+StaticMeshCollider::StaticMeshCollider(Object* owner, const std::vector<Vertex*>& vertices) :
+    Collider(owner, Vector3{}, Quaternion{}) {
 
-    if (!mesh.vertices.empty()) {
-        Vector3 min = mesh.vertices[0].position;
-        Vector3 max = mesh.vertices[0].position;
-        for (size_t i = 1; i < mesh.vertices.size(); i++) {
-            min = glm::min(min, mesh.vertices[i].position);
-            max = glm::max(max, mesh.vertices[i].position);
+    if (!vertices.empty()) {
+        Vector3 min = vertices[0]->position;
+        Vector3 max = vertices[0]->position;
+        for (size_t i = 1; i < vertices.size(); i++) {
+            min = glm::min(min, vertices[i]->position);
+            max = glm::max(max, vertices[i]->position);
         }
         glm::vec3 bounds = max - min;
         broad = AABB(min, max);
@@ -997,43 +996,42 @@ StaticMeshCollider::StaticMeshCollider(Object* owner, Mesh& mesh) :
         if (bounds.y > bounds.x && bounds.y > bounds.z) axis = 1;
         if (bounds.z > bounds.x && bounds.z > bounds.y) axis = 2;
 
-        std::vector<BVHTree::Triangle*> triangles;
-        if (mesh.indices.size() % 3 != 0) {
-            LOG_ERROR("Static Mesh Collider, mesh has non % 3 indices! Has " << mesh.indices.size());
-        }
-        for (size_t i = 0; i < mesh.indices.size(); i += 3) {
-            const Vector3& a = mesh.vertices[mesh.indices[i]].position;
-            const Vector3& b = mesh.vertices[mesh.indices[i+1]].position;
-            const Vector3& c = mesh.vertices[mesh.indices[i+2]].position;
+        std::vector<BVHTriangle*> triangles;
+
+        for (size_t i = 0; i < vertices.size(); i += 3) {
+            const Vector3& a = vertices[i]->position;
+            const Vector3& b = vertices[i+1]->position;
+            const Vector3& c = vertices[i+2]->position;
 
             Vector3 normal = (
-                mesh.vertices[mesh.indices[i]].normal +
-                mesh.vertices[mesh.indices[i+1]].normal +
-                mesh.vertices[mesh.indices[i+2]].normal) / 3.f;
-            triangles.push_back(new BVHTree::Triangle(a, b, c, normal));
+                vertices[i]->normal +
+                vertices[i+1]->normal +
+                vertices[i+2]->normal) / 3.f;
+            triangles.push_back(new BVHTriangle(a, b, c, normal));
         }
-        bvhTree = BVHTree::Create(triangles, axis, 0);
-        for (auto& triangle : triangles) {
-            if (!triangle->parentVolume) {
-                LOG_ERROR("Triangle " << triangle->a << " " << triangle->b <<
-                    " " << triangle->c << " was not placed in a BVH volume!");
-            }
-            // else {
-            //     AABB& col = triangle->parentVolume->collider;
-            //     if (!IsPointInAABB(col.position, col.size, triangle->a)) {
-            //         LOG_ERROR("A not in bound " << triangle->a);
-            //         LOG_ERROR(col.position << " " << col.size);
-            //     }
-            //     if (!IsPointInAABB(col.position, col.size, triangle->b)) {
-            //         LOG_ERROR("B not in bound " << triangle->b);
-            //         LOG_ERROR(col.position << " " << col.size);
-            //     }
-            //     if (!IsPointInAABB(col.position, col.size, triangle->c)) {
-            //         LOG_ERROR("C not in bound " << triangle->c);
-            //         LOG_ERROR(col.position << " " << col.size);
-            //     }
-            // }
-        }
+        bvhTree = BVHTree<BVHTriangle>::Create(triangles, axis, 0);
+        // for (auto& tri : triangles) {
+        //     BVHTriangle* triangle = dynamic_cast<BVHTriangle*>(tri);
+        //     // if (!triangle->parentVolume) {
+        //     //     LOG_ERROR("Triangle " << triangle->a << " " << triangle->b <<
+        //     //         " " << triangle->c << " was not placed in a BVH volume!");
+        //     // }
+        //     // else {
+        //     //     AABB& col = triangle->parentVolume->collider;
+        //     //     if (!IsPointInAABB(col.position, col.size, triangle->a)) {
+        //     //         LOG_ERROR("A not in bound " << triangle->a);
+        //     //         LOG_ERROR(col.position << " " << col.size);
+        //     //     }
+        //     //     if (!IsPointInAABB(col.position, col.size, triangle->b)) {
+        //     //         LOG_ERROR("B not in bound " << triangle->b);
+        //     //         LOG_ERROR(col.position << " " << col.size);
+        //     //     }
+        //     //     if (!IsPointInAABB(col.position, col.size, triangle->c)) {
+        //     //         LOG_ERROR("C not in bound " << triangle->c);
+        //     //         LOG_ERROR(col.position << " " << col.size);
+        //     //     }
+        //     // }
+        // }
     }
 }
 

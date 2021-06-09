@@ -89,7 +89,7 @@ protected:
     Vector3 lastFramePosition;
     Vector3 lastFrameVelocity;
 
-    REPLICATED(ObjectID, id, "id");
+    ObjectID id;
 
     bool isDirty;
     REPLICATED(bool, isStatic, "s");

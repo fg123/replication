@@ -1,6 +1,25 @@
 #version 300 es
-
 precision highp float;
+
+float PI = 3.1415926535;
+
+float rand(vec2 c){
+	return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+float noise(vec2 p, float pixel){
+	vec2 ij = floor(p/pixel);
+	vec2 xy = mod(p,pixel)/pixel;
+	//xy = 3.*xy*xy-2.*xy*xy*xy;
+	xy = .5*(1.-cos(PI*xy));
+	float a = rand((ij+vec2(0.,0.)));
+	float b = rand((ij+vec2(1.,0.)));
+	float c = rand((ij+vec2(0.,1.)));
+	float d = rand((ij+vec2(1.,1.)));
+	float x1 = mix(a, b, xy.x);
+	float x2 = mix(c, d, xy.x);
+	return mix(x1, x2, xy.y);
+}
 
 struct Material {
     vec3 Ka;
@@ -46,6 +65,8 @@ uniform float u_RandSeed;
 
 uniform int u_NumLights;
 
+uniform bool u_RenderShadows;
+
 in vec3 FragmentNormal;
 in vec3 FragmentPos;
 in vec2 FragmentTexCoords;
@@ -56,7 +77,6 @@ out vec4 OutputColor;
 
 float AmbientIntensity = 0.5;
 
-float PI = 3.1415926535;
 
 float random(vec2 p) {
     vec2 K1 = vec2(
@@ -100,9 +120,8 @@ float GetAttenuationAtPoint(int i, vec4 shadowCoord, vec2 offset, float bias, in
             // Shift to choose the right location for the map sampling
 
             // Jitter uv
-
-            uv.x += (random(uv) - 0.5) * pixel;
-            uv.y += (random(uv) - 0.5) * pixel;
+            // uv.x += ((noise(uv, 0.00001) - 0.5)) * pixel;
+            // uv.y += ((noise(uv, 0.00001) - 0.5)) * pixel;
 
             switch (i) {
                 case 0: shadowAttenuation += QueryMap(u_shadowMap[0], uv, offset) + bias < shadowCoord.z ? 0.f : 1.f; break;
@@ -122,6 +141,7 @@ float GetAttenuationAtPoint(int i, vec4 shadowCoord, vec2 offset, float bias, in
 }
 
 float GetShadowAttenuation(int i) {
+    if (!u_RenderShadows) return 1.0;
     vec4 shadowCoordNear = u_Lights[i].depthBiasMVPNear * vec4(FragmentPos, 1);
     vec4 shadowCoordMid = u_Lights[i].depthBiasMVPMid * vec4(FragmentPos, 1);
     vec4 shadowCoordFar = u_Lights[i].depthBiasMVPFar * vec4(FragmentPos, 1);
@@ -138,9 +158,9 @@ float GetShadowAttenuation(int i) {
     // vec4 shadowCoordNearNorm = shadowCoordNear / shadowCoordNear.w;
     // shadowCoordNearNorm.x *= 0.5;
 
-    float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.0005, 1);
-    float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 1);
-    float farAtten = GetAttenuationAtPoint(i, shadowCoordFar, vec2(0.0, 0.5), farBias, 2);
+    float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 2);
+    float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 2);
+    float farAtten = GetAttenuationAtPoint(i, shadowCoordFar, vec2(0.0, 0.5), farBias, 3);
 
     float z = abs(FragmentPosClipSpace.z);
     if (z < 20.0) {

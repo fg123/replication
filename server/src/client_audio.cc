@@ -51,7 +51,7 @@ void ClientAudio::Tick() {
         AudioPlayback* source = *it;
         if (Object* bound = game.GetObject<Object>(source->boundObject)) {
             // LOG_DEBUG("Updating position " << bound->GetClass());
-            source->position = bound->GetPosition();
+            source->position = bound->clientPosition;
         }
         alSource3f(source->source, AL_POSITION, source->position.x, source->position.y, source->position.z);
         alGetSourcei(source->source, AL_SOURCE_STATE, &source->state);

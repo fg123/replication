@@ -11,6 +11,8 @@
 #include <emscripten/html5.h>
 #include <emscripten/fetch.h>
 
+const unsigned int MINIMAP_WIDTH = 1024, MINIMAP_HEIGHT = 1024;
+
 struct DrawParams {
     ObjectID id;
     Mesh* mesh = nullptr;
@@ -45,6 +47,10 @@ class ClientGL {
     DrawLayer foregroundLayer;
     DrawLayer backgroundLayer;
 
+    GLuint minimapFBO = 0;
+    GLuint minimapTexture = 0;
+    Mesh minimapMarker;
+
     DebugShaderProgram* debugShaderProgram;
     ShadowMapShaderProgram* shadowMapShaderProgram;
     QuadShaderProgram* quadDrawShaderProgram;
@@ -73,7 +79,7 @@ public:
     void DrawDebugLine(const Vector3& color, const Vector3& from, const Vector3& to);
     void DrawObject(DrawParams& param, int& lastProgram);
     void DrawDebug(Object* obj);
-    void DrawObjects();
+    void DrawObjects(bool ignorePlayer);
 
     Vector2 WorldToScreenCoordinates(Vector3 worldCoord);
 };

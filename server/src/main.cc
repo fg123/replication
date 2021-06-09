@@ -33,6 +33,7 @@ void Usage(char* arg0) {
     std::cout << "        --client-draw-debug       : draw debug data on client" << std::endl;
     std::cout << "        --client-ignore-server    : client-only" << std::endl;
     std::cout << "        --client-draw-shadow-maps : draw shadow maps on client" << std::endl;
+    std::cout << "        --client-no-shadows       : ignore shadows" << std::endl;
     std::cout << "        --help                    : shows this message" << std::endl;
 }
 
@@ -61,6 +62,9 @@ int main(int argc, char** argv) {
             }
             else if (arg == "--client-draw-shadow-maps") {
                 GlobalSettings.Client_DrawShadowMaps = true;
+            }
+            else if (arg == "--client-no-shadows") {
+                GlobalSettings.Client_NoShadows = true;
             }
             else if (arg == "--help") {
                 Usage(argv[0]);
@@ -95,7 +99,7 @@ int main(int argc, char** argv) {
         }, 5000);
 
     #ifdef BUILD_SERVER
-        gameTimer.ScheduleInterval(std::bind(&Game::QueueAllDirtyForReplication, &game, std::placeholders::_1),
+        gameTimer.ScheduleInterval(std::bind(&Game::QueueAllForReplication, &game, std::placeholders::_1),
             ReplicateInterval);
     #endif
 
@@ -158,7 +162,11 @@ int main(int argc, char** argv) {
                     LOG_DEBUG("Changing character to " << charName);
                     ws->send("{\"char-selected\": \"" + charName + "\"}", uWS::OpCode::TEXT);
                 }
+                else if (obj["event"] == "playerSettings") {
+                    data->playerObject->playerSettings.ProcessReplication(obj["settings"]);
+                }
                 else {
+                    LOG_DEBUG("Input Packet: " << message);
                     data->playerObject->OnInput(obj);
                 }
             },

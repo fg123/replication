@@ -130,9 +130,27 @@ module.exports = class UICanvas {
         }
     }
 
+    DrawBasicCrosshair(player, width, height) {
+        this.context.fillStyle = "rgba(0, 0, 0, 0.9)";
+        this.context.beginPath();
+        this.context.arc(width / 2, height / 2, 4, 0, 2 * Math.PI);
+        this.context.fill();
+        this.context.fillStyle = "rgba(255, 255, 255, 0.9)";
+        this.context.beginPath();
+        this.context.arc(width / 2, height / 2, 2, 0, 2 * Math.PI);
+        this.context.fill();
+    }
+
     DrawCrosshair(player, width, height) {
-        if (!player.w) return;
+        if (!player.w) {
+            this.DrawBasicCrosshair(player, width, height);
+            return;
+        }
         const weapon = this.clientState.GetObject(player.w);
+        if (!weapon) {
+            this.DrawBasicCrosshair(player, width, height);
+            return;
+        }
         if (weapon.spread === undefined) return;
         if (weapon.ads) return;
         // Draw Crosshair

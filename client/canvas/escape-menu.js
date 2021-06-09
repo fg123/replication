@@ -1,12 +1,28 @@
 const characters = require('../characters');
 const $ = require('jquery');
 
+const Cookies = require('js-cookie');
+
+
 module.exports = class EscapeMenu {
     constructor(clientState, escapeMenuDiv, game) {
+        this.BindSliderAndTextbox($("#sensitivitySlider"), $("#sensitivityTextbox"));
+
         this.clientState = clientState;
         this.escapeMenuDiv = escapeMenuDiv;
         this.game = game;
         this.selections = {};
+
+        this.playerSettings = Cookies.get('playerSettings');
+        if (this.playerSettings === undefined) {
+            // setup cookie initially
+            this.playerSettings = clientState.GetDefaultPlayerSettings();
+            Cookies.set('playerSettings', this.playerSettings);
+        }
+        else {
+            this.playerSettings = JSON.parse(this.playerSettings);
+        }
+        this.UpdateUIToMatchPlayerSettings();
 
         Object.keys(characters).forEach((c) => {
             const characterSelect = $(`<div>
@@ -69,6 +85,26 @@ module.exports = class EscapeMenu {
         $(".slot5 .dropBtn").on("click", () => {
             this.clientState.InventoryDrop(7);
         });
+        $("#applySettings").on("click", () => {
+            this.ApplyPlayerSettings();
+        });
+
+        const firstSettings = setInterval(() => {
+            if (this.clientState.GetPlayerObject()) {
+                this.ApplyPlayerSettings();
+                clearInterval(firstSettings);
+            }
+        }, 100);
+    }
+
+    ApplyPlayerSettings() {
+        this.playerSettings['sensitivity'] = parseFloat($("#sensitivityTextbox").val());
+        Cookies.set('playerSettings', this.playerSettings);
+        this.clientState.ApplyPlayerSettings(this.playerSettings);
+    }
+
+    UpdateUIToMatchPlayerSettings() {
+        $("#sensitivityTextbox").val(this.playerSettings.sensitivity);
     }
 
     DrawInventory() {
@@ -93,5 +129,14 @@ module.exports = class EscapeMenu {
         $(".slot3 .slotWrapper .slotContent").html(slot3 ? slot3.name : "");
         $(".slot4 .slotWrapper .slotContent").html(slot4 ? slot4.name : "");
         $(".slot5 .slotWrapper .slotContent").html(slot5 ? slot5.name : "");
+    }
+
+    BindSliderAndTextbox(slider, textbox) {
+        slider.on('input', () => {
+            textbox.val(slider.val());
+        });
+        textbox.on('input', () => {
+            slider.val(textbox.val());
+        });
     }
 };

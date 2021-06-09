@@ -6,9 +6,10 @@ std::unordered_map<std::string, size_t> LootTable = {
     { "AssaultRifleObject", 10 },
     { "PistolObject", 10 },
     { "AmmoObject", 50 },
-    { "GrenadeThrower", 10 },
+    { "GrenadeThrower", 50 },
     // { "BowObject", 10 },
-    { "ShotgunObject", 10 }
+    { "ShotgunObject", 10 },
+    { "MedkitObject", 30 }
 };
 
 void MapObject::InitializeMap() {

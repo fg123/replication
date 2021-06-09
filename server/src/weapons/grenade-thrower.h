@@ -11,14 +11,14 @@ public:
     GrenadeThrower(Game& game) : GrenadeThrower(game, Vector3()) {}
     GrenadeThrower(Game& game, Vector3 position) : InputHoldThrower<GrenadeObject>(game, position) {
         cooldown = 2000;
-        powerMin = 70;
-        powerMax = 70;
+        powerMin = 10;
+        powerMax = 100;
         name = "Grenade";
 
         SetModel(game.GetModel("Grenade.obj"));
         GenerateOBBCollidersFromModel(this);
-        AABB broad = collider.children[0]->GetBroadAABB();
-        LOG_DEBUG(broad.ptMin << " " << broad.ptMax);
+        // AABB broad = collider.children[0]->GetBroadAABB();
+        // LOG_DEBUG(broad.ptMin << " " << broad.ptMax);
     }
 
     virtual void FireProjectile(Time time) override {

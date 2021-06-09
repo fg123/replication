@@ -11,24 +11,31 @@
 
 class Game;
 
+struct PlayerSettings : public Replicable {
+    REPLICATED_D(float, sensitivity, "sensitivity", 1.0f);
+};
+
 class PlayerObject : public Object {
 protected:
-    int health = 100;
+    REPLICATED_D(int, health, "h", 100);
 
     // Yaw Pitch in degrees
     REPLICATED_D(float, rotationYaw, "ry", 0.0f);
     REPLICATED_D(float, rotationPitch, "rp", 0.0f);
 
     REPLICATED(Vector3, inputVelocity, "iv");
+    REPLICATED(Vector3, inputAcceleration, "ia");
 
 public:
+    PlayerSettings playerSettings;
+
     Time lastPickupTime = 0;
 
     REPLICATED_D(bool, canPickup, "cpt", true);
 
     REPLICATED(Vector2, pitchYawVelocity, "pyv");
 
-    REPLICATED(InventoryManager, inventoryManager, "im");
+    ALWAYS_REPLICATED(InventoryManager, inventoryManager, "im");
 
     WeaponObject* qWeapon = nullptr;
     WeaponObject* zWeapon = nullptr;
@@ -85,8 +92,10 @@ public:
     // Client Side Call from UI
     void InventoryDrop(int id);
     void InventorySwap();
+    void HolsterAllWeapons();
 
     void DealDamage(int damage, ObjectID from);
+    void HealFor(int damage);
 
     // TODO: add damage source
     virtual void OnTakeDamage(int damage) {};

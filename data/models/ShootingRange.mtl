@@ -1,5 +1,5 @@
 # Blender MTL File: 'ShootingRange.blend'
-# Material Count: 17
+# Material Count: 20
 
 newmtl Bricks
 Ns 225.000000
@@ -25,6 +25,18 @@ d 1.000000
 illum 2
 map_Bump ..\\textures\\CardboardBox\\CardboardBox_LP_lambert1_Normal.png
 map_Kd ..\\textures\\CardboardBox\\CardboardBox_LP_lambert1_AlbedoTransparency.png
+
+newmtl Cloth
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\Fabric032_1K-JPG\\Fabric032_1K_Normal.jpg
+map_Kd ..\\textures\\Fabric032_1K-JPG\\Fabric032_1K_Color.jpg
 
 newmtl Concrete
 Ns 225.000000
@@ -75,10 +87,20 @@ d 1.000000
 illum 2
 map_Kd ..\\textures\\Mountains.png
 
+newmtl Glass
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.596754 0.596754 0.596754
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.200000
+illum 9
+
 newmtl Grass
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
-Kd 0.006345 0.147253 0.000000
+Kd 0.008513 0.231625 0.000000
 Ks 0.020000 0.020000 0.020000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
@@ -136,7 +158,7 @@ newmtl Metal_Ramp
 Ns 225.000000
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
-Ks 0.200000 0.200000 0.200000
+Ks 0.100000 0.100000 0.100000
 Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
@@ -171,6 +193,18 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 1
+
+newmtl Wall
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\Rock029_1K-JPG\\Rock029_1K_Normal.jpg
+map_Kd ..\\textures\\Rock029_1K-JPG\\Rock029_1K_Color.jpg
 
 newmtl Wet_Floor_Sign
 Ns 179.999996

@@ -1,5 +1,4 @@
-#ifndef REPLICABLE_H
-#define REPLICABLE_H
+#pragma once
 
 #include "json/rapidjson/document.h"
 #include "json/rapidjson/ostreamwrapper.h"
@@ -12,7 +11,11 @@
 #include <sstream>
 #include <functional>
 #include <unordered_map>
+#include <optional>
 #include <type_traits>
+
+// Yucky Global Flag to control Diff System
+extern bool IsInitialReplication;
 
 using json = rapidjson::Value;
 using JSONWriter = rapidjson::Writer<rapidjson::StringBuffer>;
@@ -67,25 +70,61 @@ public:
     }
 };
 
+#define ALWAYS_REPLICATED(type, name, repAlias)  \
+    type name;                            \
+    REPLICATED_STRUCT_IMPL(type, name, repAlias)
+
+#define ALWAYS_REPLICATED_D(type, name, repAlias, defaultValue)    \
+    type name = defaultValue;                               \
+    REPLICATED_STRUCT_IMPL(type, name, repAlias)
+
 #define REPLICATED(type, name, repAlias)  \
     type name;                            \
+    std::optional<type> name##_PREV;                       \
     REPLICATED_IMPL(type, name, repAlias)
 
 #define REPLICATED_D(type, name, repAlias, defaultValue)    \
     type name = defaultValue;                               \
+    std::optional<type> name##_PREV;                          \
     REPLICATED_IMPL(type, name, repAlias)
 
-#define REPLICATED_IMPL(repType, name, repAlias)               \
-    ReplicatedRegister<repType> name##__ {              \
-        entries,                                            \
-        repAlias,                                           \
-        [](void* _this, JSONWriter& obj) {                  \
-            obj.Key(repAlias);              \
+#ifdef BUILD_SERVER
+#define REPLICATED_IMPL(repType, name, repAlias)                              \
+    ReplicatedRegister<repType> name##__ {                                    \
+        entries,                                                              \
+        repAlias,                                                             \
+        [](void* _this, JSONWriter& obj) {                                    \
+            if (IsInitialReplication ||\
+                !static_cast<decltype(this)>(_this)->name##_PREV.has_value() || static_cast<decltype(this)>(_this)->name != *static_cast<decltype(this)>(_this)->name##_PREV) {            \
+                static_cast<decltype(this)>(_this)->name##_PREV = static_cast<decltype(this)>(_this)->name; \
+                obj.Key(repAlias);                                                \
+                SerializeDispatch(static_cast<decltype(this)>(_this)->name, obj); \
+            }\
+        },                                                    \
+        [](void* _this, json& obj) { \
+            if (obj.HasMember(repAlias)) { \
+                ProcessReplicationDispatch(static_cast<decltype(this)>(_this)->name, obj[repAlias]);  \
+            } \
+        } \
+    };
+#endif
+
+#ifdef BUILD_CLIENT
+#define REPLICATED_IMPL REPLICATED_STRUCT_IMPL
+#endif
+
+#define REPLICATED_STRUCT_IMPL(repType, name, repAlias)                              \
+    ReplicatedRegister<repType> name##__ {                                    \
+        entries,                                                              \
+        repAlias,                                                             \
+        [](void* _this, JSONWriter& obj) {                                    \
+            obj.Key(repAlias);                                                \
             SerializeDispatch(static_cast<decltype(this)>(_this)->name, obj); \
         },                                                    \
         [](void* _this, json& obj) { \
-            CheckMemberExists(obj, repAlias); \
-            ProcessReplicationDispatch(static_cast<decltype(this)>(_this)->name, obj[repAlias]);  \
+            if (obj.HasMember(repAlias)) { \
+                ProcessReplicationDispatch(static_cast<decltype(this)>(_this)->name, obj[repAlias]);  \
+            } \
         } \
     };
 
@@ -266,4 +305,3 @@ template<>
 inline void ProcessReplicationDispatch(std::string& object, json& obj) {
     object = obj.GetString();
 }
-#endif

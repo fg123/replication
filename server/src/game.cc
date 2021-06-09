@@ -20,6 +20,15 @@
 #include <fstream>
 #include <exception>
 
+
+#ifdef BUILD_SERVER
+const int TickInterval = 16;
+#endif
+#ifdef BUILD_CLIENT
+const int TickInterval = 16;
+#endif
+const int ReplicateInterval = 100;
+
 Vector3 liveBoxStart(-1000, -100, -1000);
 Vector3 liveBoxSize(2000, 2000, 2000);
 
@@ -272,6 +281,7 @@ void Game::ReplicateAnimations(Time time) {
 }
 
 void Game::InitialReplication(PlayerSocketData* data) {
+    IsInitialReplication = true;
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
 
@@ -295,6 +305,7 @@ void Game::InitialReplication(PlayerSocketData* data) {
 
     writer.EndObject();
     SendData(data, buffer.GetString());
+    IsInitialReplication = false;
 }
 
 void Game::RequestReplication(ObjectID objectId) {
@@ -306,11 +317,11 @@ void Game::RequestReplication(ObjectID objectId) {
     }
 }
 
-void Game::QueueAllDirtyForReplication(Time time) {
+void Game::QueueAllForReplication(Time time) {
     for (auto& object : gameObjects) {
-        if (object.second->IsDirty()) {
+        // if (object.second->IsDirty()) {
             RequestReplication(object.first);
-        }
+        // }
     }
 }
 

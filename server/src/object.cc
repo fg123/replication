@@ -7,6 +7,8 @@
 static const double GRAVITY = 30;
 static const double EPSILON = 10e-10;
 
+bool IsInitialReplication = false;
+
 std::unordered_map<std::string, ObjectConstructor>& GetClassLookup() {
     static std::unordered_map<std::string, ObjectConstructor> ClassLookup;
     return ClassLookup;
@@ -137,9 +139,7 @@ void Object::Tick(Time time) {
         }
 
         if (!IsZero(lastFramePosition - position)) {
-            // if (IsTagged(Tag::WEAPON)) {
-            //     LOG_DEBUG(lastFramePosition << " " << position);
-            // }
+            // LOG_DEBUG(GetClass() << ": " << (lastFramePosition - position));
             SetDirty(true);
         }
 
@@ -159,8 +159,10 @@ void Object::Tick(Time time) {
         lastFrameVelocity = velocity;
         lastFramePosition = position;
     }
-    // Tick my children
-    for (auto& child : children) {
+    // Tick my children, make a copy incase children detach
+    //   during their tick cycle
+    std::unordered_set<Object*> childrenCopy = children;
+    for (auto& child : childrenCopy) {
         child->Tick(time);
     }
 
@@ -243,6 +245,9 @@ void Object::SetIsStatic(bool isStatic) {
 
 void Object::Serialize(JSONWriter& obj) {
     Replicable::Serialize(obj);
+
+    obj.Key("id");
+    obj.Uint64(id);
 
     obj.Key("t");
     obj.String(GetClass());

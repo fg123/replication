@@ -58,12 +58,18 @@ void GenerateOBBCollidersFromModel(Object* obj) {
 void GenerateStaticMeshCollidersFromModel(Object* obj) {
     Model* model = obj->GetModel();
     if (model) {
+        std::vector<Vertex*> allVerts;
         for (Mesh& mesh : model->meshes) {
             std::string lower = ToLower(mesh.name);
             if (!mesh.vertices.empty() && !Contains(lower, "nocollide")) {
-                obj->AddCollider(new StaticMeshCollider(obj, mesh));
+                for (size_t i = 0; i < mesh.indices.size(); i += 3) {
+                    allVerts.push_back(&mesh.vertices[mesh.indices[i]]);
+                    allVerts.push_back(&mesh.vertices[mesh.indices[i + 1]]);
+                    allVerts.push_back(&mesh.vertices[mesh.indices[i + 2]]);
+                }
             }
         }
+        obj->AddCollider(new StaticMeshCollider(obj, allVerts));
     }
 }
 

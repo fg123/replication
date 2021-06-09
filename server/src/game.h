@@ -18,13 +18,8 @@
 
 class PlayerObject;
 
-#ifdef BUILD_SERVER
-static const int TickInterval = 16;
-#endif
-#ifdef BUILD_CLIENT
-static const int TickInterval = 16;
-#endif
-static const int ReplicateInterval = 100;
+extern const int TickInterval;
+extern const int ReplicateInterval;
 
 struct PlayerSocketData {
 #ifdef BUILD_SERVER
@@ -121,7 +116,7 @@ public:
 
     void ReplicateAnimations(Time time);
     void RequestReplication(ObjectID objectId);
-    void QueueAllDirtyForReplication(Time time);
+    void QueueAllForReplication(Time time);
     void InitialReplication(PlayerSocketData* data);
 
     void SendData(PlayerSocketData* player, std::string message);

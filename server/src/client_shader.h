@@ -31,6 +31,7 @@ public:
                          const Matrix4& view,
                          const Matrix4& proj) = 0;
     virtual void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) = 0;
+    virtual void SetRenderShadows(bool render) {}
 };
 
 class DefaultMaterialShaderProgram : public ShaderProgram {
@@ -41,6 +42,7 @@ class DefaultMaterialShaderProgram : public ShaderProgram {
     GLint uniformViewerPosition;
     GLint uniformNumLights;
     GLint uniformRandSeed;
+    GLint uniformRenderShadows;
 
     std::vector<GLint> uniformMaterial;
 public:
@@ -56,6 +58,7 @@ public:
         uniformViewerPosition = GetUniformLocation("u_ViewerPos");
         uniformNumLights = GetUniformLocation("u_NumLights");
         uniformRandSeed = GetUniformLocation("u_RandSeed");
+        uniformRenderShadows = GetUniformLocation("u_RenderShadows");
 
         uniformMaterial.push_back(GetUniformLocation("u_Material.Ka"));
         uniformMaterial.push_back(GetUniformLocation("u_Material.Kd"));
@@ -86,6 +89,10 @@ public:
         for (int i = 0; i < 10; i++) {
             glUniform1i(GetUniformLocation("u_shadowMap[" + std::to_string(i) + "]"), 7 + i);
         }
+    }
+
+    void SetRenderShadows(bool render) override {
+        glUniform1i(uniformRenderShadows, render);
     }
 
     void PreDraw(Game& game,

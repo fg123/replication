@@ -99,7 +99,8 @@
         "__tuple": "cpp",
         "string_view": "cpp",
         "sparse": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "__functional_base_03": "cpp"
     },
     "files.exclude": {
         "**/.git": true,

@@ -74,6 +74,23 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
+    const char* GetDefaultPlayerSettings() {
+        PlayerSettings playerSettings;
+
+        rapidjson::StringBuffer buffer;
+        rapidjson::Writer writer(buffer);
+        writer.StartObject();
+        playerSettings.Serialize(writer);
+        writer.EndObject();
+
+        size_t length = buffer.GetSize() + 1;
+        char* writable = new char[length];
+        std::copy_n(buffer.GetString(), length, writable);
+        writable[length - 1] = 0;
+        return writable;
+    }
+
+    EMSCRIPTEN_KEEPALIVE
     void TickGame() {
         // LOG_DEBUG("Tick Game");
         try {
@@ -119,6 +136,16 @@ extern "C" {
 
         obj->SetDirty(false);
         return writable;
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    void ApplyPlayerSettings(ObjectID object, const char* input) {
+        PlayerObject* obj = game.GetObject<PlayerObject>(object);
+        if (obj) {
+            JSONDocument doc;
+            doc.Parse(input);
+            obj->playerSettings.ProcessReplication(doc);
+        }
     }
 
     EMSCRIPTEN_KEEPALIVE

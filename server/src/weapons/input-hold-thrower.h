@@ -36,13 +36,14 @@ class InputHoldThrower : public WeaponWithCooldown {
     Time fireHoldDownTime = 0;
     Time chargeUpTime = 0;
 
-    REPLICATED(float, power, "pow");
 
     Time lastThrow = 0;
 
     REPLICATED_D(Time, timeSinceLastThrow, "tslt", 0);
 
 protected:
+    REPLICATED(float, power, "pow");
+
     // Customizable by inheritor
     Time maxHoldDown = 1000;
     float powerMin = 1;

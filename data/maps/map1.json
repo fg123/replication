@@ -2,6 +2,7 @@
  "tilemap": "map1Tiles.png",
  "models": [
     "ShootingRange.obj",
+    "FlatWorld.obj",
     "Player.obj",
     "NewPlayer.obj",
     "Pistol.obj",
@@ -23,7 +24,9 @@
     "Icosphere.obj",
     "Cube.obj",
     "Cylinder.obj",
-    "Shotgun.obj"
+    "Shotgun.obj",
+    "Medkit.obj",
+    "PlayerMarkerMinimap.obj"
  ],
  "sounds": [
     "bang.wav",

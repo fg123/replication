@@ -35,6 +35,38 @@ void ClientGL::SetupContext() {
     debugShaderProgram = new DebugShaderProgram();
     shadowMapShaderProgram = new ShadowMapShaderProgram();
     quadDrawShaderProgram = new QuadShaderProgram();
+
+    // Generate Texture for Minimap FBO
+    glGenTextures(1, &minimapTexture);
+    glBindTexture(GL_TEXTURE_2D, minimapTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                MINIMAP_WIDTH, MINIMAP_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    GLuint minimapDepthMap;
+    glGenTextures(1, &minimapDepthMap);
+    glBindTexture(GL_TEXTURE_2D, minimapDepthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
+            MINIMAP_WIDTH, MINIMAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glGenFramebuffers(1, &minimapFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, minimapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, minimapTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, minimapDepthMap, 0);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LOG_ERROR("FB error, status: " << status);
+    }
 }
 
 void SetupMesh(Mesh& mesh, const std::vector<float>& verts, const std::vector<unsigned int>& indices) {
@@ -83,6 +115,7 @@ void ClientGL::SetupGL() {
     SetupMesh(debugLine, lineVerts, lineIndices);
 
     debugCircle = game.GetAssetManager().GetModel("Icosphere.obj")->meshes[0];
+
     // Copied over, reorder indices to work with GL_LINES
     std::vector<unsigned int> newIndices;
     for (size_t i = 0; i < debugCircle.indices.size(); i += 3) {
@@ -103,6 +136,8 @@ void ClientGL::SetupGL() {
         newIndices.push_back(debugCylinder.indices[i]);
     }
     debugCylinder.indices = std::move(newIndices);
+
+    minimapMarker = game.GetAssetManager().GetModel("PlayerMarkerMinimap.obj")->meshes[0];
 }
 
 void ClientGL::DrawDebugLine(const Vector3& color, const Vector3& from, const Vector3& to) {
@@ -141,11 +176,11 @@ void ClientGL::DrawDebug(Object* obj) {
             else if (StaticMeshCollider* collider = dynamic_cast<StaticMeshCollider*>(cptr)) {
                 if (GlobalSettings.Client_DrawBVH) {
                     // Draw all the BVHs
-                    std::queue<std::pair<BVHTree*, int>> nodes;
+                    std::queue<std::pair<BVHTree<BVHTriangle>*, int>> nodes;
                     nodes.emplace(collider->bvhTree, 0);
                     while (!nodes.empty()) {
                         auto pair = nodes.front();
-                        BVHTree* front = pair.first;
+                        BVHTree<BVHTriangle>* front = pair.first;
                         nodes.pop();
                         for (auto& child : front->children) {
                             nodes.emplace(child, pair.second + 1);
@@ -302,118 +337,151 @@ void ClientGL::Draw(int width, int height) {
     }
 
     // Setup Shadow Maps
-    for (auto& light : game.GetAssetManager().lights) {
-        Matrix4 lightView = glm::lookAt(light.position, light.position + light.direction,
-            Vector::Up);
+    if (!GlobalSettings.Client_NoShadows) {
+        for (auto& light : game.GetAssetManager().lights) {
+            Matrix4 lightView = glm::lookAt(light.position, light.position + light.direction,
+                Vector::Up);
 
+            shadowMapShaderProgram->Use();
 
-        shadowMapShaderProgram->Use();
+            Matrix4 biasMatrix(
+                0.5, 0.0, 0.0, 0.0,
+                0.0, 0.5, 0.0, 0.0,
+                0.0, 0.0, 0.5, 0.0,
+                0.5, 0.5, 0.5, 1.0
+            );
 
-        Matrix4 biasMatrix(
-            0.5, 0.0, 0.0, 0.0,
-            0.0, 0.5, 0.0, 0.0,
-            0.0, 0.0, 0.5, 0.0,
-            0.5, 0.5, 0.5, 1.0
-        );
+            Vector3 boxToLight[8];
 
-        Vector3 boxToLight[8];
+            // GL Setup
+            glBindFramebuffer(GL_FRAMEBUFFER, light.shadowFrameBuffer);
+            // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClearColor(1, 1, 1, 1);
+            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+            glEnable(GL_DEPTH_TEST);
 
-        // GL Setup
-        glBindFramebuffer(GL_FRAMEBUFFER, light.shadowFrameBuffer);
-        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glClearColor(1, 1, 1, 1);
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
-        glEnable(GL_DEPTH_TEST);
+            // shaderPrograms[0]->Use();
+            // shaderPrograms[0]->PreDraw(game, light.position, lightView, lightProjection);
 
-        // shaderPrograms[0]->Use();
-        // shaderPrograms[0]->PreDraw(game, light.position, lightView, lightProjection);
+            // Draw Near Field
+            glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+            for (size_t i = 0; i < 8; i++) {
+                boxToLight[i] = Vector3(lightView * viewFrustrumPointsNear[i]);
+            }
 
-        // Draw Near Field
-        glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-        for (size_t i = 0; i < 8; i++) {
-            boxToLight[i] = Vector3(lightView * viewFrustrumPointsNear[i]);
+            AABB boxExtents { boxToLight, 8 };
+            Matrix4 lightProjection = glm::ortho(boxExtents.ptMin.x, boxExtents.ptMax.x,
+                boxExtents.ptMin.y, boxExtents.ptMax.y, 1.0f, 400.f);
+            light.depthBiasMVPNear = biasMatrix * lightProjection * lightView;
+            shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
+
+            for (auto& param : backgroundLayer.opaque) {
+                if (!param.castShadows) continue;
+                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
+            }
+            for (auto& param : foregroundLayer.opaque) {
+                if (!param.castShadows) continue;
+                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
+            }
+
+            // Update stuff to middle side
+            for (size_t i = 0; i < 8; i++) {
+                boxToLight[i] = Vector3(lightView * viewFrustrumPointsMid[i]);
+            }
+
+            boxExtents = AABB(boxToLight, 8);
+            lightProjection = glm::ortho(boxExtents.ptMin.x, boxExtents.ptMax.x,
+                boxExtents.ptMin.y, boxExtents.ptMax.y, 1.0f, 400.f);
+
+            light.depthBiasMVPMid = biasMatrix * lightProjection * lightView;
+            shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
+
+            glViewport(SHADOW_WIDTH, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+
+            for (auto& param : backgroundLayer.opaque) {
+                if (!param.castShadows) continue;
+                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
+            }
+            for (auto& param : foregroundLayer.opaque) {
+                if (!param.castShadows) continue;
+                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
+            }
+
+            // Update stuff to far side
+            for (size_t i = 0; i < 8; i++) {
+                boxToLight[i] = Vector3(lightView * viewFrustrumPointsFar[i]);
+            }
+
+            boxExtents = AABB(boxToLight, 8);
+            lightProjection = glm::ortho(boxExtents.ptMin.x, boxExtents.ptMax.x,
+                boxExtents.ptMin.y, boxExtents.ptMax.y, 1.0f, 400.f);
+
+            light.depthBiasMVPFar = biasMatrix * lightProjection * lightView;
+            shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
+
+            glViewport(0, SHADOW_HEIGHT, SHADOW_WIDTH, SHADOW_HEIGHT);
+
+            for (auto& param : backgroundLayer.opaque) {
+                if (!param.castShadows) continue;
+                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
+            }
+            for (auto& param : foregroundLayer.opaque) {
+                if (!param.castShadows) continue;
+                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
+            }
+
+            // debugShaderProgram->Use();
+            // debugShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
+
+            // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[0]), Vector3(viewFrustrumPointsNear[1]));
+            // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[1]), Vector3(viewFrustrumPointsNear[2]));
+            // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[2]), Vector3(viewFrustrumPointsNear[3]));
+            // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[3]), Vector3(viewFrustrumPointsNear[0]));
+            // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[4]), Vector3(viewFrustrumPointsNear[5]));
+            // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[5]), Vector3(viewFrustrumPointsNear[6]));
+            // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[6]), Vector3(viewFrustrumPointsNear[7]));
+            // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[7]), Vector3(viewFrustrumPointsNear[4]));
         }
-
-        AABB boxExtents { boxToLight, 8 };
-        Matrix4 lightProjection = glm::ortho(boxExtents.ptMin.x, boxExtents.ptMax.x,
-            boxExtents.ptMin.y, boxExtents.ptMax.y, 1.0f, 400.f);
-        light.depthBiasMVPNear = biasMatrix * lightProjection * lightView;
-        shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
-
-        for (auto& param : backgroundLayer.opaque) {
-            if (!param.castShadows) continue;
-            shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-        }
-        for (auto& param : foregroundLayer.opaque) {
-            if (!param.castShadows) continue;
-            shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-        }
-
-        // Update stuff to middle side
-        for (size_t i = 0; i < 8; i++) {
-            boxToLight[i] = Vector3(lightView * viewFrustrumPointsMid[i]);
-        }
-
-        boxExtents = AABB(boxToLight, 8);
-        lightProjection = glm::ortho(boxExtents.ptMin.x, boxExtents.ptMax.x,
-            boxExtents.ptMin.y, boxExtents.ptMax.y, 1.0f, 400.f);
-
-        light.depthBiasMVPMid = biasMatrix * lightProjection * lightView;
-        shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
-
-        glViewport(SHADOW_WIDTH, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-
-        for (auto& param : backgroundLayer.opaque) {
-            if (!param.castShadows) continue;
-            shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-        }
-        for (auto& param : foregroundLayer.opaque) {
-            if (!param.castShadows) continue;
-            shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-        }
-
-        // Update stuff to far side
-        for (size_t i = 0; i < 8; i++) {
-            boxToLight[i] = Vector3(lightView * viewFrustrumPointsFar[i]);
-        }
-
-        boxExtents = AABB(boxToLight, 8);
-        lightProjection = glm::ortho(boxExtents.ptMin.x, boxExtents.ptMax.x,
-            boxExtents.ptMin.y, boxExtents.ptMax.y, 1.0f, 400.f);
-
-        light.depthBiasMVPFar = biasMatrix * lightProjection * lightView;
-        shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
-
-        glViewport(0, SHADOW_HEIGHT, SHADOW_WIDTH, SHADOW_HEIGHT);
-
-        for (auto& param : backgroundLayer.opaque) {
-            if (!param.castShadows) continue;
-            shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-        }
-        for (auto& param : foregroundLayer.opaque) {
-            if (!param.castShadows) continue;
-            shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-        }
-
-        // debugShaderProgram->Use();
-        // debugShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
-
-        // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[0]), Vector3(viewFrustrumPointsNear[1]));
-        // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[1]), Vector3(viewFrustrumPointsNear[2]));
-        // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[2]), Vector3(viewFrustrumPointsNear[3]));
-        // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[3]), Vector3(viewFrustrumPointsNear[0]));
-        // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[4]), Vector3(viewFrustrumPointsNear[5]));
-        // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[5]), Vector3(viewFrustrumPointsNear[6]));
-        // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[6]), Vector3(viewFrustrumPointsNear[7]));
-        // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[7]), Vector3(viewFrustrumPointsNear[4]));
     }
 
+    // Render Minimap
+    glBindFramebuffer(GL_FRAMEBUFFER, minimapFBO);
+    glViewport(0, 0, MINIMAP_WIDTH, MINIMAP_HEIGHT);
+    glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    Vector3 minimapCamPosition = cameraPosition + Vector3(0, 100, 0);
+    // Matrix4 minimapView = glm::lookAt(minimapCamPosition,
+    //     cameraPosition, cameraRotation);
+
+    Matrix4 minimapView = glm::lookAt(minimapCamPosition,
+        minimapCamPosition - Vector::Up, Vector3(cameraRotation.x, 0, cameraRotation.z));
+
+    Matrix4 minimapProj = glm::ortho(-50.0, 50.0, -50.0, 50.0, 1.0, 500.0);
 
     for (auto& program : shaderPrograms) {
         program->Use();
+        program->PreDraw(game, minimapCamPosition, minimapView, minimapProj);
+        program->SetRenderShadows(false);
+    }
+
+    debugShaderProgram->Use();
+    debugShaderProgram->PreDraw(game, minimapCamPosition, minimapView, minimapProj);
+    // DrawObjects(false);
+
+    if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
+        shaderPrograms[0]->Use();
+        glDisable(GL_DEPTH_TEST);
+        shaderPrograms[0]->Draw(*this, localPlayer->GetTransform() * glm::scale(Vector3(2, 2, 2)), &minimapMarker);
+    }
+
+    // World Render
+    for (auto& program : shaderPrograms) {
+        program->Use();
         program->PreDraw(game, cameraPosition, viewMat, projMat);
+        program->SetRenderShadows(!GlobalSettings.Client_NoShadows);
     }
     debugShaderProgram->Use();
     debugShaderProgram->PreDraw(game, cameraPosition, viewMat, projMat);
@@ -423,7 +491,7 @@ void ClientGL::Draw(int width, int height) {
     glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    DrawObjects();
+    DrawObjects(true);
 
     if (GlobalSettings.Client_DrawShadowMaps) {
         for (auto& light : game.GetAssetManager().lights) {
@@ -431,6 +499,11 @@ void ClientGL::Draw(int width, int height) {
             quadDrawShaderProgram->DrawQuad(light.shadowColorMap, Matrix4{});
         }
     }
+
+    glDisable(GL_DEPTH_TEST);
+    Matrix4 minimapQuadTransform = glm::translate(Vector3((1 - (0.75 * (height / (float) width))), 0.25, 0)) * glm::scale(Vector3(0.75f * (height / (float)width), 0.75f, 1));
+    quadDrawShaderProgram->Use();
+    quadDrawShaderProgram->DrawQuad(minimapTexture, minimapQuadTransform);
 }
 
 Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
@@ -440,14 +513,14 @@ Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
     return Vector2((NDC.x + 1) * (windowWidth / 2), windowHeight - (NDC.y + 1) * (windowHeight / 2));
 }
 
-void ClientGL::DrawObjects() {
+void ClientGL::DrawObjects(bool ignorePlayer) {
     int lastProgram = -1;
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
     // Draw Background
     for (auto& param : backgroundLayer.opaque) {
-        if (param.id == game.localPlayerId) continue;
+        if (param.id == game.localPlayerId && ignorePlayer) continue;
         DrawObject(param, lastProgram);
     }
     for (auto it = backgroundLayer.transparent.rbegin(); it != backgroundLayer.transparent.rend(); ++it) {

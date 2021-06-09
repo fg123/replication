@@ -38,6 +38,7 @@
     "glm-js": "0.0.6-c",
     "https-browserify": "^1.0.0",
     "jquery": "^3.5.1",
+    "js-cookie": "^2.2.1",
     "path-browserify": "^1.0.1",
     "punycode": "^2.1.1",
     "querystring-es3": "^0.2.1",

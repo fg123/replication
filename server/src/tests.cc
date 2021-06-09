@@ -59,7 +59,7 @@ void Tests::RunStaticMeshCollisionTest() {
     side.SetRotation(DirectionToQuaternion(Vector::Left));
     LOG_INFO("Side Quat: " << side.GetRotation());
 
-    main.AddCollider(new StaticMeshCollider(&main, mesh));
+    // main.AddCollider(new StaticMeshCollider(&main, mesh));
     side.AddCollider(new OBBCollider(&side, Vector3(-0.5), Vector3(1)));
 
     side.SetPosition(Vector3(0, 0.8, 0));

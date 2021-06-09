@@ -112,8 +112,8 @@ void PlayerObject::Tick(Time time) {
             Time clientTime = time;
         #endif
 
-        // if (glm::length(GetVelocity()) > 0.01) {
-        //     LOG_DEBUG(clientTime << ": " << GetPosition());
+        // if (glm::length(GetVelocity()) > 1) {
+        //     LOG_DEBUG(clientTime << ": " << GetPosition() << " " << GetVelocity());
         // }
         // LOG_DEBUG("Input Vel " << inputVelocity);
         // LOG_DEBUG("Regular Vel " << velocity);
@@ -171,26 +171,41 @@ void PlayerObject::Tick(Time time) {
     }
 
     // TODO: move speed
-    float moveSpeed = 20.0f;
+
+    float moveSpeed = IsTagged(Tag::NO_GRAVITY) ? 20.0f : 8.0f;
     if (hasMovement) {
         if (!IsTagged(Tag::NO_GRAVITY)) {
             leftRightComponent.y = 0;
             forwardBackwardComponent.y = 0;
-            moveSpeed = 8.0f;
         }
-        inputVelocity = glm::normalize(leftRightComponent +
-            forwardBackwardComponent + upDownComponent) * moveSpeed;
+        inputAcceleration = glm::normalize(leftRightComponent +
+            forwardBackwardComponent + upDownComponent) * moveSpeed * 10.0f;
     }
     else {
-        inputVelocity *= 0.8;
-        if (glm::length(inputVelocity) < 0.01) {
-            inputVelocity = Vector3(0);
-        }
+        inputAcceleration = Vector3(0);
+        // inputVelocity *= 0.8;
+    }
+
+    Time delta = time - lastTickTime;
+    float timeFactor = delta / 1000.0;
+    Vector3 velocityDelta = inputAcceleration * timeFactor;
+    inputVelocity += velocityDelta;
+
+    float friction = (moveSpeed * 7.0) * timeFactor;
+    if (glm::length(inputVelocity) > friction) {
+        inputVelocity -= glm::normalize(inputVelocity) * friction;
+    }
+    else {
+        inputVelocity = Vector3(0);
+    }
+
+    if (glm::length(inputVelocity) >= moveSpeed) {
+        inputVelocity = glm::normalize(inputVelocity) * moveSpeed;
     }
 
     if (keyboardState[KEY_MAP[K_KEY]]) {
         if (!lastKeyboardState[KEY_MAP[K_KEY]]) {
-            DealDamage(100, GetId());
+            DealDamage(50, GetId());
         }
     }
     if (keyboardState[KEY_MAP[D1_KEY]]) {
@@ -204,6 +219,9 @@ void PlayerObject::Tick(Time time) {
     }
     if (keyboardState[KEY_MAP[G_KEY]]) {
         inventoryManager.EquipGrenade();
+    }
+    if (keyboardState[KEY_MAP[D4_KEY]]) {
+        inventoryManager.EquipMedicalSupplies();
     }
     if (mouseWheelDelta < 0) {
         inventoryManager.EquipPrevious();
@@ -298,8 +316,6 @@ void PlayerObject::Tick(Time time) {
 void PlayerObject::Serialize(JSONWriter& obj) {
     // LOG_DEBUG("Player Object Serialize - Start");
     Object::Serialize(obj);
-    obj.Key("h");
-    obj.Int(health);
 
     if (qWeapon) {
         obj.Key("wq");
@@ -316,9 +332,23 @@ void PlayerObject::Serialize(JSONWriter& obj) {
     }
     obj.EndArray();
 
+    obj.Key("lkb");
+    obj.StartArray();
+    for (const bool &kb : lastKeyboardState) {
+        obj.Bool(kb);
+    }
+    obj.EndArray();
+
     obj.Key("ms");
     obj.StartArray();
     for (const bool &ms : mouseState) {
+        obj.Bool(ms);
+    }
+    obj.EndArray();
+
+    obj.Key("lms");
+    obj.StartArray();
+    for (const bool &ms : lastMouseState) {
         obj.Bool(ms);
     }
     obj.EndArray();
@@ -349,7 +379,6 @@ void PlayerObject::ProcessReplication(json& obj) {
             inputBuffer.pop();
         }
     }
-    health = obj["h"].GetInt();
 
     if (obj.HasMember("wq")) {
         qWeapon = game.GetObject<WeaponObject>(obj["wq"].GetUint());
@@ -369,14 +398,28 @@ void PlayerObject::ProcessReplication(json& obj) {
         i++;
     }
     i = 0;
+    for (const json &kb : obj["lkb"].GetArray()) {
+        lastKeyboardState[i] = kb.GetBool();
+        i++;
+    }
+    i = 0;
     for (const json &ms : obj["ms"].GetArray()) {
         mouseState[i] = ms.GetBool();
+        i++;
+    }
+    i = 0;
+    for (const json &ms : obj["lms"].GetArray()) {
+        lastMouseState[i] = ms.GetBool();
         i++;
     }
 }
 
 void PlayerObject::DropWeapon(WeaponObject* weapon)  {
     inventoryManager.Drop(weapon);
+}
+
+void PlayerObject::HolsterAllWeapons() {
+    inventoryManager.HolsterAll();
 }
 
 void PlayerObject::OnCollide(CollisionResult& result) {
@@ -400,6 +443,13 @@ void PlayerObject::DealDamage(int damage, ObjectID from) {
     }
 #endif
     OnTakeDamage(damage);
+}
+
+void PlayerObject::HealFor(int damage) {
+    #ifdef BUILD_SERVER
+        health += damage;
+        if (health > 100) health = 100;
+    #endif
 }
 
 void PlayerObject::OnInput(const JSONDocument& obj) {
@@ -427,10 +477,10 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
         }
     }
     else if (obj["event"] == "mm") {
-        double moveX = obj["x"].GetDouble();
-        double moveY = obj["y"].GetDouble();
-        rotationYaw += moveX / 10;
-        rotationPitch -= moveY / 10;
+        double moveX = obj["x"].GetDouble() / 10;
+        double moveY = obj["y"].GetDouble() / 10;
+        rotationYaw += playerSettings.sensitivity * moveX;
+        rotationPitch -= playerSettings.sensitivity * moveY;
         rotationPitch = glm::clamp(rotationPitch, -89.f, 89.f);
     }
     else if (obj["event"] == "md") {

@@ -28,8 +28,8 @@ void InventoryManager::Pickup(WeaponObject* weapon) {
         objects.push_back(weapon);
     }
     weapon->AttachToPlayer(owner);
-    ChooseNewCurrentWeapon();
     CleanUpAmmo();
+    ChooseNewCurrentWeapon();
 }
 
 void InventoryManager::Drop(int id) {
@@ -96,7 +96,12 @@ void InventoryManager::EquipSecondary() {
 }
 
 void InventoryManager::EquipMedicalSupplies() {
-    // TODO;
+     for (auto& object : objects) {
+        if (MedkitObject* am = dynamic_cast<MedkitObject*>(object)) {
+            currentWeapon = am;
+            return;
+        }
+    }
 }
 
 void InventoryManager::EquipPrevious() {

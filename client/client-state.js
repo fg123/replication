@@ -329,6 +329,30 @@ module.exports = class ClientState {
         return this.localPlayerObject;
     }
 
+    GetDefaultPlayerSettings() {
+        const serializedString = this.wasm._GetDefaultPlayerSettings();
+        const jsonString = this.wasm.UTF8ToString(serializedString);
+        const serializedObject = JSON.parse(jsonString);
+        this.wasm._free(serializedString);
+        return serializedObject;
+    }
+
+    ApplyPlayerSettings(settings) {
+        const input = {
+            "event": "playerSettings",
+            "settings": settings
+        };
+        const inputStr = JSON.stringify(input);
+        if (this.webSocket.readyState === WebSocket.OPEN) {
+            this.SendData(inputStr);
+        }
+
+        // Serve Inputs into Local
+        const heapString = this.ToHeapString(this.wasm, JSON.stringify(settings));
+        this.wasm._ApplyPlayerSettings(this.localPlayerObjectId, heapString);
+        this.wasm._free(heapString);
+    }
+
     GetObject(id) {
         if (id === undefined) return undefined;
         if (!this.wasm._IsObjectAlive(id)) {
