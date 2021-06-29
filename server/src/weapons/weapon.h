@@ -25,6 +25,7 @@ protected:
     PlayerObject* attachedTo = nullptr;
 public:
     REPLICATED(std::string, name, "name");
+    REPLICATED(std::string, logo, "logo");
     REPLICATED(WeaponAttachmentPoint, attachmentPoint, "atp");
     REPLICATED_D(float, currentSpread, "spread", 0.f);
 

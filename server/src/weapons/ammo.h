@@ -20,6 +20,7 @@ public:
     virtual void Tick(Time time) override {
         WeaponObject::Tick(time);
         name = "Ammo (" + std::to_string(ammoCount) + ")";
+        logo = "Ammo.png";
     }
 };
 

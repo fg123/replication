@@ -1,5 +1,6 @@
 * {
     font-family: "Prompt";
+    box-sizing: border-box;
 }
 
 html, body {
@@ -79,7 +80,7 @@ div.inventory table, div.inventory td {
     border: 2px solid white;
     border-collapse: collapse;
     text-align: center;
-    font-size: 30px;
+    font-size: 20px;
     font-weight: bold;
 }
 
@@ -93,7 +94,6 @@ div.inventory {
 
 .primary, .secondary {
     width: 400px;
-    height: 200px;
 }
 
 .slot {
@@ -102,7 +102,7 @@ div.inventory {
 }
 
 .dropBtn, .swapBtn {
-    font-size: 30px;
+    font-size: 20px;
     font-weight: bold;
 }
 
@@ -119,9 +119,15 @@ div.inventory {
 .slotWrapper {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    position: relative;
 }
 
 .slotContent {
-    flex-grow: 1;
+    width: 100%;
+    text-align: center;
+}
+
+.slotImage {
+    width: 100%;
+    height: 100%;
 }

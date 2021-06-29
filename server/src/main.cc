@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
                 data->ws = ws;
                 data->eventLoop = uWS::Loop::get();
                 data->nextRespawnCharacter = "Marine";
-                PlayerObject* playerObject = new Marine(game, Vector3(0, 50, 0));
+                PlayerObject* playerObject = new Marine(game, RESPAWN_LOCATION);
                 data->playerObject = playerObject;
 
                 game.AddPlayer(data, playerObject);
@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
                     data->playerObject->playerSettings.ProcessReplication(obj["settings"]);
                 }
                 else {
-                    LOG_DEBUG("Input Packet: " << message);
+                    // LOG_DEBUG("Input Packet: " << message);
                     data->playerObject->OnInput(obj);
                 }
             },

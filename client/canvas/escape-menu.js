@@ -121,14 +121,23 @@ module.exports = class EscapeMenu {
         const slot4 = this.clientState.GetObject(player.im.o[4]);
         const slot5 = this.clientState.GetObject(player.im.o[5]);
 
-        $(".primary .slotWrapper .slotContent").html(primary ? primary.name : "");
-        $(".secondary .slotWrapper .slotContent").html(secondary ? secondary.name : "");
-        $(".slot0 .slotWrapper .slotContent").html(slot0 ? slot0.name : "");
-        $(".slot1 .slotWrapper .slotContent").html(slot1 ? slot1.name : "");
-        $(".slot2 .slotWrapper .slotContent").html(slot2 ? slot2.name : "");
-        $(".slot3 .slotWrapper .slotContent").html(slot3 ? slot3.name : "");
-        $(".slot4 .slotWrapper .slotContent").html(slot4 ? slot4.name : "");
-        $(".slot5 .slotWrapper .slotContent").html(slot5 ? slot5.name : "");
+        $(".primary   .slotContent").html(primary   ? primary.name   : "&nbsp;");
+        $(".secondary .slotContent").html(secondary ? secondary.name : "&nbsp;");
+        $(".slot0     .slotContent").html(slot0     ? slot0.name     : "&nbsp;");
+        $(".slot1     .slotContent").html(slot1     ? slot1.name     : "&nbsp;");
+        $(".slot2     .slotContent").html(slot2     ? slot2.name     : "&nbsp;");
+        $(".slot3     .slotContent").html(slot3     ? slot3.name     : "&nbsp;");
+        $(".slot4     .slotContent").html(slot4     ? slot4.name     : "&nbsp;");
+        $(".slot5     .slotContent").html(slot5     ? slot5.name     : "&nbsp;");
+
+        $(".primary   .slotImage").attr('src', "resources/weapons/" + (primary   ? primary.logo   : "BlankWide.png"));
+        $(".secondary .slotImage").attr('src', "resources/weapons/" + (secondary ? secondary.logo : "BlankWide.png"));
+        $(".slot0     .slotImage").attr('src', "resources/weapons/" + (slot0     ? slot0.logo     : "BlankNarrow.png"));
+        $(".slot1     .slotImage").attr('src', "resources/weapons/" + (slot1     ? slot1.logo     : "BlankNarrow.png"));
+        $(".slot2     .slotImage").attr('src', "resources/weapons/" + (slot2     ? slot2.logo     : "BlankNarrow.png"));
+        $(".slot3     .slotImage").attr('src', "resources/weapons/" + (slot3     ? slot3.logo     : "BlankNarrow.png"));
+        $(".slot4     .slotImage").attr('src', "resources/weapons/" + (slot4     ? slot4.logo     : "BlankNarrow.png"));
+        $(".slot5     .slotImage").attr('src', "resources/weapons/" + (slot5     ? slot5.logo     : "BlankNarrow.png"));
     }
 
     BindSliderAndTextbox(slider, textbox) {

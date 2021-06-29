@@ -17,6 +17,7 @@ public:
         automaticFire = true;
         fireOffset = Vector3(0, -0.17, 1.873);
         name = "R-303";
+        logo = "Rifle.png";
 
         SetModel(game.GetModel("Rifle.obj"));
         GenerateOBBCollidersFromModel(this);

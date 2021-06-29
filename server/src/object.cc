@@ -7,8 +7,6 @@
 static const double GRAVITY = 30;
 static const double EPSILON = 10e-10;
 
-bool IsInitialReplication = false;
-
 std::unordered_map<std::string, ObjectConstructor>& GetClassLookup() {
     static std::unordered_map<std::string, ObjectConstructor> ClassLookup;
     return ClassLookup;

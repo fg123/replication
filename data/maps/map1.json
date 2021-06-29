@@ -3,6 +3,8 @@
  "models": [
     "ShootingRange.obj",
     "FlatWorld.obj",
+    "Lift.obj",
+    "SpectatorArea.obj",
     "Player.obj",
     "NewPlayer.obj",
     "Pistol.obj",
@@ -26,7 +28,9 @@
     "Cylinder.obj",
     "Shotgun.obj",
     "Medkit.obj",
-    "PlayerMarkerMinimap.obj"
+    "MachineGun.obj",
+    "PlayerMarkerMinimap.obj",
+    "SubmachineGun.obj"
  ],
  "sounds": [
     "bang.wav",
@@ -47,6 +51,8 @@
 
  ],
  "lights": [
-    [  14, 100,  11, 1, 1, 1, -0.32, -0.87, -0.38]
+    [  14, 300,  11, 1, 1, 1, -0.32, -0.87, -0.38]
+ ],
+ "lifts": [
  ]
 }

@@ -199,10 +199,20 @@ struct TwoPhaseCollider {
     void AddCollider(Collider* collider) {
         children.push_back(collider);
     }
+
+    AABB GetBroadAABB() const {
+        if (children.empty()) return AABB{};
+        AABB broad = children[0]->GetBroadAABB();;
+        for (size_t i = 0; i < children.size(); i++) {
+            broad = AABB::FromTwo(broad, children[i]->GetBroadAABB());
+        }
+        return broad;
+    }
 };
 
 void GenerateOBBCollidersFromModel(Object* obj);
 void GenerateStaticMeshCollidersFromModel(Object* obj);
+bool AABBAndAABBCollide(const AABB& a, const AABB& b);
 
 void ClearCollisionStatistics();
 void PrintCollisionStatistics();

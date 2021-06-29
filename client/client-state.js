@@ -54,7 +54,9 @@ module.exports = class ClientState {
         this.performance = {
             handleReplicateTime: new PerfTracker(100),
             tickTime: new PerfTracker(100),
-            replicateObjectCount: new PerfTracker(100)
+            tickInterval: new PerfTracker(100),
+            replicateObjectCount: new PerfTracker(100),
+            drawTime: new PerfTracker(100)
         };
 
         this.SetupSocketHandler();
@@ -237,15 +239,17 @@ module.exports = class ClientState {
         }));
 
         const tickInterval = this.wasm._GetTickInterval();
+
+        let lastTick = Date.now();
+
         setInterval(() => {
-            // console.log("Is there focus", document.hasFocus());
-            // if (document.hasFocus()) {
-            //     console.log("Tick Start");
-                const preTick = Date.now();
-                this.wasm._TickGame();
-                this.performance.tickTime.pushValue(Date.now() - preTick);
-            //     console.log("Tick End");
-            // }
+            const preTick = Date.now();
+            this.wasm._TickGame();
+            const now = Date.now();
+            this.performance.tickTime.pushValue(now - preTick);
+            const diff = now - lastTick;
+            this.performance.tickInterval.pushValue(diff);
+            lastTick = now;
         }, tickInterval);
 
         window.addEventListener('keydown', e => {

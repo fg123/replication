@@ -11,17 +11,19 @@
 #include <emscripten/html5.h>
 #include <emscripten/fetch.h>
 
-const unsigned int MINIMAP_WIDTH = 1024, MINIMAP_HEIGHT = 1024;
+const unsigned int MINIMAP_WIDTH = 512, MINIMAP_HEIGHT = 512;
 
 struct DrawParams {
     ObjectID id;
     Mesh* mesh = nullptr;
     Matrix4 transform;
     bool castShadows;
+    bool hasOutline;
 };
 
 struct DrawLayer {
-    std::vector<DrawParams> opaque;
+    // std::map<float, std::vector<DrawParams>> opaque;
+    std::map<Material*, std::vector<DrawParams>> opaque;
     std::map<float, DrawParams> transparent;
 
     void Clear() {
@@ -46,6 +48,7 @@ class ClientGL {
     // Drawing Maps
     DrawLayer foregroundLayer;
     DrawLayer backgroundLayer;
+    DrawLayer behindPlayerLayer;
 
     GLuint minimapFBO = 0;
     GLuint minimapTexture = 0;
@@ -54,6 +57,7 @@ class ClientGL {
     DebugShaderProgram* debugShaderProgram;
     ShadowMapShaderProgram* shadowMapShaderProgram;
     QuadShaderProgram* quadDrawShaderProgram;
+    MinimapShaderProgram* minimapShaderProgram;
 
     Mesh debugCube;
     Mesh debugLine;
@@ -79,7 +83,9 @@ public:
     void DrawDebugLine(const Vector3& color, const Vector3& from, const Vector3& to);
     void DrawObject(DrawParams& param, int& lastProgram);
     void DrawDebug(Object* obj);
-    void DrawObjects(bool ignorePlayer);
+
+    void DrawShadowObjects(DrawLayer& layer);
+    void DrawObjects(bool drawBehind);
 
     Vector2 WorldToScreenCoordinates(Vector3 worldCoord);
 };

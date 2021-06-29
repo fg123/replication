@@ -11,11 +11,16 @@
 
 class Game;
 
+static const Vector3 RESPAWN_LOCATION = Vector3(0, 150, 0);
+
 struct PlayerSettings : public Replicable {
     REPLICATED_D(float, sensitivity, "sensitivity", 1.0f);
 };
 
 class PlayerObject : public Object {
+    void TryPickupItem();
+    WeaponObject* ScanPotentialWeapon();
+
 protected:
     REPLICATED_D(int, health, "h", 100);
 
@@ -27,6 +32,11 @@ protected:
     REPLICATED(Vector3, inputAcceleration, "ia");
 
 public:
+
+#ifdef BUILD_CLIENT
+    ObjectID pointedToObject;
+#endif
+
     PlayerSettings playerSettings;
 
     Time lastPickupTime = 0;

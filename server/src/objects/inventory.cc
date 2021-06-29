@@ -19,6 +19,7 @@ bool InventoryManager::CanPickup(WeaponObject* weapon) {
 }
 
 void InventoryManager::Pickup(WeaponObject* weapon) {
+    LOG_DEBUG("Inventory pickup " << (void*)weapon);
     if (dynamic_cast<GunBase*>(weapon)) {
         if (!primary) primary = weapon;
         else if (!secondary) secondary = weapon;
@@ -53,7 +54,7 @@ void InventoryManager::Drop(WeaponObject* weapon) {
     if (!weapon) return;
     weapon->Detach();
     weapon->SetVelocity(owner->GetLookDirection() * 15.0f);
-    weapon->SetRotation(Quaternion{});
+    weapon->SetRotation(owner->GetRotation());
     owner->lastPickupTime = game.GetGameTime();
     if (primary == weapon) {
         primary = nullptr;
@@ -61,9 +62,10 @@ void InventoryManager::Drop(WeaponObject* weapon) {
     if (secondary == weapon) {
         secondary = nullptr;
     }
+    LOG_DEBUG("InventoryManager drop, removing " << (void*)weapon);
     objects.erase(std::remove(objects.begin(), objects.end(), weapon), objects.end());
-    ChooseNewCurrentWeapon();
     CleanUpAmmo();
+    ChooseNewCurrentWeapon();
 }
 
 void InventoryManager::ChooseNewCurrentWeapon() {

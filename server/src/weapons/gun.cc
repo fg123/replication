@@ -2,6 +2,7 @@
 #include "bullet-tracer.h"
 #include "player.h"
 #include "bullet-hole.h"
+#include "muzzle-flash.h"
 
 void GunBase::Tick(Time time) {
     if (reloadStartTime != 0) {
@@ -83,10 +84,8 @@ void GunBase::FireBullet(const Vector3& from, const Vector3& direction) {
     }
 
     // Ray Cast
-    Vector3 startPosition = GetPosition() + fireOffset * GetRotation();
-
 #ifdef BUILD_SERVER
-    BulletTracer* bullet = new BulletTracer(game, startPosition, bulletEnd);
+    BulletTracer* bullet = new BulletTracer(game, this, bulletEnd);
     game.AddObject(bullet);
 #endif
 
@@ -104,6 +103,17 @@ void GunBase::FireBullet(const Vector3& from, const Vector3& direction) {
             #endif
         }
     }
+}
+
+void GunBase::SpawnMuzzleFlash() {
+    // Spawn 4 Quads to make a pseudo 3d flash
+    #ifdef BUILD_SERVER
+
+        MuzzleFlash* facingUp = new MuzzleFlash(game);
+        facingUp->SetPosition(GetMuzzleLocation());
+        facingUp->SetRotation(-GetRotation());
+        game.AddObject(facingUp);
+    #endif
 }
 
 void GunBase::ActualFire(Time time) {
@@ -184,6 +194,7 @@ void GunBase::ActualFire(Time time) {
 
     game.PlayAudio("bang.wav", 1.0f, GetPosition());
 
+    // SpawnMuzzleFlash();
     SetDirty(true);
 }
 

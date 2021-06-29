@@ -27,6 +27,7 @@ public:
         GenerateOBBCollidersFromModel(this);
 
         name = "Medkit";
+        logo = "Medkit.png";
         powerMin = 0;
         powerMax = 70;
         maxHoldDown = 3000;

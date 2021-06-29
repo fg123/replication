@@ -99,6 +99,7 @@ extern "C" {
             //   we fall behind HandleReplicate() will autocorrect
             lastTickTime += TickInterval;
             game.Tick(lastTickTime);
+            // LOG_DEBUG("TickGame: " << lastTickTime);
         } catch(std::runtime_error& error) {
             LOG_ERROR(error.what());
         } catch(...) {
@@ -241,7 +242,27 @@ extern "C" {
                 }
             }
 
+            // At this point we could have inputs that the server has not processed
+            //   i.e. between serverLastProcessedTime and serverCurrentTickTime.
+            // In this case, the input will go late to the server,
+            //   and we will get a desync.
+
+            // Here we have some correction algorithms that tries to resolve
+            //   if the client and server get too much out of sync.
+
+            // We also have ping, which represents the ROUND-TRIP time for
+            //   packets. In order to ensure the server accurately receives
+            //   client input, we need the client to be at least (ping / 2) amount
+            //   of time ahead of the server. Otherwise inputs will always
+            //   be missed by the time it gets to the server.
+
+            // To be safe, we target for the client to be (2 * ping) in front
+            //   of the server.
+
+            // When the client gets an update with server time,  T_s
+
             // Client too far ahead
+            // if (lastTickTime > serverCurrentTickTime + (2 * ping)) {
             if (lastTickTime > serverCurrentTickTime + 1000) {
                 LOG_WARN("Client ahead by " << lastTickTime - serverCurrentTickTime << ", resetting!");
                 lastTickTime = serverCurrentTickTime;
@@ -253,8 +274,10 @@ extern "C" {
                 LOG_WARN("Server faster than client! Last tick client: " << lastTickTime << " Server Current: " << serverCurrentTickTime);
                 // All inputs are non relevant anyway, shift client to present and just call it.
                 inputEvents.clear();
-                lastTickTime = ((serverCurrentTickTime + ping) / TickInterval) * TickInterval;
-                game.RollbackTime(lastTickTime);
+                // lastTickTime = ((serverCurrentTickTime + ping) / TickInterval) * TickInterval;
+                lastTickTime = ((serverCurrentTickTime + (ping)) / TickInterval) * TickInterval;
+                // LOG_WARN("New Tick: " << lastTickTime);
+                // game.RollbackTime(lastTickTime);
                 return;
             }
 
@@ -277,17 +300,17 @@ extern "C" {
                     static_cast<PlayerObject*>(obj)->OnInput(jsonEvent);
                 }
 
-                Time ending = std::max(serverCurrentTickTime + ping, lastTickTime);
+                Time ending = std::max(serverCurrentTickTime, lastTickTime);
 
                 // LOG_DEBUG("Bringing to present (" << serverLastProcessedTime << ", " << serverCurrentTickTime << ") " << nextTick << " -> " << ending);
                 // LOG_DEBUG("Bringing to present with " << (ending - nextTick) / TickInterval << " ticks!");
 
                 // Maximum 30 ticks forward-wind
                 size_t i = 0;
-                while (nextTick < ending) {
+                while (nextTick <= ending) {
                     obj->Tick(nextTick);
                     nextTick += TickInterval;
-                    if (i++ > 20) {
+                    if (i++ > 30) {
                         break;
                     }
                 }

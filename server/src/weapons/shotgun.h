@@ -15,8 +15,9 @@ public:
         damage = 12;
         reloadTime = 1000;
         automaticFire = false;
-        fireOffset = Vector3(0, 0, 1);
+        fireOffset = Vector3(0, -0.079494, 1.25083);
         name = "Mystiff";
+        logo = "Shotgun.png";
         shotsPerFire = 7;
         multishotSpreadRadius = 0.1f;
 

@@ -14,9 +14,6 @@
 #include <optional>
 #include <type_traits>
 
-// Yucky Global Flag to control Diff System
-extern bool IsInitialReplication;
-
 using json = rapidjson::Value;
 using JSONWriter = rapidjson::Writer<rapidjson::StringBuffer>;
 using JSONDocument = rapidjson::Document;
@@ -80,12 +77,10 @@ public:
 
 #define REPLICATED(type, name, repAlias)  \
     type name;                            \
-    std::optional<type> name##_PREV;                       \
     REPLICATED_IMPL(type, name, repAlias)
 
 #define REPLICATED_D(type, name, repAlias, defaultValue)    \
     type name = defaultValue;                               \
-    std::optional<type> name##_PREV;                          \
     REPLICATED_IMPL(type, name, repAlias)
 
 #ifdef BUILD_SERVER
@@ -94,12 +89,8 @@ public:
         entries,                                                              \
         repAlias,                                                             \
         [](void* _this, JSONWriter& obj) {                                    \
-            if (IsInitialReplication ||\
-                !static_cast<decltype(this)>(_this)->name##_PREV.has_value() || static_cast<decltype(this)>(_this)->name != *static_cast<decltype(this)>(_this)->name##_PREV) {            \
-                static_cast<decltype(this)>(_this)->name##_PREV = static_cast<decltype(this)>(_this)->name; \
-                obj.Key(repAlias);                                                \
-                SerializeDispatch(static_cast<decltype(this)>(_this)->name, obj); \
-            }\
+            obj.Key(repAlias);                                                \
+            SerializeDispatch(static_cast<decltype(this)>(_this)->name, obj); \
         },                                                    \
         [](void* _this, json& obj) { \
             if (obj.HasMember(repAlias)) { \

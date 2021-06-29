@@ -50,6 +50,8 @@ uniform sampler2D u_map_refl;
 uniform Material u_Material;
 uniform vec3 u_ViewerPos;
 
+uniform vec3 u_OutlineColor;
+
 struct Light {
     vec3 position;
     vec3 color;
@@ -72,11 +74,15 @@ in vec3 FragmentPos;
 in vec2 FragmentTexCoords;
 in mat3 FragmentTBN;
 in vec3 FragmentPosClipSpace;
+flat in float FragmentOutline;
 
 out vec4 OutputColor;
 
-float AmbientIntensity = 0.5;
+const float AmbientIntensity = 0.5;
 
+const float nearBound = 10.0;
+const float middleBound = 50.0;
+const float shadowTransitionZone = 5.0;
 
 float random(vec2 p) {
     vec2 K1 = vec2(
@@ -101,7 +107,7 @@ float QueryMap(in sampler2D shadowMap, vec2 xy, vec2 offset) {
 float pixel = 1.f / 1024.f;
 
 // The shadow map is 2048x2048 as it contains 3 mappings
-float GetAttenuationAtPoint(int i, vec4 shadowCoord, vec2 offset, float bias, int samples) {
+float GetAttenuationAtPoint(int i, vec4 shadowCoord, vec2 offset, float bias, int samples, bool useJitter) {
     vec3 shadowCoordNorm = shadowCoord.xyz / shadowCoord.w;
     shadowCoordNorm.x *= 0.5;
     shadowCoordNorm.y *= 0.5;
@@ -120,8 +126,10 @@ float GetAttenuationAtPoint(int i, vec4 shadowCoord, vec2 offset, float bias, in
             // Shift to choose the right location for the map sampling
 
             // Jitter uv
-            // uv.x += ((noise(uv, 0.00001) - 0.5)) * pixel;
-            // uv.y += ((noise(uv, 0.00001) - 0.5)) * pixel;
+            if (useJitter) {
+                uv.x += ((random(uv) - 0.5)) * pixel;
+                uv.y += ((random(uv) - 0.5)) * pixel;
+            }
 
             switch (i) {
                 case 0: shadowAttenuation += QueryMap(u_shadowMap[0], uv, offset) + bias < shadowCoord.z ? 0.f : 1.f; break;
@@ -158,22 +166,22 @@ float GetShadowAttenuation(int i) {
     // vec4 shadowCoordNearNorm = shadowCoordNear / shadowCoordNear.w;
     // shadowCoordNearNorm.x *= 0.5;
 
-    float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 2);
-    float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 2);
-    float farAtten = GetAttenuationAtPoint(i, shadowCoordFar, vec2(0.0, 0.5), farBias, 3);
+    float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 2, true);
+    float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 2, true);
+    float farAtten = GetAttenuationAtPoint(i, shadowCoordFar, vec2(0.0, 0.5), farBias, 1, false);
 
     float z = abs(FragmentPosClipSpace.z);
-    if (z < 20.0) {
+    if (z < nearBound - shadowTransitionZone) {
         return nearAtten;
     }
-    else if (z < 30.0) {
-        return mix(nearAtten, midAtten, clamp((z - 20.0) / 10.0, 0.0, 1.0));
+    else if (z < nearBound) {
+        return mix(nearAtten, midAtten, clamp((z - (nearBound - shadowTransitionZone)) / shadowTransitionZone, 0.0, 1.0));
     }
-    else if (z < 70.0) {
+    else if (z < middleBound - shadowTransitionZone) {
         return midAtten;
     }
-    else if (z < 80.0) {
-        return mix(midAtten, farAtten, clamp((z - 70.0) / 10.0, 0.0, 1.0));
+    else if (z < middleBound) {
+        return mix(midAtten, farAtten, clamp((z - (middleBound - shadowTransitionZone)) / shadowTransitionZone, 0.0, 1.0));
     }
     else {
         return farAtten;
@@ -263,6 +271,11 @@ vec3 GetKs() {
 }
 
 void main() {
+    if (FragmentOutline > 0.0) {
+        OutputColor = vec4(u_OutlineColor, 1);
+        return;
+    }
+
     vec3 diffuseAccum = GetDiffuseAccumulation();
 
     if (u_Material.illum == -1) {

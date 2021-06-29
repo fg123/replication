@@ -3,6 +3,7 @@
 #include "game.h"
 #include "logging.h"
 #include "floating-text.h"
+#include "weapons/gun.h"
 
 static const int LEFT_MOUSE_BUTTON = 1;
 static const int RIGHT_MOUSE_BUTTON = 3;
@@ -22,6 +23,7 @@ static const int D1_KEY = 49;
 static const int D2_KEY = 50;
 static const int D3_KEY = 51;
 static const int D4_KEY = 52;
+static const int E_KEY = 69;
 
 std::unordered_map<int, size_t> KEY_MAP = {
     { D_KEY, 0 },
@@ -39,7 +41,8 @@ std::unordered_map<int, size_t> KEY_MAP = {
     { D1_KEY, 12 },
     { D2_KEY, 13 },
     { D3_KEY, 14 },
-    { D4_KEY, 15 }
+    { D4_KEY, 15 },
+    { E_KEY, 16 }
 };
 
 PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector3()) {
@@ -91,7 +94,7 @@ PlayerObject::~PlayerObject() {
 }
 
 void PlayerObject::PickupWeapon(WeaponObject* weapon) {
-    if (inventoryManager.CanPickup(weapon)) {
+    if (inventoryManager.CanPickup(weapon) && canPickup) {
         inventoryManager.Pickup(weapon);
     }
 }
@@ -104,6 +107,26 @@ void PlayerObject::InventorySwap() {
     inventoryManager.Swap();
 }
 
+WeaponObject* PlayerObject::ScanPotentialWeapon() {
+    RayCastRequest castRay;
+    castRay.startPoint = GetPosition() + GetLookDirection();
+    castRay.direction = GetLookDirection();
+    castRay.exclusionTags = (~0) & (~(uint64_t)Tag::WEAPON);
+    RayCastResult result = game.RayCastInWorld(castRay);
+    if (result.isHit) {
+        if (WeaponObject* potentialWeapon = dynamic_cast<WeaponObject*>(result.hitObject)) {
+            return potentialWeapon;
+        }
+    }
+    return nullptr;
+}
+
+void PlayerObject::TryPickupItem() {
+    if (WeaponObject* potentialWeapon = ScanPotentialWeapon()) {
+        PickupWeapon(potentialWeapon);
+    }
+}
+
 void PlayerObject::Tick(Time time) {
     {
         #ifdef BUILD_SERVER
@@ -113,7 +136,8 @@ void PlayerObject::Tick(Time time) {
         #endif
 
         // if (glm::length(GetVelocity()) > 1) {
-        //     LOG_DEBUG(clientTime << ": " << GetPosition() << " " << GetVelocity());
+        //     // LOG_DEBUG(clientTime << ": " << GetPosition() << " " << GetVelocity());
+        //     LOG_DEBUG(clientTime << ": " << GetPosition().y);
         // }
         // LOG_DEBUG("Input Vel " << inputVelocity);
         // LOG_DEBUG("Regular Vel " << velocity);
@@ -159,6 +183,10 @@ void PlayerObject::Tick(Time time) {
         forwardBackwardComponent = -Vector::Forward * rotation;
         hasMovement = true;
     }
+    if (keyboardState[KEY_MAP[E_KEY]] &&
+        !lastKeyboardState[KEY_MAP[E_KEY]]) {
+        TryPickupItem();
+    }
     if (IsTagged(Tag::NO_GRAVITY)) {
         if (keyboardState[KEY_MAP[F_KEY]]) {
             upDownComponent = Vector::Up;
@@ -173,6 +201,14 @@ void PlayerObject::Tick(Time time) {
     // TODO: move speed
 
     float moveSpeed = IsTagged(Tag::NO_GRAVITY) ? 20.0f : 8.0f;
+    if (WeaponObject* currWeapon = GetCurrentWeapon()) {
+        if (GunBase* gun = dynamic_cast<GunBase*>(currWeapon)) {
+            if (gun->isADS) {
+                moveSpeed /= 2.0f;
+            }
+        }
+    }
+
     if (hasMovement) {
         if (!IsTagged(Tag::NO_GRAVITY)) {
             leftRightComponent.y = 0;
@@ -306,6 +342,16 @@ void PlayerObject::Tick(Time time) {
 
     Object::Tick(time);
 
+#ifdef BUILD_CLIENT
+    if (WeaponObject* obj = ScanPotentialWeapon()) {
+        pointedToObject = obj->GetId();
+    }
+    else {
+        pointedToObject = 0;
+    }
+#endif
+
+
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;
     ticksSinceLastProcessed += 1;
@@ -423,11 +469,11 @@ void PlayerObject::HolsterAllWeapons() {
 }
 
 void PlayerObject::OnCollide(CollisionResult& result) {
-    if (result.collidedWith->IsTagged(Tag::WEAPON)) {
-        if (canPickup) {
-            PickupWeapon(static_cast<WeaponObject*>(result.collidedWith));
-        }
-    }
+    // if (result.collidedWith->IsTagged(Tag::WEAPON)) {
+    //     if (canPickup) {
+    //         PickupWeapon(static_cast<WeaponObject*>(result.collidedWith));
+    //     }
+    // }
     Object::OnCollide(result);
 }
 

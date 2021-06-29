@@ -65,6 +65,9 @@ enum Tag : uint64_t {
 
     // Draws after transparency (no z-buffer)
     DRAW_FOREGROUND     = 0b0000000000010000000,
+
+    // Draw Outline
+    DRAW_OUTLINE        = 0b0000000000100000000
 };
 
 struct DebugLine {
@@ -121,6 +124,8 @@ public:
     bool clientRotationSet = false;
 
     std::vector<DebugLine> debugLines;
+
+    bool visibleInFrustrum = true;
 #endif
 
     // For object hierarchy, this is all managed from the game, used for

@@ -14,6 +14,7 @@ public:
         powerMin = 10;
         powerMax = 100;
         name = "Grenade";
+        logo = "Grenade.png";
 
         SetModel(game.GetModel("Grenade.obj"));
         GenerateOBBCollidersFromModel(this);

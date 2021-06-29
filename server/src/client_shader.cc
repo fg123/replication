@@ -94,57 +94,62 @@ void DefaultMaterialShaderProgram::Draw(ClientGL& client, const Matrix4& model, 
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
     // Set Mesh Material
-    DefaultMaterial* material = static_cast<DefaultMaterial*>(mesh->material);
-    glUniform3fv(uniformMaterial[0], 1, glm::value_ptr(material->Ka));
-    glUniform3fv(uniformMaterial[1], 1, glm::value_ptr(material->Kd));
-    glUniform3fv(uniformMaterial[2], 1, glm::value_ptr(material->Ks));
-    glUniform1f (uniformMaterial[3], material->Ns);
-    glUniform1f (uniformMaterial[4], material->Ni);
-    glUniform1f (uniformMaterial[5], material->d);
-    glUniform1i (uniformMaterial[6], material->illum);
+    if (mesh->material != lastMaterial) {
+        lastMaterial = mesh->material;
+        DefaultMaterial* material = static_cast<DefaultMaterial*>(mesh->material);
+        glUniform3fv(uniformMaterial[0], 1, glm::value_ptr(material->Ka));
+        glUniform3fv(uniformMaterial[1], 1, glm::value_ptr(material->Kd));
+        glUniform3fv(uniformMaterial[2], 1, glm::value_ptr(material->Ks));
+        glUniform1f (uniformMaterial[3], material->Ns);
+        glUniform1f (uniformMaterial[4], material->Ni);
+        glUniform1f (uniformMaterial[5], material->d);
+        glUniform1i (uniformMaterial[6], material->illum);
 
-    // Texture Booleans
-    glUniform1i (uniformMaterial[7],  material->map_Ka != nullptr);
-    glUniform1i (uniformMaterial[8],  material->map_Kd != nullptr);
-    glUniform1i (uniformMaterial[9],  material->map_Ks != nullptr);
-    glUniform1i (uniformMaterial[10], material->map_Ns != nullptr);
-    glUniform1i (uniformMaterial[11], material->map_d != nullptr);
-    glUniform1i (uniformMaterial[12], material->map_bump != nullptr);
-    glUniform1i (uniformMaterial[13], material->map_refl != nullptr);
+        // Texture Booleans
+        glUniform1i (uniformMaterial[7],  material->map_Ka != nullptr);
+        glUniform1i (uniformMaterial[8],  material->map_Kd != nullptr);
+        glUniform1i (uniformMaterial[9],  material->map_Ks != nullptr);
+        glUniform1i (uniformMaterial[10], material->map_Ns != nullptr);
+        glUniform1i (uniformMaterial[11], material->map_d != nullptr);
+        glUniform1i (uniformMaterial[12], material->map_bump != nullptr);
+        glUniform1i (uniformMaterial[13], material->map_refl != nullptr);
 
-    // Actual Textures, the units are previously mapped
-    if (material->map_Ka) {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, material->map_Ka->textureBuffer);
+        // Actual Textures, the units are previously mapped
+        if (material->map_Ka) {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, material->map_Ka->textureBuffer);
+        }
+        if (material->map_Kd) {
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, material->map_Kd->textureBuffer);
+        }
+        if (material->map_Ks) {
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, material->map_Ks->textureBuffer);
+        }
+        if (material->map_Ns) {
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_2D, material->map_Ns->textureBuffer);
+        }
+        if (material->map_d) {
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D, material->map_d->textureBuffer);
+        }
+        if (material->map_bump) {
+            glActiveTexture(GL_TEXTURE5);
+            glBindTexture(GL_TEXTURE_2D, material->map_bump->textureBuffer);
+        }
+        if (material->map_refl) {
+            glActiveTexture(GL_TEXTURE6);
+            glBindTexture(GL_TEXTURE_2D, material->map_refl->textureBuffer);
+        }
     }
-    if (material->map_Kd) {
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, material->map_Kd->textureBuffer);
+    if (mesh != lastMesh) {
+        lastMesh = mesh;
+        glBindVertexArray(mesh->renderInfo.vao);
+    // glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
     }
-    if (material->map_Ks) {
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, material->map_Ks->textureBuffer);
-    }
-    if (material->map_Ns) {
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, material->map_Ns->textureBuffer);
-    }
-    if (material->map_d) {
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, material->map_d->textureBuffer);
-    }
-    if (material->map_bump) {
-        glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_2D, material->map_bump->textureBuffer);
-    }
-    if (material->map_refl) {
-        glActiveTexture(GL_TEXTURE6);
-        glBindTexture(GL_TEXTURE_2D, material->map_refl->textureBuffer);
-    }
-
-    glBindVertexArray(mesh->renderInfo.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
     glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
 }
 

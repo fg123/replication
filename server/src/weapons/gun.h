@@ -26,8 +26,6 @@ protected:
     float recoilRotationPitch = 0;
     float recoilRotationPitchVel = 0;
 
-    REPLICATED_D(bool, isADS, "ads", false);
-
 private:
     Time lastFireTime = 0;
     Time nextFireTime = 0;
@@ -37,6 +35,8 @@ private:
 
     void ActualFire(Time time);
 public:
+    REPLICATED_D(bool, isADS, "ads", false);
+
     GunBase(Game& game) : GunBase(game, Vector3()) {}
     GunBase(Game& game, Vector3 position) : WeaponObject(game, position) {}
 
@@ -48,6 +48,7 @@ public:
 
     void FireBullet(const Vector3& from, const Vector3& direction);
 
+    void SpawnMuzzleFlash();
     virtual void Serialize(JSONWriter& obj) override;
 
     virtual void StartAlternateFire(Time time) override {
@@ -56,6 +57,10 @@ public:
 
     virtual void ReleaseAlternateFire(Time time) override {
         isADS = false;
+    }
+
+    Vector3 GetMuzzleLocation() {
+        return GetPosition() + fireOffset * GetRotation();
     }
 
     #ifdef BUILD_CLIENT

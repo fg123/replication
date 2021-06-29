@@ -15,11 +15,14 @@ module.exports = class GameCanvas {
         // });
 
         this.clientState.wasm._SetupClientContext();
-
         this.Draw();
     }
 
     Draw() {
+        requestAnimationFrame(() => { this.Draw() });
+
+        const preDraw = Date.now();
+
         // Serialize all data back out.
         if (this.clientState.localPlayerObjectId !== undefined) {
             if (this.clientState.wasm._IsObjectAlive(this.clientState.localPlayerObjectId)) {
@@ -59,6 +62,8 @@ module.exports = class GameCanvas {
         if (!this.clientState.isPaused) {
             this.clientState.SendMouseMoveEvent();
         }
-        requestAnimationFrame(() => { this.Draw() });
+
+        const postDraw = Date.now();
+        this.clientState.performance.drawTime.pushValue(postDraw - preDraw);
     }
 }

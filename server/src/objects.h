@@ -11,3 +11,8 @@
 #include "weapons/bow.h"
 #include "weapons/shotgun.h"
 #include "weapons/medkit.h"
+#include "weapons/machine-gun.h"
+#include "weapons/submachine-gun.h"
+
+#include "objects/lift.h"
+#include "objects/spectator-box.h"

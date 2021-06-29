@@ -51,6 +51,7 @@ void WeaponObject::Tick(Time time) {
     Object::Tick(time);
     if (attachedTo) {
         // Attached!
+        SetIsStatic(false);
         SetPosition(attachedTo->GetAttachmentPoint(attachmentPoint));
         SetVelocity(attachedTo->GetVelocity());
         SetRotation(attachedTo->GetRotationWithPitch());
@@ -69,10 +70,23 @@ void WeaponObject::Tick(Time time) {
         }
     }
     else {
+        if (isGrounded) {
+            SetIsStatic(true);
+        }
         if (IsZero(GetScale())) {
             SetScale(Vector3(1));
             SetDirty(true);
         }
+        #ifdef BUILD_CLIENT
+            if (PlayerObject* player = game.GetLocalPlayer()) {
+                if (GetId() == player->pointedToObject) {
+                    SetTag(Tag::DRAW_OUTLINE);
+                }
+                else {
+                    RemoveTag(Tag::DRAW_OUTLINE);
+                }
+            }
+        #endif
     }
 }
 

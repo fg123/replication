@@ -35,6 +35,8 @@ void ClientGL::SetupContext() {
     debugShaderProgram = new DebugShaderProgram();
     shadowMapShaderProgram = new ShadowMapShaderProgram();
     quadDrawShaderProgram = new QuadShaderProgram();
+    minimapShaderProgram = new MinimapShaderProgram();
+    minimapShaderProgram->SetMinimapSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
 
     // Generate Texture for Minimap FBO
     glGenTextures(1, &minimapTexture);
@@ -228,6 +230,17 @@ void ClientGL::DrawObject(DrawParams& params, int& lastProgram) {
         lastProgram = program;
         shaderPrograms[program]->Use();
     }
+    DefaultMaterialShaderProgram* defaultProgram = dynamic_cast<DefaultMaterialShaderProgram*>(shaderPrograms[program]);
+    if (params.hasOutline && defaultProgram) {
+        // Render Front only
+        glCullFace(GL_FRONT);
+        defaultProgram->SetDrawOutline(0.05, Vector3(1));
+        shaderPrograms[program]->Draw(*this, params.transform, params.mesh);
+    }
+    if (defaultProgram) {
+        defaultProgram->SetDrawOutline(0, Vector3());
+    }
+    glCullFace(GL_BACK);
     shaderPrograms[program]->Draw(*this, params.transform, params.mesh);
 }
 
@@ -258,6 +271,15 @@ void MultiplyAll(A* dest, const A* src, size_t count, const B& multiplyBy) {
     }
 }
 
+void ClientGL::DrawShadowObjects(DrawLayer& layer) {
+    for (auto& pair : layer.opaque) {
+        for (auto& param : pair.second) {
+            if (!param.castShadows) continue;
+            shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
+        }
+    }
+}
+
 void ClientGL::Draw(int width, int height) {
     // LOG_DEBUG("Draw " << width << " " << height);
     windowWidth = width;
@@ -277,6 +299,7 @@ void ClientGL::Draw(int width, int height) {
 
     foregroundLayer.Clear();
     backgroundLayer.Clear();
+    behindPlayerLayer.Clear();
 
     viewMat = glm::lookAt(cameraPosition,
         cameraPosition + cameraRotation, Vector::Up);
@@ -291,32 +314,37 @@ void ClientGL::Draw(int width, int height) {
         Object* obj = gameObjectPair.second;
         Matrix4 transform = obj->GetTransform();
         bool isForeground = obj->IsTagged(Tag::DRAW_FOREGROUND);
-        DrawLayer& layerToDraw = isForeground ? foregroundLayer : backgroundLayer;
+        DrawLayer& layerToDraw = !obj->visibleInFrustrum ? behindPlayerLayer : (isForeground ? foregroundLayer : backgroundLayer);
 
         if (Model* model = obj->GetModel()) {
             for (auto& mesh : model->meshes) {
+                Vector3 centerPt = Vector3(obj->GetTransform() * Vector4(mesh.center, 1));
                 if (mesh.material->IsTransparent()) {
-                    Vector3 centerPt = Vector3(obj->GetTransform() * Vector4(mesh.center, 1));
                     DrawParams& params = layerToDraw.transparent[
                         glm::distance2(centerPt, cameraPosition)];
                     params.id = obj->GetId();
                     params.mesh = &mesh;
                     params.transform = transform;
                     params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
+                    params.hasOutline = obj->IsTagged(Tag::DRAW_OUTLINE);
                 }
                 else {
-                    DrawParams& params = layerToDraw.opaque.emplace_back();
+                    // auto& list = layerToDraw.opaque[glm::distance2(centerPt, cameraPosition)];
+                    auto& list = layerToDraw.opaque[mesh.material];
+                    list.reserve(500);
+                    DrawParams& params = list.emplace_back();
                     params.id = obj->GetId();
                     params.mesh = &mesh;
                     params.transform = transform;
                     params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
+                    params.hasOutline = obj->IsTagged(Tag::DRAW_OUTLINE);
                 }
             }
         }
     }
 
-    Matrix4 nearProj = glm::perspective(FOV, aspectRatio, viewNear, 30.f);
-    Matrix4 midProj = glm::perspective(FOV, aspectRatio, viewNear, 80.f);
+    Matrix4 nearProj = glm::perspective(FOV, aspectRatio, viewNear, 10.f);
+    Matrix4 midProj = glm::perspective(FOV, aspectRatio, viewNear, 50.f);
     Matrix4 farProj = glm::perspective(FOV, aspectRatio, viewNear, viewFar);
 
     Matrix4 inverseNear = glm::inverse(nearProj * viewMat);
@@ -377,14 +405,9 @@ void ClientGL::Draw(int width, int height) {
             light.depthBiasMVPNear = biasMatrix * lightProjection * lightView;
             shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
 
-            for (auto& param : backgroundLayer.opaque) {
-                if (!param.castShadows) continue;
-                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-            }
-            for (auto& param : foregroundLayer.opaque) {
-                if (!param.castShadows) continue;
-                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-            }
+            DrawShadowObjects(backgroundLayer);
+            DrawShadowObjects(behindPlayerLayer);
+            DrawShadowObjects(foregroundLayer);
 
             // Update stuff to middle side
             for (size_t i = 0; i < 8; i++) {
@@ -400,14 +423,9 @@ void ClientGL::Draw(int width, int height) {
 
             glViewport(SHADOW_WIDTH, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 
-            for (auto& param : backgroundLayer.opaque) {
-                if (!param.castShadows) continue;
-                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-            }
-            for (auto& param : foregroundLayer.opaque) {
-                if (!param.castShadows) continue;
-                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-            }
+            DrawShadowObjects(backgroundLayer);
+            DrawShadowObjects(behindPlayerLayer);
+            DrawShadowObjects(foregroundLayer);
 
             // Update stuff to far side
             for (size_t i = 0; i < 8; i++) {
@@ -423,14 +441,9 @@ void ClientGL::Draw(int width, int height) {
 
             glViewport(0, SHADOW_HEIGHT, SHADOW_WIDTH, SHADOW_HEIGHT);
 
-            for (auto& param : backgroundLayer.opaque) {
-                if (!param.castShadows) continue;
-                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-            }
-            for (auto& param : foregroundLayer.opaque) {
-                if (!param.castShadows) continue;
-                shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
-            }
+            DrawShadowObjects(backgroundLayer);
+            DrawShadowObjects(behindPlayerLayer);
+            DrawShadowObjects(foregroundLayer);
 
             // debugShaderProgram->Use();
             // debugShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
@@ -452,7 +465,7 @@ void ClientGL::Draw(int width, int height) {
     glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    Vector3 minimapCamPosition = cameraPosition + Vector3(0, 100, 0);
+    Vector3 minimapCamPosition = Vector3(cameraPosition.x, 100, cameraPosition.z);
     // Matrix4 minimapView = glm::lookAt(minimapCamPosition,
     //     cameraPosition, cameraRotation);
 
@@ -469,12 +482,14 @@ void ClientGL::Draw(int width, int height) {
 
     debugShaderProgram->Use();
     debugShaderProgram->PreDraw(game, minimapCamPosition, minimapView, minimapProj);
-    // DrawObjects(false);
+    DrawObjects(true);
 
     if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
         shaderPrograms[0]->Use();
         glDisable(GL_DEPTH_TEST);
-        shaderPrograms[0]->Draw(*this, localPlayer->GetTransform() * glm::scale(Vector3(2, 2, 2)), &minimapMarker);
+
+        shaderPrograms[0]->Draw(*this,  glm::translate(Vector3(cameraPosition.x, 95, cameraPosition.z)) *
+                glm::transpose(glm::toMat4(localPlayer->clientRotation)) * glm::scale(Vector3(2, 2, 2)), &minimapMarker);
     }
 
     // World Render
@@ -491,19 +506,23 @@ void ClientGL::Draw(int width, int height) {
     glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    DrawObjects(true);
+    DrawObjects(false);
 
     if (GlobalSettings.Client_DrawShadowMaps) {
+        Matrix4 transform = glm::translate(Vector3(-0.5f, -0.5f, 0.0f));
         for (auto& light : game.GetAssetManager().lights) {
             quadDrawShaderProgram->Use();
-            quadDrawShaderProgram->DrawQuad(light.shadowColorMap, Matrix4{});
+            quadDrawShaderProgram->DrawQuad(light.shadowColorMap, transform);
         }
     }
 
-    glDisable(GL_DEPTH_TEST);
     Matrix4 minimapQuadTransform = glm::translate(Vector3((1 - (0.75 * (height / (float) width))), 0.25, 0)) * glm::scale(Vector3(0.75f * (height / (float)width), 0.75f, 1));
-    quadDrawShaderProgram->Use();
-    quadDrawShaderProgram->DrawQuad(minimapTexture, minimapQuadTransform);
+    minimapShaderProgram->Use();
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    minimapShaderProgram->DrawQuad(minimapTexture, minimapQuadTransform);
 }
 
 Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
@@ -513,27 +532,42 @@ Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
     return Vector2((NDC.x + 1) * (windowWidth / 2), windowHeight - (NDC.y + 1) * (windowHeight / 2));
 }
 
-void ClientGL::DrawObjects(bool ignorePlayer) {
+void ClientGL::DrawObjects(bool drawBehind) {
     int lastProgram = -1;
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
     // Draw Background
-    for (auto& param : backgroundLayer.opaque) {
-        if (param.id == game.localPlayerId && ignorePlayer) continue;
-        DrawObject(param, lastProgram);
+    for (auto& pair : backgroundLayer.opaque) {
+        for (auto& param : pair.second) {
+            if (param.id == game.localPlayerId) continue;
+            DrawObject(param, lastProgram);
+        }
     }
     for (auto it = backgroundLayer.transparent.rbegin(); it != backgroundLayer.transparent.rend(); ++it) {
         // LOG_DEBUG(it->second.mesh->name);
         DrawObject(it->second, lastProgram);
     }
 
+    if (drawBehind) {
+        for (auto& pair : behindPlayerLayer.opaque) {
+            for (auto& param : pair.second) {
+                DrawObject(param, lastProgram);
+            }
+        }
+        for (auto it = behindPlayerLayer.transparent.rbegin(); it != behindPlayerLayer.transparent.rend(); ++it) {
+            // LOG_DEBUG(it->second.mesh->name);
+            DrawObject(it->second, lastProgram);
+        }
+    }
     // Draw Foreground
     glClear(GL_DEPTH_BUFFER_BIT);
 
     glDisable(GL_CULL_FACE);
-    for (auto& param : foregroundLayer.opaque) {
-        DrawObject(param, lastProgram);
+    for (auto& pair : foregroundLayer.opaque) {
+        for (auto& param : pair.second) {
+            DrawObject(param, lastProgram);
+        }
     }
     for (auto it = foregroundLayer.transparent.rbegin(); it != foregroundLayer.transparent.rend(); ++it) {
         DrawObject(it->second, lastProgram);

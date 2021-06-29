@@ -15,8 +15,9 @@ public:
         damage = 45;
         reloadTime = 1000;
         automaticFire = false;
-        fireOffset = Vector3(0, 0, 1);
+        fireOffset = Vector3(0, -0.12663, 0.629979);
         name = "Wingboy";
+        logo = "Pistol.png";
 
         SetModel(game.GetModel("Pistol.obj"));
         GenerateOBBCollidersFromModel(this);

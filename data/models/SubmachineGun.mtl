@@ -1,0 +1,44 @@
+# Blender MTL File: 'SubmachineGun.blend'
+# Material Count: 4
+
+newmtl Material
+Ns 323.999994
+Ka 1.000000 1.000000 1.000000
+Kd 0.011088 0.011088 0.011088
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Bump ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Normal.jpg
+map_Kd ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Color.jpg
+map_Ns ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Roughness.jpg
+refl ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Metalness.jpg
+
+newmtl Material.001
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.104837 0.025967 0.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+
+newmtl Material.003
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.000000 0.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.500000
+illum 9
+
+newmtl None
+Ns 500
+Ka 0.8 0.8 0.8
+Kd 0.8 0.8 0.8
+Ks 0.8 0.8 0.8
+d 1
+illum 2

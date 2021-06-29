@@ -2,6 +2,8 @@
 #include "util.h"
 #include "weapons/weapon.h"
 
+static const int LOOT_PER_ZONE = 20;
+
 std::unordered_map<std::string, size_t> LootTable = {
     { "AssaultRifleObject", 10 },
     { "PistolObject", 10 },
@@ -9,7 +11,9 @@ std::unordered_map<std::string, size_t> LootTable = {
     { "GrenadeThrower", 50 },
     // { "BowObject", 10 },
     { "ShotgunObject", 10 },
-    { "MedkitObject", 30 }
+    { "MedkitObject", 30 },
+    { "MachineGunObject", 10 },
+    { "SubmachineGunObject", 10 }
 };
 
 void MapObject::InitializeMap() {
@@ -55,7 +59,7 @@ void MapObject::SpawnLoot(Time time) {
             }
         }
 
-        int total = 7 - zone.objects.size();
+        int total = LOOT_PER_ZONE - zone.objects.size();
         std::uniform_real_distribution<float> distribX(box.ptMin.x, box.ptMax.x);
         std::uniform_real_distribution<float> distribY(box.ptMin.y, box.ptMax.y);
         std::uniform_real_distribution<float> distribZ(box.ptMin.z, box.ptMax.z);

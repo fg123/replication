@@ -44,7 +44,15 @@ class DefaultMaterialShaderProgram : public ShaderProgram {
     GLint uniformRandSeed;
     GLint uniformRenderShadows;
 
+    GLint uniformOutlineSize;
+    GLint uniformOutlineColor;
+
     std::vector<GLint> uniformMaterial;
+
+    Material* lastMaterial = nullptr;
+    Mesh* lastMesh = nullptr;
+    float lastDrawOutline = 0.0f;
+
 public:
     DefaultMaterialShaderProgram() {
         AddShader(LoadURL("shaders/Mesh.vs"), GL_VERTEX_SHADER);
@@ -76,6 +84,9 @@ public:
         uniformMaterial.push_back(GetUniformLocation("u_Material.hasBumpMap"));
         uniformMaterial.push_back(GetUniformLocation("u_Material.hasReflMap"));
 
+        uniformOutlineSize = GetUniformLocation("u_Outline");
+        uniformOutlineColor = GetUniformLocation("u_OutlineColor");
+
         // Setup Texture Unit Ids
         glUniform1i(GetUniformLocation("u_map_Ka"), 0);
         glUniform1i(GetUniformLocation("u_map_Kd"), 1);
@@ -93,6 +104,14 @@ public:
 
     void SetRenderShadows(bool render) override {
         glUniform1i(uniformRenderShadows, render);
+    }
+
+    void SetDrawOutline(float size, Vector3 color) {
+        if (lastDrawOutline != size) {
+            lastDrawOutline = size;
+            glUniform1f(uniformOutlineSize, size);
+            glUniform3fv(uniformOutlineColor, 1, glm::value_ptr(color));
+        }
     }
 
     void PreDraw(Game& game,
@@ -198,6 +217,65 @@ public:
         glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), texCoords, GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+    }
+
+    void PreDraw(Game& game,
+                 const Vector3& viewPos,
+                 const Matrix4& view,
+                 const Matrix4& proj) {}
+    void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {}
+
+
+    void DrawQuad(GLuint texture, Matrix4 mvp) {
+        glUniformMatrix4fv(uniformMVP, 1, GL_FALSE, glm::value_ptr(mvp));
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+};
+
+class MinimapShaderProgram : public ShaderProgram {
+    // Uniforms
+    GLint uniformMVP;
+
+    GLuint quadVAO;
+    GLuint quadVBO;
+
+public:
+    MinimapShaderProgram() {
+        AddShader(LoadURL("shaders/Quad.vs"), GL_VERTEX_SHADER);
+        AddShader(LoadURL("shaders/Minimap.fs"), GL_FRAGMENT_SHADER);
+        LinkProgram();
+        Use();
+
+        glUniform1i(GetUniformLocation("u_texture"), 0);
+
+        uniformMVP = GetUniformLocation("u_MVP");
+
+        // Create Struct for Coords
+        float texCoords[] = {
+            0.0,  0.0,
+            1.0,  0.0,
+            0.0,  1.0,
+            0.0,  1.0,
+            1.0,  0.0,
+            1.0,  1.0
+        };
+        glGenVertexArrays(1, &quadVAO);
+        glBindVertexArray(quadVAO);
+
+        glGenBuffers(1, &quadVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), texCoords, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+    }
+
+    void SetMinimapSize(float width, float height) {
+        GLint uniformTextureSize = GetUniformLocation("u_textureSize");
+        glUniform2f(uniformTextureSize, width, height);
     }
 
     void PreDraw(Game& game,

@@ -77,6 +77,12 @@ void Game::LoadMap(std::string mapPath) {
         }
         assetManager.LoadModel(modelName, modelPath, modelStream);
     }
+    for (json& lift : obj["lifts"].GetArray()) {
+        LiftObject* object = new LiftObject(*this, Vector3(
+            lift[0].GetFloat(), lift[1].GetFloat(), lift[2].GetFloat()),
+            lift[3].GetFloat(), lift[4].GetFloat());
+        AddObject(object);
+    }
     #ifdef BUILD_CLIENT
     for (json& lightJson : obj["lights"].GetArray()) {
         // Light is an array that is serializable to Light
@@ -114,6 +120,8 @@ void Game::LoadMap(std::string mapPath) {
         AddObject(obj1);
         AddObject(obj2);
     }
+
+    AddObject(new SpectatorBox(*this));
 }
 
 Game::~Game() {
@@ -147,6 +155,10 @@ void Game::DetachParent(Object* child) {
     // TODO: assert has child
     parent->children.erase(child);
     child->parent = nullptr;
+}
+
+bool IsPointABehindPointB(const Vector3& a, const Vector3& b, const Vector3& bLook) {
+    return glm::dot(glm::normalize(a - b), glm::normalize(bLook)) < 0;
 }
 
 void Game::Tick(Time time) {
@@ -209,7 +221,7 @@ void Game::Tick(Time time) {
     for (auto& objectId : deadObjectsThisTick) {
         if (gameObjects.find(objectId) != gameObjects.end()) {
             Object* object = gameObjects[objectId];
-            LOG_DEBUG("Destroy Object (" << objectId << ") " << object->GetClass());
+            LOG_DEBUG("Destroy Object (" << (void*)object << ") (" << objectId << ") " << object->GetClass());
 
             // Move an object into root before destroying
             DetachParent(object);
@@ -221,6 +233,33 @@ void Game::Tick(Time time) {
             delete object;
         }
     }
+#ifdef BUILD_CLIENT
+    if (PlayerObject* player = GetLocalPlayer()) {
+        Vector3 playerPosition = player->GetPosition();
+        Vector3 playerLook = player->GetLookDirection();
+        for (auto& object : gameObjects) {
+            if (object.second->GetColliderCount() == 0) {
+                object.second->visibleInFrustrum = true;
+                continue;
+            }
+            AABB b = object.second->GetCollider().GetBroadAABB();
+            if (!IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMin.y, b.ptMin.z), playerPosition, playerLook) ||
+                !IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMin.y, b.ptMax.z), playerPosition, playerLook) ||
+                !IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMax.y, b.ptMin.z), playerPosition, playerLook) ||
+                !IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMax.y, b.ptMax.z), playerPosition, playerLook) ||
+                !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMin.y, b.ptMin.z), playerPosition, playerLook) ||
+                !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMin.y, b.ptMax.z), playerPosition, playerLook) ||
+                !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMax.y, b.ptMin.z), playerPosition, playerLook) ||
+                !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMax.y, b.ptMax.z), playerPosition, playerLook)
+            ) {
+                object.second->visibleInFrustrum = true;
+            }
+            else {
+                object.second->visibleInFrustrum = false;
+            }
+        }
+    }
+#endif
 #ifdef BUILD_SERVER
     Replicate(time);
     ReplicateAnimations(time);
@@ -281,7 +320,6 @@ void Game::ReplicateAnimations(Time time) {
 }
 
 void Game::InitialReplication(PlayerSocketData* data) {
-    IsInitialReplication = true;
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
 
@@ -305,7 +343,6 @@ void Game::InitialReplication(PlayerSocketData* data) {
 
     writer.EndObject();
     SendData(data, buffer.GetString());
-    IsInitialReplication = false;
 }
 
 void Game::RequestReplication(ObjectID objectId) {
@@ -319,9 +356,9 @@ void Game::RequestReplication(ObjectID objectId) {
 
 void Game::QueueAllForReplication(Time time) {
     for (auto& object : gameObjects) {
-        // if (object.second->IsDirty()) {
+        if (object.second->IsDirty()) {
             RequestReplication(object.first);
-        // }
+        }
     }
 }
 
@@ -477,23 +514,28 @@ RayCastResult Game::RayCastInWorld(RayCastRequest request) {
 }
 
 void CollideBetween(Object* primary, Object* secondary, bool isGround,
-        bool shouldExclude, bool shouldReport) {
-    if (!isGround && shouldExclude && !shouldReport) return;
+        bool shouldExclude, bool shouldReportPrimary, bool shouldReportSecondary) {
+    if (!isGround && shouldExclude && !shouldReportPrimary && !shouldReportSecondary) return;
     CollisionResult r = primary->CollidesWith(secondary);
     if (r.isColliding) {
         r.collidedWith = secondary;
         if (!shouldExclude) {
             primary->ResolveCollision(r.collisionDifference);
         }
-        if (shouldReport) {
+        if (shouldReportPrimary) {
             primary->OnCollide(r);
+        }
+        if (shouldReportSecondary) {
+            secondary->OnCollide(r);
         }
     }
 }
 
 void Game::HandleCollisions(Object* obj) {
+    if (deadObjects.find(obj->GetId()) != deadObjects.end()) return;
     for (auto& object : gameObjects) {
         if (obj == object.second) continue;
+        if (deadObjects.find(object.first) != deadObjects.end()) return;
 
         bool isGround = object.second->IsTagged(Tag::GROUND);
         if (!isGround && glm::distance(obj->GetPosition(), object.second->GetPosition()) > 10) {
@@ -503,17 +545,18 @@ void Game::HandleCollisions(Object* obj) {
         bool shouldExclude = obj->IsCollisionExcluded(object.second->GetTags()) ||
             object.second->IsCollisionExcluded(obj->GetTags());
 
-        bool shouldReport = obj->ShouldReportCollision(object.second->GetTags());
+        bool shouldReportPrimary = obj->ShouldReportCollision(object.second->GetTags());
+        bool shouldReportSecondary = object.second->ShouldReportCollision(obj->GetTags());
 
         if (!isGround) {
             // Colliders are only convex
-            CollideBetween(obj, object.second, isGround, shouldExclude, shouldReport);
+            CollideBetween(obj, object.second, isGround, shouldExclude, shouldReportPrimary, shouldReportSecondary);
         }
         else {
             // Do up to 3 collisions between concave static mesh
             Vector3 lastPosition = obj->GetPosition();
-            for (size_t i = 0; i < 10; i++) {
-                CollideBetween(obj, object.second, isGround, shouldExclude, shouldReport);
+            for (size_t i = 0; i < 5; i++) {
+                CollideBetween(obj, object.second, isGround, shouldExclude, shouldReportPrimary, shouldReportSecondary);
                 if (IsZero(lastPosition - obj->GetPosition())) {
                     break;
                 }
@@ -543,7 +586,7 @@ void Game::AddObject(Object* obj) {
         std::scoped_lock<std::mutex> lock(newObjectsMutex);
         ObjectID newId = RequestId();
         obj->SetId(newId);
-        LOG_DEBUG("Add Object " << obj);
+        LOG_DEBUG("Add Object (" << (void*)obj << ") " << obj);
         newObjects.insert(obj);
     #endif
 }
@@ -579,7 +622,7 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
                 p->nextRespawnCharacter = "Archer";
             }
             Object* obj = GetClassLookup()[p->nextRespawnCharacter](*this);
-            obj->SetPosition(Vector3(0, 50, 0));
+            obj->SetPosition(RESPAWN_LOCATION);
 
             static_cast<PlayerObject*>(obj)->lastClientInputTime = playerObject->lastClientInputTime;
             static_cast<PlayerObject*>(obj)->ticksSinceLastProcessed = playerObject->ticksSinceLastProcessed;

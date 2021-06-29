@@ -29,17 +29,17 @@ module.exports = class UICanvas {
         const max = Math.max(...perfTracker.buffer);
         const height = 50;
 
-        this.context.strokeStyle = "black";
+        this.context.strokeStyle = "white";
         this.context.lineWidth = 1;
         this.context.strokeRect(x + 20, y + 16, perfTracker.size, height);
 
         this.context.textBaseline = "top";
-        this.context.fillStyle = "black";
+        this.context.fillStyle = "white";
         this.context.fillText(title, x, y);
 
         this.context.textAlign = "end";
         this.context.textBaseline = "top";
-        this.context.fillStyle = "black";
+        this.context.fillStyle = "white";
         this.context.fillText(max, x + 16, y + 16);
 
         this.context.textBaseline = "bottom";
@@ -280,10 +280,15 @@ module.exports = class UICanvas {
         this.context.fillText(`${this.clientState.webSocket.url}`, width - 20, 20);
 
         this.context.textAlign = "left";
-        this.DrawGraph("HandleReplicate", this.clientState.performance.handleReplicateTime, 20, 100);
 
-        this.DrawGraph("TickTime", this.clientState.performance.tickTime, 20, 180);
-        this.DrawGraph("Replication Count", this.clientState.performance.replicateObjectCount, 20, 260);
+        const graphWidth = 150;
+        let i = 0;
+
+        this.DrawGraph("Handle Replicate", this.clientState.performance.handleReplicateTime, 300 + (graphWidth * i++), 20);
+        this.DrawGraph("Tick Time", this.clientState.performance.tickTime, 300 + (graphWidth * i++), 20);
+        this.DrawGraph("Tick Interval", this.clientState.performance.tickInterval, 300 + (graphWidth * i++), 20);
+        this.DrawGraph("Replication Count", this.clientState.performance.replicateObjectCount, 300 + (graphWidth * i++), 20);
+        this.DrawGraph("Draw Time", this.clientState.performance.drawTime, 300 + (graphWidth * i++), 20);
 
 
         Object.keys(this.clientState.animations).forEach(k => {
