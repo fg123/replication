@@ -166,8 +166,11 @@ float GetShadowAttenuation(int i) {
     // vec4 shadowCoordNearNorm = shadowCoordNear / shadowCoordNear.w;
     // shadowCoordNearNorm.x *= 0.5;
 
-    float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 2, true);
-    float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 2, true);
+    float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 2, false);
+    float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 2, false);
+
+    // float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 2, true);
+    // float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 2, true);
     float farAtten = GetAttenuationAtPoint(i, shadowCoordFar, vec2(0.0, 0.5), farBias, 1, false);
 
     float z = abs(FragmentPosClipSpace.z);

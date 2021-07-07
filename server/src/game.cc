@@ -23,9 +23,11 @@
 
 #ifdef BUILD_SERVER
 const int TickInterval = 16;
+// const int TickInterval = 100;
 #endif
 #ifdef BUILD_CLIENT
 const int TickInterval = 16;
+// const int TickInterval = 100;
 #endif
 const int ReplicateInterval = 100;
 
@@ -502,13 +504,18 @@ void Game::ProcessReplication(json& object) {
 RayCastResult Game::RayCastInWorld(RayCastRequest request) {
     RayCastResult result;
     for (auto& object : gameObjects) {
-        if (object.second->IsCollisionExcluded(request.exclusionTags)) {
+        if (!object.second->IsTagged(request.inclusionTags)) {
             continue;
         }
         if (request.excludeObjects.find(object.first) != request.excludeObjects.end()) {
             continue;
         }
-        object.second->CollidesWith(request, result);
+        RayCastResult tempResult;
+        if (object.second->CollidesWith(request, tempResult)) {
+            if (!result.isHit || tempResult.zDepth < result.zDepth) {
+                result = tempResult;
+            }
+        }
     }
     return result;
 }

@@ -2,7 +2,7 @@
 #include "util.h"
 #include "weapons/weapon.h"
 
-static const int LOOT_PER_ZONE = 20;
+static const int LOOT_PER_ZONE = 10;
 
 std::unordered_map<std::string, size_t> LootTable = {
     { "AssaultRifleObject", 10 },

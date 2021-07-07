@@ -25,6 +25,7 @@ void WeaponObject::AttachToPlayer(PlayerObject* player, WeaponAttachmentPoint in
     else if (player == attachedTo) {
         return;
     }
+    LOG_DEBUG("Weapon Attach");
     // Associate hierarchy
     attachmentPoint = inAttachmentPoint;
 

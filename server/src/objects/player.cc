@@ -25,6 +25,8 @@ static const int D3_KEY = 51;
 static const int D4_KEY = 52;
 static const int E_KEY = 69;
 
+static const int WEAPON_PICKUP_RANGE = 3.0f;
+
 std::unordered_map<int, size_t> KEY_MAP = {
     { D_KEY, 0 },
     { S_KEY, 1 },
@@ -108,14 +110,18 @@ void PlayerObject::InventorySwap() {
 }
 
 WeaponObject* PlayerObject::ScanPotentialWeapon() {
+    // LOG_DEBUG("Scan Weapon");
     RayCastRequest castRay;
     castRay.startPoint = GetPosition() + GetLookDirection();
     castRay.direction = GetLookDirection();
-    castRay.exclusionTags = (~0) & (~(uint64_t)Tag::WEAPON);
+    castRay.inclusionTags = (uint64_t)Tag::WEAPON;
     RayCastResult result = game.RayCastInWorld(castRay);
-    if (result.isHit) {
+    if (result.isHit && result.zDepth < WEAPON_PICKUP_RANGE) {
         if (WeaponObject* potentialWeapon = dynamic_cast<WeaponObject*>(result.hitObject)) {
             return potentialWeapon;
+        }
+        else {
+            LOG_ERROR("Scan Potential Weapon for Weapon only but did not hit weapon");
         }
     }
     return nullptr;
@@ -215,7 +221,7 @@ void PlayerObject::Tick(Time time) {
             forwardBackwardComponent.y = 0;
         }
         inputAcceleration = glm::normalize(leftRightComponent +
-            forwardBackwardComponent + upDownComponent) * moveSpeed * 10.0f;
+            forwardBackwardComponent + upDownComponent) * moveSpeed * 20.0f;
     }
     else {
         inputAcceleration = Vector3(0);
@@ -340,8 +346,6 @@ void PlayerObject::Tick(Time time) {
     // matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
     rotation = glm::quat_cast(matrix);
 
-    Object::Tick(time);
-
 #ifdef BUILD_CLIENT
     if (WeaponObject* obj = ScanPotentialWeapon()) {
         pointedToObject = obj->GetId();
@@ -351,6 +355,7 @@ void PlayerObject::Tick(Time time) {
     }
 #endif
 
+    Object::Tick(time);
 
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;

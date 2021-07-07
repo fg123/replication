@@ -10,6 +10,7 @@ layout (location = 0) in vec3 v_position;
 layout (location = 1) in vec3 v_normal;
 layout (location = 2) in vec2 v_texCoords;
 layout (location = 3) in vec3 v_tangent;
+layout (location = 4) in vec3 v_smoothedNormal;
 
 out vec3 FragmentNormal;
 out vec3 FragmentPos;
@@ -35,7 +36,7 @@ void main() {
 
   vec3 position = v_position;
   if (u_Outline > 0.0) {
-    position += v_normal * u_Outline;
+    position += normalize(v_smoothedNormal) * u_Outline;
   }
   gl_Position = u_Projection * u_View * u_Model * vec4(position, 1.0);
   // gl_Position gets converted, this wont

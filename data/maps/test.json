@@ -1,0 +1,12 @@
+{
+ "tilemap": "map1Tiles.png",
+ "models": [
+    "Cube.obj"
+ ],
+ "sounds": [
+ ],
+ "lights": [
+ ],
+ "lifts": [
+ ]
+}

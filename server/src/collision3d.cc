@@ -1108,6 +1108,7 @@ bool OBBCollider::CollidesWith(RayCastRequest& ray, RayCastResult& result) {
     newRay.direction = Vector3(inverse * Vector4(ray.direction, 0));
     RayCastResult newResult;
     if (AABB(Vector3(0, 0, 0), size).CollidesWith(newRay, newResult)) {
+        newResult.isHit = true;
         newResult.hitLocation = Vector3(transform * Vector4(newResult.hitLocation, 1));
         newResult.hitNormal = Vector3(glm::transpose(inverse) * Vector4(newResult.hitNormal, 0));
         newResult.zDepth = glm::distance(newResult.hitLocation, ray.startPoint);

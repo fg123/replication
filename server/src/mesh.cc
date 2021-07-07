@@ -29,6 +29,10 @@ void Mesh::InitializeMesh() {
         3, GL_FLOAT, false, sizeof(Vertex), (const void*)offsetof(Vertex, tangent));
     glEnableVertexAttribArray(3);
 
+    glVertexAttribPointer(4,
+        3, GL_FLOAT, false, sizeof(Vertex), (const void*)offsetof(Vertex, smoothedNormal));
+    glEnableVertexAttribArray(4);
+
     glGenBuffers(1, &renderInfo.ibo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderInfo.ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,

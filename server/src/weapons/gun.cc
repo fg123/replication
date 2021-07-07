@@ -75,6 +75,7 @@ void GunBase::FireBullet(const Vector3& from, const Vector3& direction) {
     Vector3 bulletEnd = from + direction * 1000.f;
     RayCastRequest request;
     request.excludeObjects.insert(attachedTo->GetId());
+    request.excludeObjects.insert(GetId());
     request.startPoint = from + direction;
     request.direction = direction;
 

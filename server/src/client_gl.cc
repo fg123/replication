@@ -17,6 +17,14 @@ ClientGL::ClientGL(Game& game, const char* selector) :
     game(game) {
 }
 
+void ClientGL::SetGLCullFace(GLenum setting) {
+    static GLenum cachedSetting = -1;
+    if (cachedSetting != setting) {
+        cachedSetting = setting;
+        glCullFace(setting);
+    }
+}
+
 void ClientGL::SetupContext() {
     LOG_DEBUG("Setting up context for selector: " << canvasSelector);
     EmscriptenWebGLContextAttributes attrs;
@@ -233,14 +241,14 @@ void ClientGL::DrawObject(DrawParams& params, int& lastProgram) {
     DefaultMaterialShaderProgram* defaultProgram = dynamic_cast<DefaultMaterialShaderProgram*>(shaderPrograms[program]);
     if (params.hasOutline && defaultProgram) {
         // Render Front only
-        glCullFace(GL_FRONT);
-        defaultProgram->SetDrawOutline(0.05, Vector3(1));
+        SetGLCullFace(GL_FRONT);
+        defaultProgram->SetDrawOutline(0.02, Vector3(1));
         shaderPrograms[program]->Draw(*this, params.transform, params.mesh);
     }
     if (defaultProgram) {
         defaultProgram->SetDrawOutline(0, Vector3());
     }
-    glCullFace(GL_BACK);
+    SetGLCullFace(GL_BACK);
     shaderPrograms[program]->Draw(*this, params.transform, params.mesh);
 }
 
@@ -365,6 +373,8 @@ void ClientGL::Draw(int width, int height) {
     }
 
     // Setup Shadow Maps
+    glEnable(GL_CULL_FACE);
+    SetGLCullFace(GL_BACK);
     if (!GlobalSettings.Client_NoShadows) {
         for (auto& light : game.GetAssetManager().lights) {
             Matrix4 lightView = glm::lookAt(light.position, light.position + light.direction,
@@ -387,7 +397,7 @@ void ClientGL::Draw(int width, int height) {
             glClearColor(1, 1, 1, 1);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             glEnable(GL_CULL_FACE);
-            glCullFace(GL_FRONT);
+            SetGLCullFace(GL_FRONT);
             glEnable(GL_DEPTH_TEST);
 
             // shaderPrograms[0]->Use();
@@ -535,7 +545,7 @@ Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
 void ClientGL::DrawObjects(bool drawBehind) {
     int lastProgram = -1;
     glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    SetGLCullFace(GL_BACK);
     glEnable(GL_DEPTH_TEST);
     // Draw Background
     for (auto& pair : backgroundLayer.opaque) {

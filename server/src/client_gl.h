@@ -87,5 +87,6 @@ public:
     void DrawShadowObjects(DrawLayer& layer);
     void DrawObjects(bool drawBehind);
 
+    void SetGLCullFace(GLenum setting);
     Vector2 WorldToScreenCoordinates(Vector3 worldCoord);
 };

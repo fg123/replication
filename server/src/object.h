@@ -209,6 +209,7 @@ public:
     void SetTag(Tag tag) { tags |= (uint64_t)tag; }
     void RemoveTag(Tag tag) { tags &= ~(uint64_t)tag; }
     bool IsTagged(Tag tag) const { return tags & (uint64_t)tag; }
+    bool IsTagged(uint64_t tag) const { return tags & (uint64_t)tag; }
     bool IsGrounded() const { return isGrounded; }
 
     virtual void OnCollide(CollisionResult& result);

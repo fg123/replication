@@ -57,6 +57,19 @@ Vector3 Average(const std::vector<Vector3>& vec) {
     return result / (float) vec.size();
 }
 
+void DumpMesh(const Mesh& mesh) {
+    LOG_DEBUG("Mesh: " << mesh.name);
+    for (size_t i = 0; i < mesh.vertices.size(); i++) {
+        auto& vert = mesh.vertices[i];
+        LOG_DEBUG("  [" << i << "]");
+        LOG_DEBUG("    Position:" << vert.position);
+        LOG_DEBUG("    Normal:" << vert.normal);
+        LOG_DEBUG("    Smoothed Normal:" << vert.smoothedNormal);
+        LOG_DEBUG("    TexCoords:" << vert.texCoords);
+        LOG_DEBUG("    Tangent:" << vert.tangent);
+    }
+}
+
 ModelID AssetManager::LoadModel(const std::string& name, const std::string& path, std::istream& stream) {
     Time start = Timer::Now();
 
@@ -91,6 +104,7 @@ ModelID AssetManager::LoadModel(const std::string& name, const std::string& path
             vertex.position = ToVec3(loadedVertex.Position);
             vertex.normal = ToVec3(loadedVertex.Normal);
             vertex.texCoords = ToVec2(loadedVertex.TextureCoordinate);
+            vertex.smoothedNormal = ToVec3(loadedVertex.SmoothedNormal);
         }
 
         // Calculate Tangents for Each Triangle
@@ -148,6 +162,7 @@ ModelID AssetManager::LoadModel(const std::string& name, const std::string& path
 
         mesh.InitializeMesh();
     #endif
+        // DumpMesh(mesh);
     }
     Time end = Timer::Now();
     LOG_INFO("Loaded " << name << " in " << TimeToString(end - start));

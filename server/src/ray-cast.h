@@ -13,7 +13,7 @@ struct RayCastRequest {
     Vector3 startPoint;
     Vector3 direction;
 
-    uint64_t exclusionTags;
+    uint64_t inclusionTags;
     std::set<ObjectID> excludeObjects;
 
     RayCastRequest();

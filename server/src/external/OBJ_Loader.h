@@ -144,6 +144,10 @@ namespace objl
 
 		// Texture Coordinate Vector
 		Vector2 TextureCoordinate;
+
+		size_t PositionIndex;
+		Vector3 SmoothedNormal;
+
 	};
 
 	struct Material
@@ -443,6 +447,23 @@ namespace objl
 			return LoadStream(Path, file);
 		}
 
+		void ProcessSmoothedNormals(const std::vector<std::vector<Vector3>>& SmoothedNormals,
+			std::vector<Vertex>& Vertices) {
+
+			std::vector<Vector3> averagedSmoothedNormals;
+			for (auto& normals : SmoothedNormals) {
+				Vector3 average;
+				for (size_t i = 0; i < normals.size(); i++) {
+					average = average + normals[i];
+				}
+				averagedSmoothedNormals.push_back(average / normals.size());
+			}
+
+			for (auto& vert : Vertices) {
+				vert.SmoothedNormal = averagedSmoothedNormals[vert.PositionIndex];
+			}
+		}
+
 		bool LoadStream(std::string Path, std::istream& file) {
 			LoadedMeshes.clear();
 			LoadedVertices.clear();
@@ -451,6 +472,7 @@ namespace objl
 			std::vector<Vector3> Positions;
 			std::vector<Vector2> TCoords;
 			std::vector<Vector3> Normals;
+			std::vector<std::vector<Vector3>> SmoothedNormals;
 
 			std::vector<Vertex> Vertices;
 			std::vector<unsigned int> Indices;
@@ -509,6 +531,7 @@ namespace objl
 						if (!Indices.empty() && !Vertices.empty())
 						{
 							// Create Mesh
+							ProcessSmoothedNormals(SmoothedNormals, Vertices);
 							tempMesh = Mesh(Vertices, Indices);
 							tempMesh.MeshName = meshname;
 
@@ -518,6 +541,7 @@ namespace objl
 							// Cleanup
 							Vertices.clear();
 							Indices.clear();
+							SmoothedNormals.clear();
 							meshname.clear();
 
 							meshname = algorithm::tail(curline);
@@ -580,9 +604,15 @@ namespace objl
 				// Generate a Face (vertices & indices)
 				if (algorithm::firstToken(curline) == "f")
 				{
+					if (SmoothedNormals.empty()) {
+						for (size_t i = 0; i < Positions.size(); i++) {
+							SmoothedNormals.emplace_back();
+						}
+					}
+
 					// Generate the vertices
 					std::vector<Vertex> vVerts;
-					GenVerticesFromRawOBJ(vVerts, Positions, TCoords, Normals, curline);
+					GenVerticesFromRawOBJ(vVerts, Positions, TCoords, Normals, SmoothedNormals, curline);
 
 					// Add Vertices
 					for (int i = 0; i < int(vVerts.size()); i++)
@@ -616,6 +646,7 @@ namespace objl
 					if (!Indices.empty() && !Vertices.empty())
 					{
 						// Create Mesh
+						ProcessSmoothedNormals(SmoothedNormals, Vertices);
 						tempMesh = Mesh(Vertices, Indices);
 						tempMesh.MeshName = meshname;
 						int i = 2;
@@ -634,6 +665,7 @@ namespace objl
 						// Cleanup
 						Vertices.clear();
 						Indices.clear();
+						SmoothedNormals.clear();
 					}
 
 					#ifdef OBJL_CONSOLE_OUTPUT
@@ -681,6 +713,7 @@ namespace objl
 			if (!Indices.empty() && !Vertices.empty())
 			{
 				// Create Mesh
+				ProcessSmoothedNormals(SmoothedNormals, Vertices);
 				tempMesh = Mesh(Vertices, Indices);
 				tempMesh.MeshName = meshname;
 
@@ -731,6 +764,7 @@ namespace objl
 			const std::vector<Vector3>& iPositions,
 			const std::vector<Vector2>& iTCoords,
 			const std::vector<Vector3>& iNormals,
+			std::vector<std::vector<Vector3>>& iSmoothedNormals,
 			std::string icurline)
 		{
 			std::vector<std::string> sface, svert;
@@ -801,6 +835,8 @@ namespace objl
 					vVert.Position = algorithm::getElement(iPositions, svert[0]);
 					vVert.TextureCoordinate = Vector2(0, 0);
 					vVert.Normal = algorithm::getElement(iNormals, svert[2]);
+					vVert.PositionIndex = std::stoi(svert[0]) - 1;
+					iSmoothedNormals[vVert.PositionIndex].push_back(vVert.Normal);
 					oVerts.push_back(vVert);
 					break;
 				}
@@ -809,6 +845,8 @@ namespace objl
 					vVert.Position = algorithm::getElement(iPositions, svert[0]);
 					vVert.TextureCoordinate = algorithm::getElement(iTCoords, svert[1]);
 					vVert.Normal = algorithm::getElement(iNormals, svert[2]);
+					vVert.PositionIndex = std::stoi(svert[0]) - 1;
+					iSmoothedNormals[vVert.PositionIndex].push_back(vVert.Normal);
 					oVerts.push_back(vVert);
 					break;
 				}

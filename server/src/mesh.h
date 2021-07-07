@@ -24,6 +24,8 @@ struct Vertex {
     Vector3 normal;
     Vector2 texCoords;
     Vector3 tangent;
+    Vector3 smoothedNormal;
+
     Vertex() {}
     Vertex(float x, float y, float z) : position(x, y, z) {}
     Vertex(float x, float y, float z,

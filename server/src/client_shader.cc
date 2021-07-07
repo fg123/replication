@@ -89,7 +89,6 @@ GLint ShaderProgram::GetUniformLocation(const std::string& uniName) {
 }
 
 void DefaultMaterialShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {
-    glUniform1f(uniformRandSeed, (float) client.game.GetGameTime() / 16);
     // Set Model Transform
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -147,7 +146,6 @@ void DefaultMaterialShaderProgram::Draw(ClientGL& client, const Matrix4& model, 
     if (mesh != lastMesh) {
         lastMesh = mesh;
         glBindVertexArray(mesh->renderInfo.vao);
-    // glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
     }
     glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
@@ -163,6 +161,8 @@ void DefaultMaterialShaderProgram::PreDraw(Game& game,
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glUniform1f(uniformRandSeed, (float) game.GetGameTime() / 16);
 
     glUniform3fv(uniformViewerPosition, 1, glm::value_ptr(viewPos));
     glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
@@ -205,7 +205,6 @@ void ShadowMapShaderProgram::PreDraw(Game& game,
 void ShadowMapShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
     glBindVertexArray(mesh->renderInfo.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
     glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
 }
@@ -213,10 +212,8 @@ void ShadowMapShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* 
 void DebugShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
     glBindVertexArray(mesh->renderInfo.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
     glDrawElements(GL_LINES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
-    // glDrawArrays(GL_LINES, 0, mesh->renderInfo.iboCount);
 }
 
 void DebugShaderProgram::PreDraw(Game& game,
