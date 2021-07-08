@@ -14,7 +14,7 @@ struct _GlobalSettings : Replicable {
     ALWAYS_REPLICATED_D(bool, Client_DrawBVH, "Client_DrawBVH", false);
     ALWAYS_REPLICATED_D(bool, Client_IgnoreServer, "Client_IgnoreServer", false);
     ALWAYS_REPLICATED_D(bool, Client_DrawShadowMaps, "Client_DrawShadowMaps", false);
-    ALWAYS_REPLICATED_D(bool, Client_NoShadows, "Client_NoShadows", false);
+    ALWAYS_REPLICATED_D(bool, Client_NoShadows, "Client_NoShadows", true);
 };
 
 extern _GlobalSettings GlobalSettings;
