@@ -19,7 +19,7 @@ void GameLoop(Timer& gameTimer) {
     while (gameRunning) {
         gameTimer.Tick();
         // Reduce CPU load
-        std::this_thread::yield();
+        std::this_thread::sleep_for(std::chrono::microseconds(800));
     }
 }
 
