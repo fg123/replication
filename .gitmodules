@@ -1,0 +1,3 @@
+[submodule "server/scripting/wendy"]
+	path = server/scripting/wendy
+	url = https://github.com/fg123/wendy

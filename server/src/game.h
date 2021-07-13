@@ -6,6 +6,7 @@
 
 #include "animation.h"
 #include "ray-cast.h"
+#include "scripting.h"
 
 #ifdef BUILD_SERVER
 #include "uWebSocket/App.h"
@@ -70,6 +71,7 @@ class Game {
     Time gameTime;
     AssetManager assetManager;
 
+    ScriptManager scriptManager;
 public:
     Game();
 

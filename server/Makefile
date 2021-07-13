@@ -1,27 +1,28 @@
 EXE = game
 SRC_DIR = src
 SRC = $(shell find src/ -name "*.cc" | grep -v "main" | grep -v "client")
-SERVER_SRC = $(SRC) src/main.cc
-COLLLIDER_TEST_SRC = $(SRC) src/collider-test-main.cc
-CLIENT_SRC = $(SRC) src/client_main.cc src/client_gl.cc src/client_shader.cc src/client_audio.cc
-
+WENDY_SRC = $(shell find scripting/wendy/src/ -name "*.c" | grep -v "main")
+SERVER_SRC = $(SRC) $(WENDY_SRC) src/main.cc
+COLLIDER_TEST_SRC = $(SRC) $(WENDY_SRC) src/collider-test-main.cc
+CLIENT_SRC = $(SRC) $(WENDY_SRC) src/client_main.cc src/client_gl.cc src/client_shader.cc src/client_audio.cc
 
 DATA_DIRS = $(shell find ../data/ -type d)
 DATA_FILES = $(shell find ../data/ -type f -name '*')
 
 # Use .wo for webassembly
-SERVER_OBJ = $(SERVER_SRC:%.cc=%.o)
+SERVER_OBJ = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SERVER_SRC)))
 SERVER_DEPS = $(SERVER_OBJ:%.o=%.d)
 
-COLLIDER_TEST_OBJ = $(COLLLIDER_TEST_SRC:%.cc=%.o)
+COLLIDER_TEST_OBJ = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(COLLIDER_TEST_SRC)))
 COLLIDER_TEST_DEPS = $(COLLIDER_TEST_OBJ:%.o=%.d)
 
-CLIENT_OBJ = $(CLIENT_SRC:%.cc=%.wo)
+CLIENT_OBJ = $(patsubst %.cc,%.wo,$(patsubst %.c,%.wo,$(CLIENT_SRC)))
 CLIENT_DEPS = $(CLIENT_OBJ:%.wo=%.wd)
 
 HEADERS = $(shell find src/ -name "*.h") Makefile
 
 USOCKET = $(SRC_DIR)/uWebSocket/uSocket
+EXTERNAL_INCLUDE = src/external/
 # LIBASSIMP = lib/assimp-4.1.0/lib/cc-libassimp.a lib/assimp-4.1.0/lib/libIrrXml.a
 # EMLIBASSIMP = lib/assimp-4.1.0/lib/em-libassimp.a lib/assimp-4.1.0/lib/libIrrXml.a
 
@@ -30,6 +31,11 @@ CPPFLAGS = -std=c++17 -Wall \
 	-I $(USOCKET)/src \
 	-I $(SRC_DIR)/objects \
 	-I $(SRC_DIR)/animations \
+	-I $(EXTERNAL_INCLUDE)
+
+CFLAGS = -Wall \
+	-I scripting/wendy/src/
+
 # -I lib/assimp-4.1.0/include
 
 LDLIBS = -L/usr/lib
@@ -68,6 +74,10 @@ all: $(SERVER_OUTPUT) $(CLIENT_OUTPUT) $(COLLIDER_TEST_OUTPUT)
 
 server_prod: $(SERVER_OUTPUT_PROD)
 
+$(WENDY_LIBRARY):
+	mkdir -p $(EXTERNAL_INCLUDE)/wendy
+	cp scripting/wendy/src/*.h $(EXTERNAL_INCLUDE)/wendy/
+
 $(SERVER_OUTPUT): $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
 	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_DEBUG) -o $(SERVER_OUTPUT)
@@ -95,8 +105,14 @@ client_prod: $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
 %.o: %.cc
 	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
+%.o: %.c
+	$(CC) -O2 $(CFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
+
 %.wo: %.cc
 	em++ -O2 $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -g4 -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
+
+%.wo: %.c
+	emcc -O2 $(CFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -g4 -MMD -MF $(<:%.c=%.wd) -c $< -o $@
 
 $(USOCKET)/uSockets.a:
 	$(MAKE) $(USOCKET)

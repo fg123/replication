@@ -7,6 +7,7 @@
 // C++ Build File
 server/bin/game_server
 server/bin/game_client*
+server/bin/game_collider
 
 // JS
 node_modules/
