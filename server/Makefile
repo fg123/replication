@@ -54,6 +54,7 @@ WASM_LINKING_FLAGS = \
 	--preload-file ../data/shaders@/shaders \
 	--preload-file ../data/sounds@/sounds \
 	--preload-file ../data/textures@/textures \
+	--preload-file ../data/scripts@/scripts \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s INITIAL_MEMORY=128MB \
@@ -74,7 +75,7 @@ all: $(SERVER_OUTPUT) $(CLIENT_OUTPUT) $(COLLIDER_TEST_OUTPUT)
 
 server_prod: $(SERVER_OUTPUT_PROD)
 
-$(WENDY_LIBRARY):
+wendy_includes:
 	mkdir -p $(EXTERNAL_INCLUDE)/wendy
 	cp scripting/wendy/src/*.h $(EXTERNAL_INCLUDE)/wendy/
 

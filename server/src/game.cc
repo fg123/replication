@@ -34,7 +34,7 @@ const int ReplicateInterval = 100;
 Vector3 liveBoxStart(-1000, -100, -1000);
 Vector3 liveBoxSize(2000, 2000, 2000);
 
-Game::Game() : nextId(1) {
+Game::Game() : nextId(1), scriptManager(this) {
     if (GlobalSettings.RunTests) return;
     #ifdef BUILD_SERVER
         if (GlobalSettings.IsProduction) {
@@ -79,12 +79,13 @@ void Game::LoadMap(std::string mapPath) {
         }
         assetManager.LoadModel(modelName, modelPath, modelStream);
     }
-    for (json& lift : obj["lifts"].GetArray()) {
-        LiftObject* object = new LiftObject(*this, Vector3(
-            lift[0].GetFloat(), lift[1].GetFloat(), lift[2].GetFloat()),
-            lift[3].GetFloat(), lift[4].GetFloat());
-        AddObject(object);
+    // Process Scripts
+    for (json& script : obj["scripts"].GetArray()) {
+        std::string scriptName = script.GetString();
+        std::string scriptPath = RESOURCE_PATH("scripts/" + scriptName);
+        scriptManager.AddScript(scriptPath);
     }
+    scriptManager.InitializeVM();
     #ifdef BUILD_CLIENT
     for (json& lightJson : obj["lights"].GetArray()) {
         // Light is an array that is serializable to Light
@@ -124,6 +125,7 @@ void Game::LoadMap(std::string mapPath) {
     }
 
     AddObject(new SpectatorBox(*this));
+    // LoadScriptedObject("TestObject");
 }
 
 Game::~Game() {
@@ -708,4 +710,9 @@ void Game::PlayAudio(const std::string& audio, float volume, Object* boundObject
         LOG_DEBUG("Playing audio " << audio);
         audioRequests.emplace_back(assetManager.GetAudio(audio), volume, boundObject->GetId());
     #endif
+}
+
+void Game::LoadScriptedObject(const std::string& className) {
+    ScriptableObject* obj = new ScriptableObject(*this, className);
+    AddObject(obj);
 }

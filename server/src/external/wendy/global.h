@@ -58,7 +58,7 @@ void set_settings_flag(enum settings_flags flag);
 bool get_settings_flag(enum settings_flags flag);
 
 struct malloc_node {
-	char* filename;
+	const char* filename;
 	int line_num;
 	size_t size;
 	void* ptr;
@@ -75,11 +75,11 @@ extern bool last_printed_newline;
 char* safe_strdup_impl(const char* s, char* allocated);
 
 /* We safe_malloc in the call so we get the right allocation location */
-#define safe_strdup(x) safe_strdup_impl(x, safe_malloc(strlen(x) + 1))
+#define safe_strdup(x) safe_strdup_impl(x, (char*)safe_malloc(strlen(x) + 1))
 #define UNUSED(var) (void)(var)
 #define forever for(;;)
 
-char* safe_concat_impl(char* first, ...);
+char* safe_concat_impl(const char* first, ...);
 
 #define safe_concat(...) safe_concat_impl(__VA_ARGS__, NULL)
 
@@ -100,10 +100,10 @@ char* safe_concat_impl(char* first, ...);
 
 #endif
 
-void* safe_realloc_impl(void* ptr, size_t size, char* filename, int line_num);
-void* safe_malloc_impl(size_t size, char* filename, int line_num);
-void* safe_calloc_impl(size_t num, size_t size, char* filename, int line_num);
-void safe_free_impl(void* ptr, char* filename, int line_num);
+void* safe_realloc_impl(void* ptr, size_t size, const char* filename, int line_num);
+void* safe_malloc_impl(size_t size, const char* filename, int line_num);
+void* safe_calloc_impl(size_t num, size_t size, const char* filename, int line_num);
+void safe_free_impl(void* ptr, const char* filename, int line_num);
 
 void* safe_release_malloc(size_t size);
 void* safe_release_calloc(size_t num, size_t size);

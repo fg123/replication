@@ -59,7 +59,7 @@ struct BVHTree {
             // tris[0]->parentVolume = node;
             for (size_t i = 1; i < N; i++) {
                 // tris[i]->parentVolume = node;
-                NodeType* triangle = tris[i];
+                // NodeType* triangle = tris[i];
                 // AABB& col = triangle->parentVolume->collider;
                 node->collider = AABB::FromTwo(node->collider, tris[i]->ComputeAABB());
                 // node->collider.ExpandToContain(tris[i]->a);

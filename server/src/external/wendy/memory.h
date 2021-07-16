@@ -65,7 +65,7 @@ void ensure_working_stack_size(struct memory *, size_t additional);
 #define refcnt_malloc(memory, count) \
 	refcnt_malloc_impl(memory, safe_calloc( \
 		(count) * sizeof(struct data) + sizeof(struct refcnt_container), 1), count)
-struct data *refcnt_malloc_impl(struct memory *, struct data* allocated, size_t count);
+struct data *refcnt_malloc_impl(struct memory *, void* allocvoid, size_t count);
 
 // refcnt_free() reduces the refcount by 1, and frees the heap memory
 //   if the refcount is 0
@@ -77,14 +77,14 @@ struct data *refcnt_copy(struct data *ptr);
 // wendy_list_malloc is a helper for refcnt allocating space for a wendy
 //   list but also inserting a header
 #define wendy_list_malloc(memory, size) wendy_list_malloc_impl(refcnt_malloc(memory, (size) + 1), (size))
-struct data* wendy_list_malloc_impl(struct data* allocated, size_t size);
+struct data* wendy_list_malloc_impl(void* allocvoid, size_t size);
 size_t wendy_list_size(const struct data* list_ref);
 
 // push_frame(name) creates a new stack frame (when starting a function call)
-void push_frame(struct memory * memory, char* name, address ret, int line);
+void push_frame(struct memory * memory, const char* name, address ret, int line);
 
 // push_auto_frame() creates an automatical local variable frame
-void push_auto_frame(struct memory * memory, address ret, char* type, int line);
+void push_auto_frame(struct memory * memory, address ret, const char* type, int line);
 
 // pop_frame(is_ret) ends a function call, pops the latest stack frame
 //   (including automatically created local frames IF is_ret!
@@ -93,17 +93,17 @@ void pop_frame(struct memory * memory, bool is_ret, address* ret);
 
 // push_stack_entry(id) declares a new variable in the stack frame
 //   this leaves the val as EMPTY, and not NONE
-struct data* push_stack_entry(struct memory * memory, char* id, int line);
-struct data* push_closure_entry(struct memory * memory, char* id, int line);
+struct data* push_stack_entry(struct memory * memory, const char* id, int line);
+struct data* push_closure_entry(struct memory * memory, const char* id, int line);
 
 // id_exist(id, search_main) returns true if id exists in the current stackframe
-bool id_exist(struct memory * memory, char* id, bool search_main);
+bool id_exist(struct memory * memory, const char* id, bool search_main);
 
-bool id_exist_local_frame_ignore_closure(struct memory* memory, char* id);
+bool id_exist_local_frame_ignore_closure(struct memory* memory, const char* id);
 
 // get_address_of_id(id, line) returns address of the id given
 //   requires: id exist in the stackframe
-struct data* get_address_of_id(struct memory * memory, char* id, bool search_main, bool* is_closure);
+struct data* get_address_of_id(struct memory * memory, const char* id, bool search_main, bool* is_closure);
 
 // print_call_stack prints out the callstack
 void print_call_stack(struct memory * memory, FILE* file, int maxlines);

@@ -1,5 +1,3 @@
-import object
-
 struct Explosion : Object => () {
     radius = 0;
     damage = 0;

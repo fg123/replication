@@ -1,6 +1,8 @@
 #pragma once
 
 #include "replicable.h"
+#include "timer.h"
+#include <vector>
 
 extern "C"
 {
@@ -8,13 +10,19 @@ extern "C"
 }
 
 // Provides integration between WendyScript and the rest of the game
-
 class Game;
+class Object;
+using ObjectID = uint32_t;
 
-// Each object holds a context
-class ScriptContext : public Replicable {
+void CallMemberFunction(struct data structInstance,
+    const std::string& member, const std::vector<struct data> arguments);
 
+// Each object holds an instance
+class ScriptInstance : public Replicable {
+    struct data classInstance;
 public:
+    std::string className;
+
     virtual void Serialize(JSONWriter& obj) override {
         Replicable::Serialize(obj);
 
@@ -23,20 +31,44 @@ public:
     virtual void ProcessReplication(json& obj) override {
         Replicable::ProcessReplication(obj);
     }
+
+    void InitializeInstance(const std::string& className, ObjectID id);
+
+    // Events
+    void OnTick(Time time) {
+        CallMemberFunction(classInstance, "OnTick", {
+            make_data(D_NUMBER, data_value_num(time))
+        });
+    }
+    void OnClientCreate() {
+        CallMemberFunction(classInstance, "OnClientCreate", {});
+    }
+
+    void OnIdAssigned() {
+        CallMemberFunction(classInstance, "OnIdAssigned", {});
+    }
+
+};
+
+// Each class has a script
+struct Script {
+    uint8_t* bytecode = nullptr;
+    size_t size = 0;
+    ~Script();
+
+    void LoadAndCompile(const std::string& path);
 };
 
 // Handles loading files / hot reload and running the actual VM
 class ScriptManager {
-
-    struct vm* vm = nullptr;
-
+    std::vector<Script*> scripts;
 public:
-    ScriptManager() {
-        vm = vm_init();
-    }
+    static struct vm* vm;
+    static Game* game;
 
-    ~ScriptManager() {
-        vm_destroy(vm);
-        vm = nullptr;
-    }
+    ScriptManager(Game* game);
+    ~ScriptManager();
+
+    void AddScript(const std::string& path);
+    void InitializeVM();
 };

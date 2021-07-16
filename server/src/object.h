@@ -11,6 +11,7 @@
 #include "replicable.h"
 #include "model.h"
 #include "ray-cast.h"
+#include "scripting.h"
 
 // This must be 32 bit because client side JS only supports 32 bit
 using ObjectID = uint32_t;
@@ -162,6 +163,8 @@ public:
     //   after it has been replicated
     virtual void OnClientCreate() {}
 
+    virtual void OnIdAssigned() {}
+
     void HandleAllCollisions();
     void ResolveCollision(Vector3 difference);
 
@@ -178,7 +181,7 @@ public:
 
     ObjectID GetId() const { return id; }
 
-    void SetId(ObjectID newId) { id = newId; }
+    void SetId(ObjectID newId) { id = newId; OnIdAssigned(); }
 
     bool IsDirty() const { return isDirty; }
     void SetDirty(bool dirty) { isDirty = dirty; }
@@ -254,6 +257,35 @@ public:
 };
 
 CLASS_REGISTER(GameObject);
+
+class ScriptableObject : public Object {
+public:
+    CLASS_CREATE(ScriptableObject);
+    REPLICATED(std::string, className, "cn");
+    REPLICATED(ScriptInstance, script, "script");
+
+    ScriptableObject(Game& game) : Object(game) {}
+    ScriptableObject(Game& game, const std::string& className) : Object(game), className(className) {
+    }
+
+    virtual void OnClientCreate() override {
+        Object::OnClientCreate();
+        script.InitializeInstance(className, GetId());
+        script.OnClientCreate();
+    }
+
+    virtual void OnIdAssigned() override {
+        script.InitializeInstance(className, GetId());
+        script.OnIdAssigned();
+    }
+
+    virtual void Tick(Time time) override {
+        Object::Tick(time);
+        script.OnTick(time);
+    }
+};
+
+CLASS_REGISTER(ScriptableObject);
 
 inline std::ostream& operator<<(std::ostream& os, const Object* obj) {
     if (!obj) {

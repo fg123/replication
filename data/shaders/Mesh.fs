@@ -126,10 +126,11 @@ float GetAttenuationAtPoint(int i, vec4 shadowCoord, vec2 offset, float bias, in
             // Shift to choose the right location for the map sampling
 
             // Jitter uv
-            if (useJitter) {
-                uv.x += ((random(uv) - 0.5)) * pixel;
-                uv.y += ((random(uv) - 0.5)) * pixel;
-            }
+
+            // if (useJitter) {
+            //     uv.x += ((random(uv) - 0.5)) * pixel;
+            //     uv.y += ((random(uv) - 0.5)) * pixel;
+            // }
 
             switch (i) {
                 case 0: shadowAttenuation += QueryMap(u_shadowMap[0], uv, offset) + bias < shadowCoord.z ? 0.f : 1.f; break;
@@ -166,8 +167,8 @@ float GetShadowAttenuation(int i) {
     // vec4 shadowCoordNearNorm = shadowCoordNear / shadowCoordNear.w;
     // shadowCoordNearNorm.x *= 0.5;
 
-    float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 2, false);
-    float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 2, false);
+    float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 1, false);
+    float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 1, false);
 
     // float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 2, true);
     // float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 2, true);

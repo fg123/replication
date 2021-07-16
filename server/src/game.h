@@ -129,6 +129,8 @@ public:
     }
 #endif
 
+    void LoadScriptedObject(const std::string& className);
+
     void AddObject(Object* obj);
     void DestroyObject(ObjectID objectId);
 

@@ -30,7 +30,8 @@
     "Medkit.obj",
     "MachineGun.obj",
     "PlayerMarkerMinimap.obj",
-    "SubmachineGun.obj"
+    "SubmachineGun.obj",
+    "SmokeGrenade.obj"
  ],
  "sounds": [
     "bang.wav",
@@ -48,11 +49,14 @@
     "Archer/arrow-shoot.wav",
     "Archer/arrow-ulti-activate.wav",
     "Archer/arrow-ulti-shoot.wav"
-
  ],
  "lights": [
     [  14, 300,  11, 1, 1, 1, -0.32, -0.87, -0.38]
  ],
- "lifts": [
+ "scripts": [
+   "Types.w",
+   "Object.w",
+   "Test.w"
  ]
+
 }
