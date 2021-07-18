@@ -32,6 +32,36 @@ struct DrawLayer {
     }
 };
 
+class RenderBuffer {
+    // Internally we use another FBO to blit over when we want a texture
+    GLuint internalFBO = 0;
+    GLuint internalTexture = 0;
+    GLuint internalDepth = 0;
+
+public:
+    // These buffers internally do MSAA
+    GLuint fbo = 0;
+    GLuint renderBufferColor = 0;
+    GLuint renderBufferDepth = 0;
+
+    int width = 0;
+    int height = 0;
+
+    void SetSize(int width, int height);
+
+    void Bind() {
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glViewport(0, 0, width, height);
+    }
+
+    // warning: will override current fbo
+    GLuint BlitTexture();
+};
+
+struct GLLimits{
+    GLint MAX_SAMPLES = 0;
+};
+
 class ClientGL {
     EMSCRIPTEN_WEBGL_CONTEXT_HANDLE glContext;
 
@@ -55,9 +85,17 @@ class ClientGL {
     Mesh minimapMarker;
 
     DebugShaderProgram* debugShaderProgram;
+
     ShadowMapShaderProgram* shadowMapShaderProgram;
+
+    // Simple Quad
     QuadShaderProgram* quadDrawShaderProgram;
-    MinimapShaderProgram* minimapShaderProgram;
+
+    // Handles the circle algorithm
+    QuadShaderProgram* minimapShaderProgram;
+
+    // Simple antialiasing
+    QuadShaderProgram* antialiasShaderProgram;
 
     Mesh debugCube;
     Mesh debugLine;
@@ -66,7 +104,23 @@ class ClientGL {
 
     Matrix4 viewMat;
     Matrix4 projMat;
+
+    RenderBuffer minimapRenderBuffer;
+    RenderBuffer worldRenderBuffer;
+    RenderBuffer bloomRenderBuffer;
+
+    // Shadow Blurring Target
+    RenderBuffer shadowMapRenderBuffer;
+
+    // Draw Steps
+    void SetupDrawingLayers();
+    void RenderMinimap();
+    void RenderWorld();
+
 public:
+
+    static GLLimits glLimits;
+
     Game& game;
 
     ClientGL(Game& game, const char* selector);

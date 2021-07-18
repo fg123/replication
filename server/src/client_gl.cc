@@ -25,12 +25,14 @@ void ClientGL::SetGLCullFace(GLenum setting) {
     }
 }
 
+GLLimits ClientGL::glLimits;
+
 void ClientGL::SetupContext() {
     LOG_DEBUG("Setting up context for selector: " << canvasSelector);
     EmscriptenWebGLContextAttributes attrs;
     emscripten_webgl_init_context_attributes(&attrs);
     attrs.majorVersion = 2;
-    attrs.antialias = true;
+    attrs.antialias = false;
     attrs.alpha = true;
     attrs.depth = true;
 
@@ -38,45 +40,22 @@ void ClientGL::SetupContext() {
     glContext = emscripten_webgl_create_context(canvasSelector.c_str(), &attrs);
     emscripten_webgl_make_context_current(glContext);
 
+    glGetIntegerv(GL_MAX_SAMPLES, &glLimits.MAX_SAMPLES);
+    LOG_INFO("GL_MAX_SAMPLES = " << glLimits.MAX_SAMPLES);
+
     // Setup Available Shaders
     shaderPrograms.push_back(new DefaultMaterialShaderProgram());
     debugShaderProgram = new DebugShaderProgram();
     shadowMapShaderProgram = new ShadowMapShaderProgram();
-    quadDrawShaderProgram = new QuadShaderProgram();
-    minimapShaderProgram = new MinimapShaderProgram();
-    minimapShaderProgram->SetMinimapSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
+    quadDrawShaderProgram = new QuadShaderProgram("shaders/Quad.fs");
+    minimapShaderProgram = new QuadShaderProgram("shaders/Minimap.fs");
+    minimapShaderProgram->SetTextureSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
+
+    antialiasShaderProgram = new QuadShaderProgram("shaders/Antialias.fs");
 
     // Generate Texture for Minimap FBO
-    glGenTextures(1, &minimapTexture);
-    glBindTexture(GL_TEXTURE_2D, minimapTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-                MINIMAP_WIDTH, MINIMAP_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    GLuint minimapDepthMap;
-    glGenTextures(1, &minimapDepthMap);
-    glBindTexture(GL_TEXTURE_2D, minimapDepthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
-            MINIMAP_WIDTH, MINIMAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glGenFramebuffers(1, &minimapFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, minimapFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, minimapTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, minimapDepthMap, 0);
-
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("FB error, status: " << status);
-    }
+    minimapRenderBuffer.SetSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
+    shadowMapRenderBuffer.SetSize(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2);
 }
 
 void SetupMesh(Mesh& mesh, const std::vector<float>& verts, const std::vector<unsigned int>& indices) {
@@ -288,11 +267,7 @@ void ClientGL::DrawShadowObjects(DrawLayer& layer) {
     }
 }
 
-void ClientGL::Draw(int width, int height) {
-    // LOG_DEBUG("Draw " << width << " " << height);
-    windowWidth = width;
-    windowHeight = height;
-
+void ClientGL::SetupDrawingLayers() {
     for (auto& gameObjectPair : game.GetGameObjects()) {
         gameObjectPair.second->RemoveTag(Tag::DRAW_FOREGROUND);
     }
@@ -308,16 +283,6 @@ void ClientGL::Draw(int width, int height) {
     foregroundLayer.Clear();
     backgroundLayer.Clear();
     behindPlayerLayer.Clear();
-
-    viewMat = glm::lookAt(cameraPosition,
-        cameraPosition + cameraRotation, Vector::Up);
-
-    float FOV = glm::radians(55.0f);
-    float viewNear = 0.2f;
-    float viewFar = 300.f;
-    float aspectRatio = (float) width / (float) height;
-    projMat = glm::perspective(FOV, aspectRatio, viewNear, viewFar);
-
     for (auto& gameObjectPair : game.GetGameObjects()) {
         Object* obj = gameObjectPair.second;
         Matrix4 transform = obj->GetTransform();
@@ -350,6 +315,88 @@ void ClientGL::Draw(int width, int height) {
             }
         }
     }
+}
+
+void ClientGL::RenderMinimap() {
+    minimapRenderBuffer.Bind();
+    glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    Vector3 minimapCamPosition = Vector3(cameraPosition.x, 100, cameraPosition.z);
+    // Matrix4 minimapView = glm::lookAt(minimapCamPosition,
+    //     cameraPosition, cameraRotation);
+
+    Matrix4 minimapView = glm::lookAt(minimapCamPosition,
+        minimapCamPosition - Vector::Up, Vector3(cameraRotation.x, 0, cameraRotation.z));
+
+    Matrix4 minimapProj = glm::ortho(-50.0, 50.0, -50.0, 50.0, 1.0, 500.0);
+
+    for (auto& program : shaderPrograms) {
+        program->Use();
+        program->PreDraw(game, minimapCamPosition, minimapView, minimapProj);
+        program->SetRenderShadows(false);
+    }
+
+    debugShaderProgram->Use();
+    debugShaderProgram->PreDraw(game, minimapCamPosition, minimapView, minimapProj);
+    DrawObjects(true);
+
+    if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
+        shaderPrograms[0]->Use();
+        glDisable(GL_DEPTH_TEST);
+
+        shaderPrograms[0]->Draw(*this,  glm::translate(Vector3(cameraPosition.x, 95, cameraPosition.z)) *
+                glm::transpose(glm::toMat4(localPlayer->clientRotation)) * glm::scale(Vector3(2, 2, 2)), &minimapMarker);
+    }
+
+    // Draw Minimap onto base
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    GLuint minimapTexture = minimapRenderBuffer.BlitTexture();
+    worldRenderBuffer.Bind();
+    minimapShaderProgram->Use();
+    Matrix4 minimapQuadTransform = glm::translate(
+        Vector3((1 - (0.75 * (windowHeight / (float) windowWidth))), 0.25, 0)) *
+        glm::scale(Vector3(0.75f * (windowHeight / (float)windowWidth), 0.75f, 1));
+    minimapShaderProgram->DrawQuad(minimapTexture, minimapQuadTransform);
+}
+
+void ClientGL::RenderWorld() {
+    // World Render
+    for (auto& program : shaderPrograms) {
+        program->Use();
+        program->PreDraw(game, cameraPosition, viewMat, projMat);
+        program->SetRenderShadows(!GlobalSettings.Client_NoShadows);
+    }
+    debugShaderProgram->Use();
+    debugShaderProgram->PreDraw(game, cameraPosition, viewMat, projMat);
+
+    worldRenderBuffer.Bind();
+    glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    DrawObjects(false);
+}
+
+void ClientGL::Draw(int width, int height) {
+    // LOG_DEBUG("Draw " << width << " " << height);
+    windowWidth = width;
+    windowHeight = height;
+
+    worldRenderBuffer.SetSize(width, height);
+    bloomRenderBuffer.SetSize(width, height);
+
+    SetupDrawingLayers();
+
+    viewMat = glm::lookAt(cameraPosition,
+        cameraPosition + cameraRotation, Vector::Up);
+
+    float FOV = glm::radians(55.0f);
+    float viewNear = 0.2f;
+    float viewFar = 300.f;
+    float aspectRatio = (float) width / (float) height;
+    projMat = glm::perspective(FOV, aspectRatio, viewNear, viewFar);
 
     Matrix4 nearProj = glm::perspective(FOV, aspectRatio, viewNear, 10.f);
     Matrix4 midProj = glm::perspective(FOV, aspectRatio, viewNear, 50.f);
@@ -391,8 +438,8 @@ void ClientGL::Draw(int width, int height) {
 
             Vector3 boxToLight[8];
 
-            // GL Setup
-            glBindFramebuffer(GL_FRAMEBUFFER, light.shadowFrameBuffer);
+            // Draw to our temporary buffer
+            shadowMapRenderBuffer.Bind();
             // glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClearColor(1, 1, 1, 1);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -410,8 +457,11 @@ void ClientGL::Draw(int width, int height) {
             }
 
             AABB boxExtents { boxToLight, 8 };
-            Matrix4 lightProjection = glm::ortho(boxExtents.ptMin.x, boxExtents.ptMax.x,
-                boxExtents.ptMin.y, boxExtents.ptMax.y, 1.0f, 400.f);
+            Matrix4 lightProjection = glm::ortho(
+                glm::floor(boxExtents.ptMin.x),
+                glm::ceil(boxExtents.ptMax.x),
+                glm::floor(boxExtents.ptMin.y),
+                glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
             light.depthBiasMVPNear = biasMatrix * lightProjection * lightView;
             shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
 
@@ -425,8 +475,11 @@ void ClientGL::Draw(int width, int height) {
             }
 
             boxExtents = AABB(boxToLight, 8);
-            lightProjection = glm::ortho(boxExtents.ptMin.x, boxExtents.ptMax.x,
-                boxExtents.ptMin.y, boxExtents.ptMax.y, 1.0f, 400.f);
+            lightProjection = glm::ortho(
+                glm::floor(boxExtents.ptMin.x),
+                glm::ceil(boxExtents.ptMax.x),
+                glm::floor(boxExtents.ptMin.y),
+                glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
 
             light.depthBiasMVPMid = biasMatrix * lightProjection * lightView;
             shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
@@ -443,8 +496,11 @@ void ClientGL::Draw(int width, int height) {
             }
 
             boxExtents = AABB(boxToLight, 8);
-            lightProjection = glm::ortho(boxExtents.ptMin.x, boxExtents.ptMax.x,
-                boxExtents.ptMin.y, boxExtents.ptMax.y, 1.0f, 400.f);
+            lightProjection = glm::ortho(
+                glm::floor(boxExtents.ptMin.x),
+                glm::ceil(boxExtents.ptMax.x),
+                glm::floor(boxExtents.ptMin.y),
+                glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
 
             light.depthBiasMVPFar = biasMatrix * lightProjection * lightView;
             shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
@@ -455,69 +511,22 @@ void ClientGL::Draw(int width, int height) {
             DrawShadowObjects(behindPlayerLayer);
             DrawShadowObjects(foregroundLayer);
 
-            // debugShaderProgram->Use();
-            // debugShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
+            // Copy it over by blitzing
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, light.shadowFrameBuffer);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, shadowMapRenderBuffer.fbo);
+            glBlitFramebuffer(
+                0, 0, SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2,
+                0, 0, SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2,
+                GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-            // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[0]), Vector3(viewFrustrumPointsNear[1]));
-            // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[1]), Vector3(viewFrustrumPointsNear[2]));
-            // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[2]), Vector3(viewFrustrumPointsNear[3]));
-            // DrawDebugLine(Vector3(1, 0, 0), Vector3(viewFrustrumPointsNear[3]), Vector3(viewFrustrumPointsNear[0]));
-            // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[4]), Vector3(viewFrustrumPointsNear[5]));
-            // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[5]), Vector3(viewFrustrumPointsNear[6]));
-            // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[6]), Vector3(viewFrustrumPointsNear[7]));
-            // DrawDebugLine(Vector3(0, 1, 0), Vector3(viewFrustrumPointsNear[7]), Vector3(viewFrustrumPointsNear[4]));
         }
     }
 
-    // Render Minimap
-    glBindFramebuffer(GL_FRAMEBUFFER, minimapFBO);
-    glViewport(0, 0, MINIMAP_WIDTH, MINIMAP_HEIGHT);
-    glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    RenderWorld();
+    RenderMinimap();
 
-    Vector3 minimapCamPosition = Vector3(cameraPosition.x, 100, cameraPosition.z);
-    // Matrix4 minimapView = glm::lookAt(minimapCamPosition,
-    //     cameraPosition, cameraRotation);
-
-    Matrix4 minimapView = glm::lookAt(minimapCamPosition,
-        minimapCamPosition - Vector::Up, Vector3(cameraRotation.x, 0, cameraRotation.z));
-
-    Matrix4 minimapProj = glm::ortho(-50.0, 50.0, -50.0, 50.0, 1.0, 500.0);
-
-    for (auto& program : shaderPrograms) {
-        program->Use();
-        program->PreDraw(game, minimapCamPosition, minimapView, minimapProj);
-        program->SetRenderShadows(false);
-    }
-
-    debugShaderProgram->Use();
-    debugShaderProgram->PreDraw(game, minimapCamPosition, minimapView, minimapProj);
-    DrawObjects(true);
-
-    if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
-        shaderPrograms[0]->Use();
-        glDisable(GL_DEPTH_TEST);
-
-        shaderPrograms[0]->Draw(*this,  glm::translate(Vector3(cameraPosition.x, 95, cameraPosition.z)) *
-                glm::transpose(glm::toMat4(localPlayer->clientRotation)) * glm::scale(Vector3(2, 2, 2)), &minimapMarker);
-    }
-
-    // World Render
-    for (auto& program : shaderPrograms) {
-        program->Use();
-        program->PreDraw(game, cameraPosition, viewMat, projMat);
-        program->SetRenderShadows(!GlobalSettings.Client_NoShadows);
-    }
-    debugShaderProgram->Use();
-    debugShaderProgram->PreDraw(game, cameraPosition, viewMat, projMat);
-
+    // Finally render everything to the main buffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, width, height);
-    glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    DrawObjects(false);
-
     if (GlobalSettings.Client_DrawShadowMaps) {
         Matrix4 transform = glm::translate(Vector3(-0.5f, -0.5f, 0.0f));
         for (auto& light : game.GetAssetManager().lights) {
@@ -526,13 +535,14 @@ void ClientGL::Draw(int width, int height) {
         }
     }
 
-    Matrix4 minimapQuadTransform = glm::translate(Vector3((1 - (0.75 * (height / (float) width))), 0.25, 0)) * glm::scale(Vector3(0.75f * (height / (float)width), 0.75f, 1));
-    minimapShaderProgram->Use();
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // Blit World Buffer onto Screen
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, worldRenderBuffer.fbo);
 
-    minimapShaderProgram->DrawQuad(minimapTexture, minimapQuadTransform);
+    glBlitFramebuffer(
+        0, 0, worldRenderBuffer.width, worldRenderBuffer.height,
+        0, 0, worldRenderBuffer.width, worldRenderBuffer.height,
+        GL_COLOR_BUFFER_BIT, GL_NEAREST
+    );
 }
 
 Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
@@ -587,4 +597,101 @@ void ClientGL::DrawObjects(bool drawBehind) {
     for (auto& gameObjectPair : game.GetGameObjects()) {
         DrawDebug(gameObjectPair.second);
     }
+}
+
+void RenderBuffer::SetSize(int newWidth, int newHeight) {
+    if (newWidth == width && newHeight == height) {
+        return;
+    }
+
+    width = newWidth;
+    height = newHeight;
+
+    if (fbo) {
+        glDeleteFramebuffers(1, &fbo);
+        fbo = 0;
+    }
+
+    if (renderBufferColor) {
+        glDeleteRenderbuffers(1, &renderBufferColor);
+        renderBufferColor = 0;
+    }
+
+    if (renderBufferDepth) {
+        glDeleteRenderbuffers(1, &renderBufferDepth);
+        renderBufferDepth = 0;
+    }
+
+    if (internalFBO) {
+        glDeleteFramebuffers(1, &internalFBO);
+        internalFBO = 0;
+    }
+
+    if (internalTexture) {
+        glDeleteTextures(1, &internalTexture);
+        internalTexture = 0;
+    }
+
+    if (internalDepth) {
+        glDeleteTextures(1, &internalDepth);
+        internalDepth = 0;
+    }
+
+    glGenRenderbuffers(1, &renderBufferColor);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderBufferColor);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, ClientGL::glLimits.MAX_SAMPLES, GL_RGBA8,
+        width, height);
+
+    glGenRenderbuffers(1, &renderBufferDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderBufferDepth);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, ClientGL::glLimits.MAX_SAMPLES, GL_DEPTH_COMPONENT24,
+        width, height);
+
+    glGenFramebuffers(1, &fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderBufferColor);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderBufferDepth);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LOG_ERROR("Could not setup render buffer! Status: " << status);
+    }
+
+    glGenTextures(1, &internalTexture);
+    glBindTexture(GL_TEXTURE_2D, internalTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glGenTextures(1, &internalDepth);
+    glBindTexture(GL_TEXTURE_2D, internalDepth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
+            width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glGenFramebuffers(1, &internalFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, internalFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, internalTexture, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, internalDepth, 0);
+
+    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LOG_ERROR("Could not setup internal frame buffer! Status: " << status);
+    }
+
+}
+
+GLuint RenderBuffer::BlitTexture() {
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, internalFBO);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    return internalTexture;
 }

@@ -10,10 +10,12 @@ in vec2 FragmentTexCoords;
 out vec4 OutputColor;
 
 vec4 samplePoint(vec2 point) {
+    vec4 val = texture(u_texture, point);
     if (distance(point, vec2(0.5, 0.5)) > 0.5) {
-        return vec4(0, 0, 0, 0);
+        val.a = 0.0;
+        return val;
     }
-    return texture(u_texture, point);
+    return val;
 }
 
 void main() {

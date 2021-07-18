@@ -104,7 +104,7 @@ float QueryMap(in sampler2D shadowMap, vec2 xy, vec2 offset) {
     return texture(shadowMap, xy).r;
 }
 
-float pixel = 1.f / 1024.f;
+float pixel = 1.f / 2048.f;
 
 // The shadow map is 2048x2048 as it contains 3 mappings
 float GetAttenuationAtPoint(int i, vec4 shadowCoord, vec2 offset, float bias, int samples, bool useJitter) {
@@ -158,6 +158,7 @@ float GetShadowAttenuation(int i) {
     vec3 lightDirection = normalize(u_Lights[i].position - FragmentPos);
     float farBias = max(0.08 * (1.0 - dot(FragmentNormal, lightDirection)), 0.01);
     float midBias = max(0.01 * (1.0 - dot(FragmentNormal, lightDirection)), 0.001);
+    float nearBias = max(0.001 * (1.0 - dot(FragmentNormal, lightDirection)), 0.0001);
     // return min(GetAttenuationAtPoint(i, shadowCoordNear, 0.0, 0.0),
     //     GetAttenuationAtPoint(i, shadowCoordFar, 0.5, 0.001));
 
@@ -167,11 +168,8 @@ float GetShadowAttenuation(int i) {
     // vec4 shadowCoordNearNorm = shadowCoordNear / shadowCoordNear.w;
     // shadowCoordNearNorm.x *= 0.5;
 
-    float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 1, false);
+    float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), nearBias, 2, false);
     float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 1, false);
-
-    // float nearAtten = GetAttenuationAtPoint(i, shadowCoordNear, vec2(0.0, 0.0), 0.001, 2, true);
-    // float midAtten = GetAttenuationAtPoint(i, shadowCoordMid, vec2(0.5, 0.0), midBias, 2, true);
     float farAtten = GetAttenuationAtPoint(i, shadowCoordFar, vec2(0.0, 0.5), farBias, 1, false);
 
     float z = abs(FragmentPosClipSpace.z);

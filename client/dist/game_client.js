@@ -209,7 +209,7 @@ Module['FS_createPath']('/', 'scripts', true, true);
     }
   
    }
-   loadPackage({"files": [{"filename": "/maps/map1.json", "start": 0, "end": 1181, "audio": 0}, {"filename": "/maps/test.json", "start": 1181, "end": 1294, "audio": 0}, {"filename": "/models/Ammo.mtl", "start": 1294, "end": 1954, "audio": 0}, {"filename": "/models/Ammo.obj", "start": 1954, "end": 29494, "audio": 0}, {"filename": "/models/Arrow.mtl", "start": 29494, "end": 30158, "audio": 0}, {"filename": "/models/Arrow.obj", "start": 30158, "end": 36847, "audio": 0}, {"filename": "/models/Artillery.mtl", "start": 36847, "end": 37138, "audio": 0}, {"filename": "/models/Artillery.obj", "start": 37138, "end": 1692576, "audio": 0}, {"filename": "/models/ArtilleryIndicator.mtl", "start": 1692576, "end": 1692828, "audio": 0}, {"filename": "/models/ArtilleryIndicator.obj", "start": 1692828, "end": 1739254, "audio": 0}, {"filename": "/models/BombCrate.mtl", "start": 1739254, "end": 1739619, "audio": 0}, {"filename": "/models/BombCrate.obj", "start": 1739619, "end": 1740710, "audio": 0}, {"filename": "/models/Bow.mtl", "start": 1740710, "end": 1741372, "audio": 0}, {"filename": "/models/Bow.obj", "start": 1741372, "end": 1754967, "audio": 0}, {"filename": "/models/Bullet.mtl", "start": 1754967, "end": 1755208, "audio": 0}, {"filename": "/models/Bullet.obj", "start": 1755208, "end": 1783477, "audio": 0}, {"filename": "/models/BulletTracer.mtl", "start": 1783477, "end": 1783758, "audio": 0}, {"filename": "/models/BulletTracer.obj", "start": 1783758, "end": 1793187, "audio": 0}, {"filename": "/models/Cube.mtl", "start": 1793187, "end": 1793416, "audio": 0}, {"filename": "/models/Cube.obj", "start": 1793416, "end": 1794443, "audio": 0}, {"filename": "/models/Cylinder.obj", "start": 1794443, "end": 1800094, "audio": 0}, {"filename": "/models/Explosion.mtl", "start": 1800094, "end": 1800515, "audio": 0}, {"filename": "/models/Explosion.obj", "start": 1800515, "end": 2468153, "audio": 0}, {"filename": "/models/FlatWorld.mtl", "start": 2468153, "end": 2468393, "audio": 0}, {"filename": "/models/FlatWorld.obj", "start": 2468393, "end": 2469456, "audio": 0}, {"filename": "/models/Grenade.mtl", "start": 2469456, "end": 2470055, "audio": 0}, {"filename": "/models/Grenade.obj", "start": 2470055, "end": 2717014, "audio": 0}, {"filename": "/models/Heaven.mtl", "start": 2717014, "end": 2718170, "audio": 0}, {"filename": "/models/Heaven.obj", "start": 2718170, "end": 2999437, "audio": 0}, {"filename": "/models/HookThrower.mtl", "start": 2999437, "end": 2999802, "audio": 0}, {"filename": "/models/HookThrower.obj", "start": 2999802, "end": 3002161, "audio": 0}, {"filename": "/models/Icosphere.mtl", "start": 3002161, "end": 3002285, "audio": 0}, {"filename": "/models/Icosphere.obj", "start": 3002285, "end": 3117943, "audio": 0}, {"filename": "/models/island.obj", "start": 3117943, "end": 4550517, "audio": 0}, {"filename": "/models/Lift.mtl", "start": 4550517, "end": 4550756, "audio": 0}, {"filename": "/models/Lift.obj", "start": 4550756, "end": 4565906, "audio": 0}, {"filename": "/models/MachineGun.mtl", "start": 4565906, "end": 4567193, "audio": 0}, {"filename": "/models/MachineGun.obj", "start": 4567193, "end": 4716730, "audio": 0}, {"filename": "/models/Medkit.mtl", "start": 4716730, "end": 4717216, "audio": 0}, {"filename": "/models/Medkit.obj", "start": 4717216, "end": 4731548, "audio": 0}, {"filename": "/models/NewPlayer.mtl", "start": 4731548, "end": 4732316, "audio": 0}, {"filename": "/models/NewPlayer.obj", "start": 4732316, "end": 4784638, "audio": 0}, {"filename": "/models/Pistol.mtl", "start": 4784638, "end": 4785184, "audio": 0}, {"filename": "/models/Pistol.obj", "start": 4785184, "end": 4809070, "audio": 0}, {"filename": "/models/Plane.mtl", "start": 4809070, "end": 4809194, "audio": 0}, {"filename": "/models/Plane.obj", "start": 4809194, "end": 4809534, "audio": 0}, {"filename": "/models/Player.mtl", "start": 4809534, "end": 4809774, "audio": 0}, {"filename": "/models/Player.obj", "start": 4809774, "end": 5581897, "audio": 0}, {"filename": "/models/PlayerMarkerMinimap.mtl", "start": 5581897, "end": 5582147, "audio": 0}, {"filename": "/models/PlayerMarkerMinimap.obj", "start": 5582147, "end": 5582551, "audio": 0}, {"filename": "/models/Portal.mtl", "start": 5582551, "end": 5582974, "audio": 0}, {"filename": "/models/Portal.obj", "start": 5582974, "end": 5611272, "audio": 0}, {"filename": "/models/Quad.obj", "start": 5611272, "end": 5611616, "audio": 0}, {"filename": "/models/Rifle.mtl", "start": 5611616, "end": 5612101, "audio": 0}, {"filename": "/models/Rifle.obj", "start": 5612101, "end": 5635829, "audio": 0}, {"filename": "/models/ShootingRange.mtl", "start": 5635829, "end": 5641380, "audio": 0}, {"filename": "/models/ShootingRange.obj", "start": 5641380, "end": 11309075, "audio": 0}, {"filename": "/models/Shotgun.mtl", "start": 11309075, "end": 11309748, "audio": 0}, {"filename": "/models/Shotgun.obj", "start": 11309748, "end": 11339695, "audio": 0}, {"filename": "/models/SmokeGrenade.mtl", "start": 11339695, "end": 11340116, "audio": 0}, {"filename": "/models/SmokeGrenade.obj", "start": 11340116, "end": 12700840, "audio": 0}, {"filename": "/models/SpectatorArea.mtl", "start": 12700840, "end": 12701084, "audio": 0}, {"filename": "/models/SpectatorArea.obj", "start": 12701084, "end": 12703490, "audio": 0}, {"filename": "/models/SubmachineGun.mtl", "start": 12703490, "end": 12704432, "audio": 0}, {"filename": "/models/SubmachineGun.obj", "start": 12704432, "end": 12740495, "audio": 0}, {"filename": "/models/suzanne.obj", "start": 12740495, "end": 12819251, "audio": 0}, {"filename": "/shaders/Debug.fs", "start": 12819251, "end": 12819399, "audio": 0}, {"filename": "/shaders/Debug.vs", "start": 12819399, "end": 12819630, "audio": 0}, {"filename": "/shaders/Mesh.fs", "start": 12819630, "end": 12830163, "audio": 0}, {"filename": "/shaders/Mesh.vs", "start": 12830163, "end": 12831419, "audio": 0}, {"filename": "/shaders/Minimap.fs", "start": 12831419, "end": 12832135, "audio": 0}, {"filename": "/shaders/noise2D.glsl", "start": 12832135, "end": 12834405, "audio": 0}, {"filename": "/shaders/Quad.fs", "start": 12834405, "end": 12834611, "audio": 0}, {"filename": "/shaders/Quad.vs", "start": 12834611, "end": 12834851, "audio": 0}, {"filename": "/shaders/ShadowMap.fs", "start": 12834851, "end": 12835013, "audio": 0}, {"filename": "/shaders/ShadowMap.vs", "start": 12835013, "end": 12835244, "audio": 0}, {"filename": "/sounds/bang.wav", "start": 12835244, "end": 12962830, "audio": 1}, {"filename": "/sounds/boom-old1.wav", "start": 12962830, "end": 13034554, "audio": 1}, {"filename": "/sounds/boom.wav", "start": 13034554, "end": 13106278, "audio": 1}, {"filename": "/sounds/GrenadeOut.wav", "start": 13106278, "end": 13186194, "audio": 1}, {"filename": "/sounds/HookReel.wav", "start": 13186194, "end": 13244606, "audio": 1}, {"filename": "/sounds/HookThrow.wav", "start": 13244606, "end": 13272298, "audio": 1}, {"filename": "/sounds/incoming.wav", "start": 13272298, "end": 13427020, "audio": 1}, {"filename": "/sounds/PortalEnd.wav", "start": 13427020, "end": 13498744, "audio": 1}, {"filename": "/sounds/PortalStart.wav", "start": 13498744, "end": 13571492, "audio": 1}, {"filename": "/sounds/reload.wav", "start": 13571492, "end": 13685200, "audio": 1}, {"filename": "/sounds/ueh.wav", "start": 13685200, "end": 13720060, "audio": 1}, {"filename": "/sounds/Archer/arrow-jump.wav", "start": 13720060, "end": 13990508, "audio": 1}, {"filename": "/sounds/Archer/arrow-pullback.wav", "start": 13990508, "end": 14138080, "audio": 1}, {"filename": "/sounds/Archer/arrow-shoot.wav", "start": 14138080, "end": 14252880, "audio": 1}, {"filename": "/sounds/Archer/arrow-ulti-activate.wav", "start": 14252880, "end": 14576584, "audio": 1}, {"filename": "/sounds/Archer/arrow-ulti-shoot.wav", "start": 14576584, "end": 14728254, "audio": 1}, {"filename": "/textures/Artillery.png", "start": 14728254, "end": 15845481, "audio": 0}, {"filename": "/textures/BulletTracer.png", "start": 15845481, "end": 15879248, "audio": 0}, {"filename": "/textures/Mountains.png", "start": 15879248, "end": 15956066, "audio": 0}, {"filename": "/textures/Skydome.png", "start": 15956066, "end": 17628237, "audio": 0}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_AmbientOcclusion.jpg", "start": 17628237, "end": 18228571, "audio": 0}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Color.jpg", "start": 18228571, "end": 19650261, "audio": 0}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Displacement.jpg", "start": 19650261, "end": 20034690, "audio": 0}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Normal.jpg", "start": 20034690, "end": 21701245, "audio": 0}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Roughness.jpg", "start": 21701245, "end": 22381338, "audio": 0}, {"filename": "/textures/BulletHole/BulletHole.png", "start": 22381338, "end": 22413542, "audio": 0}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_AlbedoTransparency.png", "start": 22413542, "end": 22497758, "audio": 0}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_MetallicSmoothness.png", "start": 22497758, "end": 22505898, "audio": 0}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_Normal.png", "start": 22505898, "end": 22537266, "audio": 0}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Color.jpg", "start": 22537266, "end": 23604739, "audio": 0}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Displacement.jpg", "start": 23604739, "end": 24231160, "audio": 0}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Normal.jpg", "start": 24231160, "end": 25400700, "audio": 0}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Roughness.jpg", "start": 25400700, "end": 26033957, "audio": 0}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Color.jpg", "start": 26033957, "end": 27104388, "audio": 0}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Displacement.jpg", "start": 27104388, "end": 27727132, "audio": 0}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Normal.jpg", "start": 27727132, "end": 30076278, "audio": 0}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Roughness.jpg", "start": 30076278, "end": 30897037, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Color.jpg", "start": 30897037, "end": 32230468, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Displacement.jpg", "start": 32230468, "end": 32527304, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Emission.jpg", "start": 32527304, "end": 33858287, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Normal.jpg", "start": 33858287, "end": 35554648, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Roughness.jpg", "start": 35554648, "end": 36125510, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/LavaGrayscale.jpg", "start": 36125510, "end": 36708372, "audio": 0}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Color.jpg", "start": 36708372, "end": 37117656, "audio": 0}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Displacement.jpg", "start": 37117656, "end": 37378263, "audio": 0}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Normal.jpg", "start": 37378263, "end": 37973620, "audio": 0}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Opacity.jpg", "start": 37973620, "end": 38292098, "audio": 0}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Roughness.jpg", "start": 38292098, "end": 38591519, "audio": 0}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Color.jpg", "start": 38591519, "end": 39684503, "audio": 0}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Displacement.jpg", "start": 39684503, "end": 40475063, "audio": 0}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Normal.jpg", "start": 40475063, "end": 40814912, "audio": 0}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Roughness.jpg", "start": 40814912, "end": 41395012, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Color.jpg", "start": 41395012, "end": 42101881, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Displacement.jpg", "start": 42101881, "end": 42531095, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Metalness.jpg", "start": 42531095, "end": 42661099, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Normal.jpg", "start": 42661099, "end": 43726641, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Roughness.jpg", "start": 43726641, "end": 44098918, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/MetalGreen.jpg", "start": 44098918, "end": 44839823, "audio": 0}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Color.jpg", "start": 44839823, "end": 45213982, "audio": 0}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Displacement.jpg", "start": 45213982, "end": 45351174, "audio": 0}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Metalness.jpg", "start": 45351174, "end": 45522368, "audio": 0}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Normal.jpg", "start": 45522368, "end": 46230295, "audio": 0}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Roughness.jpg", "start": 46230295, "end": 46637188, "audio": 0}, {"filename": "/textures/MuzzleFlash/muzzle1.png", "start": 46637188, "end": 46662960, "audio": 0}, {"filename": "/textures/MuzzleFlash/muzzle2.png", "start": 46662960, "end": 46684328, "audio": 0}, {"filename": "/textures/MuzzleFlash/muzzle3.png", "start": 46684328, "end": 46704777, "audio": 0}, {"filename": "/textures/MuzzleFlash/muzzle4.png", "start": 46704777, "end": 46728078, "audio": 0}, {"filename": "/textures/MuzzleFlash/muzzle5.png", "start": 46728078, "end": 46752274, "audio": 0}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_AmbientOcclusion.jpg", "start": 46752274, "end": 47352403, "audio": 0}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Color.jpg", "start": 47352403, "end": 48879864, "audio": 0}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Displacement.jpg", "start": 48879864, "end": 49176661, "audio": 0}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Normal.jpg", "start": 49176661, "end": 51469045, "audio": 0}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Roughness.jpg", "start": 51469045, "end": 52134101, "audio": 0}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_AO.png", "start": 52134101, "end": 52160593, "audio": 0}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_BaseColor.png", "start": 52160593, "end": 52944613, "audio": 0}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_Normal.png", "start": 52944613, "end": 53615172, "audio": 0}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_Roughness.png", "start": 53615172, "end": 53883603, "audio": 0}, {"filename": "/textures/Wood026_1K-JPG/Wood026_1K_Color.jpg", "start": 53883603, "end": 54869238, "audio": 0}, {"filename": "/textures/Wood026_1K-JPG/Wood026_1K_Normal.jpg", "start": 54869238, "end": 56104506, "audio": 0}, {"filename": "/textures/WoodenCrate/Wood_Crate_001_basecolor.jpg", "start": 56104506, "end": 56144317, "audio": 0}, {"filename": "/textures/WoodenCrate/Wood_Crate_001_normal.jpg", "start": 56144317, "end": 56404574, "audio": 0}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_AmbientOcclusion.jpg", "start": 56404574, "end": 56784295, "audio": 0}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Color.jpg", "start": 56784295, "end": 57584376, "audio": 0}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Displacement.jpg", "start": 57584376, "end": 58101271, "audio": 0}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Normal.jpg", "start": 58101271, "end": 59125760, "audio": 0}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Roughness.jpg", "start": 59125760, "end": 59499782, "audio": 0}, {"filename": "/scripts/Explosion.w", "start": 59499782, "end": 59500480, "audio": 0}, {"filename": "/scripts/Object.w", "start": 59500480, "end": 59501978, "audio": 0}, {"filename": "/scripts/Test.w", "start": 59501978, "end": 59502290, "audio": 0}, {"filename": "/scripts/Types.w", "start": 59502290, "end": 59502586, "audio": 0}], "remote_package_size": 59502586, "package_uuid": "42eb1101-7e43-4f37-9d49-8e07eca6f6c3"});
+   loadPackage({"files": [{"filename": "/maps/map1.json", "start": 0, "end": 1181, "audio": 0}, {"filename": "/maps/test.json", "start": 1181, "end": 1294, "audio": 0}, {"filename": "/models/Ammo.mtl", "start": 1294, "end": 1954, "audio": 0}, {"filename": "/models/Ammo.obj", "start": 1954, "end": 29494, "audio": 0}, {"filename": "/models/Arrow.mtl", "start": 29494, "end": 30158, "audio": 0}, {"filename": "/models/Arrow.obj", "start": 30158, "end": 36847, "audio": 0}, {"filename": "/models/Artillery.mtl", "start": 36847, "end": 37138, "audio": 0}, {"filename": "/models/Artillery.obj", "start": 37138, "end": 1692576, "audio": 0}, {"filename": "/models/ArtilleryIndicator.mtl", "start": 1692576, "end": 1692828, "audio": 0}, {"filename": "/models/ArtilleryIndicator.obj", "start": 1692828, "end": 1739254, "audio": 0}, {"filename": "/models/BombCrate.mtl", "start": 1739254, "end": 1739619, "audio": 0}, {"filename": "/models/BombCrate.obj", "start": 1739619, "end": 1740710, "audio": 0}, {"filename": "/models/Bow.mtl", "start": 1740710, "end": 1741372, "audio": 0}, {"filename": "/models/Bow.obj", "start": 1741372, "end": 1754967, "audio": 0}, {"filename": "/models/Bullet.mtl", "start": 1754967, "end": 1755208, "audio": 0}, {"filename": "/models/Bullet.obj", "start": 1755208, "end": 1783477, "audio": 0}, {"filename": "/models/BulletTracer.mtl", "start": 1783477, "end": 1783758, "audio": 0}, {"filename": "/models/BulletTracer.obj", "start": 1783758, "end": 1793187, "audio": 0}, {"filename": "/models/Cube.mtl", "start": 1793187, "end": 1793416, "audio": 0}, {"filename": "/models/Cube.obj", "start": 1793416, "end": 1794443, "audio": 0}, {"filename": "/models/Cylinder.obj", "start": 1794443, "end": 1800094, "audio": 0}, {"filename": "/models/Explosion.mtl", "start": 1800094, "end": 1800515, "audio": 0}, {"filename": "/models/Explosion.obj", "start": 1800515, "end": 2468153, "audio": 0}, {"filename": "/models/FlatWorld.mtl", "start": 2468153, "end": 2468393, "audio": 0}, {"filename": "/models/FlatWorld.obj", "start": 2468393, "end": 2469456, "audio": 0}, {"filename": "/models/Grenade.mtl", "start": 2469456, "end": 2470055, "audio": 0}, {"filename": "/models/Grenade.obj", "start": 2470055, "end": 2717014, "audio": 0}, {"filename": "/models/Heaven.mtl", "start": 2717014, "end": 2718170, "audio": 0}, {"filename": "/models/Heaven.obj", "start": 2718170, "end": 2999437, "audio": 0}, {"filename": "/models/HookThrower.mtl", "start": 2999437, "end": 2999802, "audio": 0}, {"filename": "/models/HookThrower.obj", "start": 2999802, "end": 3002161, "audio": 0}, {"filename": "/models/Icosphere.mtl", "start": 3002161, "end": 3002285, "audio": 0}, {"filename": "/models/Icosphere.obj", "start": 3002285, "end": 3117943, "audio": 0}, {"filename": "/models/island.obj", "start": 3117943, "end": 4550517, "audio": 0}, {"filename": "/models/Lift.mtl", "start": 4550517, "end": 4550756, "audio": 0}, {"filename": "/models/Lift.obj", "start": 4550756, "end": 4565906, "audio": 0}, {"filename": "/models/MachineGun.mtl", "start": 4565906, "end": 4567193, "audio": 0}, {"filename": "/models/MachineGun.obj", "start": 4567193, "end": 4716730, "audio": 0}, {"filename": "/models/Medkit.mtl", "start": 4716730, "end": 4717216, "audio": 0}, {"filename": "/models/Medkit.obj", "start": 4717216, "end": 4731548, "audio": 0}, {"filename": "/models/NewPlayer.mtl", "start": 4731548, "end": 4732316, "audio": 0}, {"filename": "/models/NewPlayer.obj", "start": 4732316, "end": 4784638, "audio": 0}, {"filename": "/models/Pistol.mtl", "start": 4784638, "end": 4785184, "audio": 0}, {"filename": "/models/Pistol.obj", "start": 4785184, "end": 4809070, "audio": 0}, {"filename": "/models/Plane.mtl", "start": 4809070, "end": 4809194, "audio": 0}, {"filename": "/models/Plane.obj", "start": 4809194, "end": 4809534, "audio": 0}, {"filename": "/models/Player.mtl", "start": 4809534, "end": 4809774, "audio": 0}, {"filename": "/models/Player.obj", "start": 4809774, "end": 5581897, "audio": 0}, {"filename": "/models/PlayerMarkerMinimap.mtl", "start": 5581897, "end": 5582147, "audio": 0}, {"filename": "/models/PlayerMarkerMinimap.obj", "start": 5582147, "end": 5582551, "audio": 0}, {"filename": "/models/Portal.mtl", "start": 5582551, "end": 5582974, "audio": 0}, {"filename": "/models/Portal.obj", "start": 5582974, "end": 5611272, "audio": 0}, {"filename": "/models/Quad.obj", "start": 5611272, "end": 5611616, "audio": 0}, {"filename": "/models/Rifle.mtl", "start": 5611616, "end": 5612101, "audio": 0}, {"filename": "/models/Rifle.obj", "start": 5612101, "end": 5635829, "audio": 0}, {"filename": "/models/ShootingRange.mtl", "start": 5635829, "end": 5641380, "audio": 0}, {"filename": "/models/ShootingRange.obj", "start": 5641380, "end": 11309075, "audio": 0}, {"filename": "/models/Shotgun.mtl", "start": 11309075, "end": 11309748, "audio": 0}, {"filename": "/models/Shotgun.obj", "start": 11309748, "end": 11339695, "audio": 0}, {"filename": "/models/SmokeGrenade.mtl", "start": 11339695, "end": 11340116, "audio": 0}, {"filename": "/models/SmokeGrenade.obj", "start": 11340116, "end": 11489216, "audio": 0}, {"filename": "/models/SpectatorArea.mtl", "start": 11489216, "end": 11489460, "audio": 0}, {"filename": "/models/SpectatorArea.obj", "start": 11489460, "end": 11491866, "audio": 0}, {"filename": "/models/SubmachineGun.mtl", "start": 11491866, "end": 11492808, "audio": 0}, {"filename": "/models/SubmachineGun.obj", "start": 11492808, "end": 11528871, "audio": 0}, {"filename": "/models/suzanne.obj", "start": 11528871, "end": 11607627, "audio": 0}, {"filename": "/shaders/Antialias.fs", "start": 11607627, "end": 11608252, "audio": 0}, {"filename": "/shaders/Debug.fs", "start": 11608252, "end": 11608400, "audio": 0}, {"filename": "/shaders/Debug.vs", "start": 11608400, "end": 11608631, "audio": 0}, {"filename": "/shaders/GaussianBlur.fs", "start": 11608631, "end": 11608631, "audio": 0}, {"filename": "/shaders/Mesh.fs", "start": 11608631, "end": 11619053, "audio": 0}, {"filename": "/shaders/Mesh.vs", "start": 11619053, "end": 11620309, "audio": 0}, {"filename": "/shaders/Minimap.fs", "start": 11620309, "end": 11621055, "audio": 0}, {"filename": "/shaders/noise2D.glsl", "start": 11621055, "end": 11623325, "audio": 0}, {"filename": "/shaders/Quad.fs", "start": 11623325, "end": 11623560, "audio": 0}, {"filename": "/shaders/Quad.vs", "start": 11623560, "end": 11623800, "audio": 0}, {"filename": "/shaders/ShadowMap.fs", "start": 11623800, "end": 11623962, "audio": 0}, {"filename": "/shaders/ShadowMap.vs", "start": 11623962, "end": 11624193, "audio": 0}, {"filename": "/sounds/bang.wav", "start": 11624193, "end": 11751779, "audio": 1}, {"filename": "/sounds/boom-old1.wav", "start": 11751779, "end": 11823503, "audio": 1}, {"filename": "/sounds/boom.wav", "start": 11823503, "end": 11895227, "audio": 1}, {"filename": "/sounds/GrenadeOut.wav", "start": 11895227, "end": 11975143, "audio": 1}, {"filename": "/sounds/HookReel.wav", "start": 11975143, "end": 12033555, "audio": 1}, {"filename": "/sounds/HookThrow.wav", "start": 12033555, "end": 12061247, "audio": 1}, {"filename": "/sounds/incoming.wav", "start": 12061247, "end": 12215969, "audio": 1}, {"filename": "/sounds/PortalEnd.wav", "start": 12215969, "end": 12287693, "audio": 1}, {"filename": "/sounds/PortalStart.wav", "start": 12287693, "end": 12360441, "audio": 1}, {"filename": "/sounds/reload.wav", "start": 12360441, "end": 12474149, "audio": 1}, {"filename": "/sounds/ueh.wav", "start": 12474149, "end": 12509009, "audio": 1}, {"filename": "/sounds/Archer/arrow-jump.wav", "start": 12509009, "end": 12779457, "audio": 1}, {"filename": "/sounds/Archer/arrow-pullback.wav", "start": 12779457, "end": 12927029, "audio": 1}, {"filename": "/sounds/Archer/arrow-shoot.wav", "start": 12927029, "end": 13041829, "audio": 1}, {"filename": "/sounds/Archer/arrow-ulti-activate.wav", "start": 13041829, "end": 13365533, "audio": 1}, {"filename": "/sounds/Archer/arrow-ulti-shoot.wav", "start": 13365533, "end": 13517203, "audio": 1}, {"filename": "/textures/Artillery.png", "start": 13517203, "end": 14634430, "audio": 0}, {"filename": "/textures/BulletTracer.png", "start": 14634430, "end": 14668197, "audio": 0}, {"filename": "/textures/Mountains.png", "start": 14668197, "end": 14745015, "audio": 0}, {"filename": "/textures/Skydome.png", "start": 14745015, "end": 16417186, "audio": 0}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_AmbientOcclusion.jpg", "start": 16417186, "end": 17017520, "audio": 0}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Color.jpg", "start": 17017520, "end": 18439210, "audio": 0}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Displacement.jpg", "start": 18439210, "end": 18823639, "audio": 0}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Normal.jpg", "start": 18823639, "end": 20490194, "audio": 0}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Roughness.jpg", "start": 20490194, "end": 21170287, "audio": 0}, {"filename": "/textures/BulletHole/BulletHole.png", "start": 21170287, "end": 21202491, "audio": 0}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_AlbedoTransparency.png", "start": 21202491, "end": 21286707, "audio": 0}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_MetallicSmoothness.png", "start": 21286707, "end": 21294847, "audio": 0}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_Normal.png", "start": 21294847, "end": 21326215, "audio": 0}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Color.jpg", "start": 21326215, "end": 22393688, "audio": 0}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Displacement.jpg", "start": 22393688, "end": 23020109, "audio": 0}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Normal.jpg", "start": 23020109, "end": 24189649, "audio": 0}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Roughness.jpg", "start": 24189649, "end": 24822906, "audio": 0}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Color.jpg", "start": 24822906, "end": 25893337, "audio": 0}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Displacement.jpg", "start": 25893337, "end": 26516081, "audio": 0}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Normal.jpg", "start": 26516081, "end": 28865227, "audio": 0}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Roughness.jpg", "start": 28865227, "end": 29685986, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Color.jpg", "start": 29685986, "end": 31019417, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Displacement.jpg", "start": 31019417, "end": 31316253, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Emission.jpg", "start": 31316253, "end": 32647236, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Normal.jpg", "start": 32647236, "end": 34343597, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Roughness.jpg", "start": 34343597, "end": 34914459, "audio": 0}, {"filename": "/textures/Lava004_1K-JPG/LavaGrayscale.jpg", "start": 34914459, "end": 35497321, "audio": 0}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Color.jpg", "start": 35497321, "end": 35906605, "audio": 0}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Displacement.jpg", "start": 35906605, "end": 36167212, "audio": 0}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Normal.jpg", "start": 36167212, "end": 36762569, "audio": 0}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Opacity.jpg", "start": 36762569, "end": 37081047, "audio": 0}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Roughness.jpg", "start": 37081047, "end": 37380468, "audio": 0}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Color.jpg", "start": 37380468, "end": 38473452, "audio": 0}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Displacement.jpg", "start": 38473452, "end": 39264012, "audio": 0}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Normal.jpg", "start": 39264012, "end": 39603861, "audio": 0}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Roughness.jpg", "start": 39603861, "end": 40183961, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Color.jpg", "start": 40183961, "end": 40890830, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Displacement.jpg", "start": 40890830, "end": 41320044, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Metalness.jpg", "start": 41320044, "end": 41450048, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Normal.jpg", "start": 41450048, "end": 42515590, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Roughness.jpg", "start": 42515590, "end": 42887867, "audio": 0}, {"filename": "/textures/Metal038_1K-JPG/MetalGreen.jpg", "start": 42887867, "end": 43628772, "audio": 0}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Color.jpg", "start": 43628772, "end": 44002931, "audio": 0}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Displacement.jpg", "start": 44002931, "end": 44140123, "audio": 0}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Metalness.jpg", "start": 44140123, "end": 44311317, "audio": 0}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Normal.jpg", "start": 44311317, "end": 45019244, "audio": 0}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Roughness.jpg", "start": 45019244, "end": 45426137, "audio": 0}, {"filename": "/textures/MuzzleFlash/muzzle1.png", "start": 45426137, "end": 45451909, "audio": 0}, {"filename": "/textures/MuzzleFlash/muzzle2.png", "start": 45451909, "end": 45473277, "audio": 0}, {"filename": "/textures/MuzzleFlash/muzzle3.png", "start": 45473277, "end": 45493726, "audio": 0}, {"filename": "/textures/MuzzleFlash/muzzle4.png", "start": 45493726, "end": 45517027, "audio": 0}, {"filename": "/textures/MuzzleFlash/muzzle5.png", "start": 45517027, "end": 45541223, "audio": 0}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_AmbientOcclusion.jpg", "start": 45541223, "end": 46141352, "audio": 0}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Color.jpg", "start": 46141352, "end": 47668813, "audio": 0}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Displacement.jpg", "start": 47668813, "end": 47965610, "audio": 0}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Normal.jpg", "start": 47965610, "end": 50257994, "audio": 0}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Roughness.jpg", "start": 50257994, "end": 50923050, "audio": 0}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_AO.png", "start": 50923050, "end": 50949542, "audio": 0}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_BaseColor.png", "start": 50949542, "end": 51733562, "audio": 0}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_Normal.png", "start": 51733562, "end": 52404121, "audio": 0}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_Roughness.png", "start": 52404121, "end": 52672552, "audio": 0}, {"filename": "/textures/Wood026_1K-JPG/Wood026_1K_Color.jpg", "start": 52672552, "end": 53658187, "audio": 0}, {"filename": "/textures/Wood026_1K-JPG/Wood026_1K_Normal.jpg", "start": 53658187, "end": 54893455, "audio": 0}, {"filename": "/textures/WoodenCrate/Wood_Crate_001_basecolor.jpg", "start": 54893455, "end": 54933266, "audio": 0}, {"filename": "/textures/WoodenCrate/Wood_Crate_001_normal.jpg", "start": 54933266, "end": 55193523, "audio": 0}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_AmbientOcclusion.jpg", "start": 55193523, "end": 55573244, "audio": 0}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Color.jpg", "start": 55573244, "end": 56373325, "audio": 0}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Displacement.jpg", "start": 56373325, "end": 56890220, "audio": 0}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Normal.jpg", "start": 56890220, "end": 57914709, "audio": 0}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Roughness.jpg", "start": 57914709, "end": 58288731, "audio": 0}, {"filename": "/scripts/Explosion.w", "start": 58288731, "end": 58289429, "audio": 0}, {"filename": "/scripts/Object.w", "start": 58289429, "end": 58290927, "audio": 0}, {"filename": "/scripts/Test.w", "start": 58290927, "end": 58291239, "audio": 0}, {"filename": "/scripts/Types.w", "start": 58291239, "end": 58291535, "audio": 0}], "remote_package_size": 58291535, "package_uuid": "d773f09a-3599-4b22-8af9-3632759b73ae"});
   
   })();
   
@@ -7682,6 +7682,10 @@ var ASM_CONSTS = {
   
     }
 
+  function _glBindRenderbuffer(target, renderbuffer) {
+      GLctx.bindRenderbuffer(target, GL.renderbuffers[renderbuffer]);
+    }
+
   function _glBindTexture(target, texture) {
       GLctx.bindTexture(target, GL.textures[texture]);
     }
@@ -7691,6 +7695,8 @@ var ASM_CONSTS = {
     }
 
   function _glBlendFunc(x0, x1) { GLctx['blendFunc'](x0, x1) }
+
+  function _glBlitFramebuffer(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) { GLctx['blitFramebuffer'](x0, x1, x2, x3, x4, x5, x6, x7, x8, x9) }
 
   function _glBufferData(target, size, data, usage) {
   
@@ -7733,6 +7739,39 @@ var ASM_CONSTS = {
 
   function _glCullFace(x0) { GLctx['cullFace'](x0) }
 
+  function _glDeleteFramebuffers(n, framebuffers) {
+      for (var i = 0; i < n; ++i) {
+        var id = HEAP32[(((framebuffers)+(i*4))>>2)];
+        var framebuffer = GL.framebuffers[id];
+        if (!framebuffer) continue; // GL spec: "glDeleteFramebuffers silently ignores 0s and names that do not correspond to existing framebuffer objects".
+        GLctx.deleteFramebuffer(framebuffer);
+        framebuffer.name = 0;
+        GL.framebuffers[id] = null;
+      }
+    }
+
+  function _glDeleteRenderbuffers(n, renderbuffers) {
+      for (var i = 0; i < n; i++) {
+        var id = HEAP32[(((renderbuffers)+(i*4))>>2)];
+        var renderbuffer = GL.renderbuffers[id];
+        if (!renderbuffer) continue; // GL spec: "glDeleteRenderbuffers silently ignores 0s and names that do not correspond to existing renderbuffer objects".
+        GLctx.deleteRenderbuffer(renderbuffer);
+        renderbuffer.name = 0;
+        GL.renderbuffers[id] = null;
+      }
+    }
+
+  function _glDeleteTextures(n, textures) {
+      for (var i = 0; i < n; i++) {
+        var id = HEAP32[(((textures)+(i*4))>>2)];
+        var texture = GL.textures[id];
+        if (!texture) continue; // GL spec: "glDeleteTextures silently ignores 0s and names that do not correspond to existing textures".
+        GLctx.deleteTexture(texture);
+        texture.name = 0;
+        GL.textures[id] = null;
+      }
+    }
+
   function _glDisable(x0) { GLctx['disable'](x0) }
 
   function _glDrawArrays(mode, first, count) {
@@ -7751,6 +7790,11 @@ var ASM_CONSTS = {
 
   function _glEnableVertexAttribArray(index) {
       GLctx.enableVertexAttribArray(index);
+    }
+
+  function _glFramebufferRenderbuffer(target, attachment, renderbuffertarget, renderbuffer) {
+      GLctx.framebufferRenderbuffer(target, attachment, renderbuffertarget,
+                                         GL.renderbuffers[renderbuffer]);
     }
 
   function _glFramebufferTexture2D(target, attachment, textarget, texture, level) {
@@ -7782,6 +7826,11 @@ var ASM_CONSTS = {
         );
     }
 
+  function _glGenRenderbuffers(n, renderbuffers) {
+      __glGenObject(n, renderbuffers, 'createRenderbuffer', GL.renderbuffers
+        );
+    }
+
   function _glGenTextures(n, textures) {
       __glGenObject(n, textures, 'createTexture', GL.textures
         );
@@ -7793,6 +7842,151 @@ var ASM_CONSTS = {
     }
 
   function _glGenerateMipmap(x0) { GLctx['generateMipmap'](x0) }
+
+  function readI53FromI64(ptr) {
+      return HEAPU32[ptr>>2] + HEAP32[ptr+4>>2] * 4294967296;
+    }
+  
+  function readI53FromU64(ptr) {
+      return HEAPU32[ptr>>2] + HEAPU32[ptr+4>>2] * 4294967296;
+    }
+  function writeI53ToI64(ptr, num) {
+      HEAPU32[ptr>>2] = num;
+      HEAPU32[ptr+4>>2] = (num - HEAPU32[ptr>>2])/4294967296;
+      var deserialized = (num >= 0) ? readI53FromU64(ptr) : readI53FromI64(ptr);
+      if (deserialized != num) warnOnce('writeI53ToI64() out of range: serialized JS Number ' + num + ' to Wasm heap as bytes lo=0x' + HEAPU32[ptr>>2].toString(16) + ', hi=0x' + HEAPU32[ptr+4>>2].toString(16) + ', which deserializes back to ' + deserialized + ' instead!');
+    }
+  function emscriptenWebGLGet(name_, p, type) {
+      // Guard against user passing a null pointer.
+      // Note that GLES2 spec does not say anything about how passing a null pointer should be treated.
+      // Testing on desktop core GL 3, the application crashes on glGetIntegerv to a null pointer, but
+      // better to report an error instead of doing anything random.
+      if (!p) {
+        GL.recordError(0x501 /* GL_INVALID_VALUE */);
+        return;
+      }
+      var ret = undefined;
+      switch(name_) { // Handle a few trivial GLES values
+        case 0x8DFA: // GL_SHADER_COMPILER
+          ret = 1;
+          break;
+        case 0x8DF8: // GL_SHADER_BINARY_FORMATS
+          if (type != 0 && type != 1) {
+            GL.recordError(0x500); // GL_INVALID_ENUM
+          }
+          return; // Do not write anything to the out pointer, since no binary formats are supported.
+        case 0x87FE: // GL_NUM_PROGRAM_BINARY_FORMATS
+        case 0x8DF9: // GL_NUM_SHADER_BINARY_FORMATS
+          ret = 0;
+          break;
+        case 0x86A2: // GL_NUM_COMPRESSED_TEXTURE_FORMATS
+          // WebGL doesn't have GL_NUM_COMPRESSED_TEXTURE_FORMATS (it's obsolete since GL_COMPRESSED_TEXTURE_FORMATS returns a JS array that can be queried for length),
+          // so implement it ourselves to allow C++ GLES2 code get the length.
+          var formats = GLctx.getParameter(0x86A3 /*GL_COMPRESSED_TEXTURE_FORMATS*/);
+          ret = formats ? formats.length : 0;
+          break;
+        case 0x821D: // GL_NUM_EXTENSIONS
+          if (GL.currentContext.version < 2) {
+            GL.recordError(0x502 /* GL_INVALID_OPERATION */); // Calling GLES3/WebGL2 function with a GLES2/WebGL1 context
+            return;
+          }
+          // .getSupportedExtensions() can return null if context is lost, so coerce to empty array.
+          var exts = GLctx.getSupportedExtensions() || [];
+          ret = 2 * exts.length; // each extension is duplicated, first in unprefixed WebGL form, and then a second time with "GL_" prefix.
+          break;
+        case 0x821B: // GL_MAJOR_VERSION
+        case 0x821C: // GL_MINOR_VERSION
+          if (GL.currentContext.version < 2) {
+            GL.recordError(0x500); // GL_INVALID_ENUM
+            return;
+          }
+          ret = name_ == 0x821B ? 3 : 0; // return version 3.0
+          break;
+      }
+  
+      if (ret === undefined) {
+        var result = GLctx.getParameter(name_);
+        switch (typeof(result)) {
+          case "number":
+            ret = result;
+            break;
+          case "boolean":
+            ret = result ? 1 : 0;
+            break;
+          case "string":
+            GL.recordError(0x500); // GL_INVALID_ENUM
+            return;
+          case "object":
+            if (result === null) {
+              // null is a valid result for some (e.g., which buffer is bound - perhaps nothing is bound), but otherwise
+              // can mean an invalid name_, which we need to report as an error
+              switch(name_) {
+                case 0x8894: // ARRAY_BUFFER_BINDING
+                case 0x8B8D: // CURRENT_PROGRAM
+                case 0x8895: // ELEMENT_ARRAY_BUFFER_BINDING
+                case 0x8CA6: // FRAMEBUFFER_BINDING or DRAW_FRAMEBUFFER_BINDING
+                case 0x8CA7: // RENDERBUFFER_BINDING
+                case 0x8069: // TEXTURE_BINDING_2D
+                case 0x85B5: // WebGL 2 GL_VERTEX_ARRAY_BINDING, or WebGL 1 extension OES_vertex_array_object GL_VERTEX_ARRAY_BINDING_OES
+                case 0x8F36: // COPY_READ_BUFFER_BINDING or COPY_READ_BUFFER
+                case 0x8F37: // COPY_WRITE_BUFFER_BINDING or COPY_WRITE_BUFFER
+                case 0x88ED: // PIXEL_PACK_BUFFER_BINDING
+                case 0x88EF: // PIXEL_UNPACK_BUFFER_BINDING
+                case 0x8CAA: // READ_FRAMEBUFFER_BINDING
+                case 0x8919: // SAMPLER_BINDING
+                case 0x8C1D: // TEXTURE_BINDING_2D_ARRAY
+                case 0x806A: // TEXTURE_BINDING_3D
+                case 0x8E25: // TRANSFORM_FEEDBACK_BINDING
+                case 0x8C8F: // TRANSFORM_FEEDBACK_BUFFER_BINDING
+                case 0x8A28: // UNIFORM_BUFFER_BINDING
+                case 0x8514: { // TEXTURE_BINDING_CUBE_MAP
+                  ret = 0;
+                  break;
+                }
+                default: {
+                  GL.recordError(0x500); // GL_INVALID_ENUM
+                  return;
+                }
+              }
+            } else if (result instanceof Float32Array ||
+                       result instanceof Uint32Array ||
+                       result instanceof Int32Array ||
+                       result instanceof Array) {
+              for (var i = 0; i < result.length; ++i) {
+                switch (type) {
+                  case 0: HEAP32[(((p)+(i*4))>>2)]=result[i]; break;
+                  case 2: HEAPF32[(((p)+(i*4))>>2)]=result[i]; break;
+                  case 4: HEAP8[(((p)+(i))>>0)]=result[i] ? 1 : 0; break;
+                }
+              }
+              return;
+            } else {
+              try {
+                ret = result.name | 0;
+              } catch(e) {
+                GL.recordError(0x500); // GL_INVALID_ENUM
+                err('GL_INVALID_ENUM in glGet' + type + 'v: Unknown object returned from WebGL getParameter(' + name_ + ')! (error: ' + e + ')');
+                return;
+              }
+            }
+            break;
+          default:
+            GL.recordError(0x500); // GL_INVALID_ENUM
+            err('GL_INVALID_ENUM in glGet' + type + 'v: Native code calling glGet' + type + 'v(' + name_ + ') and it returns ' + result + ' of type ' + typeof(result) + '!');
+            return;
+        }
+      }
+  
+      switch (type) {
+        case 1: writeI53ToI64(p, ret); break;
+        case 0: HEAP32[((p)>>2)]=ret; break;
+        case 2:   HEAPF32[((p)>>2)]=ret; break;
+        case 4: HEAP8[((p)>>0)]=ret ? 1 : 0; break;
+      }
+    }
+  function _glGetIntegerv(name_, p) {
+      emscriptenWebGLGet(name_, p, 0);
+    }
 
   function _glGetProgramInfoLog(program, maxLength, length, infoLog) {
       var log = GLctx.getProgramInfoLog(GL.programs[program]);
@@ -7914,6 +8108,8 @@ var ASM_CONSTS = {
       GLctx.linkProgram(GL.programs[program]);
       GL.populateUniformTable(program);
     }
+
+  function _glRenderbufferStorageMultisample(x0, x1, x2, x3, x4) { GLctx['renderbufferStorageMultisample'](x0, x1, x2, x3, x4) }
 
   function _glShaderSource(shader, count, string, length) {
       var source = GL.getSource(shader, count, string, length);
@@ -8591,9 +8787,11 @@ var asmLibraryArg = {
   "glAttachShader": _glAttachShader,
   "glBindBuffer": _glBindBuffer,
   "glBindFramebuffer": _glBindFramebuffer,
+  "glBindRenderbuffer": _glBindRenderbuffer,
   "glBindTexture": _glBindTexture,
   "glBindVertexArray": _glBindVertexArray,
   "glBlendFunc": _glBlendFunc,
+  "glBlitFramebuffer": _glBlitFramebuffer,
   "glBufferData": _glBufferData,
   "glCheckFramebufferStatus": _glCheckFramebufferStatus,
   "glClear": _glClear,
@@ -8602,23 +8800,30 @@ var asmLibraryArg = {
   "glCreateProgram": _glCreateProgram,
   "glCreateShader": _glCreateShader,
   "glCullFace": _glCullFace,
+  "glDeleteFramebuffers": _glDeleteFramebuffers,
+  "glDeleteRenderbuffers": _glDeleteRenderbuffers,
+  "glDeleteTextures": _glDeleteTextures,
   "glDisable": _glDisable,
   "glDrawArrays": _glDrawArrays,
   "glDrawElements": _glDrawElements,
   "glEnable": _glEnable,
   "glEnableVertexAttribArray": _glEnableVertexAttribArray,
+  "glFramebufferRenderbuffer": _glFramebufferRenderbuffer,
   "glFramebufferTexture2D": _glFramebufferTexture2D,
   "glGenBuffers": _glGenBuffers,
   "glGenFramebuffers": _glGenFramebuffers,
+  "glGenRenderbuffers": _glGenRenderbuffers,
   "glGenTextures": _glGenTextures,
   "glGenVertexArrays": _glGenVertexArrays,
   "glGenerateMipmap": _glGenerateMipmap,
+  "glGetIntegerv": _glGetIntegerv,
   "glGetProgramInfoLog": _glGetProgramInfoLog,
   "glGetProgramiv": _glGetProgramiv,
   "glGetShaderInfoLog": _glGetShaderInfoLog,
   "glGetShaderiv": _glGetShaderiv,
   "glGetUniformLocation": _glGetUniformLocation,
   "glLinkProgram": _glLinkProgram,
+  "glRenderbufferStorageMultisample": _glRenderbufferStorageMultisample,
   "glShaderSource": _glShaderSource,
   "glTexImage2D": _glTexImage2D,
   "glTexParameteri": _glTexParameteri,
@@ -8760,12 +8965,12 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 /** @type {function(...*):?} */
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module['_game'] = 126624;
-var _clientGl = Module['_clientGl'] = 126880;
-var _clientAudio = Module['_clientAudio'] = 127508;
-var _inputEvents = Module['_inputEvents'] = 127532;
-var _ping = Module['_ping'] = 127568;
-var _lastTickTime = Module['_lastTickTime'] = 127560;
+var _game = Module['_game'] = 126656;
+var _clientGl = Module['_clientGl'] = 126912;
+var _clientAudio = Module['_clientAudio'] = 127672;
+var _inputEvents = Module['_inputEvents'] = 127696;
+var _ping = Module['_ping'] = 127728;
+var _lastTickTime = Module['_lastTickTime'] = 127720;
 
 
 
