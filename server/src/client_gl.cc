@@ -40,13 +40,17 @@ void ClientGL::SetupContext() {
     glContext = emscripten_webgl_create_context(canvasSelector.c_str(), &attrs);
     emscripten_webgl_make_context_current(glContext);
 
+    emscripten_webgl_enable_extension(glContext, "EXT_color_buffer_float");
+
     glGetIntegerv(GL_MAX_SAMPLES, &glLimits.MAX_SAMPLES);
     LOG_INFO("GL_MAX_SAMPLES = " << glLimits.MAX_SAMPLES);
 
     // Setup Available Shaders
-    shaderPrograms.push_back(new DefaultMaterialShaderProgram());
+    // shaderPrograms.push_back(new DefaultMaterialShaderProgram());
+    shaderPrograms.push_back(new DeferredShadingGeometryShaderProgram());
     debugShaderProgram = new DebugShaderProgram();
     shadowMapShaderProgram = new ShadowMapShaderProgram();
+    deferredLightingShaderProgram = new DeferredShadingLightingShaderProgram();
     quadDrawShaderProgram = new QuadShaderProgram("shaders/Quad.fs");
     minimapShaderProgram = new QuadShaderProgram("shaders/Minimap.fs");
     minimapShaderProgram->SetTextureSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
@@ -372,11 +376,42 @@ void ClientGL::RenderWorld() {
     debugShaderProgram->Use();
     debugShaderProgram->PreDraw(game, cameraPosition, viewMat, projMat);
 
+    worldGBuffer.Bind();
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    DrawObjects(false);
+}
+
+void ClientGL::RenderLighting() {
+    // Render lighting pass from gbuffers into world render buffer
     worldRenderBuffer.Bind();
     glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    DrawObjects(false);
+    deferredLightingShaderProgram->Use();
+    deferredLightingShaderProgram->PreDraw(game, cameraPosition, viewMat, projMat);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, worldGBuffer.g_position);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, worldGBuffer.g_normal);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, worldGBuffer.g_diffuse);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, worldGBuffer.g_specular);
+
+    deferredLightingShaderProgram->SetRenderShadows(!GlobalSettings.Client_NoShadows);
+    deferredLightingShaderProgram->RenderLighting();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void ClientGL::Draw(int width, int height) {
@@ -384,6 +419,7 @@ void ClientGL::Draw(int width, int height) {
     windowWidth = width;
     windowHeight = height;
 
+    worldGBuffer.SetSize(width, height);
     worldRenderBuffer.SetSize(width, height);
     bloomRenderBuffer.SetSize(width, height);
 
@@ -514,27 +550,23 @@ void ClientGL::Draw(int width, int height) {
             // Copy it over by blitzing
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, light.shadowFrameBuffer);
             glBindFramebuffer(GL_READ_FRAMEBUFFER, shadowMapRenderBuffer.fbo);
+            // TODO: The color buffer here is just for debugging purposes
+            //  IRL it'll be slower since we only use the depth bit
             glBlitFramebuffer(
                 0, 0, SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2,
                 0, 0, SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2,
-                GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+                GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
         }
     }
 
     RenderWorld();
-    RenderMinimap();
+    RenderLighting();
+
+    // RenderMinimap();
 
     // Finally render everything to the main buffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    if (GlobalSettings.Client_DrawShadowMaps) {
-        Matrix4 transform = glm::translate(Vector3(-0.5f, -0.5f, 0.0f));
-        for (auto& light : game.GetAssetManager().lights) {
-            quadDrawShaderProgram->Use();
-            quadDrawShaderProgram->DrawQuad(light.shadowColorMap, transform);
-        }
-    }
-
     // Blit World Buffer onto Screen
     glBindFramebuffer(GL_READ_FRAMEBUFFER, worldRenderBuffer.fbo);
 
@@ -543,6 +575,15 @@ void ClientGL::Draw(int width, int height) {
         0, 0, worldRenderBuffer.width, worldRenderBuffer.height,
         GL_COLOR_BUFFER_BIT, GL_NEAREST
     );
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    if (GlobalSettings.Client_DrawShadowMaps) {
+        Matrix4 transform = glm::translate(Vector3(-0.5f, -0.5f, 0.0f));
+        for (auto& light : game.GetAssetManager().lights) {
+            quadDrawShaderProgram->Use();
+            quadDrawShaderProgram->DrawQuad(light.shadowColorMap, transform);
+        }
+    }
 }
 
 Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
@@ -556,7 +597,6 @@ void ClientGL::DrawObjects(bool drawBehind) {
     int lastProgram = -1;
     glEnable(GL_CULL_FACE);
     SetGLCullFace(GL_BACK);
-    glEnable(GL_DEPTH_TEST);
     // Draw Background
     for (auto& pair : backgroundLayer.opaque) {
         for (auto& param : pair.second) {
@@ -597,101 +637,4 @@ void ClientGL::DrawObjects(bool drawBehind) {
     for (auto& gameObjectPair : game.GetGameObjects()) {
         DrawDebug(gameObjectPair.second);
     }
-}
-
-void RenderBuffer::SetSize(int newWidth, int newHeight) {
-    if (newWidth == width && newHeight == height) {
-        return;
-    }
-
-    width = newWidth;
-    height = newHeight;
-
-    if (fbo) {
-        glDeleteFramebuffers(1, &fbo);
-        fbo = 0;
-    }
-
-    if (renderBufferColor) {
-        glDeleteRenderbuffers(1, &renderBufferColor);
-        renderBufferColor = 0;
-    }
-
-    if (renderBufferDepth) {
-        glDeleteRenderbuffers(1, &renderBufferDepth);
-        renderBufferDepth = 0;
-    }
-
-    if (internalFBO) {
-        glDeleteFramebuffers(1, &internalFBO);
-        internalFBO = 0;
-    }
-
-    if (internalTexture) {
-        glDeleteTextures(1, &internalTexture);
-        internalTexture = 0;
-    }
-
-    if (internalDepth) {
-        glDeleteTextures(1, &internalDepth);
-        internalDepth = 0;
-    }
-
-    glGenRenderbuffers(1, &renderBufferColor);
-    glBindRenderbuffer(GL_RENDERBUFFER, renderBufferColor);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, ClientGL::glLimits.MAX_SAMPLES, GL_RGBA8,
-        width, height);
-
-    glGenRenderbuffers(1, &renderBufferDepth);
-    glBindRenderbuffer(GL_RENDERBUFFER, renderBufferDepth);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, ClientGL::glLimits.MAX_SAMPLES, GL_DEPTH_COMPONENT24,
-        width, height);
-
-    glGenFramebuffers(1, &fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderBufferColor);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderBufferDepth);
-
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("Could not setup render buffer! Status: " << status);
-    }
-
-    glGenTextures(1, &internalTexture);
-    glBindTexture(GL_TEXTURE_2D, internalTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glGenTextures(1, &internalDepth);
-    glBindTexture(GL_TEXTURE_2D, internalDepth);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
-            width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glGenFramebuffers(1, &internalFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, internalFBO);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, internalTexture, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, internalDepth, 0);
-
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_ERROR("Could not setup internal frame buffer! Status: " << status);
-    }
-
-}
-
-GLuint RenderBuffer::BlitTexture() {
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, internalFBO);
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    return internalTexture;
 }

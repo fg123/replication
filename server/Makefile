@@ -4,7 +4,7 @@ SRC = $(shell find src/ -name "*.cc" | grep -v "main" | grep -v "client")
 WENDY_SRC = $(shell find scripting/wendy/src/ -name "*.c" | grep -v "main")
 SERVER_SRC = $(SRC) $(WENDY_SRC) src/main.cc
 COLLIDER_TEST_SRC = $(SRC) $(WENDY_SRC) src/collider-test-main.cc
-CLIENT_SRC = $(SRC) $(WENDY_SRC) src/client_main.cc src/client_gl.cc src/client_shader.cc src/client_audio.cc
+CLIENT_SRC = $(SRC) $(WENDY_SRC) src/client_main.cc src/client_gl.cc src/client_shader.cc src/client_audio.cc src/client_buffers.cc
 
 DATA_DIRS = $(shell find ../data/ -type d)
 DATA_FILES = $(shell find ../data/ -type f -name '*')
