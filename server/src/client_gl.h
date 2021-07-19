@@ -84,9 +84,6 @@ class ClientGL {
     RenderBuffer worldRenderBuffer;
     RenderBuffer bloomRenderBuffer;
 
-    // Shadow Blurring Target
-    RenderBuffer shadowMapRenderBuffer;
-
     // Draw Steps
     void SetupDrawingLayers();
     void RenderMinimap();

@@ -31,7 +31,8 @@
     "MachineGun.obj",
     "PlayerMarkerMinimap.obj",
     "SubmachineGun.obj",
-    "SmokeGrenade.obj"
+    "SmokeGrenade.obj",
+    "Cone.obj"
  ],
  "sounds": [
     "bang.wav",

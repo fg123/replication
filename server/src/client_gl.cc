@@ -59,7 +59,6 @@ void ClientGL::SetupContext() {
 
     // Generate Texture for Minimap FBO
     minimapRenderBuffer.SetSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
-    shadowMapRenderBuffer.SetSize(SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2);
 }
 
 void SetupMesh(Mesh& mesh, const std::vector<float>& verts, const std::vector<unsigned int>& indices) {
@@ -402,7 +401,7 @@ void ClientGL::RenderLighting() {
     glBindTexture(GL_TEXTURE_2D, worldGBuffer.g_specular);
 
     deferredLightingShaderProgram->SetRenderShadows(!GlobalSettings.Client_NoShadows);
-    deferredLightingShaderProgram->RenderLighting();
+    deferredLightingShaderProgram->RenderLighting(game);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -475,7 +474,7 @@ void ClientGL::Draw(int width, int height) {
             Vector3 boxToLight[8];
 
             // Draw to our temporary buffer
-            shadowMapRenderBuffer.Bind();
+            glBindFramebuffer(GL_FRAMEBUFFER, light.shadowFrameBuffer);
             // glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClearColor(1, 1, 1, 1);
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -487,7 +486,7 @@ void ClientGL::Draw(int width, int height) {
             // shaderPrograms[0]->PreDraw(game, light.position, lightView, lightProjection);
 
             // Draw Near Field
-            glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+            glViewport(0, 0, light.shadowMapSize, light.shadowMapSize);
             for (size_t i = 0; i < 8; i++) {
                 boxToLight[i] = Vector3(lightView * viewFrustrumPointsNear[i]);
             }
@@ -520,7 +519,7 @@ void ClientGL::Draw(int width, int height) {
             light.depthBiasMVPMid = biasMatrix * lightProjection * lightView;
             shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
 
-            glViewport(SHADOW_WIDTH, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+            glViewport(light.shadowMapSize, 0, light.shadowMapSize, light.shadowMapSize);
 
             DrawShadowObjects(backgroundLayer);
             DrawShadowObjects(behindPlayerLayer);
@@ -541,21 +540,11 @@ void ClientGL::Draw(int width, int height) {
             light.depthBiasMVPFar = biasMatrix * lightProjection * lightView;
             shadowMapShaderProgram->PreDraw(game, Vector3(), lightView, lightProjection);
 
-            glViewport(0, SHADOW_HEIGHT, SHADOW_WIDTH, SHADOW_HEIGHT);
+            glViewport(0, light.shadowMapSize, light.shadowMapSize, light.shadowMapSize);
 
             DrawShadowObjects(backgroundLayer);
             DrawShadowObjects(behindPlayerLayer);
             DrawShadowObjects(foregroundLayer);
-
-            // Copy it over by blitzing
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, light.shadowFrameBuffer);
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, shadowMapRenderBuffer.fbo);
-            // TODO: The color buffer here is just for debugging purposes
-            //  IRL it'll be slower since we only use the depth bit
-            glBlitFramebuffer(
-                0, 0, SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2,
-                0, 0, SHADOW_WIDTH * 2, SHADOW_HEIGHT * 2,
-                GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
         }
     }

@@ -2,6 +2,7 @@
 #include "logging.h"
 #include "global.h"
 
+#include "util.h"
 #include "object.h"
 #include "vector.h"
 #include "objects/player.h"
@@ -36,6 +37,8 @@ Vector3 liveBoxSize(2000, 2000, 2000);
 
 Game::Game() : nextId(1), scriptManager(this) {
     if (GlobalSettings.RunTests) return;
+    const std::string mapModelName = "ShootingRange.obj";
+
     #ifdef BUILD_SERVER
         if (GlobalSettings.IsProduction) {
             LOG_INFO("==== PRODUCTION MODE ====");
@@ -45,7 +48,7 @@ Game::Game() : nextId(1), scriptManager(this) {
         }
 
         LoadMap(RESOURCE_PATH(GlobalSettings.MapPath));
-        CreateMapBaseObject("ShootingRange.obj");
+        CreateMapBaseObject(mapModelName);
     #endif
 }
 
@@ -100,32 +103,37 @@ void Game::LoadMap(std::string mapPath) {
     }
     #endif
 
-    // Loot Table / Pool
-    // AddObject(new AssaultRifleObject(*this, Vector3(2, 10, 2)));
-    // AddObject(new PistolObject(*this, Vector3(2, 10, 4)));
-    // AddObject(new GrenadeThrower(*this, Vector3(2, 10, 6)));
-    // AddObject(new AmmoObject(*this, Vector3(2, 10, 8)));
-    // AddObject(new AmmoObject(*this, Vector3(4.65f, 20, -17.f)));
-    // AddObject(new AmmoObject(*this, Vector3(2, 10, 12)));
-    // AddObject(new AmmoObject(*this, Vector3(2, 10, 14)));
-    // AddObject(new AmmoObject(*this, Vector3(2, 10, 16)));
-
     // Collision Testing
-    if (!GlobalSettings.IsProduction) {
-        auto obj1 = new SphereObject(*this);
-        obj1->SetPosition(Vector3(20, 20, 20));
-        obj1->SetIsStatic(true);
+    // if (!GlobalSettings.IsProduction) {
+    //     auto obj1 = new SphereObject(*this);
+    //     obj1->SetPosition(Vector3(20, 20, 20));
+    //     obj1->SetIsStatic(true);
 
-        auto obj2 = new BoxObject(*this);
-        obj2->SetPosition(Vector3(25, 20, 25));
-        // obj2->SetRotation(DirectionToQuaternion(Vector3(1, 1, 1)));
-        obj2->SetIsStatic(true);
-        AddObject(obj1);
-        AddObject(obj2);
-    }
+    //     auto obj2 = new BoxObject(*this);
+    //     obj2->SetPosition(Vector3(25, 20, 25));
+    //     // obj2->SetRotation(DirectionToQuaternion(Vector3(1, 1, 1)));
+    //     obj2->SetIsStatic(true);
+    //     AddObject(obj1);
+    //     AddObject(obj2);
+    // }
 
     AddObject(new SpectatorBox(*this));
     // LoadScriptedObject("TestObject");
+
+    // Setup Lighting (DEBUG FOR NOW TO TEST LIGHTING)
+    #ifdef BUILD_CLIENT
+    // Model* mapModel = GetModel("ShootingRange.obj");
+    // for (auto& mesh : mapModel->meshes) {
+    //     if (Contains(ToLower(mesh.name), "lightemit")) {
+    //         Light& light = assetManager.lights.emplace_back();
+    //         light.position = Average(Map<Vertex, Vector3>(mesh.vertices, [](const Vertex& t) -> Vector3 { return t.position; }));
+    //         light.direction = -Vector::Up;
+    //         light.color = Vector3(1, 1, 1);
+    //         LOG_DEBUG("Add Light " << light.position);
+    //         light.InitializeLight();
+    //     }
+    // }
+    #endif
 }
 
 Game::~Game() {

@@ -47,16 +47,6 @@ std::string StandardizePath(const std::string& str) {
     return out;
 }
 
-Vector3 Average(const std::vector<Vector3>& vec) {
-    if (vec.empty()) return Vector3();
-
-    Vector3 result;
-    for (auto& t : vec) {
-        result += t;
-    }
-    return result / (float) vec.size();
-}
-
 void DumpMesh(const Mesh& mesh) {
     LOG_DEBUG("Mesh: " << mesh.name);
     for (size_t i = 0; i < mesh.vertices.size(); i++) {

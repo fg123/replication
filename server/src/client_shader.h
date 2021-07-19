@@ -201,7 +201,8 @@ public:
 
 class DeferredShadingLightingShaderProgram : public ShaderProgram {
     // Uniforms
-    GLint uniformMVP;
+    GLint uniformProj;
+    GLint uniformModel;
 
     GLint uniformView;
     GLint uniformViewerPosition;
@@ -216,36 +217,17 @@ public:
     DeferredShadingLightingShaderProgram() {
         standardRemapMatrix = glm::translate(Vector3(-1, -1, -1)) * glm::scale(Vector3(2, 2, 2));
 
-        AddShader(LoadURL("shaders/Quad.vs"), GL_VERTEX_SHADER);
+        AddShader(LoadURL("shaders/MeshLighting.vs"), GL_VERTEX_SHADER);
         AddShader(LoadURL("shaders/MeshLighting.fs"), GL_FRAGMENT_SHADER);
         LinkProgram();
         Use();
-
-        // Create Struct for Coords
-        float texCoords[] = {
-            0.0,  0.0,
-            1.0,  0.0,
-            0.0,  1.0,
-            0.0,  1.0,
-            1.0,  0.0,
-            1.0,  1.0
-        };
-        glGenVertexArrays(1, &quadVAO);
-        glBindVertexArray(quadVAO);
-
-        glGenBuffers(1, &quadVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-        glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), texCoords, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
-
-        uniformMVP = GetUniformLocation("u_MVP");
-
 
         uniformViewerPosition = GetUniformLocation("u_ViewerPos");
         uniformNumLights = GetUniformLocation("u_NumLights");
         uniformRenderShadows = GetUniformLocation("u_RenderShadows");
         uniformView = GetUniformLocation("u_View");
+        uniformModel = GetUniformLocation("u_Model");
+        uniformProj = GetUniformLocation("u_Projection");
 
         // Setup Texture Unit Ids
         glUniform1i(GetUniformLocation("gbuf_position"), 0);
@@ -254,9 +236,7 @@ public:
         glUniform1i(GetUniformLocation("gbuf_specular"), 3);
 
         // Light Texture Maps
-        for (int i = 0; i < 10; i++) {
-            glUniform1i(GetUniformLocation("u_shadowMap[" + std::to_string(i) + "]"), 4 + i);
-        }
+        glUniform1i(GetUniformLocation("u_shadowMap"), 4);
     }
 
     void SetRenderShadows(bool render) override {
@@ -269,11 +249,7 @@ public:
                  const Matrix4& proj) override;
     void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) override {}
 
-    void RenderLighting() {
-        glUniformMatrix4fv(uniformMVP, 1, GL_FALSE, glm::value_ptr(standardRemapMatrix));
-        glBindVertexArray(quadVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-    }
+    void RenderLighting(Game& game);
 };
 
 class DebugShaderProgram : public ShaderProgram {

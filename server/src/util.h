@@ -21,3 +21,22 @@ inline bool Contains(const std::vector<T>& haystack, const T& needle) {
     }
     return false;
 }
+
+inline Vector3 Average(const std::vector<Vector3>& vec) {
+    if (vec.empty()) return Vector3();
+
+    Vector3 result;
+    for (auto& t : vec) {
+        result += t;
+    }
+    return result / (float) vec.size();
+}
+
+template<typename T, typename R>
+inline std::vector<R> Map(const std::vector<T>& vec, std::function<R(const T&)> func) {
+    std::vector<R> result;
+    for (auto& t : vec) {
+        result.push_back(func(t));
+    }
+    return result;
+}

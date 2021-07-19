@@ -11,8 +11,6 @@
     #include <GLES3/gl3.h>
     #include <GLES3/gl2ext.h>
 
-const unsigned int SHADOW_WIDTH = 2048, SHADOW_HEIGHT = 2048;
-
 #endif
 
 // Handles Meshes and Vertex Data for Rendering
@@ -34,7 +32,19 @@ struct Vertex {
 };
 
 #ifdef BUILD_CLIENT
+
+// TODO: Implement point lights, will need a refactor of the shadow mapping
+//   system to support this
+
+enum class LightShape {
+    Directional
+};
+
 struct Light {
+    LightShape shape = LightShape::Directional;
+
+    int shadowMapSize = 256;
+
     Vector3 position;
     Vector3 color;
     Vector3 direction;

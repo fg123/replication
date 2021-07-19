@@ -179,11 +179,14 @@ void DefaultMaterialShaderProgram::PreDraw(Game& game,
         GLint depthBiasMVPNear = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPNear");
         GLint depthBiasMVPMid = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPMid");
         GLint depthBiasMVPFar = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPFar");
+
+        GLint shadowMapSize = GetUniformLocation("u_Lights[" + std::to_string(i) + "].shadowMapSize");
         glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
         glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
         glUniformMatrix4fv(depthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPNear));
         glUniformMatrix4fv(depthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPMid));
         glUniformMatrix4fv(depthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPFar));
+        glUniform1i(shadowMapSize, lights[i].shadowMapSize);
 
         // See client_shader.h:83
         glActiveTexture(GL_TEXTURE7 + i);
@@ -310,26 +313,68 @@ void DeferredShadingLightingShaderProgram::PreDraw(Game& game,
 
     glUniform3fv(uniformViewerPosition, 1, glm::value_ptr(viewPos));
     glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
 
-    // Load Lights Into Shader
-    auto& lights = game.GetAssetManager().lights;
-    int numLights = lights.size();
-    // LOG_DEBUG("Loading " << numLights << " into uniform");
-    glUniform1i(uniformNumLights, numLights);
-    for (int i = 0; i < numLights; i++) {
-        GLint lightPosition = GetUniformLocation("u_Lights[" + std::to_string(i) + "].position");
-        GLint lightColor = GetUniformLocation("u_Lights[" + std::to_string(i) + "].color");
-        GLint depthBiasMVPNear = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPNear");
-        GLint depthBiasMVPMid = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPMid");
-        GLint depthBiasMVPFar = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPFar");
-        glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
-        glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
-        glUniformMatrix4fv(depthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPNear));
-        glUniformMatrix4fv(depthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPMid));
-        glUniformMatrix4fv(depthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPFar));
+    // // Load Lights Into Shader
+    // auto& lights = game.GetAssetManager().lights;
+    // int numLights = lights.size();
+    // // LOG_DEBUG("Loading " << numLights << " into uniform");
+    // glUniform1i(uniformNumLights, numLights);
+    // for (int i = 0; i < numLights; i++) {
+    //     GLint lightPosition = GetUniformLocation("u_Lights[" + std::to_string(i) + "].position");
+    //     GLint lightColor = GetUniformLocation("u_Lights[" + std::to_string(i) + "].color");
+    //     GLint depthBiasMVPNear = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPNear");
+    //     GLint depthBiasMVPMid = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPMid");
+    //     GLint depthBiasMVPFar = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPFar");
+
+    //     GLint shadowMapSize = GetUniformLocation("u_Lights[" + std::to_string(i) + "].shadowMapSize");
+    //     glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
+    //     glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
+    //     glUniformMatrix4fv(depthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPNear));
+    //     glUniformMatrix4fv(depthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPMid));
+    //     glUniformMatrix4fv(depthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPFar));
+    //     glUniform1i(shadowMapSize, lights[i].shadowMapSize);
+
+    //     // See client_shader.h:83
+    //     glActiveTexture(GL_TEXTURE4 + i);
+    //     glBindTexture(GL_TEXTURE_2D, lights[i].shadowDepthMap);
+    // }
+}
+
+void DeferredShadingLightingShaderProgram::RenderLighting(Game& game) {
+    if (!game.GetModel("Cone.obj")) return;
+
+    Mesh& coneMesh = game.GetModel("Cone.obj")->meshes[0];
+
+    // Render Each Light Volume
+    for (auto& light : game.GetAssetManager().lights) {
+        GLint lightPosition = GetUniformLocation("u_Light.position");
+        GLint lightColor = GetUniformLocation("u_Light.color");
+        GLint depthBiasMVPNear = GetUniformLocation("u_Light.depthBiasMVPNear");
+        GLint depthBiasMVPMid = GetUniformLocation("u_Light.depthBiasMVPMid");
+        GLint depthBiasMVPFar = GetUniformLocation("u_Light.depthBiasMVPFar");
+
+        GLint shadowMapSize = GetUniformLocation("u_Light.shadowMapSize");
+        glUniform3fv(lightPosition, 1, glm::value_ptr(light.position));
+        glUniform3fv(lightColor, 1, glm::value_ptr(light.color));
+        glUniformMatrix4fv(depthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPNear));
+        glUniformMatrix4fv(depthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPMid));
+        glUniformMatrix4fv(depthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPFar));
+        glUniform1i(shadowMapSize, light.shadowMapSize);
 
         // See client_shader.h:83
-        glActiveTexture(GL_TEXTURE4 + i);
-        glBindTexture(GL_TEXTURE_2D, lights[i].shadowDepthMap);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, light.shadowDepthMap);
+
+        // Get the Light's View Matrix
+        Matrix4 model = glm::translate(light.position) *
+            glm::transpose(glm::toMat4(DirectionToQuaternion(light.direction))) *
+            glm::scale(Vector3(10, 10, 600));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+
+        glBindVertexArray(coneMesh.renderInfo.vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, coneMesh.renderInfo.ibo);
+        glDrawElements(GL_TRIANGLES, coneMesh.renderInfo.iboCount, GL_UNSIGNED_INT, 0);
+        return;
     }
 }
