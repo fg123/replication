@@ -64,6 +64,7 @@ void Texture::InitializeTexture() {
 }
 
 void Light::InitializeLight() {
+    if (shadowMapSize == 0) return;
     // We use SHADOW_WIDTH * 2 due to cascading shadow map and SHADOW_HEIGHT * 2
 
     glGenTextures(1, &shadowColorMap);

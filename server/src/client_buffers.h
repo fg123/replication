@@ -6,9 +6,10 @@ class RenderBuffer {
     // Internally we use another FBO to blit over when we want a texture
     GLuint internalFBO = 0;
     GLuint internalTexture = 0;
-    GLuint internalDepth = 0;
 
 public:
+    GLuint internalDepth = 0;
+
     // These buffers internally do MSAA
     GLuint fbo = 0;
     GLuint renderBufferColor = 0;

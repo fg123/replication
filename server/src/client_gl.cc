@@ -385,8 +385,16 @@ void ClientGL::RenderWorld() {
 void ClientGL::RenderLighting() {
     // Render lighting pass from gbuffers into world render buffer
     worldRenderBuffer.Bind();
-    glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
+    // glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Copy Depth from GBuffer Over
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, worldGBuffer.fbo);
+    glBlitFramebuffer(0, 0, windowWidth, windowHeight,
+        0, 0, windowWidth, windowHeight,
+        GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    worldRenderBuffer.Bind();
 
     deferredLightingShaderProgram->Use();
     deferredLightingShaderProgram->PreDraw(game, cameraPosition, viewMat, projMat);
@@ -401,7 +409,17 @@ void ClientGL::RenderLighting() {
     glBindTexture(GL_TEXTURE_2D, worldGBuffer.g_specular);
 
     deferredLightingShaderProgram->SetRenderShadows(!GlobalSettings.Client_NoShadows);
+
+    // glDisable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
+    glDisable(GL_BLEND);
+
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_ONE, GL_ONE);
+
     deferredLightingShaderProgram->RenderLighting(game);
+
+    glDisable(GL_BLEND);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -421,6 +439,9 @@ void ClientGL::Draw(int width, int height) {
     worldGBuffer.SetSize(width, height);
     worldRenderBuffer.SetSize(width, height);
     bloomRenderBuffer.SetSize(width, height);
+
+    deferredLightingShaderProgram->Use();
+    deferredLightingShaderProgram->SetViewportSize(width, height);
 
     SetupDrawingLayers();
 
@@ -459,6 +480,7 @@ void ClientGL::Draw(int width, int height) {
     SetGLCullFace(GL_BACK);
     if (!GlobalSettings.Client_NoShadows) {
         for (auto& light : game.GetAssetManager().lights) {
+            if (light.shadowMapSize == 0) continue;
             Matrix4 lightView = glm::lookAt(light.position, light.position + light.direction,
                 Vector::Up);
 
@@ -572,6 +594,14 @@ void ClientGL::Draw(int width, int height) {
             quadDrawShaderProgram->Use();
             quadDrawShaderProgram->DrawQuad(light.shadowColorMap, transform);
         }
+    }
+    if (GlobalSettings.Client_DrawGBuffer) {
+        Matrix4 transform = glm::translate(Vector3(-0.5f, -0.5f, 0.0f));
+        // worldRenderBuffer.BlitTexture();
+
+        quadDrawShaderProgram->Use();
+        quadDrawShaderProgram->DrawQuad(worldGBuffer.g_diffuse, transform);
+        // quadDrawShaderProgram->DrawQuad(worldGBuffer.internalDepth, transform);
     }
 }
 

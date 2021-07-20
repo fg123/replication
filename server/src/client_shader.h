@@ -208,6 +208,9 @@ class DeferredShadingLightingShaderProgram : public ShaderProgram {
     GLint uniformViewerPosition;
     GLint uniformNumLights;
     GLint uniformRenderShadows;
+    GLint uniformUseProjectionAndView;
+
+    GLint uniformViewportSize;
 
     GLuint quadVAO;
     GLuint quadVBO;
@@ -222,12 +225,34 @@ public:
         LinkProgram();
         Use();
 
+        // Create Struct for Coords
+        float texCoords[] = {
+            0.0,  0.0,
+            1.0,  0.0,
+            0.0,  1.0,
+            0.0,  1.0,
+            1.0,  0.0,
+            1.0,  1.0
+        };
+        glGenVertexArrays(1, &quadVAO);
+        glBindVertexArray(quadVAO);
+
+        glGenBuffers(1, &quadVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), texCoords, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
+
+        standardRemapMatrix = glm::translate(Vector3(-1, -1, -1)) * glm::scale(Vector3(2, 2, 2));
+
         uniformViewerPosition = GetUniformLocation("u_ViewerPos");
         uniformNumLights = GetUniformLocation("u_NumLights");
         uniformRenderShadows = GetUniformLocation("u_RenderShadows");
         uniformView = GetUniformLocation("u_View");
         uniformModel = GetUniformLocation("u_Model");
         uniformProj = GetUniformLocation("u_Projection");
+        uniformViewportSize = GetUniformLocation("u_ViewportSize");
+        uniformUseProjectionAndView = GetUniformLocation("u_UseProjectionAndView");
 
         // Setup Texture Unit Ids
         glUniform1i(GetUniformLocation("gbuf_position"), 0);
@@ -241,6 +266,10 @@ public:
 
     void SetRenderShadows(bool render) override {
         glUniform1i(uniformRenderShadows, render);
+    }
+
+    void SetViewportSize(int width, int height) {
+        glUniform2f(uniformViewportSize, (float)width, (float)height);
     }
 
     void PreDraw(Game& game,

@@ -4,8 +4,6 @@ precision highp float;
 
 out vec4 OutputColor;
 
-vec2 FragmentTexCoords;
-
 uniform sampler2D gbuf_position;
 uniform sampler2D gbuf_normal;
 uniform sampler2D gbuf_diffuse;
@@ -19,6 +17,8 @@ struct Light {
     mat4 depthBiasMVPMid;
     mat4 depthBiasMVPFar;
 };
+
+uniform vec2 u_ViewportSize;
 
 uniform mat4 u_View;
 uniform vec3 u_ViewerPos;
@@ -89,7 +89,7 @@ float GetAttenuationAtPoint(vec4 shadowCoord, vec2 offset, float bias, int sampl
 }
 
 float GetShadowAttenuation() {
-    if (!u_RenderShadows) return 1.0;
+    if (!u_RenderShadows || u_Light.shadowMapSize == 0) return 1.0;
     vec4 shadowCoordNear = u_Light.depthBiasMVPNear * vec4(FragmentPos, 1);
     vec4 shadowCoordMid = u_Light.depthBiasMVPMid * vec4(FragmentPos, 1);
     vec4 shadowCoordFar = u_Light.depthBiasMVPFar * vec4(FragmentPos, 1);
@@ -157,6 +157,13 @@ vec3 GetSpecularAccumulation() {
 void main()
 {
     // retrieve data from G-buffer
+    // OutputColor = vec4(FragmentTexCoords.x, FragmentTexCoords.y, 1.0, 1.0);
+    // return;
+    if (u_Light.shadowMapSize == 0) {
+        OutputColor = vec4(u_Light.position, 1.0);
+        return;
+    }
+    vec2 FragmentTexCoords = gl_FragCoord.xy / u_ViewportSize;
     FragmentPos = texture(gbuf_position, FragmentTexCoords).rgb;
     FragmentNormal = texture(gbuf_normal, FragmentTexCoords).rgb;
     FragmentPosClipSpace = vec3(u_View * vec4(FragmentPos, 1.0));

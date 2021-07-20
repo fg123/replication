@@ -308,9 +308,6 @@ void DeferredShadingLightingShaderProgram::PreDraw(Game& game,
                 const Matrix4& view,
                 const Matrix4& proj) {
 
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
     glUniform3fv(uniformViewerPosition, 1, glm::value_ptr(viewPos));
     glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
@@ -342,9 +339,9 @@ void DeferredShadingLightingShaderProgram::PreDraw(Game& game,
 }
 
 void DeferredShadingLightingShaderProgram::RenderLighting(Game& game) {
-    if (!game.GetModel("Cone.obj")) return;
+    if (!game.GetModel("Cube.obj")) return;
 
-    Mesh& coneMesh = game.GetModel("Cone.obj")->meshes[0];
+    Mesh& coneMesh = game.GetModel("Cube.obj")->meshes[0];
 
     // Render Each Light Volume
     for (auto& light : game.GetAssetManager().lights) {
@@ -366,15 +363,29 @@ void DeferredShadingLightingShaderProgram::RenderLighting(Game& game) {
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, light.shadowDepthMap);
 
-        // Get the Light's View Matrix
-        Matrix4 model = glm::translate(light.position) *
-            glm::transpose(glm::toMat4(DirectionToQuaternion(light.direction))) *
-            glm::scale(Vector3(10, 10, 600));
-        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        if (light.shape == LightShape::Directional) {
+            glDepthMask(GL_TRUE);
+            glEnable(GL_DEPTH_TEST);
+            glUniform1i(uniformUseProjectionAndView, GL_TRUE);
+            // Get the Light's View Matrix
+            Matrix4 model = glm::translate(light.position) *
+                glm::transpose(glm::toMat4(DirectionToQuaternion(light.direction))) *
+                glm::scale(Vector3(4, 4, 4));
+            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
-        glBindVertexArray(coneMesh.renderInfo.vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, coneMesh.renderInfo.ibo);
-        glDrawElements(GL_TRIANGLES, coneMesh.renderInfo.iboCount, GL_UNSIGNED_INT, 0);
-        return;
+            glBindVertexArray(coneMesh.renderInfo.vao);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, coneMesh.renderInfo.ibo);
+            glDrawElements(GL_TRIANGLES, coneMesh.renderInfo.iboCount, GL_UNSIGNED_INT, 0);
+        }
+        else if (light.shape == LightShape::Sun) {
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
+            glUniform1i(uniformUseProjectionAndView, GL_FALSE);
+            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(standardRemapMatrix));
+            glBindVertexArray(quadVAO);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glDepthMask(GL_TRUE);
+            glEnable(GL_DEPTH_TEST);
+        }
     }
 }

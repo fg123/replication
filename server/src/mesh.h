@@ -37,6 +37,7 @@ struct Vertex {
 //   system to support this
 
 enum class LightShape {
+    Sun,
     Directional
 };
 

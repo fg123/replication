@@ -94,6 +94,7 @@ void Game::LoadMap(std::string mapPath) {
         // Light is an array that is serializable to Light
         Light& light = assetManager.lights.emplace_back();
         ProcessReplicationDispatch(light, lightJson);
+        light.shape = LightShape::Sun;
         light.InitializeLight();
     }
     for (json& audio : obj["sounds"].GetArray()) {
@@ -122,17 +123,18 @@ void Game::LoadMap(std::string mapPath) {
 
     // Setup Lighting (DEBUG FOR NOW TO TEST LIGHTING)
     #ifdef BUILD_CLIENT
-    // Model* mapModel = GetModel("ShootingRange.obj");
-    // for (auto& mesh : mapModel->meshes) {
-    //     if (Contains(ToLower(mesh.name), "lightemit")) {
-    //         Light& light = assetManager.lights.emplace_back();
-    //         light.position = Average(Map<Vertex, Vector3>(mesh.vertices, [](const Vertex& t) -> Vector3 { return t.position; }));
-    //         light.direction = -Vector::Up;
-    //         light.color = Vector3(1, 1, 1);
-    //         LOG_DEBUG("Add Light " << light.position);
-    //         light.InitializeLight();
-    //     }
-    // }
+    Model* mapModel = GetModel("ShootingRange.obj");
+    for (auto& mesh : mapModel->meshes) {
+        if (Contains(ToLower(mesh.name), "lightemit")) {
+            Light& light = assetManager.lights.emplace_back();
+            light.position = Average(Map<Vertex, Vector3>(mesh.vertices, [](const Vertex& t) -> Vector3 { return t.position; }));
+            light.direction = -Vector::Up;
+            light.color = Vector3(1, 1, 1);
+            light.shadowMapSize = 0;
+            LOG_DEBUG("Add Light " << light.position);
+            light.InitializeLight();
+        }
+    }
     #endif
 }
 

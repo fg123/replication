@@ -63,6 +63,9 @@ int main(int argc, char** argv) {
             else if (arg == "--client-draw-shadow-maps") {
                 GlobalSettings.Client_DrawShadowMaps = true;
             }
+            else if (arg == "--client-draw-gbuffer") {
+                GlobalSettings.Client_DrawGBuffer = true;
+            }
             else if (arg == "--client-no-shadows") {
                 GlobalSettings.Client_NoShadows = true;
             }

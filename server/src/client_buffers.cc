@@ -24,11 +24,6 @@ void RenderBuffer::SetSize(int newWidth, int newHeight) {
         renderBufferDepth = 0;
     }
 
-    if (internalFBO) {
-        glDeleteFramebuffers(1, &internalFBO);
-        internalFBO = 0;
-    }
-
     if (internalTexture) {
         glDeleteTextures(1, &internalTexture);
         internalTexture = 0;
@@ -39,15 +34,22 @@ void RenderBuffer::SetSize(int newWidth, int newHeight) {
         internalDepth = 0;
     }
 
+    if (internalFBO) {
+        glDeleteFramebuffers(1, &internalFBO);
+        internalFBO = 0;
+    }
+
     glGenRenderbuffers(1, &renderBufferColor);
     glBindRenderbuffer(GL_RENDERBUFFER, renderBufferColor);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, ClientGL::glLimits.MAX_SAMPLES, GL_RGBA8,
-        width, height);
+    // glRenderbufferStorageMultisample(GL_RENDERBUFFER, ClientGL::glLimits.MAX_SAMPLES, GL_RGBA8,
+    //     width, height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, width, height);
 
     glGenRenderbuffers(1, &renderBufferDepth);
     glBindRenderbuffer(GL_RENDERBUFFER, renderBufferDepth);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, ClientGL::glLimits.MAX_SAMPLES, GL_DEPTH_COMPONENT24,
-        width, height);
+    // glRenderbufferStorageMultisample(GL_RENDERBUFFER, ClientGL::glLimits.MAX_SAMPLES, GL_DEPTH_COMPONENT24,
+    //     width, height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
 
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -94,7 +96,7 @@ void RenderBuffer::SetSize(int newWidth, int newHeight) {
 GLuint RenderBuffer::BlitTexture() {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, internalFBO);
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     return internalTexture;
 }
 
@@ -142,6 +144,8 @@ void GBuffer::SetSize(int newWidth, int newHeight) {
                 width, height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glGenTextures(1, &g_normal);
     glBindTexture(GL_TEXTURE_2D, g_normal);
@@ -149,6 +153,8 @@ void GBuffer::SetSize(int newWidth, int newHeight) {
                 width, height, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glGenTextures(1, &g_diffuse);
     glBindTexture(GL_TEXTURE_2D, g_diffuse);
@@ -156,6 +162,8 @@ void GBuffer::SetSize(int newWidth, int newHeight) {
                 width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glGenTextures(1, &g_specular);
     glBindTexture(GL_TEXTURE_2D, g_specular);
@@ -163,6 +171,8 @@ void GBuffer::SetSize(int newWidth, int newHeight) {
                 width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glGenRenderbuffers(1, &g_depth);
     glBindRenderbuffer(GL_RENDERBUFFER, g_depth);
