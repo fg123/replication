@@ -159,10 +159,10 @@ void main()
     // retrieve data from G-buffer
     // OutputColor = vec4(FragmentTexCoords.x, FragmentTexCoords.y, 1.0, 1.0);
     // return;
-    if (u_Light.shadowMapSize == 0) {
-        OutputColor = vec4(u_Light.position, 1.0);
-        return;
-    }
+    // if (u_Light.shadowMapSize == 0) {
+    //     OutputColor = vec4(u_Light.position, 1.0);
+    //     return;
+    // }
     vec2 FragmentTexCoords = gl_FragCoord.xy / u_ViewportSize;
     FragmentPos = texture(gbuf_position, FragmentTexCoords).rgb;
     FragmentNormal = texture(gbuf_normal, FragmentTexCoords).rgb;

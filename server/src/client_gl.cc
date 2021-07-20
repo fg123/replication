@@ -412,10 +412,10 @@ void ClientGL::RenderLighting() {
 
     // glDisable(GL_CULL_FACE);
     glEnable(GL_CULL_FACE);
-    glDisable(GL_BLEND);
+    // glDisable(GL_BLEND);
 
-    // glEnable(GL_BLEND);
-    // glBlendFunc(GL_ONE, GL_ONE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
 
     deferredLightingShaderProgram->RenderLighting(game);
 
@@ -600,7 +600,9 @@ void ClientGL::Draw(int width, int height) {
         // worldRenderBuffer.BlitTexture();
 
         quadDrawShaderProgram->Use();
-        quadDrawShaderProgram->DrawQuad(worldGBuffer.g_diffuse, transform);
+        quadDrawShaderProgram->SetIsDepth(true);
+        quadDrawShaderProgram->DrawQuad(worldGBuffer.g_depth, transform);
+        quadDrawShaderProgram->SetIsDepth(false);
         // quadDrawShaderProgram->DrawQuad(worldGBuffer.internalDepth, transform);
     }
 }
@@ -640,7 +642,7 @@ void ClientGL::DrawObjects(bool drawBehind) {
         }
     }
     // Draw Foreground
-    glClear(GL_DEPTH_BUFFER_BIT);
+    // glClear(GL_DEPTH_BUFFER_BIT);
 
     glDisable(GL_CULL_FACE);
     for (auto& pair : foregroundLayer.opaque) {

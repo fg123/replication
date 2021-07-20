@@ -339,9 +339,9 @@ void DeferredShadingLightingShaderProgram::PreDraw(Game& game,
 }
 
 void DeferredShadingLightingShaderProgram::RenderLighting(Game& game) {
-    if (!game.GetModel("Cube.obj")) return;
+    if (!game.GetModel("Cone.obj")) return;
 
-    Mesh& coneMesh = game.GetModel("Cube.obj")->meshes[0];
+    Mesh& coneMesh = game.GetModel("Cone.obj")->meshes[0];
 
     // Render Each Light Volume
     for (auto& light : game.GetAssetManager().lights) {
@@ -364,8 +364,7 @@ void DeferredShadingLightingShaderProgram::RenderLighting(Game& game) {
         glBindTexture(GL_TEXTURE_2D, light.shadowDepthMap);
 
         if (light.shape == LightShape::Directional) {
-            glDepthMask(GL_TRUE);
-            glEnable(GL_DEPTH_TEST);
+            glCullFace(GL_FRONT);
             glUniform1i(uniformUseProjectionAndView, GL_TRUE);
             // Get the Light's View Matrix
             Matrix4 model = glm::translate(light.position) *
@@ -378,6 +377,7 @@ void DeferredShadingLightingShaderProgram::RenderLighting(Game& game) {
             glDrawElements(GL_TRIANGLES, coneMesh.renderInfo.iboCount, GL_UNSIGNED_INT, 0);
         }
         else if (light.shape == LightShape::Sun) {
+            glCullFace(GL_BACK);
             glDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
             glUniform1i(uniformUseProjectionAndView, GL_FALSE);

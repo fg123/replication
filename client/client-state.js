@@ -196,6 +196,19 @@ module.exports = class ClientState {
     }
 
     SendInputPacket(input) {
+        // All events go into game
+        // input.time = this.wasm._GetLastTickTime() + this.wasm._GetTickInterval();
+        // // console.log(input);
+        // const inputStr = JSON.stringify(input);
+        // if (this.webSocket.readyState === WebSocket.OPEN) {
+        //     this.SendData(inputStr);
+        // }
+
+        // // Serve Inputs into Local
+        // const heapString = this.ToHeapString(this.wasm, inputStr);
+        // this.wasm._HandleLocalInput(heapString);
+        // this.wasm._free(heapString);
+
         if (this.localPlayerObjectId !== undefined) {
             input.time = this.wasm._GetLastTickTime() + this.wasm._GetTickInterval();
             // console.log(input);

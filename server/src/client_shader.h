@@ -344,6 +344,7 @@ public:
 class QuadShaderProgram : public ShaderProgram {
     // Uniforms
     GLint uniformMVP;
+    GLint uniformIsDepth;
 
     GLuint quadVAO;
     GLuint quadVBO;
@@ -361,6 +362,7 @@ public:
         glUniform1i(GetUniformLocation("u_texture"), 0);
 
         uniformMVP = GetUniformLocation("u_MVP");
+        uniformIsDepth = GetUniformLocation("u_isDepth");
 
         // Create Struct for Coords
         float texCoords[] = {
@@ -381,13 +383,19 @@ public:
         glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
 
         standardRemapMatrix = glm::translate(Vector3(-1, -1, -1)) * glm::scale(Vector3(2, 2, 2));
+        SetIsDepth(false);
     }
+
 
     void PreDraw(Game& game,
                  const Vector3& viewPos,
                  const Matrix4& view,
                  const Matrix4& proj) {}
     void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {}
+
+    void SetIsDepth(bool isDepth) {
+        glUniform1i(uniformIsDepth, isDepth);
+    }
 
     void SetTextureSize(float width, float height) {
         GLint uniformTextureSize = GetUniformLocation("u_textureSize");
