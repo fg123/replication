@@ -5,9 +5,7 @@
 *.wd
 
 // C++ Build File
-server/bin/game_server
-server/bin/game_client*
-server/bin/game_collider
+server/bin/game*
 
 // JS
 node_modules/

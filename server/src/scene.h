@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "vector.h"
+#include "mesh.h"
 
 // Manages / Serializes / De-serializes the scene
 
@@ -15,12 +16,12 @@ struct Node {
     std::vector<Node*> children;
 };
 
-struct StaticMesh : public Node {
-    std::string mesh;
+struct StaticMeshNode : public Node {
+    Mesh* mesh;
 };
 
-struct Light : public Node {
-
+struct LightNode : public Node {
+    Light* light;
 };
 
 class Scene {

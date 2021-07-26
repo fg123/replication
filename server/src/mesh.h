@@ -8,9 +8,9 @@
 #include <vector>
 
 #ifdef BUILD_CLIENT
+    #include "light.h"
     #include <GLES3/gl3.h>
     #include <GLES3/gl2ext.h>
-
 #endif
 
 // Handles Meshes and Vertex Data for Rendering
@@ -32,34 +32,6 @@ struct Vertex {
 };
 
 #ifdef BUILD_CLIENT
-
-// TODO: Implement point lights, will need a refactor of the shadow mapping
-//   system to support this
-
-enum class LightShape : uint32_t {
-    Sun = 0,
-    Directional = 1
-};
-
-struct Light {
-    LightShape shape = LightShape::Directional;
-
-    int shadowMapSize = 256;
-
-    Vector3 position;
-    Vector3 color;
-    Vector3 direction;
-
-    GLuint shadowFrameBuffer = 0;
-    GLuint shadowDepthMap = 0;
-    GLuint shadowColorMap = 0;
-
-    Matrix4 depthBiasMVPNear;
-    Matrix4 depthBiasMVPMid;
-    Matrix4 depthBiasMVPFar;
-
-    void InitializeLight();
-};
 
 template<>
 inline void SerializeDispatch(Light& object, JSONWriter& obj) {

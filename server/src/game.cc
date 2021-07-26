@@ -15,7 +15,6 @@
 
 #include "static-mesh.h"
 
-#include "collision-test-objects.h"
 #include "objects.h"
 
 #include <fstream>

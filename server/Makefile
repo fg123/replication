@@ -1,24 +1,43 @@
 EXE = game
+
+# The primary files are stored in src/ aka all the shared ones
+#   We build a couple of binaries:
+#    * game_server - the game executable
+#    * game_client* - client wasm data for frontend
+#    * game_collider - collider test
+#    * game_editor - local editor for scene editing
+
 SRC_DIR = src
-SRC = $(shell find src/ -name "*.cc" | grep -v "main" | grep -v "client")
-CLIENT_SPECIFIC_SRC = $(shell find src/ -name "*.cc" | grep -v "main" | grep "client")
+SRC = $(shell find src/ -name "*.cc")
 WENDY_SRC = $(shell find scripting/wendy/src/ -name "*.c" | grep -v "main")
-SERVER_SRC = $(SRC) $(WENDY_SRC) src/main.cc
-COLLIDER_TEST_SRC = $(SRC) $(WENDY_SRC) src/collider-test-main.cc
-CLIENT_SRC = $(SRC) $(WENDY_SRC) src/client_main.cc $(CLIENT_SPECIFIC_SRC)
+
+LDLIBS = -L/usr/lib
+
+# For Each Subproject, define following + entry in the main linker
+# Use .wo for webassembly
+SERVER_SRC =        $(SRC) $(WENDY_SRC) $(shell find server/ -name "*.cc")
+SERVER_OBJ = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SERVER_SRC)))
+SERVER_DEPS = $(SERVER_OBJ:%.o=%.d)
+SERVER_LDLIBS = $(LDLIBS) -lz -lpthread
+
+CLIENT_SRC =        $(SRC) $(WENDY_SRC) $(shell find client/ -name "*.cc")
+CLIENT_OBJ = $(patsubst %.cc,%.wo,$(patsubst %.c,%.wo,$(CLIENT_SRC)))
+CLIENT_DEPS = $(CLIENT_OBJ:%.wo=%.wd)
+
+COLLIDER_TEST_SRC = $(SRC) $(WENDY_SRC) $(shell find collider-test/ -name "*.cc")
+COLLIDER_TEST_OBJ = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(COLLIDER_TEST_SRC)))
+COLLIDER_TEST_DEPS = $(COLLIDER_TEST_OBJ:%.o=%.d)
+COLLIDER_TEST_OUTPUT = bin/$(EXE)_collider
+COLLIDER_TEST_LDLIBS = $(SERVER_LDLIBS) -lglfw -lGL -lGLEW
+
+EDITOR_SRC = $(SRC) $(WENDY_SRC) $(shell find editor/ -name "*.cc")
+EDITOR_OBJ = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(EDITOR_SRC)))
+EDITOR_DEPS = $(EDITOR_OBJ:%.o=%.d)
+EDITOR_OUTPUT = bin/$(EXE)_editor
+EDITOR_LDLIBS = $(SERVER_LDLIBS) -lz -lpthread
 
 DATA_DIRS = $(shell find ../data/ -type d)
 DATA_FILES = $(shell find ../data/ -type f -name '*')
-
-# Use .wo for webassembly
-SERVER_OBJ = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SERVER_SRC)))
-SERVER_DEPS = $(SERVER_OBJ:%.o=%.d)
-
-COLLIDER_TEST_OBJ = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(COLLIDER_TEST_SRC)))
-COLLIDER_TEST_DEPS = $(COLLIDER_TEST_OBJ:%.o=%.d)
-
-CLIENT_OBJ = $(patsubst %.cc,%.wo,$(patsubst %.c,%.wo,$(CLIENT_SRC)))
-CLIENT_DEPS = $(CLIENT_OBJ:%.wo=%.wd)
 
 HEADERS = $(shell find src/ -name "*.h") Makefile
 
@@ -39,11 +58,8 @@ CFLAGS = -Wall \
 
 # -I lib/assimp-4.1.0/include
 
-LDLIBS = -L/usr/lib
 SERVER_DEBUG = -g -O2
 SERVER_PROD = -O2
-SERVER_LDLIBS = $(LDLIBS) -lz -lpthread
-COLLIDER_TEST_LDLIBS = $(SERVER_LDLIBS) -lglfw -lGL -lGLEW
 # -s SAFE_HEAP=1
 WASM_DEBUG = -g4 -s ASSERTIONS=2 -s STACK_OVERFLOW_CHECK=1
 WASM_FLAGS =
@@ -70,9 +86,7 @@ SERVER_OUTPUT_PROD = bin/$(EXE)_server_prod
 
 CLIENT_OUTPUT = bin/$(EXE)_client.js
 
-COLLIDER_TEST_OUTPUT = bin/$(EXE)_collider
-
-all: $(SERVER_OUTPUT) $(CLIENT_OUTPUT) $(COLLIDER_TEST_OUTPUT)
+all: $(SERVER_OUTPUT) $(CLIENT_OUTPUT) $(COLLIDER_TEST_OUTPUT) $(EDITOR_OUTPUT)
 
 server_prod: $(SERVER_OUTPUT_PROD)
 
@@ -87,6 +101,10 @@ $(SERVER_OUTPUT): $(SERVER_OBJ) $(USOCKET)/uSockets.a
 $(COLLIDER_TEST_OUTPUT): $(COLLIDER_TEST_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
 	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(COLLIDER_TEST_LDLIBS) $(SERVER_DEBUG) -o $(COLLIDER_TEST_OUTPUT)
+
+$(EDITOR_OUTPUT): $(EDITOR_OBJ) $(USOCKET)/uSockets.a
+	mkdir -p bin
+	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(EDITOR_LDLIBS) $(SERVER_DEBUG) -o $(EDITOR_OUTPUT)
 
 $(SERVER_OUTPUT_PROD): $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
