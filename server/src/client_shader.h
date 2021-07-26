@@ -215,6 +215,14 @@ class DeferredShadingLightingShaderProgram : public ShaderProgram {
     GLuint quadVAO;
     GLuint quadVBO;
 
+    GLint uniformLightType;
+    GLint uniformLightPosition;
+    GLint uniformLightColor;
+    GLint uniformDepthBiasMVPNear;
+    GLint uniformDepthBiasMVPMid;
+    GLint uniformDepthBiasMVPFar;
+    GLint uniformShadowMapSize;
+
 public:
     Matrix4 standardRemapMatrix;
     DeferredShadingLightingShaderProgram() {
@@ -253,6 +261,15 @@ public:
         uniformProj = GetUniformLocation("u_Projection");
         uniformViewportSize = GetUniformLocation("u_ViewportSize");
         uniformUseProjectionAndView = GetUniformLocation("u_UseProjectionAndView");
+
+
+        uniformLightType = GetUniformLocation("u_Light.type");
+        uniformLightPosition = GetUniformLocation("u_Light.position");
+        uniformLightColor = GetUniformLocation("u_Light.color");
+        uniformDepthBiasMVPNear = GetUniformLocation("u_Light.depthBiasMVPNear");
+        uniformDepthBiasMVPMid = GetUniformLocation("u_Light.depthBiasMVPMid");
+        uniformDepthBiasMVPFar = GetUniformLocation("u_Light.depthBiasMVPFar");
+        uniformShadowMapSize = GetUniformLocation("u_Light.shadowMapSize");
 
         // Setup Texture Unit Ids
         glUniform1i(GetUniformLocation("gbuf_position"), 0);

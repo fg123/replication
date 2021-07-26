@@ -89,6 +89,12 @@ vec3 GetKs() {
 void main() {
     gbuf_position = FragmentPos;
     gbuf_normal = GetNormal();
+
+    if (FragmentOutline > 0.0) {
+        gbuf_diffuse = vec4(u_OutlineColor, 1);
+        return;
+    }
+
     gbuf_diffuse.rgb = GetKd();
     gbuf_diffuse.a = GetD();
     gbuf_specular.rgb = GetKs();

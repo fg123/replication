@@ -44,7 +44,7 @@ module.exports = class EscapeMenu {
 
         escapeMenuDiv.style.display = "none";
         setInterval(() => {
-            escapeMenuDiv.style.display = clientState.isPaused ? "block" : "none";
+            escapeMenuDiv.style.display = clientState.showInventory ? "block" : "none";
             this.DrawInventory();
         }, 100);
 

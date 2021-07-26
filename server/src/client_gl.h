@@ -33,6 +33,15 @@ struct DrawLayer {
     }
 };
 
+struct DrawLayerOptions {
+    bool drawBehind = true;
+    bool drawBackground = true;
+    bool drawForeground = true;
+
+    bool drawTransparent = true;
+    bool drawOpaque = true;
+};
+
 class ClientGL {
     EMSCRIPTEN_WEBGL_CONTEXT_HANDLE glContext;
 
@@ -80,7 +89,8 @@ class ClientGL {
 
     GBuffer worldGBuffer;
 
-    RenderBuffer minimapRenderBuffer;
+    GBuffer minimapGBuffer;
+
     RenderBuffer worldRenderBuffer;
     RenderBuffer bloomRenderBuffer;
 
@@ -89,6 +99,8 @@ class ClientGL {
     void RenderMinimap();
     void RenderWorld();
     void RenderLighting();
+    void RenderTransparentObjects();
+    void RenderUI(int width, int height);
 
 public:
 
@@ -112,8 +124,10 @@ public:
     void DrawDebug(Object* obj);
 
     void DrawShadowObjects(DrawLayer& layer);
-    void DrawObjects(bool drawBehind);
+    void DrawObjects(DrawLayerOptions options);
 
     void SetGLCullFace(GLenum setting);
     Vector2 WorldToScreenCoordinates(Vector3 worldCoord);
+
+    bool HandleInput(JSONDocument& input);
 };

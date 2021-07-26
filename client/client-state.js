@@ -22,6 +22,8 @@ module.exports = class ClientState {
         this.wasmVector3Location = this.wasm._malloc(3 * 4);
 
         this.isPaused = true;
+        this.showInventory = false;
+
         this.events = {};
 
         this.ping = 0;
@@ -213,13 +215,14 @@ module.exports = class ClientState {
             input.time = this.wasm._GetLastTickTime() + this.wasm._GetTickInterval();
             // console.log(input);
             const inputStr = JSON.stringify(input);
-            if (this.webSocket.readyState === WebSocket.OPEN) {
-                this.SendData(inputStr);
-            }
 
             // Serve Inputs into Local
             const heapString = this.ToHeapString(this.wasm, inputStr);
-            this.wasm._HandleLocalInput(this.localPlayerObjectId, heapString);
+            if (this.wasm._HandleLocalInput(this.localPlayerObjectId, heapString)) {
+                if (this.webSocket.readyState === WebSocket.OPEN) {
+                    this.SendData(inputStr);
+                }
+            }
             this.wasm._free(heapString);
         }
     }
@@ -257,6 +260,8 @@ module.exports = class ClientState {
 
         setInterval(() => {
             const preTick = Date.now();
+            this.wasm._SetIsPaused(this.isPaused);
+            this.wasm._SetIsInventoryOpen(this.showInventory);
             this.wasm._TickGame();
             const now = Date.now();
             this.performance.tickTime.pushValue(now - preTick);
@@ -268,47 +273,54 @@ module.exports = class ClientState {
         window.addEventListener('keydown', e => {
             if (!this.isPaused) {
                 e.preventDefault();
-                if (!e.repeat) {
-                    this.SendInputPacket({
-                        event: "kd",
-                        key: e.keyCode
-                    });
-                }
+            }
+            if (!e.repeat) {
+                this.SendInputPacket({
+                    event: "kd",
+                    key: e.keyCode,
+                    ctrl: e.ctrlKey,
+                    shift: e.shiftKey,
+                    alt: e.altKey,
+                });
             }
             if (e.keyCode === 9) {
+                e.preventDefault();
                 if (!this.isPaused) {
+                    this.showInventory = true;
                     document.exitPointerLock();
                 }
                 else {
+                    this.showInventory = false;
                     this.game.canvas.requestPointerLock();
                 }
             }
         });
 
         window.addEventListener('keyup', e => {
-            e.preventDefault();
+            if (!this.isPaused) {
+                e.preventDefault();
+            }
             this.SendInputPacket({
                 event: "ku",
-                key: e.keyCode
+                key: e.keyCode,
+				ctrl: e.ctrlKey,
+				shift: e.shiftKey,
+				alt: e.altKey,
             });
         });
 
         window.addEventListener('mousemove', e => {
-            if (!this.isPaused) {
-                this.rawMousePos.x = e.pageX;
-                this.rawMousePos.y = e.pageY;
-                this.mouseMovement.x += e.movementX;
-                this.mouseMovement.y += e.movementY;
-            }
+            this.rawMousePos.x = e.pageX;
+            this.rawMousePos.y = e.pageY;
+            this.mouseMovement.x += e.movementX;
+            this.mouseMovement.y += e.movementY;
         });
 
         window.addEventListener('mousedown', e => {
-            if (!this.isPaused) {
-                this.SendInputPacket({
-                    event: "md",
-                    button: e.which
-                });
-            }
+            this.SendInputPacket({
+                event: "md",
+                button: e.which
+            });
         });
 
         window.addEventListener('mouseup', e => {
@@ -319,12 +331,11 @@ module.exports = class ClientState {
         });
 
         window.addEventListener('wheel', e => {
-            if (!this.isPaused) {
-                this.SendInputPacket({
-                    event: "mw",
-                    delta: e.deltaY
-                });
-            }
+            this.SendInputPacket({
+                event: "mw",
+                x: e.deltaX,
+                y: e.deltaY
+            });
         });
     }
 
@@ -336,7 +347,9 @@ module.exports = class ClientState {
         this.SendInputPacket({
             event: "mm",
             x: this.mouseMovement.x,
-            y: this.mouseMovement.y
+            y: this.mouseMovement.y,
+            rx: this.rawMousePos.x,
+            ry: this.rawMousePos.y
         });
         this.mouseMovement.x = 0;
         this.mouseMovement.y = 0;

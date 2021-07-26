@@ -36,9 +36,9 @@ struct Vertex {
 // TODO: Implement point lights, will need a refactor of the shadow mapping
 //   system to support this
 
-enum class LightShape {
-    Sun,
-    Directional
+enum class LightShape : uint32_t {
+    Sun = 0,
+    Directional = 1
 };
 
 struct Light {

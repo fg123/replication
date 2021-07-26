@@ -10,6 +10,14 @@ uniform sampler2D gbuf_diffuse;
 uniform sampler2D gbuf_specular;
 
 struct Light {
+    int type;
+
+    // For Cone Light
+    vec3 coneDirection;
+    float height;
+    float baseRadius;
+
+
     vec3 position;
     vec3 color;
     int shadowMapSize;
@@ -26,8 +34,6 @@ uniform Light u_Light;
 uniform sampler2D u_shadowMap;
 uniform bool u_RenderShadows;
 
-const float AmbientIntensity = 0.5;
-
 const float nearBound = 10.0;
 const float middleBound = 50.0;
 const float shadowTransitionZone = 5.0;
@@ -37,6 +43,19 @@ vec3 FragmentPos;
 vec3 FragmentNormal;
 vec3 FragmentPosClipSpace;
 float SpecularFactor;
+
+bool IsPointInLightCone(vec3 point) {
+    float cone_dist = dot(point - u_Light.position, u_Light.coneDirection);
+
+    if (cone_dist < 0.0 || cone_dist > u_Light.height) {
+        return false;
+    }
+
+    float cone_radius = (cone_dist / u_Light.height) * u_Light.baseRadius;
+    float orth_distance = length((point - u_Light.position) - cone_dist * u_Light.coneDirection);
+
+    return (orth_distance < cone_radius);
+}
 
 float random(vec2 p) {
     vec2 K1 = vec2(
@@ -78,8 +97,8 @@ float GetAttenuationAtPoint(vec4 shadowCoord, vec2 offset, float bias, int sampl
             // Jitter uv
 
             // if (useJitter) {
-                uv.x += ((random(uv) - 0.5)) * pixel;
-                uv.y += ((random(uv) - 0.5)) * pixel;
+                // uv.x += ((random(uv) - 0.5)) * pixel;
+                // uv.y += ((random(uv) - 0.5)) * pixel;
             // }
 
             shadowAttenuation += QueryMap(u_shadowMap, uv, offset) + bias < shadowCoord.z ? 0.f : 1.f; break;
@@ -160,7 +179,7 @@ void main()
     // OutputColor = vec4(FragmentTexCoords.x, FragmentTexCoords.y, 1.0, 1.0);
     // return;
     // if (u_Light.shadowMapSize == 0) {
-    //     OutputColor = vec4(u_Light.position, 1.0);
+    //     OutputColor = vec4(1, 0, 0, 1.0);
     //     return;
     // }
     vec2 FragmentTexCoords = gl_FragCoord.xy / u_ViewportSize;
@@ -169,13 +188,20 @@ void main()
     FragmentPosClipSpace = vec3(u_View * vec4(FragmentPos, 1.0));
     SpecularFactor = texture(gbuf_specular, FragmentTexCoords).a;
 
+    if (u_Light.type == 1) {
+        if (!IsPointInLightCone(FragmentPos)) {
+            OutputColor = vec4(0.0, 0.0, 0.0, 0.0);
+            return;
+        }
+    }
+
+    // This is fully additive factors on top of ambient base color
     vec3 Diffuse = texture(gbuf_diffuse, FragmentTexCoords).rgb;
     vec3 Specular = texture(gbuf_specular, FragmentTexCoords).rgb;
 
     vec3 diffuseAccum = GetDiffuseAccumulation();
     vec3 specularAccum = GetSpecularAccumulation();
-    OutputColor = vec4(AmbientIntensity * Diffuse
-                    + Diffuse * diffuseAccum
+    OutputColor = vec4(Diffuse * diffuseAccum
                     + Specular * specularAccum, 1.0);
 }
 

@@ -48,6 +48,22 @@ extern "C" {
     Time ping = 0;
 
     EMSCRIPTEN_KEEPALIVE
+    bool isPaused = true;
+
+    EMSCRIPTEN_KEEPALIVE
+    bool isInventoryOpen = true;
+
+    EMSCRIPTEN_KEEPALIVE
+    void SetIsPaused(bool paused) {
+        isPaused = paused;
+    }
+
+    EMSCRIPTEN_KEEPALIVE
+    void SetIsInventoryOpen(bool inventoryOpen) {
+        isInventoryOpen = inventoryOpen;
+    }
+
+    EMSCRIPTEN_KEEPALIVE
     void SetPing(Time inPing) {
         ping = inPing;
     }
@@ -150,24 +166,34 @@ extern "C" {
     }
 
     EMSCRIPTEN_KEEPALIVE
-    void HandleLocalInput(ObjectID object, const char* input) {
+    bool HandleLocalInput(ObjectID object, const char* input) {
+        JSONDocument doc;
+        doc.Parse(input);
+
+        if (isInventoryOpen) return false;
+
+        if (isPaused) {
+            // UI Captured
+            clientGl.HandleInput(doc);
+            return false;
+        }
+
+
         Object* obj = game.GetObject(object);
         if (obj) {
             if (!GlobalSettings.Client_IgnoreServer) {
                 if (inputEvents.size() > MAX_INPUT_EVENT_QUEUE) {
                     LOG_WARN("Local input queue > " << MAX_INPUT_EVENT_QUEUE << ", server crashed?");
-                    return;
+                    return true;
                 }
-                inputEvents.emplace_back();
-                inputEvents.back().Parse(input);
+                inputEvents.push_back(std::move(doc));
                 static_cast<PlayerObject*>(obj)->OnInput(inputEvents.back());
             }
             else {
-                JSONDocument doc;
-                doc.Parse(input);
                 static_cast<PlayerObject*>(obj)->OnInput(doc);
             }
         }
+        return true;
     }
 
     EMSCRIPTEN_KEEPALIVE

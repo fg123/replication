@@ -340,41 +340,55 @@ void DeferredShadingLightingShaderProgram::PreDraw(Game& game,
 
 void DeferredShadingLightingShaderProgram::RenderLighting(Game& game) {
     if (!game.GetModel("Cone.obj")) return;
+    glEnable(GL_DEPTH_TEST);
 
     Mesh& coneMesh = game.GetModel("Cone.obj")->meshes[0];
 
     // Render Each Light Volume
     for (auto& light : game.GetAssetManager().lights) {
-        GLint lightPosition = GetUniformLocation("u_Light.position");
-        GLint lightColor = GetUniformLocation("u_Light.color");
-        GLint depthBiasMVPNear = GetUniformLocation("u_Light.depthBiasMVPNear");
-        GLint depthBiasMVPMid = GetUniformLocation("u_Light.depthBiasMVPMid");
-        GLint depthBiasMVPFar = GetUniformLocation("u_Light.depthBiasMVPFar");
-
-        GLint shadowMapSize = GetUniformLocation("u_Light.shadowMapSize");
-        glUniform3fv(lightPosition, 1, glm::value_ptr(light.position));
-        glUniform3fv(lightColor, 1, glm::value_ptr(light.color));
-        glUniformMatrix4fv(depthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPNear));
-        glUniformMatrix4fv(depthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPMid));
-        glUniformMatrix4fv(depthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPFar));
-        glUniform1i(shadowMapSize, light.shadowMapSize);
+        glUniform1i(uniformLightType, (int)light.shape);
+        glUniform3fv(uniformLightPosition, 1, glm::value_ptr(light.position));
+        glUniform3fv(uniformLightColor, 1, glm::value_ptr(light.color));
+        glUniformMatrix4fv(uniformDepthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPNear));
+        glUniformMatrix4fv(uniformDepthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPMid));
+        glUniformMatrix4fv(uniformDepthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPFar));
+        glUniform1i(uniformShadowMapSize, light.shadowMapSize);
 
         // See client_shader.h:83
         glActiveTexture(GL_TEXTURE4);
         glBindTexture(GL_TEXTURE_2D, light.shadowDepthMap);
 
         if (light.shape == LightShape::Directional) {
+            glUniform3f(GetUniformLocation("u_Light.coneDirection"), 0.0f, -1.0f, 0.0f);
+            glUniform1f(GetUniformLocation("u_Light.height"), 4.0f);
+            glUniform1f(GetUniformLocation("u_Light.baseRadius"), 2.0f);
+
+            // glCullFace(GL_BACK);
+            // glDisable(GL_DEPTH_TEST);
+            // glDepthMask(GL_FALSE);
+            // glUniform1i(uniformUseProjectionAndView, GL_FALSE);
+            // glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(standardRemapMatrix));
+            // glBindVertexArray(quadVAO);
+            // glDrawArrays(GL_TRIANGLES, 0, 6);
+            // glDepthMask(GL_TRUE);
+            // glEnable(GL_DEPTH_TEST);
+
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
             glCullFace(GL_FRONT);
             glUniform1i(uniformUseProjectionAndView, GL_TRUE);
             // Get the Light's View Matrix
             Matrix4 model = glm::translate(light.position) *
                 glm::transpose(glm::toMat4(DirectionToQuaternion(light.direction))) *
-                glm::scale(Vector3(4, 4, 4));
+                glm::scale(Vector3(4, 4, 10));
             glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
             glBindVertexArray(coneMesh.renderInfo.vao);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, coneMesh.renderInfo.ibo);
             glDrawElements(GL_TRIANGLES, coneMesh.renderInfo.iboCount, GL_UNSIGNED_INT, 0);
+
+            glDepthMask(GL_TRUE);
+            glEnable(GL_DEPTH_TEST);
         }
         else if (light.shape == LightShape::Sun) {
             glCullFace(GL_BACK);

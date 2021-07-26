@@ -6,6 +6,9 @@
 #include "client_shader.h"
 #include "bvh.h"
 #include "global.h"
+#include "client_imgui/imgui.h"
+#include "client_imgui/imgui_impl_opengl3.h"
+#include "client_imgui/imgui_impl_web.h"
 
 #include <vector>
 #include <fstream>
@@ -58,8 +61,23 @@ void ClientGL::SetupContext() {
     antialiasShaderProgram = new QuadShaderProgram("shaders/Antialias.fs");
 
     // Generate Texture for Minimap FBO
-    minimapRenderBuffer.SetSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
+    minimapGBuffer.SetSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
+
+    // Setup IMGUI
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    UNUSED(io);
+    ImGui::StyleColorsDark();
+    ImGuiStyle* style = &ImGui::GetStyle();
+    style->WindowRounding = 5.0f;
+    ImGui_ImplWeb_Init();
+    ImGui_ImplOpenGL3_Init("#version 300 es");
 }
+
+// TODO: somewhere we probably want to destroy the context for the imgui
+//   but at this point the game either closes and ends, there's no
+//   shutdown procedure on the client side.
 
 void SetupMesh(Mesh& mesh, const std::vector<float>& verts, const std::vector<unsigned int>& indices) {
     glGenVertexArrays(1, &mesh.renderInfo.vao);
@@ -220,7 +238,9 @@ void ClientGL::DrawObject(DrawParams& params, int& lastProgram) {
         lastProgram = program;
         shaderPrograms[program]->Use();
     }
-    DefaultMaterialShaderProgram* defaultProgram = dynamic_cast<DefaultMaterialShaderProgram*>(shaderPrograms[program]);
+    DeferredShadingGeometryShaderProgram* defaultProgram = dynamic_cast<
+        DeferredShadingGeometryShaderProgram*>(
+            shaderPrograms[program]);
     if (params.hasOutline && defaultProgram) {
         // Render Front only
         SetGLCullFace(GL_FRONT);
@@ -321,9 +341,9 @@ void ClientGL::SetupDrawingLayers() {
 }
 
 void ClientGL::RenderMinimap() {
-    minimapRenderBuffer.Bind();
-    glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    minimapGBuffer.Bind();
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     Vector3 minimapCamPosition = Vector3(cameraPosition.x, 100, cameraPosition.z);
     // Matrix4 minimapView = glm::lookAt(minimapCamPosition,
@@ -342,27 +362,31 @@ void ClientGL::RenderMinimap() {
 
     debugShaderProgram->Use();
     debugShaderProgram->PreDraw(game, minimapCamPosition, minimapView, minimapProj);
-    DrawObjects(true);
+    DrawLayerOptions options;
+    DrawObjects(options);
 
     if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
         shaderPrograms[0]->Use();
         glDisable(GL_DEPTH_TEST);
 
-        shaderPrograms[0]->Draw(*this,  glm::translate(Vector3(cameraPosition.x, 95, cameraPosition.z)) *
+        shaderPrograms[0]->Draw(*this, glm::translate(Vector3(cameraPosition.x, 95, cameraPosition.z)) *
                 glm::transpose(glm::toMat4(localPlayer->clientRotation)) * glm::scale(Vector3(2, 2, 2)), &minimapMarker);
     }
 
     // Draw Minimap onto base
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // // glDisable(GL_DEPTH_TEST);
 
-    GLuint minimapTexture = minimapRenderBuffer.BlitTexture();
+    GLuint minimapTexture = minimapGBuffer.g_diffuse;
     worldRenderBuffer.Bind();
     minimapShaderProgram->Use();
     Matrix4 minimapQuadTransform = glm::translate(
         Vector3((1 - (0.75 * (windowHeight / (float) windowWidth))), 0.25, 0)) *
         glm::scale(Vector3(0.75f * (windowHeight / (float)windowWidth), 0.75f, 1));
     minimapShaderProgram->DrawQuad(minimapTexture, minimapQuadTransform);
+
+    glDisable(GL_BLEND);
 }
 
 void ClientGL::RenderWorld() {
@@ -379,7 +403,41 @@ void ClientGL::RenderWorld() {
     glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    DrawObjects(false);
+    DrawLayerOptions options;
+    options.drawTransparent = false;
+    options.drawBehind = false;
+    DrawObjects(options);
+}
+
+
+void ClientGL::RenderTransparentObjects() {
+    // World Render
+    for (auto& program : shaderPrograms) {
+        program->Use();
+        program->PreDraw(game, cameraPosition, viewMat, projMat);
+        program->SetRenderShadows(!GlobalSettings.Client_NoShadows);
+    }
+    debugShaderProgram->Use();
+    debugShaderProgram->PreDraw(game, cameraPosition, viewMat, projMat);
+
+    // Clear just the color, keep depth, draw transparent objects
+    worldGBuffer.Bind();
+    glClearColor(0, 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    DrawLayerOptions options;
+    options.drawOpaque = false;
+    options.drawBehind = false;
+    DrawObjects(options);
+
+    worldRenderBuffer.Bind();
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    GLuint diffuseTexture = worldGBuffer.g_diffuse;
+
+    quadDrawShaderProgram->Use();
+    quadDrawShaderProgram->DrawQuad(diffuseTexture, quadDrawShaderProgram->standardRemapMatrix);
 }
 
 void ClientGL::RenderLighting() {
@@ -573,8 +631,9 @@ void ClientGL::Draw(int width, int height) {
 
     RenderWorld();
     RenderLighting();
+    RenderTransparentObjects();
 
-    // RenderMinimap();
+    RenderMinimap();
 
     // Finally render everything to the main buffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -587,7 +646,10 @@ void ClientGL::Draw(int width, int height) {
         GL_COLOR_BUFFER_BIT, GL_NEAREST
     );
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    // Handle any UI drawing
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    RenderUI(width, height);
+
     if (GlobalSettings.Client_DrawShadowMaps) {
         Matrix4 transform = glm::translate(Vector3(-0.5f, -0.5f, 0.0f));
         for (auto& light : game.GetAssetManager().lights) {
@@ -614,28 +676,88 @@ Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
     return Vector2((NDC.x + 1) * (windowWidth / 2), windowHeight - (NDC.y + 1) * (windowHeight / 2));
 }
 
-void ClientGL::DrawObjects(bool drawBehind) {
+void ClientGL::RenderUI(int width, int height) {
+    ImGuiIO& io = ImGui::GetIO();
+    io.DisplaySize = ImVec2(width, height);
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplWeb_NewFrame();
+    ImGui::NewFrame();
+
+    // bool demoWindowOpen;
+    // ImGui::ShowDemoWindow(&isOpen);
+
+    bool renderSettingWindowActive = true;
+    ImGui::Begin("Render Settings", &renderSettingWindowActive, ImGuiWindowFlags_None);
+    ImGui::Separator();
+
+    if (ImGui::CollapsingHeader("GBuffer")) {
+        ImVec2 uv_min = ImVec2(0.0f, 1.0f);                 // Top-left
+        ImVec2 uv_max = ImVec2(1.0f, 0.0f);                 // Lower-right
+        ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
+        ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+        ImVec2 size = ImVec2(worldGBuffer.width / 4.0, worldGBuffer.height / 4.0);
+        if (ImGui::TreeNode("Diffuse")) {
+            ImGui::Image((ImTextureID)worldGBuffer.g_diffuse, size, uv_min, uv_max, tint_col, border_col);
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Position")) {
+            ImGui::Image((ImTextureID)worldGBuffer.g_position, size, uv_min, uv_max, tint_col, border_col);
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Normal")) {
+            ImGui::Image((ImTextureID)worldGBuffer.g_normal, size, uv_min, uv_max, tint_col, border_col);
+            ImGui::TreePop();
+        }
+        if (ImGui::TreeNode("Specular")) {
+            ImGui::Image((ImTextureID)worldGBuffer.g_specular, size, uv_min, uv_max, tint_col, border_col);
+            ImGui::TreePop();
+        }
+    }
+    if (ImGui::CollapsingHeader("Minimap GBuffer")) {
+        ImVec2 uv_min = ImVec2(0.0f, 1.0f);                 // Top-left
+        ImVec2 uv_max = ImVec2(1.0f, 0.0f);                 // Lower-right
+        ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
+        ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+        ImVec2 size = ImVec2(minimapGBuffer.width, minimapGBuffer.height);
+        if (ImGui::TreeNode("Diffuse")) {
+            ImGui::Image((ImTextureID)minimapGBuffer.g_diffuse, size, uv_min, uv_max, tint_col, border_col);
+            ImGui::TreePop();
+        }
+    }
+    ImGui::End();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void ClientGL::DrawObjects(DrawLayerOptions options) {
     int lastProgram = -1;
     glEnable(GL_CULL_FACE);
     SetGLCullFace(GL_BACK);
     // Draw Background
-    for (auto& pair : backgroundLayer.opaque) {
-        for (auto& param : pair.second) {
-            if (param.id == game.localPlayerId) continue;
-            DrawObject(param, lastProgram);
+    if (options.drawBackground && options.drawOpaque) {
+        for (auto& pair : backgroundLayer.opaque) {
+            for (auto& param : pair.second) {
+                if (param.id == game.localPlayerId) continue;
+                DrawObject(param, lastProgram);
+            }
         }
     }
-    for (auto it = backgroundLayer.transparent.rbegin(); it != backgroundLayer.transparent.rend(); ++it) {
-        // LOG_DEBUG(it->second.mesh->name);
-        DrawObject(it->second, lastProgram);
+    if (options.drawBackground && options.drawTransparent) {
+        for (auto it = backgroundLayer.transparent.rbegin(); it != backgroundLayer.transparent.rend(); ++it) {
+            // LOG_DEBUG(it->second.mesh->name);
+            DrawObject(it->second, lastProgram);
+        }
     }
-
-    if (drawBehind) {
+    if (options.drawBehind && options.drawOpaque) {
         for (auto& pair : behindPlayerLayer.opaque) {
             for (auto& param : pair.second) {
                 DrawObject(param, lastProgram);
             }
         }
+    }
+    if (options.drawBehind && options.drawTransparent) {
         for (auto it = behindPlayerLayer.transparent.rbegin(); it != behindPlayerLayer.transparent.rend(); ++it) {
             // LOG_DEBUG(it->second.mesh->name);
             DrawObject(it->second, lastProgram);
@@ -645,17 +767,28 @@ void ClientGL::DrawObjects(bool drawBehind) {
     // glClear(GL_DEPTH_BUFFER_BIT);
 
     glDisable(GL_CULL_FACE);
-    for (auto& pair : foregroundLayer.opaque) {
-        for (auto& param : pair.second) {
-            DrawObject(param, lastProgram);
+    if (options.drawForeground && options.drawOpaque) {
+        for (auto& pair : foregroundLayer.opaque) {
+            for (auto& param : pair.second) {
+                DrawObject(param, lastProgram);
+            }
         }
     }
-    for (auto it = foregroundLayer.transparent.rbegin(); it != foregroundLayer.transparent.rend(); ++it) {
-        DrawObject(it->second, lastProgram);
+    if (options.drawForeground && options.drawTransparent) {
+        for (auto it = foregroundLayer.transparent.rbegin(); it != foregroundLayer.transparent.rend(); ++it) {
+            DrawObject(it->second, lastProgram);
+        }
     }
 
     // Debug Drawing
     for (auto& gameObjectPair : game.GetGameObjects()) {
         DrawDebug(gameObjectPair.second);
     }
+}
+
+bool ClientGL::HandleInput(JSONDocument& input) {
+    ImGui_ImplWeb_ProcessEvent(input);
+    if (ImGui::GetIO().WantCaptureMouse) return true;
+    if (ImGui::GetIO().WantCaptureKeyboard) return true;
+    return false;
 }

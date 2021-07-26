@@ -7,10 +7,14 @@ module.exports = class GameCanvas {
 
         document.addEventListener('pointerlockchange', () => {
             this.clientState.isPaused = document.pointerLockElement !== this.canvas;
+            console.log(this.clientState.isPaused);
+            if (!this.clientState.isPaused) {
+				this.clientState.showInventory = false;
+			}
         }, false);
 
         // window.addEventListener("click", () => {
-        //     console.log("Click");
+        //     // console.log("Click");
         //     this.canvas.requestPointerLock();
         // });
 
@@ -59,9 +63,7 @@ module.exports = class GameCanvas {
             }
         }
 
-        if (!this.clientState.isPaused) {
-            this.clientState.SendMouseMoveEvent();
-        }
+        this.clientState.SendMouseMoveEvent();
 
         const postDraw = Date.now();
         this.clientState.performance.drawTime.pushValue(postDraw - preDraw);

@@ -95,6 +95,7 @@ void Game::LoadMap(std::string mapPath) {
         Light& light = assetManager.lights.emplace_back();
         ProcessReplicationDispatch(light, lightJson);
         light.shape = LightShape::Sun;
+        light.shadowMapSize = 2048;
         light.InitializeLight();
     }
     for (json& audio : obj["sounds"].GetArray()) {

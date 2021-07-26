@@ -547,7 +547,7 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
         }
     }
     else if (obj["event"] == "mw") {
-        mouseWheelDelta = obj["delta"].GetInt();
+        mouseWheelDelta = obj["y"].GetInt();
     }
     else if (obj["event"] == "inventoryDrop") {
         InventoryDrop(obj["id"].GetInt());
