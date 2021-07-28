@@ -1,0 +1,123 @@
+# Blender MTL File: 'Warehouse.blend'
+# Material Count: 10
+
+newmtl Bricks
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\Bricks059_1K-JPG\\Bricks059_1K_Normal.jpg
+map_Kd ..\\textures\\Bricks059_1K-JPG\\Bricks059_1K_Color.jpg
+map_Ns ..\\textures\\Bricks059_1K-JPG\\Bricks059_1K_Roughness.jpg
+
+newmtl CardboardBox
+Ns 179.999996
+Ka 1.000000 1.000000 1.000000
+Kd 0.500000 0.500000 0.500000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\CardboardBox\\CardboardBox_LP_lambert1_Normal.png
+map_Kd ..\\textures\\CardboardBox\\CardboardBox_LP_lambert1_AlbedoTransparency.png
+
+newmtl Concrete
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\Concrete036_1K-JPG\\Concrete036_1K_Normal.jpg
+map_Kd ..\\textures\\Concrete036_1K-JPG\\Concrete036_1K_Color.jpg
+map_Ns ..\\textures\\Concrete036_1K-JPG\\Concrete036_1K_Roughness.jpg
+
+newmtl DirtyGlass
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.345455
+illum 9
+map_Bump ..\\textures\\Leaking003_1K-JPG\\Leaking003_1K_Normal.jpg
+map_Kd ..\\textures\\Leaking003_1K-JPG\\Leaking003_1K_Color.jpg
+map_d ..\\textures\\Leaking003_1K-JPG\\Leaking003_1K_Opacity.jpg
+
+newmtl Light
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 1.000000 1.000000 1.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl Marble
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\Marble012_1K-JPG\\Marble012_1K_Normal.jpg
+map_Kd ..\\textures\\Marble012_1K-JPG\\Marble012_1K_Color.jpg
+
+newmtl Metal
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\Concrete036_1K-JPG\\Concrete036_1K_Normal.jpg
+map_Kd ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Color.jpg
+
+newmtl Metal_Ramp
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.100000 0.100000 0.100000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Normal.jpg
+map_Kd ..\\textures\\Metal038_1K-JPG\\Metal038_1K_Color.jpg
+
+newmtl Wet_Floor_Sign
+Ns 179.999996
+Ka 1.000000 1.000000 1.000000
+Kd 0.500000 0.500000 0.500000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump ..\\textures\\WetFloor\\wet_floor_sign_1001_Normal.png
+map_Kd ..\\textures\\WetFloor\\wet_floor_sign_1001_BaseColor.png
+
+newmtl Wood
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 1
+map_Bump ..\\textures\\Wood026_1K-JPG\\Wood026_1K_Normal.jpg
+map_Kd ..\\textures\\Wood026_1K-JPG\\Wood026_1K_Color.jpg

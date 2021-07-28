@@ -35,12 +35,6 @@ struct PlayerSocketData {
     PlayerObject* playerObject;
 };
 
-#ifdef BUILD_SERVER
-    #define RESOURCE_PATH(path) (std::string("data/") + path)
-#else
-    #define RESOURCE_PATH(path) (path)
-#endif
-
 class Game {
     std::atomic<ObjectID> nextId;
 

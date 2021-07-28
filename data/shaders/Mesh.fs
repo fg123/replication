@@ -1,4 +1,3 @@
-#version 300 es
 precision highp float;
 
 float PI = 3.1415926535;

@@ -17,6 +17,8 @@
 
 #include "objects.h"
 
+#include "scene.h"
+
 #include <fstream>
 #include <exception>
 

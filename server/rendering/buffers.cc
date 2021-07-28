@@ -1,5 +1,5 @@
-#include "client_buffers.h"
-#include "client_gl.h"
+#include "buffers.h"
+#include "logging.h"
 
 void RenderBuffer::SetSize(int newWidth, int newHeight) {
     if (newWidth == width && newHeight == height) {

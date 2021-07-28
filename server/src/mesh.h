@@ -7,11 +7,8 @@
 #include <string>
 #include <vector>
 
-#ifdef BUILD_CLIENT
-    #include "light.h"
-    #include <GLES3/gl3.h>
-    #include <GLES3/gl2ext.h>
-#endif
+#include "light.h"
+#include "opengl.h"
 
 // Handles Meshes and Vertex Data for Rendering
 // These structs can be replicable but we want to keep them POD
@@ -134,6 +131,7 @@ public:
     std::vector<unsigned int> indices;
 
     Vector3 center;
+
 #ifdef BUILD_CLIENT
     Material* material = nullptr;
     MeshRenderInfo renderInfo;

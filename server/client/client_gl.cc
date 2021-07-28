@@ -3,12 +3,14 @@
 #include "game.h"
 #include "player.h"
 #include "vector.h"
-#include "client_shader.h"
+#include "shader.h"
 #include "bvh.h"
 #include "global.h"
-#include "client_imgui/imgui.h"
-#include "client_imgui/imgui_impl_opengl3.h"
-#include "client_imgui/imgui_impl_web.h"
+
+#define IMGUI_IMPL_OPENGL_ES3
+#include "imgui.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_web.h"
 
 #include <vector>
 #include <fstream>
@@ -158,7 +160,7 @@ void ClientGL::DrawDebugLine(const Vector3& color, const Vector3& from, const Ve
         glm::transpose(glm::toMat4(DirectionToQuaternion(to - from))) *
         glm::scale(Vector3(length));
     debugShaderProgram->SetColor(color);
-    debugShaderProgram->Draw(*this, model, &debugLine);
+    debugShaderProgram->Draw(model, &debugLine);
 }
 
 void ClientGL::DrawDebug(Object* obj) {
@@ -175,13 +177,13 @@ void ClientGL::DrawDebug(Object* obj) {
             debugShaderProgram->SetColor(Vector3(1, 0, 0));
             AABB broad = cptr->GetBroadAABB();
             Matrix4 model = glm::translate(broad.ptMin) * glm::scale(broad.ptMax - broad.ptMin);
-            debugShaderProgram->Draw(*this, model, &debugCube);
+            debugShaderProgram->Draw(model, &debugCube);
 
             if (OBBCollider* collider = dynamic_cast<OBBCollider*>(cptr)) {
                 // Transform locally first
                 Matrix4 model = collider->GetWorldTransform() * glm::scale(collider->size);
                 debugShaderProgram->SetColor(Vector3(0, 0, 1));
-                debugShaderProgram->Draw(*this, model, &debugCube);
+                debugShaderProgram->Draw(model, &debugCube);
             }
             else if (StaticMeshCollider* collider = dynamic_cast<StaticMeshCollider*>(cptr)) {
                 if (GlobalSettings.Client_DrawBVH) {
@@ -199,7 +201,7 @@ void ClientGL::DrawDebug(Object* obj) {
                             int level = pair.second;
                             debugShaderProgram->SetColor(Vector3(level % 3 == 0, level % 3 == 1, level % 3 == 2));
                             Matrix4 model = glm::translate(front->collider.ptMin) * glm::scale(front->collider.ptMax - front->collider.ptMin);
-                            debugShaderProgram->Draw(*this, model, &debugCube);
+                            debugShaderProgram->Draw(model, &debugCube);
                         }
                     }
                 }
@@ -207,16 +209,16 @@ void ClientGL::DrawDebug(Object* obj) {
             else if (SphereCollider* collider = dynamic_cast<SphereCollider*>(cptr)) {
                 Matrix4 model = collider->GetWorldTransform() * glm::scale(Vector3(collider->radius));
                 debugShaderProgram->SetColor(Vector3(0, 0, 1));
-                debugShaderProgram->Draw(*this, model, &debugCircle);
+                debugShaderProgram->Draw(model, &debugCircle);
             }
             else if (CapsuleCollider* collider = dynamic_cast<CapsuleCollider*>(cptr)) {
                 Matrix4 model = collider->GetWorldTransform() * glm::scale(Vector3(collider->radius));
                 debugShaderProgram->SetColor(Vector3(0, 0, 1));
-                debugShaderProgram->Draw(*this, model, &debugCircle);
+                debugShaderProgram->Draw(model, &debugCircle);
 
                 model = collider->GetWorldTransformForLocalPoint(collider->position2) * glm::scale(Vector3(collider->radius));
                 debugShaderProgram->SetColor(Vector3(0, 0, 1));
-                debugShaderProgram->Draw(*this, model, &debugCircle);
+                debugShaderProgram->Draw(model, &debugCircle);
 
                 Vector3 pt1 = Vector3(collider->GetWorldTransform() * Vector4(0, 0, 0, 1));
                 Vector3 pt2 = Vector3(collider->GetWorldTransformForLocalPoint(collider->position2) * Vector4(0, 0, 0, 1));
@@ -226,7 +228,7 @@ void ClientGL::DrawDebug(Object* obj) {
                     collider->radius, glm::distance(collider->position, collider->position2)));
 
                 debugShaderProgram->SetColor(Vector3(0, 0, 1));
-                debugShaderProgram->Draw(*this, model, &debugCylinder);
+                debugShaderProgram->Draw(model, &debugCylinder);
             }
         }
     }
@@ -245,13 +247,13 @@ void ClientGL::DrawObject(DrawParams& params, int& lastProgram) {
         // Render Front only
         SetGLCullFace(GL_FRONT);
         defaultProgram->SetDrawOutline(0.02, Vector3(1));
-        shaderPrograms[program]->Draw(*this, params.transform, params.mesh);
+        shaderPrograms[program]->Draw(params.transform, params.mesh);
     }
     if (defaultProgram) {
         defaultProgram->SetDrawOutline(0, Vector3());
     }
     SetGLCullFace(GL_BACK);
-    shaderPrograms[program]->Draw(*this, params.transform, params.mesh);
+    shaderPrograms[program]->Draw(params.transform, params.mesh);
 }
 
 template<typename T>
@@ -285,7 +287,7 @@ void ClientGL::DrawShadowObjects(DrawLayer& layer) {
     for (auto& pair : layer.opaque) {
         for (auto& param : pair.second) {
             if (!param.castShadows) continue;
-            shadowMapShaderProgram->Draw(*this, param.transform, param.mesh);
+            shadowMapShaderProgram->Draw( param.transform, param.mesh);
         }
     }
 }
@@ -369,7 +371,7 @@ void ClientGL::RenderMinimap() {
         shaderPrograms[0]->Use();
         glDisable(GL_DEPTH_TEST);
 
-        shaderPrograms[0]->Draw(*this, glm::translate(Vector3(cameraPosition.x, 95, cameraPosition.z)) *
+        shaderPrograms[0]->Draw(glm::translate(Vector3(cameraPosition.x, 95, cameraPosition.z)) *
                 glm::transpose(glm::toMat4(localPlayer->clientRotation)) * glm::scale(Vector3(2, 2, 2)), &minimapMarker);
     }
 

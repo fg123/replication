@@ -1,9 +1,9 @@
 #pragma once
 
-#include <GLES3/gl3.h>
 #include <string>
 #include <vector>
 
+#include "opengl.h"
 #include "vector.h"
 #include "object.h"
 
@@ -26,11 +26,10 @@ public:
     GLint GetUniformLocation(const std::string& uniName);
     GLint GetAttributeLocation(const std::string& attrName);
 
-    virtual void PreDraw(Game& game,
-                         const Vector3& viewPos,
+    virtual void PreDraw(const Vector3& viewPos,
                          const Matrix4& view,
                          const Matrix4& proj) = 0;
-    virtual void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) = 0;
+    virtual void Draw(const Matrix4& model, Mesh* mesh) = 0;
     virtual void SetRenderShadows(bool render) {}
 };
 
@@ -114,11 +113,10 @@ public:
         }
     }
 
-    void PreDraw(Game& game,
-                 const Vector3& viewPos,
+    void PreDraw(const Vector3& viewPos,
                  const Matrix4& view,
                  const Matrix4& proj) override;
-    void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) override;
+    void Draw(const Matrix4& model, Mesh* mesh) override;
 };
 
 class DeferredShadingGeometryShaderProgram : public ShaderProgram {
@@ -192,11 +190,10 @@ public:
         }
     }
 
-    void PreDraw(Game& game,
-                 const Vector3& viewPos,
+    void PreDraw(const Vector3& viewPos,
                  const Matrix4& view,
                  const Matrix4& proj) override;
-    void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) override;
+    void Draw(const Matrix4& model, Mesh* mesh) override;
 };
 
 class DeferredShadingLightingShaderProgram : public ShaderProgram {
@@ -289,11 +286,10 @@ public:
         glUniform2f(uniformViewportSize, (float)width, (float)height);
     }
 
-    void PreDraw(Game& game,
-                 const Vector3& viewPos,
+    void PreDraw(const Vector3& viewPos,
                  const Matrix4& view,
                  const Matrix4& proj) override;
-    void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) override {}
+    void Draw(const Matrix4& model, Mesh* mesh) override {}
 
     void RenderLighting(Game& game);
 };
@@ -319,11 +315,10 @@ public:
         uniformColor = GetUniformLocation("u_Color");
     }
 
-    void PreDraw(Game& game,
-                 const Vector3& viewPos,
+    void PreDraw(const Vector3& viewPos,
                  const Matrix4& view,
                  const Matrix4& proj) override;
-    void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) override;
+    void Draw(const Matrix4& model, Mesh* mesh) override;
 
     void SetDrawType(GLenum inDrawType) {
         drawType = inDrawType;
@@ -351,11 +346,10 @@ public:
         uniformModel = GetUniformLocation("u_Model");
     }
 
-    void PreDraw(Game& game,
-                 const Vector3& viewPos,
+    void PreDraw(const Vector3& viewPos,
                  const Matrix4& view,
                  const Matrix4& proj) override;
-    void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) override;
+    void Draw(const Matrix4& model, Mesh* mesh) override;
 };
 
 class QuadShaderProgram : public ShaderProgram {
@@ -404,11 +398,10 @@ public:
     }
 
 
-    void PreDraw(Game& game,
-                 const Vector3& viewPos,
+    void PreDraw(const Vector3& viewPos,
                  const Matrix4& view,
                  const Matrix4& proj) {}
-    void Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {}
+    void Draw(const Matrix4& model, Mesh* mesh) {}
 
     void SetIsDepth(bool isDepth) {
         glUniform1i(uniformIsDepth, isDepth);

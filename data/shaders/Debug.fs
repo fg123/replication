@@ -1,5 +1,3 @@
-#version 300 es
-
 precision highp float;
 
 uniform vec3 u_Color;

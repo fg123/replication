@@ -1,4 +1,3 @@
-#version 300 es
 
 uniform mat4 u_Projection;
 uniform mat4 u_View;

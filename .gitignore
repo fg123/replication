@@ -1,8 +1,10 @@
 // C++ Object Files
 *.o
 *.wo
+*.eo
 *.d
 *.wd
+*.ed
 
 // C++ Build File
 server/bin/game*

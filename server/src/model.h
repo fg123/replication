@@ -12,6 +12,7 @@ using ModelID = uint32_t;
 
 class Model {
 public:
+    std::string name;
     ModelID id;
 
     // Meshes to be rendered

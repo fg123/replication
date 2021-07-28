@@ -2,36 +2,18 @@
 
 // Handles Client Side WebGL rendering
 #include "game.h"
-#include "client_shader.h"
-#include "client_buffers.h"
+#include "shader.h"
+#include "buffers.h"
 
 #include <string>
 #include <algorithm>
 
-#include <GLES3/gl3.h>
+#include "opengl.h"
+
 #include <emscripten/html5.h>
 #include <emscripten/fetch.h>
 
 const unsigned int MINIMAP_WIDTH = 512, MINIMAP_HEIGHT = 512;
-
-struct DrawParams {
-    ObjectID id;
-    Mesh* mesh = nullptr;
-    Matrix4 transform;
-    bool castShadows;
-    bool hasOutline;
-};
-
-struct DrawLayer {
-    // std::map<float, std::vector<DrawParams>> opaque;
-    std::map<Material*, std::vector<DrawParams>> opaque;
-    std::map<float, DrawParams> transparent;
-
-    void Clear() {
-        opaque.clear();
-        transparent.clear();
-    }
-};
 
 struct DrawLayerOptions {
     bool drawBehind = true;

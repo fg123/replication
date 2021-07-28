@@ -1,10 +1,14 @@
-#include "client_shader.h"
+#include "shader.h"
 #include "logging.h"
-#include "client_gl.h"
+
+// TODO: remove
+#include "game.h"
+#include "scene.h"
 
 #include <fstream>
 
-std::string ShaderProgram::LoadURL(const std::string& url) {
+std::string ShaderProgram::LoadURL(const std::string& name) {
+    std::string url = RESOURCE_PATH(name);
     LOG_DEBUG("Loading " << url);
     std::ifstream t(url);
     if (!t.good()) {
@@ -15,10 +19,24 @@ std::string ShaderProgram::LoadURL(const std::string& url) {
                  std::istreambuf_iterator<char>());
 }
 
+#ifdef BUILD_EDITOR
+
+const char* SHADER_HEADER = "#version 330\n";
+
+#elif BUILD_CLIENT
+
+const char* SHADER_HEADER = "#version 300 es\n";
+
+#endif
+
+
 void ShaderProgram::AddShader(const std::string& data, GLenum shaderType) {
+
+    std::string fullShader = std::string(SHADER_HEADER) + data;
+
     GLuint shader = glCreateShader(shaderType);
 
-    const char* shaderData = data.c_str();
+    const char* shaderData = fullShader.c_str();
     glShaderSource(shader, 1, (const GLchar**)&shaderData, NULL);
     glCompileShader(shader);
 
@@ -88,7 +106,7 @@ GLint ShaderProgram::GetUniformLocation(const std::string& uniName) {
     return result;
 }
 
-void DefaultMaterialShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {
+void DefaultMaterialShaderProgram::Draw(const Matrix4& model, Mesh* mesh) {
     // Set Model Transform
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -151,8 +169,7 @@ void DefaultMaterialShaderProgram::Draw(ClientGL& client, const Matrix4& model, 
     glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
 }
 
-void DefaultMaterialShaderProgram::PreDraw(Game& game,
-                const Vector3& viewPos,
+void DefaultMaterialShaderProgram::PreDraw(const Vector3& viewPos,
                 const Matrix4& view,
                 const Matrix4& proj) {
 
@@ -162,40 +179,38 @@ void DefaultMaterialShaderProgram::PreDraw(Game& game,
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glUniform1f(uniformRandSeed, (float) game.GetGameTime() / 16);
-
     glUniform3fv(uniformViewerPosition, 1, glm::value_ptr(viewPos));
     glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
 
     // Load Lights Into Shader
-    auto& lights = game.GetAssetManager().lights;
-    int numLights = lights.size();
-    // LOG_DEBUG("Loading " << numLights << " into uniform");
-    glUniform1i(uniformNumLights, numLights);
-    for (int i = 0; i < numLights; i++) {
-        GLint lightPosition = GetUniformLocation("u_Lights[" + std::to_string(i) + "].position");
-        GLint lightColor = GetUniformLocation("u_Lights[" + std::to_string(i) + "].color");
-        GLint depthBiasMVPNear = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPNear");
-        GLint depthBiasMVPMid = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPMid");
-        GLint depthBiasMVPFar = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPFar");
+    // auto& lights = game.GetAssetManager().lights;
+    // int numLights = lights.size();
+    // // LOG_DEBUG("Loading " << numLights << " into uniform");
+    // glUniform1i(uniformNumLights, numLights);
+    // for (int i = 0; i < numLights; i++) {
+    //     GLint lightPosition = GetUniformLocation("u_Lights[" + std::to_string(i) + "].position");
+    //     GLint lightColor = GetUniformLocation("u_Lights[" + std::to_string(i) + "].color");
+    //     GLint depthBiasMVPNear = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPNear");
+    //     GLint depthBiasMVPMid = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPMid");
+    //     GLint depthBiasMVPFar = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPFar");
 
-        GLint shadowMapSize = GetUniformLocation("u_Lights[" + std::to_string(i) + "].shadowMapSize");
-        glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
-        glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
-        glUniformMatrix4fv(depthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPNear));
-        glUniformMatrix4fv(depthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPMid));
-        glUniformMatrix4fv(depthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPFar));
-        glUniform1i(shadowMapSize, lights[i].shadowMapSize);
+    //     GLint shadowMapSize = GetUniformLocation("u_Lights[" + std::to_string(i) + "].shadowMapSize");
+    //     glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
+    //     glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
+    //     glUniformMatrix4fv(depthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPNear));
+    //     glUniformMatrix4fv(depthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPMid));
+    //     glUniformMatrix4fv(depthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPFar));
+    //     glUniform1i(shadowMapSize, lights[i].shadowMapSize);
 
-        // See client_shader.h:83
-        glActiveTexture(GL_TEXTURE7 + i);
-        glBindTexture(GL_TEXTURE_2D, lights[i].shadowDepthMap);
-    }
+    //     // See client_shader.h:83
+    //     glActiveTexture(GL_TEXTURE7 + i);
+    //     glBindTexture(GL_TEXTURE_2D, lights[i].shadowDepthMap);
+    // }
 }
 
 
-void DeferredShadingGeometryShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {
+void DeferredShadingGeometryShaderProgram::Draw(const Matrix4& model, Mesh* mesh) {
     // Set Model Transform
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -258,8 +273,7 @@ void DeferredShadingGeometryShaderProgram::Draw(ClientGL& client, const Matrix4&
     glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
 }
 
-void DeferredShadingGeometryShaderProgram::PreDraw(Game& game,
-                const Vector3& viewPos,
+void DeferredShadingGeometryShaderProgram::PreDraw(const Vector3& viewPos,
                 const Matrix4& view,
                 const Matrix4& proj) {
     glEnable(GL_CULL_FACE);
@@ -270,8 +284,7 @@ void DeferredShadingGeometryShaderProgram::PreDraw(Game& game,
     glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
 }
 
-void ShadowMapShaderProgram::PreDraw(Game& game,
-                const Vector3& viewPos,
+void ShadowMapShaderProgram::PreDraw(const Vector3& viewPos,
                 const Matrix4& view,
                 const Matrix4& proj) {
     glEnable(GL_CULL_FACE);
@@ -281,30 +294,28 @@ void ShadowMapShaderProgram::PreDraw(Game& game,
     glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
 }
 
-void ShadowMapShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {
+void ShadowMapShaderProgram::Draw(const Matrix4& model, Mesh* mesh) {
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
     glBindVertexArray(mesh->renderInfo.vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
     glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
 }
 
-void DebugShaderProgram::Draw(ClientGL& client, const Matrix4& model, Mesh* mesh) {
+void DebugShaderProgram::Draw(const Matrix4& model, Mesh* mesh) {
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
     glBindVertexArray(mesh->renderInfo.vao);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
     glDrawElements(GL_LINES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
 }
 
-void DebugShaderProgram::PreDraw(Game& game,
-                const Vector3& viewPos,
+void DebugShaderProgram::PreDraw(const Vector3& viewPos,
                 const Matrix4& view,
                 const Matrix4& proj) {
     glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
 }
 
-void DeferredShadingLightingShaderProgram::PreDraw(Game& game,
-                const Vector3& viewPos,
+void DeferredShadingLightingShaderProgram::PreDraw(const Vector3& viewPos,
                 const Matrix4& view,
                 const Matrix4& proj) {
 

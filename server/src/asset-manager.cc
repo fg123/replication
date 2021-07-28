@@ -2,6 +2,7 @@
 #include "logging.h"
 #include "timer.h"
 #include "util.h"
+#include "scene.h"
 
 #include "external/OBJ_Loader.h"
 
@@ -29,7 +30,7 @@ std::string StandardizePath(const std::string& str) {
     std::string out;
     out.reserve(str.size());
     size_t i = 0;
-    if (str.substr(0, 4) == "..\\") {
+    if (str.substr(0, 4) == "..\\\\") {
         i = 4;
     }
     for (; i < str.size(); i++) {
@@ -69,6 +70,7 @@ ModelID AssetManager::LoadModel(const std::string& name, const std::string& path
     Model* model = new Model;
     ModelID id = models.size();
     model->id = id;
+    model->name = name;
     models.push_back(model);
 
     modelMap[name] = model;
@@ -160,8 +162,9 @@ ModelID AssetManager::LoadModel(const std::string& name, const std::string& path
 }
 
 #ifdef BUILD_CLIENT
-Texture* AssetManager::LoadTexture(const std::string& path, Texture::Format format) {
-    if (path.empty()) return nullptr;
+Texture* AssetManager::LoadTexture(const std::string& name, Texture::Format format) {
+    if (name.empty()) return nullptr;
+    std::string path = RESOURCE_PATH(name);
     if (textures.find(path) == textures.end()) {
         Time start = Timer::Now();
         int width, height, nrChannels;

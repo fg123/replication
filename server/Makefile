@@ -13,14 +13,16 @@ WENDY_SRC = $(shell find scripting/wendy/src/ -name "*.c" | grep -v "main")
 
 LDLIBS = -L/usr/lib
 
+RENDERING_SRC = $(shell find rendering/ -name "*.cc")
+
 # For Each Subproject, define following + entry in the main linker
 # Use .wo for webassembly
-SERVER_SRC =        $(SRC) $(WENDY_SRC) $(shell find server/ -name "*.cc")
+SERVER_SRC = $(SRC) $(WENDY_SRC) $(shell find server/ -name "*.cc")
 SERVER_OBJ = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SERVER_SRC)))
 SERVER_DEPS = $(SERVER_OBJ:%.o=%.d)
 SERVER_LDLIBS = $(LDLIBS) -lz -lpthread
 
-CLIENT_SRC =        $(SRC) $(WENDY_SRC) $(shell find client/ -name "*.cc")
+CLIENT_SRC = $(SRC) $(WENDY_SRC) $(shell find client/ -name "*.cc") $(RENDERING_SRC)
 CLIENT_OBJ = $(patsubst %.cc,%.wo,$(patsubst %.c,%.wo,$(CLIENT_SRC)))
 CLIENT_DEPS = $(CLIENT_OBJ:%.wo=%.wd)
 
@@ -30,11 +32,11 @@ COLLIDER_TEST_DEPS = $(COLLIDER_TEST_OBJ:%.o=%.d)
 COLLIDER_TEST_OUTPUT = bin/$(EXE)_collider
 COLLIDER_TEST_LDLIBS = $(SERVER_LDLIBS) -lglfw -lGL -lGLEW
 
-EDITOR_SRC = $(SRC) $(WENDY_SRC) $(shell find editor/ -name "*.cc")
-EDITOR_OBJ = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(EDITOR_SRC)))
-EDITOR_DEPS = $(EDITOR_OBJ:%.o=%.d)
+EDITOR_SRC = $(SRC) $(WENDY_SRC) $(shell find editor/ -name "*.cc") $(RENDERING_SRC)
+EDITOR_OBJ = $(patsubst %.cc,%.eo,$(patsubst %.c,%.eo,$(EDITOR_SRC)))
+EDITOR_DEPS = $(EDITOR_OBJ:%.eo=%.ed)
 EDITOR_OUTPUT = bin/$(EXE)_editor
-EDITOR_LDLIBS = $(SERVER_LDLIBS) -lz -lpthread
+EDITOR_LDLIBS = $(SERVER_LDLIBS) -lz -lpthread -lGL -lGLEW -lglfw -lopenal
 
 DATA_DIRS = $(shell find ../data/ -type d)
 DATA_FILES = $(shell find ../data/ -type f -name '*')
@@ -51,6 +53,8 @@ CPPFLAGS = -std=c++17 -Wall \
 	-I $(USOCKET)/src \
 	-I $(SRC_DIR)/objects \
 	-I $(SRC_DIR)/animations \
+	-I $(SRC_DIR)/imgui \
+	-I rendering/ \
 	-I $(EXTERNAL_INCLUDE)
 
 CFLAGS = -Wall \
@@ -134,6 +138,12 @@ client_prod: $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
 %.wo: %.c
 	emcc -O2 $(CFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -g4 -MMD -MF $(<:%.c=%.wd) -c $< -o $@
 
+%.eo: %.cc
+	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -c $< -o $@
+
+%.eo: %.c
+	$(CC) -O2 $(CFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -c $< -o $@
+
 $(USOCKET)/uSockets.a:
 	$(MAKE) $(USOCKET)
 
@@ -146,5 +156,7 @@ $(USOCKET)/uSockets.a:
 clean:
 	find . -name "*.o" -type f -delete
 	find . -name "*.wo" -type f -delete
+	find . -name "*.eo" -type f -delete
 	find . -name "*.d" -type f -delete
 	find . -name "*.wd" -type f -delete
+	find . -name "*.ed" -type f -delete

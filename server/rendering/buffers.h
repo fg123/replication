@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GLES3/gl3.h>
+#include "opengl.h"
 
 class RenderBuffer {
     // Internally we use another FBO to blit over when we want a texture

@@ -1,4 +1,3 @@
-#version 300 es
 //
 // Description : Array and textureless GLSL 2D simplex noise function.
 //      Author : Ian McEwan, Ashima Arts.
