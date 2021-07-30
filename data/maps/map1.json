@@ -82,7 +82,8 @@
          "name": "Building",
          "type": "StaticModelNode",
          "model": "Warehouse.obj"
-      }
-    ]
- }
+       }
+      ]
+   },
+   "collections": []
 }

@@ -1,5 +1,3 @@
-precision highp float;
-
 struct Material {
     vec3 Ka;
     vec3 Kd;

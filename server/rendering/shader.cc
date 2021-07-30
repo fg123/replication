@@ -4,10 +4,16 @@
 // TODO: remove
 #include "game.h"
 #include "scene.h"
+#include "util.h"
 
 #include <fstream>
 
 std::string ShaderProgram::LoadURL(const std::string& name) {
+    std::unordered_map<std::string, std::string> substitutions;
+    return LoadURL(name, substitutions);
+}
+
+std::string ShaderProgram::LoadURL(const std::string& name, std::unordered_map<std::string, std::string>& substitutions) {
     std::string url = RESOURCE_PATH(name);
     LOG_DEBUG("Loading " << url);
     std::ifstream t(url);
@@ -15,23 +21,22 @@ std::string ShaderProgram::LoadURL(const std::string& name) {
         LOG_ERROR("Could not open file " << url);
         throw "Could not open file!";
     }
-    return std::string((std::istreambuf_iterator<char>(t)),
-                 std::istreambuf_iterator<char>());
+    return PreprocessShader(std::string((std::istreambuf_iterator<char>(t)),
+                 std::istreambuf_iterator<char>()), substitutions);
 }
 
 #ifdef BUILD_EDITOR
 
-const char* SHADER_HEADER = "#version 330\n";
+const char* SHADER_HEADER = "#version 330\nprecision highp float;\n";
 
 #elif BUILD_CLIENT
 
-const char* SHADER_HEADER = "#version 300 es\n";
+const char* SHADER_HEADER = "#version 300 es\nprecision highp float;\n";
 
 #endif
 
 
 void ShaderProgram::AddShader(const std::string& data, GLenum shaderType) {
-
     std::string fullShader = std::string(SHADER_HEADER) + data;
 
     GLuint shader = glCreateShader(shaderType);
@@ -58,6 +63,76 @@ void ShaderProgram::AddShader(const std::string& data, GLenum shaderType) {
         throw std::runtime_error(message);
     }
     shaders.push_back(shader);
+}
+
+struct PreprocessorDirective {
+    std::string type;
+    std::vector<std::string> arguments;
+};
+
+bool ParsePreprocessorDirective(const std::string& line, PreprocessorDirective& directive) {
+    std::string trimmedLine = trim_copy(line);
+    if (line.empty()) return false;
+    if (line[0] != '#') return false;
+
+    std::istringstream iss {trimmedLine};
+    if (!(iss >> directive.type)) return false;
+    std::string part;
+    while (iss >> part) {
+        directive.arguments.emplace_back(part);
+    }
+    return true;
+}
+
+std::string ShaderProgram::PreprocessShader(const std::string& raw_shader, std::unordered_map<std::string, std::string>& substitutions) {
+    std::ostringstream outputShader;
+
+    std::istringstream iss(raw_shader);
+    std::string line;
+
+    std::string currentSubstitution = "";
+
+    while (std::getline(iss, line)) {
+        PreprocessorDirective directive;
+        if (ParsePreprocessorDirective(line, directive)) {
+            if (directive.type == "#define") {
+                if (directive.arguments.size() != 1) {
+                    LOG_ERROR("#define directive must have exactly one argument");
+                    throw std::runtime_error("#define directive must have exactly one argument");
+                }
+                currentSubstitution = directive.arguments.at(0);
+            }
+            else if (directive.type == "#end") {
+                currentSubstitution = "";
+            }
+            else if (directive.type == "#include") {
+                if (directive.arguments.size() != 1) {
+                    LOG_ERROR("#include directive must have exactly one argument");
+                    throw std::runtime_error("#include directive must have exactly one argument");
+                }
+                outputShader << LoadURL(directive.arguments[0], substitutions) << "\n";
+            }
+            else if (directive.type == "#require") {
+                if (directive.arguments.size() != 1) {
+                    LOG_ERROR("#require directive must have exactly one argument");
+                    throw std::runtime_error("#require directive requires exactly one argument");
+                }
+                if (substitutions.find(directive.arguments[0]) == substitutions.end()) {
+                    LOG_ERROR("Could not find substitution " << directive.arguments[0]);
+                    throw std::runtime_error("Could not find substitution " + directive.arguments[0]);
+                }
+                outputShader << substitutions.at(directive.arguments[0]) << "\n";
+            }
+        }
+        else if (!currentSubstitution.empty()) {
+            substitutions[currentSubstitution] += line + "\n";
+        }
+        else {
+            outputShader << line << "\n";
+        }
+    }
+
+    return outputShader.str();
 }
 
 void ShaderProgram::LinkProgram() {
@@ -214,10 +289,11 @@ void DeferredShadingGeometryShaderProgram::Draw(const Matrix4& model, Mesh* mesh
     // Set Model Transform
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
+    Material* meshMat = overrideMaterial ? overrideMaterial : mesh->material;
     // Set Mesh Material
-    if (mesh->material != lastMaterial) {
-        lastMaterial = mesh->material;
-        DefaultMaterial* material = static_cast<DefaultMaterial*>(mesh->material);
+    if (meshMat != lastMaterial) {
+        lastMaterial = meshMat;
+        DefaultMaterial* material = static_cast<DefaultMaterial*>(meshMat);
         glUniform3fv(uniformMaterial[0], 1, glm::value_ptr(material->Ka));
         glUniform3fv(uniformMaterial[1], 1, glm::value_ptr(material->Kd));
         glUniform3fv(uniformMaterial[2], 1, glm::value_ptr(material->Ks));
@@ -349,68 +425,54 @@ void DeferredShadingLightingShaderProgram::PreDraw(const Vector3& viewPos,
     // }
 }
 
-void DeferredShadingLightingShaderProgram::RenderLighting(Game& game) {
-    if (!game.GetModel("Cone.obj")) return;
-    glEnable(GL_DEPTH_TEST);
+void DeferredShadingLightingShaderProgram::RenderLighting(LightNode& light, AssetManager& assetManager) {
+    // Set all the uniforms
+    glUniform3fv(uniformLightPosition, 1, glm::value_ptr(light.position));
+    glUniform3fv(uniformLightDirection, 1, glm::value_ptr(light.GetDirection()));
+    glUniformMatrix4fv(uniformLightTransform, 1, GL_FALSE, glm::value_ptr(light.transform));
+    glUniformMatrix4fv(uniformLightInverseTransform, 1, GL_FALSE, glm::value_ptr(glm::inverse(light.transform)));
+    glUniformMatrix4fv(uniformInverseVolumeTransform, 1, GL_FALSE, glm::value_ptr(glm::inverse(light.GetRectangleVolumeTransform())));
+    glUniform1i(uniformShadowMapSize, light.shadowMapSize);
+    glUniform1f(uniformLightStrength, light.strength);
+    glUniform3fv(uniformLightColor, 1, glm::value_ptr(light.color));
+    glUniform2fv(uniformLightVolumeSize, 1, glm::value_ptr(light.volumeSize));
+    glUniform2fv(uniformLightVolumeOffset, 1, glm::value_ptr(light.volumeOffset));
+    glUniformMatrix4fv(uniformDepthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPNear));
+    glUniformMatrix4fv(uniformDepthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPMid));
+    glUniformMatrix4fv(uniformDepthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPFar));
 
-    Mesh& coneMesh = game.GetModel("Cone.obj")->meshes[0];
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, light.shadowDepthMap);
 
-    // Render Each Light Volume
-    for (auto& light : game.GetAssetManager().lights) {
-        glUniform1i(uniformLightType, (int)light.shape);
-        glUniform3fv(uniformLightPosition, 1, glm::value_ptr(light.position));
-        glUniform3fv(uniformLightColor, 1, glm::value_ptr(light.color));
-        glUniformMatrix4fv(uniformDepthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPNear));
-        glUniformMatrix4fv(uniformDepthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPMid));
-        glUniformMatrix4fv(uniformDepthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPFar));
-        glUniform1i(uniformShadowMapSize, light.shadowMapSize);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    glCullFace(GL_FRONT);
+    glUniform1i(uniformUseProjectionAndView, GL_TRUE);
 
-        // See client_shader.h:83
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, light.shadowDepthMap);
-
-        if (light.shape == LightShape::Directional) {
-            glUniform3f(GetUniformLocation("u_Light.coneDirection"), 0.0f, -1.0f, 0.0f);
-            glUniform1f(GetUniformLocation("u_Light.height"), 4.0f);
-            glUniform1f(GetUniformLocation("u_Light.baseRadius"), 2.0f);
-
-            // glCullFace(GL_BACK);
-            // glDisable(GL_DEPTH_TEST);
-            // glDepthMask(GL_FALSE);
-            // glUniform1i(uniformUseProjectionAndView, GL_FALSE);
-            // glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(standardRemapMatrix));
-            // glBindVertexArray(quadVAO);
-            // glDrawArrays(GL_TRIANGLES, 0, 6);
-            // glDepthMask(GL_TRUE);
-            // glEnable(GL_DEPTH_TEST);
-
-            glDisable(GL_DEPTH_TEST);
-            glDepthMask(GL_FALSE);
-            glCullFace(GL_FRONT);
-            glUniform1i(uniformUseProjectionAndView, GL_TRUE);
-            // Get the Light's View Matrix
-            Matrix4 model = glm::translate(light.position) *
-                glm::transpose(glm::toMat4(DirectionToQuaternion(light.direction))) *
-                glm::scale(Vector3(4, 4, 10));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
-            glBindVertexArray(coneMesh.renderInfo.vao);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, coneMesh.renderInfo.ibo);
-            glDrawElements(GL_TRIANGLES, coneMesh.renderInfo.iboCount, GL_UNSIGNED_INT, 0);
-
-            glDepthMask(GL_TRUE);
-            glEnable(GL_DEPTH_TEST);
-        }
-        else if (light.shape == LightShape::Sun) {
-            glCullFace(GL_BACK);
-            glDisable(GL_DEPTH_TEST);
-            glDepthMask(GL_FALSE);
-            glUniform1i(uniformUseProjectionAndView, GL_FALSE);
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(standardRemapMatrix));
-            glBindVertexArray(quadVAO);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glDepthMask(GL_TRUE);
-            glEnable(GL_DEPTH_TEST);
-        }
+    // Draw Light Volume
+    Mesh* mesh = nullptr;
+    if (light.shape == LightShape::Point) {
+        // Sphere
+        mesh = &assetManager.GetModel("Icosphere.obj")->meshes[0];
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(light.transform));
     }
+    else if (light.shape == LightShape::Rectangle) {
+        mesh = &assetManager.GetModel("Cube.obj")->meshes[0];
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(light.GetRectangleVolumeTransform()));
+    }
+
+    if (mesh) {
+        glBindVertexArray(mesh->renderInfo.vao);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
+        glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, 0);
+    }
+
+    // glCullFace(GL_BACK);
+
+    // glUniform1i(uniformUseProjectionAndView, GL_FALSE);
+    // glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(standardRemapMatrix));
+    // glBindVertexArray(quadVAO);
+    // glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glEnable(GL_DEPTH_TEST);
 }

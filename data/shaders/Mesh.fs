@@ -1,5 +1,3 @@
-precision highp float;
-
 float PI = 3.1415926535;
 
 float rand(vec2 c){

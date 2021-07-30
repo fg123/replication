@@ -3,7 +3,8 @@
 
 Editor::Editor(GLFWwindow* window, const std::string& path) :
     window(window),
-    path(path) {
+    path(path),
+    renderer(scene.assetManager) {
 
     std::string title = "Editor: " + path;
     glfwSetWindowTitle(window, title.c_str());
@@ -11,6 +12,7 @@ Editor::Editor(GLFWwindow* window, const std::string& path) :
     scene.LoadFromFile(path);
 
     glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
+        if (ImGui::GetIO().WantCaptureMouse) return;
         Editor* editor = (Editor*)glfwGetWindowUserPointer(window);
         Vector3 forward = glm::normalize(Vector::Forward * editor->GetRotationQuat());
         editor->targetViewPos += forward * (float) yoffset;
@@ -29,11 +31,11 @@ void Editor::DrawScene(int width, int height) {
     parameters.height = height;
     parameters.proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 1000.0f);
     parameters.viewPos = viewPos;
+    parameters.ambientFactor = 0.3f;
 
     Vector3 rot = Vector::Forward * GetRotationQuat();
 
     parameters.view = glm::lookAt(viewPos, viewPos + rot, Vector::Up);
-    renderer.NewFrame(parameters);
 
     // Aggregate Meshes
     std::vector<Node*> nodes;
@@ -45,26 +47,60 @@ void Editor::DrawScene(int width, int height) {
             for (auto& mesh : model_node->model->meshes) {
                 Vector3 centerPt = Vector3(model_node->transform * Vector4(mesh.center, 1));
                 if (mesh.material->IsTransparent()) {
-                    DrawParams& params = layer.transparent[
-                        glm::distance2(centerPt, viewPos)];
+                    DrawParams& params = layer.PushTransparent(
+                        glm::distance2(centerPt, viewPos));
                     params.mesh = &mesh;
                     params.transform = model_node->transform;
                     params.castShadows = false;
-                    params.hasOutline = false;
+                    params.hasOutline = model_node == GetSelectedNode();
                 }
                 else {
-                    auto& list = layer.opaque[mesh.material];
-                    list.reserve(500);
-                    DrawParams& params = list.emplace_back();
+                    DrawParams& params = layer.PushOpaque(mesh.material);
                     params.mesh = &mesh;
                     params.transform = model_node->transform;
                     params.castShadows = false;
-                    params.hasOutline = false;
+                    params.hasOutline = model_node == GetSelectedNode();
                 }
+            }
+        }
+        else if (LightNode* light_node = dynamic_cast<LightNode*>(node)) {
+            parameters.lights.emplace_back(light_node);
+            light_node->defaultMaterial.Kd = light_node->color;
+            if (light_node == GetSelectedNode()) {
+                if (light_node->shape == LightShape::Point) {
+                    DrawParams& params = layer.PushTransparent(
+                        glm::distance2(light_node->position, viewPos));
+                    params.mesh = &scene.assetManager.GetModel("Icosphere.obj")->meshes[0];
+                    params.transform = light_node->transform;
+                    params.castShadows = false;
+                    params.isWireframe = true;
+                    params.overrideMaterial = &light_node->defaultMaterial;
+                }
+            }
+            if (light_node->shape == LightShape::Rectangle) {
+                // Setup a mesh, queue it up as a transparent so it draws after
+                //   lighting is calculated
+                DrawParams& params = layer.PushTransparent(
+                    glm::distance2(light_node->position, viewPos));
+                params.mesh = &scene.assetManager.GetModel("Quad.obj")->meshes[0];
+                params.transform = light_node->transform;
+                params.castShadows = false;
+                params.isWireframe = false;
+                params.overrideMaterial = &light_node->defaultMaterial;
+
+                // Draw bounding box
+                DrawParams& params2 = layer.PushTransparent(
+                    glm::distance2(light_node->position, viewPos));
+                params2.mesh = &scene.assetManager.GetModel("Cube.obj")->meshes[0];
+                params2.transform = light_node->GetRectangleVolumeTransform();
+                params2.castShadows = false;
+                params2.isWireframe = true;
+                params2.overrideMaterial = &light_node->defaultMaterial;
             }
         }
     }
 
+    renderer.NewFrame(parameters);
     renderer.Draw(layer);
 
     QuadShaderProgram& quadShader = renderer.GetQuadShader();
@@ -73,6 +109,10 @@ void Editor::DrawScene(int width, int height) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     quadShader.Use();
     quadShader.DrawQuad(texture, quadShader.standardRemapMatrix);
+}
+
+Node* Editor::GetSelectedNode() {
+    return scene_graph_window.selectedNode;
 }
 
 void Editor::DrawUI(int width, int height) {

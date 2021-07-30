@@ -6,7 +6,11 @@ Scene::Scene() : root(*this) {
 
 }
 
-Scene::~Scene() { }
+Scene::~Scene() {
+    for (auto& collection : collections) {
+        delete collection;
+    }
+}
 
 void Scene::LoadFromFile(const std::string& filename) {
     std::ifstream mapFile(filename);
@@ -41,6 +45,12 @@ void Scene::LoadFromFile(const std::string& filename) {
 
     // Process Root
     root.ProcessReplication(obj["root"]);
+
+    for (json& collectionObj : obj["collections"].GetArray()) {
+        CollectionNode* node = new CollectionNode(*this);
+        collections.push_back(node);
+        node->ProcessReplication(collectionObj);
+    }
 }
 
 void Scene::WriteToFile(std::ostream& output) {
@@ -69,6 +79,13 @@ void Scene::WriteToFile(std::ostream& output) {
     writer.Key("root");
     root.Serialize(writer);
     writer.EndObject();
+
+    writer.Key("collections");
+    writer.StartArray();
+    for (auto& collection : collections) {
+        collection->Serialize(writer);
+    }
+    writer.EndArray();
 }
 
 void StaticModelNode::ProcessReplication(json& obj) {
@@ -118,7 +135,7 @@ void Scene::FlattenHierarchy(std::vector<Node*>& output) {
         Node* node = entry.node;
         Matrix4 localTransform =
             glm::translate(node->position) *
-            glm::yawPitchRoll(node->rotation.x, node->rotation.y, node->rotation.z) *
+            glm::yawPitchRoll(glm::radians(node->rotation.x), glm::radians(node->rotation.y), glm::radians(node->rotation.z)) *
             glm::scale(node->scale);
 
         node->transform = entry.parentTransform * localTransform;

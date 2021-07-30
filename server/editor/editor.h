@@ -15,7 +15,6 @@
 
 // Primary Editor Class
 struct Editor {
-
     struct MouseState {
         double mx, my;
         bool lmb, rmb, mmb;
@@ -24,8 +23,8 @@ struct Editor {
     GLFWwindow* window;
     std::string path;
 
-    DeferredRenderer renderer;
     Scene scene;
+    DeferredRenderer renderer;
 
     Vector3 viewPos, targetViewPos;
     // Yaw, Pitch
@@ -53,4 +52,5 @@ struct Editor {
     void HandleKeyboardInputs();
 
     void OnScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    Node* GetSelectedNode();
 };

@@ -6,6 +6,7 @@
 #include "opengl.h"
 #include "vector.h"
 #include "object.h"
+#include "scene.h"
 
 class ClientGL;
 class Mesh;
@@ -19,6 +20,8 @@ public:
     virtual ~ShaderProgram() {}
 
     std::string LoadURL(const std::string& url);
+    std::string LoadURL(const std::string& url, std::unordered_map<std::string, std::string>& substitutions);
+    std::string PreprocessShader(const std::string& raw_shader, std::unordered_map<std::string, std::string>& substitutions);
     void AddShader(const std::string& data, GLenum shaderType);
     void LinkProgram();
     void Use();
@@ -132,6 +135,8 @@ class DeferredShadingGeometryShaderProgram : public ShaderProgram {
 
     std::vector<GLint> uniformMaterial;
 
+    Material* overrideMaterial = nullptr;
+
     Material* lastMaterial = nullptr;
     Mesh* lastMesh = nullptr;
     float lastDrawOutline = 0.0f;
@@ -182,6 +187,10 @@ public:
         glUniform1i(uniformRenderShadows, render);
     }
 
+    void SetOverrideMaterial(Material* material) {
+        overrideMaterial = material;
+    }
+
     void SetDrawOutline(float size, Vector3 color) {
         if (lastDrawOutline != size) {
             lastDrawOutline = size;
@@ -212,21 +221,27 @@ class DeferredShadingLightingShaderProgram : public ShaderProgram {
     GLuint quadVAO;
     GLuint quadVBO;
 
-    GLint uniformLightType;
     GLint uniformLightPosition;
+    GLint uniformLightDirection;
+    GLint uniformLightTransform;
+    GLint uniformLightInverseTransform;
+    GLint uniformShadowMapSize;
+    GLint uniformLightStrength;
     GLint uniformLightColor;
+    GLint uniformLightVolumeSize;
+    GLint uniformLightVolumeOffset;
+    GLint uniformInverseVolumeTransform;
     GLint uniformDepthBiasMVPNear;
     GLint uniformDepthBiasMVPMid;
     GLint uniformDepthBiasMVPFar;
-    GLint uniformShadowMapSize;
 
 public:
     Matrix4 standardRemapMatrix;
-    DeferredShadingLightingShaderProgram() {
+    DeferredShadingLightingShaderProgram(std::string fragmentShader) {
         standardRemapMatrix = glm::translate(Vector3(-1, -1, -1)) * glm::scale(Vector3(2, 2, 2));
 
         AddShader(LoadURL("shaders/MeshLighting.vs"), GL_VERTEX_SHADER);
-        AddShader(LoadURL("shaders/MeshLighting.fs"), GL_FRAGMENT_SHADER);
+        AddShader(LoadURL(fragmentShader), GL_FRAGMENT_SHADER);
         LinkProgram();
         Use();
 
@@ -259,14 +274,19 @@ public:
         uniformViewportSize = GetUniformLocation("u_ViewportSize");
         uniformUseProjectionAndView = GetUniformLocation("u_UseProjectionAndView");
 
-
-        uniformLightType = GetUniformLocation("u_Light.type");
         uniformLightPosition = GetUniformLocation("u_Light.position");
+        uniformLightDirection = GetUniformLocation("u_Light.direction");
+        uniformLightTransform = GetUniformLocation("u_Light.transform");
+        uniformLightInverseTransform = GetUniformLocation("u_Light.inverseTransform");
+        uniformShadowMapSize = GetUniformLocation("u_Light.shadowMapSize");
+        uniformLightStrength = GetUniformLocation("u_Light.strength");
         uniformLightColor = GetUniformLocation("u_Light.color");
+        uniformLightVolumeSize = GetUniformLocation("u_Light.volumeSize");
+        uniformLightVolumeOffset = GetUniformLocation("u_Light.volumeOffset");
+        uniformInverseVolumeTransform = GetUniformLocation("u_Light.inverseVolumeTransform");
         uniformDepthBiasMVPNear = GetUniformLocation("u_Light.depthBiasMVPNear");
         uniformDepthBiasMVPMid = GetUniformLocation("u_Light.depthBiasMVPMid");
         uniformDepthBiasMVPFar = GetUniformLocation("u_Light.depthBiasMVPFar");
-        uniformShadowMapSize = GetUniformLocation("u_Light.shadowMapSize");
 
         // Setup Texture Unit Ids
         glUniform1i(GetUniformLocation("gbuf_position"), 0);
@@ -291,7 +311,7 @@ public:
                  const Matrix4& proj) override;
     void Draw(const Matrix4& model, Mesh* mesh) override {}
 
-    void RenderLighting(Game& game);
+    void RenderLighting(LightNode& light, AssetManager& assetManager);
 };
 
 class DebugShaderProgram : public ShaderProgram {
@@ -357,6 +377,8 @@ class QuadShaderProgram : public ShaderProgram {
     GLint uniformMVP;
     GLint uniformIsDepth;
 
+    GLint uniformColorMultiplier;
+
     GLuint quadVAO;
     GLuint quadVBO;
 
@@ -374,6 +396,7 @@ public:
 
         uniformMVP = GetUniformLocation("u_MVP");
         uniformIsDepth = GetUniformLocation("u_isDepth");
+        uniformColorMultiplier = GetUniformLocation("u_colorMultiplier");
 
         // Create Struct for Coords
         float texCoords[] = {
@@ -412,8 +435,9 @@ public:
         glUniform2f(uniformTextureSize, width, height);
     }
 
-    void DrawQuad(GLuint texture, Matrix4 mvp) {
+    void DrawQuad(GLuint texture, Matrix4 mvp, float colorMultiplier = 1.0f) {
         glUniformMatrix4fv(uniformMVP, 1, GL_FALSE, glm::value_ptr(mvp));
+        glUniform1f(uniformColorMultiplier, colorMultiplier);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);

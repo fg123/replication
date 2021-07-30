@@ -55,7 +55,7 @@ void ClientGL::SetupContext() {
     shaderPrograms.push_back(new DeferredShadingGeometryShaderProgram());
     debugShaderProgram = new DebugShaderProgram();
     shadowMapShaderProgram = new ShadowMapShaderProgram();
-    deferredLightingShaderProgram = new DeferredShadingLightingShaderProgram();
+    deferredLightingShaderProgram = new DeferredShadingLightingShaderProgram("");
     quadDrawShaderProgram = new QuadShaderProgram("shaders/Quad.fs");
     minimapShaderProgram = new QuadShaderProgram("shaders/Minimap.fs");
     minimapShaderProgram->SetTextureSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
@@ -318,8 +318,8 @@ void ClientGL::SetupDrawingLayers() {
             for (auto& mesh : model->meshes) {
                 Vector3 centerPt = Vector3(obj->GetTransform() * Vector4(mesh.center, 1));
                 if (mesh.material->IsTransparent()) {
-                    DrawParams& params = layerToDraw.transparent[
-                        glm::distance2(centerPt, cameraPosition)];
+                    DrawParams& params = layerToDraw.PushTransparent(
+                        glm::distance2(centerPt, cameraPosition));
                     params.id = obj->GetId();
                     params.mesh = &mesh;
                     params.transform = transform;
@@ -328,9 +328,7 @@ void ClientGL::SetupDrawingLayers() {
                 }
                 else {
                     // auto& list = layerToDraw.opaque[glm::distance2(centerPt, cameraPosition)];
-                    auto& list = layerToDraw.opaque[mesh.material];
-                    list.reserve(500);
-                    DrawParams& params = list.emplace_back();
+                    DrawParams& params = layerToDraw.PushOpaque(mesh.material);
                     params.id = obj->GetId();
                     params.mesh = &mesh;
                     params.transform = transform;
@@ -477,7 +475,7 @@ void ClientGL::RenderLighting() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 
-    deferredLightingShaderProgram->RenderLighting(game);
+    // deferredLightingShaderProgram->RenderLighting(game);
 
     glDisable(GL_BLEND);
 
@@ -749,7 +747,9 @@ void ClientGL::DrawObjects(DrawLayerOptions options) {
     if (options.drawBackground && options.drawTransparent) {
         for (auto it = backgroundLayer.transparent.rbegin(); it != backgroundLayer.transparent.rend(); ++it) {
             // LOG_DEBUG(it->second.mesh->name);
-            DrawObject(it->second, lastProgram);
+            for (auto& param : it->second) {
+                DrawObject(param, lastProgram);
+            }
         }
     }
     if (options.drawBehind && options.drawOpaque) {
@@ -762,7 +762,9 @@ void ClientGL::DrawObjects(DrawLayerOptions options) {
     if (options.drawBehind && options.drawTransparent) {
         for (auto it = behindPlayerLayer.transparent.rbegin(); it != behindPlayerLayer.transparent.rend(); ++it) {
             // LOG_DEBUG(it->second.mesh->name);
-            DrawObject(it->second, lastProgram);
+             for (auto& param : it->second) {
+                DrawObject(param, lastProgram);
+            }
         }
     }
     // Draw Foreground
@@ -778,7 +780,9 @@ void ClientGL::DrawObjects(DrawLayerOptions options) {
     }
     if (options.drawForeground && options.drawTransparent) {
         for (auto it = foregroundLayer.transparent.rbegin(); it != foregroundLayer.transparent.rend(); ++it) {
-            DrawObject(it->second, lastProgram);
+             for (auto& param : it->second) {
+                DrawObject(param, lastProgram);
+            }
         }
     }
 
