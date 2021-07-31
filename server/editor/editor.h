@@ -12,6 +12,7 @@
 #include "deferred_renderer.h"
 #include "scene_data_window.h"
 #include "scene_graph_window.h"
+#include "render_settings_window.h"
 
 // Primary Editor Class
 struct Editor {
@@ -43,6 +44,7 @@ struct Editor {
     // Viewing Windows
     SceneDataWindow scene_data_window;
     SceneGraphWindow scene_graph_window;
+    RenderSettingsWindow render_settings_window;
 
     Editor(GLFWwindow* window, const std::string& path);
 
@@ -53,4 +55,5 @@ struct Editor {
 
     void OnScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
     Node* GetSelectedNode();
+    Node* GetSelectedRootNode();
 };

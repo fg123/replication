@@ -378,6 +378,7 @@ class QuadShaderProgram : public ShaderProgram {
     GLint uniformIsDepth;
 
     GLint uniformColorMultiplier;
+    GLint uniformTextureSize;
 
     GLuint quadVAO;
     GLuint quadVBO;
@@ -397,6 +398,7 @@ public:
         uniformMVP = GetUniformLocation("u_MVP");
         uniformIsDepth = GetUniformLocation("u_isDepth");
         uniformColorMultiplier = GetUniformLocation("u_colorMultiplier");
+        uniformTextureSize = GetUniformLocation("u_textureSize");
 
         // Create Struct for Coords
         float texCoords[] = {
@@ -431,7 +433,6 @@ public:
     }
 
     void SetTextureSize(float width, float height) {
-        GLint uniformTextureSize = GetUniformLocation("u_textureSize");
         glUniform2f(uniformTextureSize, width, height);
     }
 

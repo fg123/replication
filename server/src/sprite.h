@@ -30,7 +30,7 @@ public:
         if (!materialSetup) {
             materialSetup = true;
             DefaultMaterial* material = new DefaultMaterial;
-            customQuad.meshes[0].material = material;
+            customQuad.meshes[0]->material = material;
 
             // Custom Model
             material->illum = -1;

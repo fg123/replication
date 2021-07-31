@@ -61,10 +61,10 @@ class ClientGL {
     // Simple antialiasing
     QuadShaderProgram* antialiasShaderProgram;
 
-    Mesh debugCube;
-    Mesh debugLine;
-    Mesh debugCircle;
-    Mesh debugCylinder;
+    Mesh* debugCube;
+    Mesh* debugLine;
+    Mesh* debugCircle;
+    Mesh* debugCylinder;
 
     Matrix4 viewMat;
     Matrix4 projMat;

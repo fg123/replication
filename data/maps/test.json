@@ -1,12 +1,27 @@
 {
- "tilemap": "map1Tiles.png",
- "models": [
-    "Cube.obj"
- ],
- "sounds": [
- ],
- "lights": [
- ],
- "lifts": [
- ]
-}
+   "models": [
+      "Icosphere.obj",
+      "Cube.obj",
+      "Quad.obj"
+   ],
+   "sounds": [],
+   "scripts": [],
+   "root": {
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "rotation": { "x": 0, "y": 0, "z": 0 },
+      "scale": { "x": 1, "y": 1, "z": 1 },
+      "name": "Root",
+      "type": "CollectionNode",
+      "children": [
+         {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "rotation": { "x": 0, "y": 0, "z": 0 },
+            "scale": { "x": 1, "y": 1, "z": 1 },
+            "name": "Map",
+            "type": "StaticModelNode",
+            "model": "Cube.obj"
+         }
+        ]
+     },
+     "collections": []
+  }

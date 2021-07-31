@@ -74,16 +74,26 @@
           "name": "Map",
           "type": "StaticModelNode",
           "model": "ShootingRange.obj"
-       },
-       {
-         "position": { "x": 0, "y": 0, "z": 0 },
-         "rotation": { "x": 0, "y": 0, "z": 0 },
-         "scale": { "x": 1, "y": 1, "z": 1 },
-         "name": "Building",
-         "type": "StaticModelNode",
-         "model": "Warehouse.obj"
        }
       ]
    },
-   "collections": []
+   "collections": [
+      {
+         "position": { "x": 0, "y": 0, "z": 0 },
+         "rotation": { "x": 0, "y": 0, "z": 0 },
+         "scale": { "x": 1, "y": 1, "z": 1 },
+         "name": "Building w/ Lights",
+         "type": "CollectionNode",
+         "children": [
+            {
+              "position": { "x": 0, "y": 0, "z": 0 },
+              "rotation": { "x": 0, "y": 0, "z": 0 },
+              "scale": { "x": 1, "y": 1, "z": 1 },
+              "name": "Building",
+              "type": "StaticModelNode",
+              "model": "Warehouse.obj"
+            }
+           ]
+        }
+   ]
 }

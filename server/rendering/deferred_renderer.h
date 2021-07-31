@@ -5,6 +5,7 @@
 #include "buffers.h"
 #include "asset-manager.h"
 #include "scene.h"
+#include "bloom.h"
 
 // Everything must be loaded in, don't depend on game instance
 
@@ -50,6 +51,7 @@ struct RenderFrameParameters {
     int height;
 
     float ambientFactor;
+    float bloomThreshold;
     std::vector<LightNode*> lights;
 };
 
@@ -68,6 +70,8 @@ class DeferredRenderer {
     // Different lighting shaders for each type of light
     DeferredShadingLightingShaderProgram pointLightShader;
     DeferredShadingLightingShaderProgram rectangleLightShader;
+
+    BloomShader bloomShader;
 
     void DrawObject(DrawParams& params);
 public:

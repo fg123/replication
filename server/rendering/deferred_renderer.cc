@@ -119,25 +119,42 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // Draw Transparent Objects, Clear Color, keep depth
-    gBuffer.Bind();
-    glClearColor(0, 0, 0, 0);
-    glClear(GL_COLOR_BUFFER_BIT);
+    {
+        gBuffer.Bind();
+        glClearColor(0, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
 
-    geometryShader.Use();
-    for (auto it = layer.transparent.rbegin(); it != layer.transparent.rend(); ++it) {
-        // LOG_DEBUG(it->second.mesh->name);
-        for (auto& param : it->second) {
-            DrawObject(param);
+        geometryShader.Use();
+        for (auto it = layer.transparent.rbegin(); it != layer.transparent.rend(); ++it) {
+            // LOG_DEBUG(it->second.mesh->name);
+            for (auto& param : it->second) {
+                DrawObject(param);
+            }
         }
+
+        outputBuffer.Bind();
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        GLuint diffuseTexture = gBuffer.g_diffuse;
+        quadShader.Use();
+        quadShader.DrawQuad(diffuseTexture, quadShader.standardRemapMatrix);
+
     }
 
+    GLuint postBloomTexture = bloomShader.BloomTexture(
+        outputBuffer.BlitTexture(),
+        renderFrameParameters.bloomThreshold,
+        renderFrameParameters.width,
+        renderFrameParameters.height);
+
     outputBuffer.Bind();
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    GLuint diffuseTexture = gBuffer.g_diffuse;
-
+    glBlendFunc(GL_ONE, GL_ONE);
+    // glClearColor(0, 0, 0, 0);
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
     quadShader.Use();
-    quadShader.DrawQuad(diffuseTexture, quadShader.standardRemapMatrix);
+    quadShader.DrawQuad(postBloomTexture, quadShader.standardRemapMatrix);
 
+    glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 }

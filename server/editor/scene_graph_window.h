@@ -9,7 +9,7 @@ public:
     bool isVisible = true;
     Node* selectedNode = nullptr;
 
-    void DrawCurrentProperties();
+    void DrawCurrentProperties(Editor& editor);
     void DrawTreeNode(Node* node);
     void Draw(Editor& editor);
 };

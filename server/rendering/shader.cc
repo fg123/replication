@@ -453,11 +453,11 @@ void DeferredShadingLightingShaderProgram::RenderLighting(LightNode& light, Asse
     Mesh* mesh = nullptr;
     if (light.shape == LightShape::Point) {
         // Sphere
-        mesh = &assetManager.GetModel("Icosphere.obj")->meshes[0];
+        mesh = assetManager.GetModel("Icosphere.obj")->meshes[0];
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(light.transform));
     }
     else if (light.shape == LightShape::Rectangle) {
-        mesh = &assetManager.GetModel("Cube.obj")->meshes[0];
+        mesh = assetManager.GetModel("Cube.obj")->meshes[0];
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(light.GetRectangleVolumeTransform()));
     }
 

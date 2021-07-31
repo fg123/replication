@@ -39,14 +39,14 @@ void GenerateOBBCollidersFromModel(Object* obj) {
     // LOG_DEBUG("Generating Map Colliders");
     Model* model = obj->GetModel();
     if (model) {
-        for (Mesh& mesh : model->meshes) {
-            std::string lower = ToLower(mesh.name);
-            if (!mesh.vertices.empty() && !Contains(lower, "nocollide")) {
-                Vector3 min = mesh.vertices[0].position;
-                Vector3 max = mesh.vertices[0].position;
-                for (size_t i = 1; i < mesh.vertices.size(); i++) {
-                    min = glm::min(min, mesh.vertices[i].position);
-                    max = glm::max(max, mesh.vertices[i].position);
+        for (Mesh* mesh : model->meshes) {
+            std::string lower = ToLower(mesh->name);
+            if (!mesh->vertices.empty() && !Contains(lower, "nocollide")) {
+                Vector3 min = mesh->vertices[0].position;
+                Vector3 max = mesh->vertices[0].position;
+                for (size_t i = 1; i < mesh->vertices.size(); i++) {
+                    min = glm::min(min, mesh->vertices[i].position);
+                    max = glm::max(max, mesh->vertices[i].position);
                 }
 
                 obj->AddCollider(new OBBCollider(obj, min, max - min));
@@ -59,13 +59,13 @@ void GenerateStaticMeshCollidersFromModel(Object* obj) {
     Model* model = obj->GetModel();
     if (model) {
         std::vector<Vertex*> allVerts;
-        for (Mesh& mesh : model->meshes) {
-            std::string lower = ToLower(mesh.name);
-            if (!mesh.vertices.empty() && !Contains(lower, "nocollide")) {
-                for (size_t i = 0; i < mesh.indices.size(); i += 3) {
-                    allVerts.push_back(&mesh.vertices[mesh.indices[i]]);
-                    allVerts.push_back(&mesh.vertices[mesh.indices[i + 1]]);
-                    allVerts.push_back(&mesh.vertices[mesh.indices[i + 2]]);
+        for (Mesh* mesh : model->meshes) {
+            std::string lower = ToLower(mesh->name);
+            if (!mesh->vertices.empty() && !Contains(lower, "nocollide")) {
+                for (size_t i = 0; i < mesh->indices.size(); i += 3) {
+                    allVerts.push_back(&mesh->vertices[mesh->indices[i]]);
+                    allVerts.push_back(&mesh->vertices[mesh->indices[i + 1]]);
+                    allVerts.push_back(&mesh->vertices[mesh->indices[i + 2]]);
                 }
             }
         }

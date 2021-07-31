@@ -73,6 +73,7 @@ struct Texture {
 };
 
 struct Material {
+    virtual ~Material() {}
     virtual int GetShaderProgram() = 0;
     virtual bool IsTransparent() = 0;
 };
@@ -109,6 +110,9 @@ struct DefaultMaterial : public Material {
     // Reflective Map
     Texture* map_refl = nullptr;
 
+    ~DefaultMaterial() {
+        // Textures are owned by asset manager, do not delete them here!!
+    }
     int GetShaderProgram() override { return 0; }
     bool IsTransparent() override {
         return illum == -1 || d < 1.0f || map_d != nullptr;
@@ -137,5 +141,10 @@ public:
     MeshRenderInfo renderInfo;
 #endif
 
+    ~Mesh() {
+        #ifdef BUILD_CLIENT
+            delete material;
+        #endif
+    }
     void InitializeMesh();
 };

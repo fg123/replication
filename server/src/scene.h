@@ -132,6 +132,15 @@ struct LightNode : public Node {
     }
 };
 
+struct CollectionReferenceNode : public Node {
+    // This is 1 indexed!!!
+    REPLICATED_D(size_t, index, "index", 0);
+
+    CollectionReferenceNode(Scene& scene) : Node(scene) {}
+
+    virtual const char* GetNodeType() override { return "CollectionReferenceNode"; }
+};
+
 class Scene {
 public:
     std::vector<std::string> models;
@@ -150,5 +159,5 @@ public:
     void LoadFromFile(const std::string& filename);
     void WriteToFile(std::ostream& output);
 
-    void FlattenHierarchy(std::vector<Node*>& output);
+    void FlattenHierarchy(std::vector<Node*>& output, Node* root);
 };

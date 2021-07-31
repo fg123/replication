@@ -15,6 +15,9 @@ Scene::~Scene() {
 void Scene::LoadFromFile(const std::string& filename) {
     std::ifstream mapFile(filename);
 
+    if (!mapFile.is_open()) {
+        throw "Could not open " + filename;
+    }
     rapidjson::IStreamWrapper stream(mapFile);
 
     JSONDocument obj;
@@ -110,6 +113,9 @@ void CollectionNode::ProcessReplication(json& obj) {
         else if (str == "LightNode") {
             children.emplace_back(new LightNode(scene));
         }
+        else if (str == "CollectionReferenceNode") {
+            children.emplace_back(new CollectionReferenceNode(scene));
+        }
         else {
             throw std::runtime_error("Unknown node type: " + str);
         }
@@ -125,9 +131,9 @@ struct NodeIterationEntry {
         node(node), parentTransform(parentTransform) { }
 };
 
-void Scene::FlattenHierarchy(std::vector<Node*>& output) {
+void Scene::FlattenHierarchy(std::vector<Node*>& output, Node* root) {
     std::queue<NodeIterationEntry> hierarchyQueue;
-    hierarchyQueue.emplace(&root, Matrix4{});
+    hierarchyQueue.emplace(root, Matrix4{});
     while (!hierarchyQueue.empty()) {
         NodeIterationEntry entry = hierarchyQueue.front();
         hierarchyQueue.pop();
@@ -143,6 +149,12 @@ void Scene::FlattenHierarchy(std::vector<Node*>& output) {
         if (CollectionNode* collection = dynamic_cast<CollectionNode*>(node)) {
             for (Node* child : collection->children) {
                 hierarchyQueue.emplace(child, collection->transform);
+            }
+        }
+        else if (CollectionReferenceNode* collection = dynamic_cast<CollectionReferenceNode*>(node)) {
+            // 1 indexed
+            if (collection->index > 0 && collection->index <= collections.size()) {
+                hierarchyQueue.emplace(collections[collection->index - 1], collection->transform);
             }
         }
         output.push_back(node);

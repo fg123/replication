@@ -316,21 +316,21 @@ void ClientGL::SetupDrawingLayers() {
 
         if (Model* model = obj->GetModel()) {
             for (auto& mesh : model->meshes) {
-                Vector3 centerPt = Vector3(obj->GetTransform() * Vector4(mesh.center, 1));
-                if (mesh.material->IsTransparent()) {
+                Vector3 centerPt = Vector3(obj->GetTransform() * Vector4(mesh->center, 1));
+                if (mesh->material->IsTransparent()) {
                     DrawParams& params = layerToDraw.PushTransparent(
                         glm::distance2(centerPt, cameraPosition));
                     params.id = obj->GetId();
-                    params.mesh = &mesh;
+                    params.mesh = mesh;
                     params.transform = transform;
                     params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
                     params.hasOutline = obj->IsTagged(Tag::DRAW_OUTLINE);
                 }
                 else {
                     // auto& list = layerToDraw.opaque[glm::distance2(centerPt, cameraPosition)];
-                    DrawParams& params = layerToDraw.PushOpaque(mesh.material);
+                    DrawParams& params = layerToDraw.PushOpaque(mesh->material);
                     params.id = obj->GetId();
-                    params.mesh = &mesh;
+                    params.mesh = mesh;
                     params.transform = transform;
                     params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
                     params.hasOutline = obj->IsTagged(Tag::DRAW_OUTLINE);

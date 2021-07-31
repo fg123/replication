@@ -21,6 +21,7 @@ public:
 
     std::vector<Model*> models;
 
+    ~AssetManager();
     Model* GetModel(ModelID id) {
         if (id >= models.size()) {
             LOG_ERROR("GetModel for non-existant ID " << id);

@@ -2,7 +2,15 @@
 #include "editor.h"
 #include "scene.h"
 
-void SceneGraphWindow::DrawCurrentProperties() {
+std::string MakeID(const std::string& label, void* ptr) {
+    return (label + "##" + std::to_string((unsigned long)ptr));
+}
+
+void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
+    if (editor.GetSelectedRootNode()) {
+        ImGui::InputText("Collection Name", &editor.GetSelectedRootNode()->name);
+    }
+    ImGui::Separator();
     if (selectedNode == nullptr) {
         ImGui::Text("No node selected");
         return;
@@ -30,6 +38,27 @@ void SceneGraphWindow::DrawCurrentProperties() {
             ImGui::DragFloat3("Volume Offset", glm::value_ptr(lightNode->volumeOffset), 0.05f);
         }
     }
+    else if (CollectionReferenceNode* collectionNode = dynamic_cast<CollectionReferenceNode*>(selectedNode)) {
+        ImGui::Separator();
+        std::string currentTitle = "None";
+        if (collectionNode->index > 0 && collectionNode->index <= editor.scene.collections.size()) {
+            currentTitle = editor.scene.collections[collectionNode->index - 1]->name;
+        }
+        if (ImGui::BeginCombo("Collections", currentTitle.c_str())) {
+            if (ImGui::Selectable("None", collectionNode->index == 0)) {
+                collectionNode->index = 0;
+            }
+            for (size_t i = 0; i < editor.scene.collections.size(); i++) {
+                auto& collection = editor.scene.collections[i];
+                if (ImGui::Selectable((collection->name + "##" + std::to_string(i)).c_str(),
+                        collectionNode->index == i + 1)) {
+                    collectionNode->index = i + 1;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+    }
 }
 
 void SceneGraphWindow::DrawTreeNode(Node* node) {
@@ -40,7 +69,7 @@ void SceneGraphWindow::DrawTreeNode(Node* node) {
 
     if (CollectionNode* collectionNode = dynamic_cast<CollectionNode*>(node)) {
         std::string title = collectionNode->name + " (" + std::to_string(collectionNode->children.size()) + " items)";
-        if (ImGui::TreeNodeEx(title.c_str(), baseFlags)) {
+        if (ImGui::TreeNodeEx(MakeID(title, node).c_str(), baseFlags)) {
             for (Node* child : collectionNode->children) {
                 DrawTreeNode(child);
             }
@@ -48,7 +77,7 @@ void SceneGraphWindow::DrawTreeNode(Node* node) {
         }
     }
     else {
-        if (ImGui::TreeNodeEx(node->name.c_str(), baseFlags | ImGuiTreeNodeFlags_Leaf)) {
+        if (ImGui::TreeNodeEx(MakeID(node->name, node).c_str(), baseFlags | ImGuiTreeNodeFlags_Leaf)) {
             ImGui::TreePop();
         }
         if (ImGui::IsItemClicked()) {
@@ -71,13 +100,13 @@ void SceneGraphWindow::Draw(Editor& editor) {
             if (ImGui::MenuItem("Light")) {
                 LightNode* node = new LightNode(editor.scene);
                 node->name = "New Light";
-                editor.scene.root.children.push_back(node);
+                dynamic_cast<CollectionNode*>(editor.GetSelectedRootNode())->children.push_back(node);
             }
 
-            if (ImGui::MenuItem("Collection")) {
-                CollectionNode* node = new CollectionNode(editor.scene);
-                editor.scene.collections.emplace_back(node);
-                node->name = "New Collection";
+            if (ImGui::MenuItem("CollectionReference")) {
+                CollectionReferenceNode* node = new CollectionReferenceNode(editor.scene);
+                node->name = "CollectionReference";
+                dynamic_cast<CollectionNode*>(editor.GetSelectedRootNode())->children.push_back(node);
             }
 
             ImGui::EndMenu();
@@ -115,7 +144,7 @@ void SceneGraphWindow::Draw(Editor& editor) {
             StaticModelNode* node = new StaticModelNode(editor.scene);
             node->model = editor.scene.assetManager.GetModel(editor.scene.models[selectedModelIdx]);
             node->name = editor.scene.models[selectedModelIdx];
-            editor.scene.root.children.push_back(node);
+            dynamic_cast<CollectionNode*>(editor.GetSelectedRootNode())->children.push_back(node);
             ImGui::CloseCurrentPopup();
         }
         ImGui::SameLine();
@@ -125,11 +154,8 @@ void SceneGraphWindow::Draw(Editor& editor) {
         ImGui::EndPopup();
     }
 
-    DrawTreeNode(&editor.scene.root);
-    for (auto& collection : editor.scene.collections){
-        DrawTreeNode(collection);
-    }
+    DrawTreeNode(editor.GetSelectedRootNode());
     ImGui::Separator();
-    DrawCurrentProperties();
+    DrawCurrentProperties(editor);
     ImGui::End();
 }

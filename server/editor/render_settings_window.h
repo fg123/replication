@@ -4,10 +4,11 @@
 
 class Editor;
 
-class SceneDataWindow {
+class RenderSettingsWindow {
 public:
     bool isVisible = true;
-    Node* selectedNode = nullptr;
+
+    float bloomThreshold = 0.5f;
 
     void Draw(Editor& editor);
 };

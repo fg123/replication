@@ -127,9 +127,9 @@ void Game::LoadMap(std::string mapPath) {
     #ifdef BUILD_CLIENT
     Model* mapModel = GetModel("ShootingRange.obj");
     for (auto& mesh : mapModel->meshes) {
-        if (Contains(ToLower(mesh.name), "lightemit")) {
+        if (Contains(ToLower(mesh->name), "lightemit")) {
             Light& light = assetManager.lights.emplace_back();
-            light.position = Average(Map<Vertex, Vector3>(mesh.vertices, [](const Vertex& t) -> Vector3 { return t.position; }));
+            light.position = Average(Map<Vertex, Vector3>(mesh->vertices, [](const Vertex& t) -> Vector3 { return t.position; }));
             light.direction = -Vector::Up;
             light.color = Vector3(1, 1, 1);
             light.shadowMapSize = 0;

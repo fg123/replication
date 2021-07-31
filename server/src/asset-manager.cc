@@ -61,6 +61,20 @@ void DumpMesh(const Mesh& mesh) {
     }
 }
 
+AssetManager::~AssetManager() {
+    for (auto& model : models) {
+        delete model;
+    }
+    #ifdef BUILD_CLIENT
+    for (auto& texture : textures) {
+        delete texture.second;
+    }
+    for (auto& sound : sounds) {
+        delete sound.second;
+    }
+    #endif
+
+}
 ModelID AssetManager::LoadModel(const std::string& name, const std::string& path, std::istream& stream) {
     Time start = Timer::Now();
 
@@ -77,22 +91,21 @@ ModelID AssetManager::LoadModel(const std::string& name, const std::string& path
 
     for (auto& loadedMesh : loader.LoadedMeshes) {
         std::string name = ToLower(loadedMesh.MeshName);
-        Mesh* _mesh = nullptr;
+        Mesh* mesh = new Mesh;
         // LOG_DEBUG(name << " " << Contains(name, "nomesh"));
         if (Contains(name, "nomesh")) {
-            _mesh = &model->otherMeshes.emplace_back();
+            model->otherMeshes.emplace_back(mesh);
         }
         else {
-            _mesh = &model->meshes.emplace_back();
+            model->meshes.emplace_back(mesh);
         }
-        Mesh& mesh = *_mesh;
 
-        mesh.name = loadedMesh.MeshName;
-        mesh.indices = loadedMesh.Indices;
+        mesh->name = loadedMesh.MeshName;
+        mesh->indices = loadedMesh.Indices;
         std::vector<std::vector<Vector3>> tangents { loadedMesh.Vertices.size() };
 
         for (auto& loadedVertex : loadedMesh.Vertices) {
-            Vertex& vertex = mesh.vertices.emplace_back();
+            Vertex& vertex = mesh->vertices.emplace_back();
             vertex.position = ToVec3(loadedVertex.Position);
             vertex.normal = ToVec3(loadedVertex.Normal);
             vertex.texCoords = ToVec2(loadedVertex.TextureCoordinate);
@@ -100,14 +113,14 @@ ModelID AssetManager::LoadModel(const std::string& name, const std::string& path
         }
 
         // Calculate Tangents for Each Triangle
-        for (size_t i = 0; i < mesh.indices.size(); i += 3) {
-            size_t ai = mesh.indices[i];
-            size_t bi = mesh.indices[i + 1];
-            size_t ci = mesh.indices[i + 2];
+        for (size_t i = 0; i < mesh->indices.size(); i += 3) {
+            size_t ai = mesh->indices[i];
+            size_t bi = mesh->indices[i + 1];
+            size_t ci = mesh->indices[i + 2];
 
-            Vertex& a = mesh.vertices[ai];
-            Vertex& b = mesh.vertices[bi];
-            Vertex& c = mesh.vertices[ci];
+            Vertex& a = mesh->vertices[ai];
+            Vertex& b = mesh->vertices[bi];
+            Vertex& c = mesh->vertices[ci];
 
             Vector3 edge1 = b.position - a.position;
             Vector3 edge2 = c.position - a.position;
@@ -125,8 +138,8 @@ ModelID AssetManager::LoadModel(const std::string& name, const std::string& path
         }
 
         // Average Tangents for Each Vertex
-        for (size_t i = 0; i < mesh.vertices.size(); i++) {
-            mesh.vertices[i].tangent = Average(tangents[i]);
+        for (size_t i = 0; i < mesh->vertices.size(); i++) {
+            mesh->vertices[i].tangent = Average(tangents[i]);
         }
 
         // Use Default Shader
@@ -150,9 +163,9 @@ ModelID AssetManager::LoadModel(const std::string& name, const std::string& path
         material->map_d = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_d), Texture::Format::RGB);
         material->map_bump = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.map_bump), Texture::Format::RGB);
         material->map_refl = LoadTexture(StandardizePath(loadedMesh.MeshMaterial.refl), Texture::Format::RGB);
-        mesh.material = material;
+        mesh->material = material;
 
-        mesh.InitializeMesh();
+        mesh->InitializeMesh();
     #endif
         // DumpMesh(mesh);
     }

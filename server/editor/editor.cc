@@ -31,7 +31,8 @@ void Editor::DrawScene(int width, int height) {
     parameters.height = height;
     parameters.proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 1000.0f);
     parameters.viewPos = viewPos;
-    parameters.ambientFactor = 0.3f;
+    parameters.ambientFactor = 0.1f;
+    parameters.bloomThreshold = render_settings_window.bloomThreshold;
 
     Vector3 rot = Vector::Forward * GetRotationQuat();
 
@@ -39,24 +40,24 @@ void Editor::DrawScene(int width, int height) {
 
     // Aggregate Meshes
     std::vector<Node*> nodes;
-    scene.FlattenHierarchy(nodes);
+    scene.FlattenHierarchy(nodes, GetSelectedRootNode());
 
     DrawLayer layer;
     for (auto& node : nodes) {
         if (StaticModelNode* model_node = dynamic_cast<StaticModelNode*>(node)) {
             for (auto& mesh : model_node->model->meshes) {
-                Vector3 centerPt = Vector3(model_node->transform * Vector4(mesh.center, 1));
-                if (mesh.material->IsTransparent()) {
+                Vector3 centerPt = Vector3(model_node->transform * Vector4(mesh->center, 1));
+                if (mesh->material->IsTransparent()) {
                     DrawParams& params = layer.PushTransparent(
                         glm::distance2(centerPt, viewPos));
-                    params.mesh = &mesh;
+                    params.mesh = mesh;
                     params.transform = model_node->transform;
                     params.castShadows = false;
                     params.hasOutline = model_node == GetSelectedNode();
                 }
                 else {
-                    DrawParams& params = layer.PushOpaque(mesh.material);
-                    params.mesh = &mesh;
+                    DrawParams& params = layer.PushOpaque(mesh->material);
+                    params.mesh = mesh;
                     params.transform = model_node->transform;
                     params.castShadows = false;
                     params.hasOutline = model_node == GetSelectedNode();
@@ -70,7 +71,7 @@ void Editor::DrawScene(int width, int height) {
                 if (light_node->shape == LightShape::Point) {
                     DrawParams& params = layer.PushTransparent(
                         glm::distance2(light_node->position, viewPos));
-                    params.mesh = &scene.assetManager.GetModel("Icosphere.obj")->meshes[0];
+                    params.mesh = scene.assetManager.GetModel("Icosphere.obj")->meshes[0];
                     params.transform = light_node->transform;
                     params.castShadows = false;
                     params.isWireframe = true;
@@ -82,7 +83,7 @@ void Editor::DrawScene(int width, int height) {
                 //   lighting is calculated
                 DrawParams& params = layer.PushTransparent(
                     glm::distance2(light_node->position, viewPos));
-                params.mesh = &scene.assetManager.GetModel("Quad.obj")->meshes[0];
+                params.mesh = scene.assetManager.GetModel("Quad.obj")->meshes[0];
                 params.transform = light_node->transform;
                 params.castShadows = false;
                 params.isWireframe = false;
@@ -91,7 +92,7 @@ void Editor::DrawScene(int width, int height) {
                 // Draw bounding box
                 DrawParams& params2 = layer.PushTransparent(
                     glm::distance2(light_node->position, viewPos));
-                params2.mesh = &scene.assetManager.GetModel("Cube.obj")->meshes[0];
+                params2.mesh = scene.assetManager.GetModel("Cube.obj")->meshes[0];
                 params2.transform = light_node->GetRectangleVolumeTransform();
                 params2.castShadows = false;
                 params2.isWireframe = true;
@@ -115,6 +116,13 @@ Node* Editor::GetSelectedNode() {
     return scene_graph_window.selectedNode;
 }
 
+Node* Editor::GetSelectedRootNode() {
+    if (!scene_data_window.selectedNode) {
+        scene_data_window.selectedNode = &scene.root;
+    }
+    return scene_data_window.selectedNode;
+}
+
 void Editor::DrawUI(int width, int height) {
     if(ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Windows")) {
@@ -126,6 +134,10 @@ void Editor::DrawUI(int width, int height) {
                 "Scene Graph", NULL,
                 &scene_graph_window.isVisible, true);
 
+            ImGui::MenuItem(
+                "Render Settings", NULL,
+                &render_settings_window.isVisible, true);
+
             ImGui::EndMenu();
         }
 
@@ -134,6 +146,7 @@ void Editor::DrawUI(int width, int height) {
 
     scene_data_window.Draw(*this);
     scene_graph_window.Draw(*this);
+    render_settings_window.Draw(*this);
 }
 
 void Editor::Draw(int width, int height) {
