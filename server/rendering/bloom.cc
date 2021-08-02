@@ -6,8 +6,8 @@ GLuint BloomShader::BloomTexture(GLuint texture, float threshold, int width, int
     glDisable(GL_DEPTH_TEST);
     bloomBuffer.SetSize(width, height);
 
-    quadDrawShader.Use();
-    quadDrawShader.SetTextureSize(width, height);
+    blurShader.Use();
+    blurShader.SetTextureSize(width, height);
 
     bloomBuffer.Bind();
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -20,18 +20,18 @@ GLuint BloomShader::BloomTexture(GLuint texture, float threshold, int width, int
 
     texture = bloomBuffer.BlitTexture();
 
-    quadDrawShader.Use();
+    blurShader.Use();
     glUniform2f(uniformDirection, 0.0f, 1.0f);
-    for (size_t i = 0; i < 16; i++) {
+    for (size_t i = 0; i < 4; i++) {
         bloomBuffer.Bind();
-        quadDrawShader.DrawQuad(texture, quadDrawShader.standardRemapMatrix);
+        blurShader.DrawQuad(texture, blurShader.standardRemapMatrix);
 
         texture = bloomBuffer.BlitTexture();
     }
     glUniform2f(uniformDirection, 1.0f, 0.0f);
-    for (size_t i = 0; i < 16; i++) {
+    for (size_t i = 0; i < 4; i++) {
         bloomBuffer.Bind();
-        quadDrawShader.DrawQuad(texture, quadDrawShader.standardRemapMatrix);
+        blurShader.DrawQuad(texture, blurShader.standardRemapMatrix);
 
         texture = bloomBuffer.BlitTexture();
     }

@@ -15,6 +15,36 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
         ImGui::Text("No node selected");
         return;
     }
+    ImGui::Separator();
+    ImGui::Text("Node Properties");
+    if (ImGui::Button("Deselect")) {
+        selectedNode = nullptr;
+        return;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Delete")) {
+        ImGui::OpenPopup("Delete Node?");
+    }
+    ImGui::Separator();
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (ImGui::BeginPopupModal("Delete node?", NULL, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("Are you sure you want to delete this node?\n");
+        ImGui::Separator();
+
+        if (ImGui::Button("Delete")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SetItemDefaultFocus();
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+
     ImGui::InputText("Name", &selectedNode->name);
 
     ImGui::DragFloat3("Position", glm::value_ptr(selectedNode->position), 0.05f);

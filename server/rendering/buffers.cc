@@ -14,14 +14,14 @@ void RenderBuffer::SetSize(int newWidth, int newHeight) {
         fbo = 0;
     }
 
-    if (renderBufferColor) {
-        glDeleteRenderbuffers(1, &renderBufferColor);
-        renderBufferColor = 0;
+    if (textureColor) {
+        glDeleteTextures(1, &textureColor);
+        textureColor = 0;
     }
 
-    if (renderBufferDepth) {
-        glDeleteRenderbuffers(1, &renderBufferDepth);
-        renderBufferDepth = 0;
+    if (textureDepth) {
+        glDeleteTextures(1, &textureDepth);
+        textureDepth = 0;
     }
 
     if (internalTexture) {
@@ -39,22 +39,30 @@ void RenderBuffer::SetSize(int newWidth, int newHeight) {
         internalFBO = 0;
     }
 
-    glGenRenderbuffers(1, &renderBufferColor);
-    glBindRenderbuffer(GL_RENDERBUFFER, renderBufferColor);
-    // glRenderbufferStorageMultisample(GL_RENDERBUFFER, ClientGL::glLimits.MAX_SAMPLES, GL_RGBA8,
-    //     width, height);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, width, height);
+    glGenTextures(1, &textureColor);
+    glBindTexture(GL_TEXTURE_2D, textureColor);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F,
+                width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glGenRenderbuffers(1, &renderBufferDepth);
-    glBindRenderbuffer(GL_RENDERBUFFER, renderBufferDepth);
-    // glRenderbufferStorageMultisample(GL_RENDERBUFFER, ClientGL::glLimits.MAX_SAMPLES, GL_DEPTH_COMPONENT24,
-    //     width, height);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+    glGenTextures(1, &textureDepth);
+    glBindTexture(GL_TEXTURE_2D, textureDepth);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
+            width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
 
     glGenFramebuffers(1, &fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, renderBufferColor);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderBufferDepth);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColor, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, textureDepth, 0);
 
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 
@@ -64,10 +72,10 @@ void RenderBuffer::SetSize(int newWidth, int newHeight) {
 
     glGenTextures(1, &internalTexture);
     glBindTexture(GL_TEXTURE_2D, internalTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F,
+                width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -76,8 +84,8 @@ void RenderBuffer::SetSize(int newWidth, int newHeight) {
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
             width, height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -96,7 +104,9 @@ void RenderBuffer::SetSize(int newWidth, int newHeight) {
 GLuint RenderBuffer::BlitTexture() {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, internalFBO);
-    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
+        GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT,
+        GL_NEAREST);
     return internalTexture;
 }
 

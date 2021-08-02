@@ -51,17 +51,26 @@ struct RenderFrameParameters {
     int height;
 
     float ambientFactor;
+
+    bool enableBloom;
     float bloomThreshold;
+
+    bool enableToneMapping;
+    float exposure;
+
+    bool enableAntialiasing;
     std::vector<LightNode*> lights;
 };
 
 class DeferredRenderer {
+public:
     AssetManager& assetManager;
 
     DeferredShadingGeometryShaderProgram geometryShader;
     QuadShaderProgram quadShader;
 
     GBuffer gBuffer;
+    GBuffer transparencyGBuffer;
 
     RenderBuffer outputBuffer;
 
@@ -73,8 +82,14 @@ class DeferredRenderer {
 
     BloomShader bloomShader;
 
+    // Tone Mapping
+    QuadShaderProgram toneMappingShader;
+    GLint uniformToneMappingExposure;
+
+    QuadShaderProgram fxaaShader;
+
+
     void DrawObject(DrawParams& params);
-public:
     DeferredRenderer(AssetManager& assetManager);
 
     void NewFrame(const RenderFrameParameters& params);

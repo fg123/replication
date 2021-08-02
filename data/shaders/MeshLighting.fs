@@ -38,10 +38,10 @@ const float middleBound = 50.0;
 const float shadowTransitionZone = 5.0;
 
 // Retreived from maps
-vec3 MappedFragmentPos;
-vec3 MappedFragmentNormal;
-vec3 MappedFragmentPosClipSpace;
-float SpecularFactor;
+vec3 MappedFragmentPos = vec3(0.0);
+vec3 MappedFragmentNormal = vec3(0.0);
+vec3 MappedFragmentPosClipSpace = vec3(0.0);
+float SpecularFactor = 0.0;
 
 #require GetClosestPointOnEmitter
 #require IsPointInVolume
@@ -189,7 +189,12 @@ void main()
         // return;
     // }
     vec2 FragmentTexCoords = gl_FragCoord.xy / u_ViewportSize;
-    MappedFragmentPos = texture(gbuf_position, FragmentTexCoords).rgb;
+    vec4 texPos = texture(gbuf_position, FragmentTexCoords);
+    if (texPos.a < 0.5) {
+        OutputColor = vec4(0, 0, 0, 0);
+        return;
+    }
+    MappedFragmentPos = texPos.rgb;
 
     // OutputColor = vec4(MappedFragmentPos / 200.0, 1.0);
     // return;
@@ -204,7 +209,9 @@ void main()
     }
 
     // This is fully additive factors on top of ambient base color
-    vec3 Diffuse = texture(gbuf_diffuse, FragmentTexCoords).rgb;
+    vec4 fullDiffuse = texture(gbuf_diffuse, FragmentTexCoords);
+    vec3 Diffuse = fullDiffuse.rgb;
+    float alpha = fullDiffuse.a;
     vec3 Specular = texture(gbuf_specular, FragmentTexCoords).rgb;
 
     vec3 diffuseAccum = GetDiffuseAccumulation();
@@ -212,7 +219,7 @@ void main()
     float r = distance(MappedFragmentPos, GetClosestPointOnEmitter(MappedFragmentPos));
 
     OutputColor = vec4(
-        (Diffuse * diffuseAccum + Specular * specularAccum) / (r * r), 1.0);
+        (Diffuse * diffuseAccum + Specular * specularAccum) / (r * r), alpha);
 
     // vec3 transformedPoint = vec3(u_Light.inverseTransform * vec4(MappedFragmentPos, 1.0));
     // float d = distance(transformedPoint, u_Light.position);

@@ -8,15 +8,17 @@ class RenderBuffer {
     GLuint internalTexture = 0;
 
 public:
+
     GLuint internalDepth = 0;
 
     GLuint fbo = 0;
-    GLuint renderBufferColor = 0;
-    GLuint renderBufferDepth = 0;
+    GLuint textureColor = 0;
+    GLuint textureDepth = 0;
 
     int width = 0;
     int height = 0;
 
+    RenderBuffer() {}
     void SetSize(int width, int height);
 
     void Bind() {

@@ -5,9 +5,8 @@
 #include "shader.h"
 
 class BloomShader {
-    RenderBuffer bloomBuffer;
 
-    QuadShaderProgram quadDrawShader;
+    QuadShaderProgram blurShader;
 
     QuadShaderProgram highPassFilter;
 
@@ -15,11 +14,12 @@ class BloomShader {
 
     GLuint uniformThreshold;
 public:
+    RenderBuffer bloomBuffer;
 
-    BloomShader() : quadDrawShader("shaders/GaussianBlur.fs"),
+    BloomShader() : blurShader("shaders/GaussianBlur.fs"),
             highPassFilter("shaders/BloomHighPass.fs") {
-        quadDrawShader.Use();
-        uniformDirection = quadDrawShader.GetUniformLocation("u_direction");
+        blurShader.Use();
+        uniformDirection = blurShader.GetUniformLocation("u_direction");
 
         highPassFilter.Use();
         uniformThreshold = highPassFilter.GetUniformLocation("u_threshold");

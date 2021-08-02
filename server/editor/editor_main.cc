@@ -17,6 +17,20 @@ static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
+void GLAPIENTRY
+MessageCallback( GLenum source,
+                 GLenum type,
+                 GLuint id,
+                 GLenum severity,
+                 GLsizei length,
+                 const GLchar* message,
+                 const void* userParam )
+{
+  fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
+            type, severity, message );
+}
+
 int main(int argc, char* argv[]) {
     // Setup Editor
     if (argc != 2) {
@@ -34,6 +48,7 @@ int main(int argc, char* argv[]) {
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 
@@ -52,6 +67,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
     // Initialize after opengl has been loaded in.
     Editor editor (window, std::string(argv[1]));
     glfwSetWindowUserPointer(window, &editor);

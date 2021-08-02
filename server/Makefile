@@ -151,6 +151,8 @@ $(USOCKET)/uSockets.a:
 
 -include $(CLIENT_DEPS)
 
+-include $(EDITOR_DEPS)
+
 .PHONY: all clean release
 
 clean:

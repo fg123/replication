@@ -32,7 +32,11 @@ void Editor::DrawScene(int width, int height) {
     parameters.proj = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 1000.0f);
     parameters.viewPos = viewPos;
     parameters.ambientFactor = 0.1f;
+    parameters.enableBloom = render_settings_window.enableBloom;
     parameters.bloomThreshold = render_settings_window.bloomThreshold;
+    parameters.enableToneMapping = render_settings_window.enableToneMapping;
+    parameters.exposure = render_settings_window.exposure;
+    parameters.enableAntialiasing = render_settings_window.enableAntialiasing;
 
     Vector3 rot = Vector::Forward * GetRotationQuat();
 

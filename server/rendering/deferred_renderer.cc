@@ -4,8 +4,13 @@ DeferredRenderer::DeferredRenderer(AssetManager& assetManager) :
     assetManager(assetManager),
     quadShader("shaders/Quad.fs"),
     pointLightShader("shaders/MeshLightingPointLight.fs"),
-    rectangleLightShader("shaders/MeshLightingRectangleLight.fs") {
+    rectangleLightShader("shaders/MeshLightingRectangleLight.fs"),
 
+    toneMappingShader("shaders/ToneMapping.fs"),
+    fxaaShader("shaders/FXAA.fs") {
+
+    toneMappingShader.Use();
+    uniformToneMappingExposure = toneMappingShader.GetUniformLocation("u_exposure");
 }
 
 void DeferredRenderer::NewFrame(const RenderFrameParameters& params) {
@@ -21,6 +26,7 @@ void DeferredRenderer::NewFrame(const RenderFrameParameters& params) {
     rectangleLightShader.SetViewportSize(params.width, params.height);
 
     gBuffer.SetSize(params.width, params.height);
+    transparencyGBuffer.SetSize(params.width, params.height);
     outputBuffer.SetSize(params.width, params.height);
 
     renderFrameParameters = params;
@@ -46,11 +52,12 @@ void DeferredRenderer::DrawObject(DrawParams& params) {
     geometryShader.SetDrawOutline(0, Vector3());
     geometryShader.Draw(params.transform, params.mesh);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_CULL_FACE);
 }
 
 void DeferredRenderer::Draw(DrawLayer& layer) {
     gBuffer.Bind();
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -66,7 +73,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
 
     // Lighting Pass
     outputBuffer.Bind();
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Copy Depth from GBuffer Over
@@ -120,9 +127,15 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
 
     // Draw Transparent Objects, Clear Color, keep depth
     {
-        gBuffer.Bind();
+        transparencyGBuffer.Bind();
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.fbo);
+        glBlitFramebuffer(0, 0, gBuffer.width, gBuffer.height,
+            0, 0, transparencyGBuffer.width, transparencyGBuffer.height,
+            GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        transparencyGBuffer.Bind();
+
 
         geometryShader.Use();
         for (auto it = layer.transparent.rbegin(); it != layer.transparent.rend(); ++it) {
@@ -135,25 +148,43 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
         outputBuffer.Bind();
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        GLuint diffuseTexture = gBuffer.g_diffuse;
+        GLuint diffuseTexture = transparencyGBuffer.g_diffuse;
         quadShader.Use();
         quadShader.DrawQuad(diffuseTexture, quadShader.standardRemapMatrix);
 
     }
 
-    GLuint postBloomTexture = bloomShader.BloomTexture(
-        outputBuffer.BlitTexture(),
-        renderFrameParameters.bloomThreshold,
-        renderFrameParameters.width,
-        renderFrameParameters.height);
+    glBlendFunc(GL_ONE, GL_ZERO);
 
-    outputBuffer.Bind();
-    glBlendFunc(GL_ONE, GL_ONE);
-    // glClearColor(0, 0, 0, 0);
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
-    quadShader.Use();
-    quadShader.DrawQuad(postBloomTexture, quadShader.standardRemapMatrix);
+    GLuint texture = outputBuffer.BlitTexture();
+    if (renderFrameParameters.enableBloom) {
+        texture = bloomShader.BloomTexture(
+            texture,
+            renderFrameParameters.bloomThreshold,
+            renderFrameParameters.width,
+            renderFrameParameters.height);
+
+        outputBuffer.Bind();
+
+        // Additive Bloom on top
+        glBlendFunc(GL_ONE, GL_ONE);
+        glDisable(GL_DEPTH_TEST);
+        quadShader.Use();
+        quadShader.DrawQuad(texture, quadShader.standardRemapMatrix);
+        texture = outputBuffer.BlitTexture();
+    }
+
+    if (renderFrameParameters.enableToneMapping) {
+        outputBuffer.Bind();
+        glBlendFunc(GL_ONE, GL_ZERO);
+        glDisable(GL_DEPTH_TEST);
+        toneMappingShader.Use();
+        glUniform1f(uniformToneMappingExposure, renderFrameParameters.exposure);
+        toneMappingShader.DrawQuad(texture, toneMappingShader.standardRemapMatrix);
+    }
+
+    // texture = outputBuffer.BlitTexture();
+
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);

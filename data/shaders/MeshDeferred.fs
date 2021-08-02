@@ -40,7 +40,7 @@ in mat3 FragmentTBN;
 in vec3 FragmentPosClipSpace;
 flat in float FragmentOutline;
 
-layout(location = 0) out vec3 gbuf_position;
+layout(location = 0) out vec4 gbuf_position;
 layout(location = 1) out vec3 gbuf_normal;
 layout(location = 2) out vec4 gbuf_diffuse;
 layout(location = 3) out vec4 gbuf_specular;
@@ -84,7 +84,8 @@ vec3 GetKs() {
 }
 
 void main() {
-    gbuf_position = FragmentPos;
+    gbuf_position.rgb = FragmentPos;
+    gbuf_position.a = 1.0;
     gbuf_normal = GetNormal();
 
     if (FragmentOutline > 0.0) {

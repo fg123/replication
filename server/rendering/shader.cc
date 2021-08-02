@@ -435,8 +435,8 @@ void DeferredShadingLightingShaderProgram::RenderLighting(LightNode& light, Asse
     glUniform1i(uniformShadowMapSize, light.shadowMapSize);
     glUniform1f(uniformLightStrength, light.strength);
     glUniform3fv(uniformLightColor, 1, glm::value_ptr(light.color));
-    glUniform2fv(uniformLightVolumeSize, 1, glm::value_ptr(light.volumeSize));
-    glUniform2fv(uniformLightVolumeOffset, 1, glm::value_ptr(light.volumeOffset));
+    glUniform3fv(uniformLightVolumeSize, 1, glm::value_ptr(light.volumeSize));
+    glUniform3fv(uniformLightVolumeOffset, 1, glm::value_ptr(light.volumeOffset));
     glUniformMatrix4fv(uniformDepthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPNear));
     glUniformMatrix4fv(uniformDepthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPMid));
     glUniformMatrix4fv(uniformDepthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPFar));
