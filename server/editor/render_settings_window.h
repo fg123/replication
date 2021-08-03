@@ -8,13 +8,13 @@ class RenderSettingsWindow {
 public:
     bool isVisible = true;
 
-    bool enableBloom = true;
+    bool enableBloom = false;
     float bloomThreshold = 1.0f;
 
-    bool enableToneMapping = true;
+    bool enableToneMapping = false;
     float exposure = 1.0f;
 
-    bool enableAntialiasing = true;
+    bool enableAntialiasing = false;
 
     void Draw(Editor& editor);
 };

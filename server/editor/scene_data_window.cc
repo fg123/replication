@@ -27,5 +27,33 @@ void SceneDataWindow::Draw(Editor& editor) {
         editor.scene.collections.emplace_back(node);
         node->name = "New Collection";
     }
+
+    if (ImGui::Button("Save Scene")) {
+        if (!editor.SaveToFile()) {
+            ImGui::OpenPopup("Error");
+        }
+        else {
+            ImGui::OpenPopup("Success");
+        }
+    }
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (ImGui::BeginPopupModal("Error", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Failed to save scene to file.");
+        ImGui::Separator();
+        if (ImGui::Button("OK")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+     if (ImGui::BeginPopupModal("Success", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        ImGui::Text("Saved to File");
+        ImGui::Separator();
+        if (ImGui::Button("OK")) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
     ImGui::End();
 }

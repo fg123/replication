@@ -59,6 +59,12 @@ struct RenderFrameParameters {
     float exposure;
 
     bool enableAntialiasing;
+
+    float fxaaLumaThreshold = 0.5f;
+    float fxaaMulReduceReciprocal = 8.0f;
+    float fxaaMinReduceReciprocal = 128.0f;
+    float fxaaMaxSpan = 8.0f;
+
     std::vector<LightNode*> lights;
 };
 
@@ -87,10 +93,15 @@ public:
     GLint uniformToneMappingExposure;
 
     QuadShaderProgram fxaaShader;
+    GLint uniformFXAALumaThreshold;
+    GLint uniformFXAAMulReduceReciprocal;
+    GLint uniformFXAAMinReduceReciprocal;
+    GLint uniformFXAAMaxSpan;
 
+
+    DeferredRenderer(AssetManager& assetManager);
 
     void DrawObject(DrawParams& params);
-    DeferredRenderer(AssetManager& assetManager);
 
     void NewFrame(const RenderFrameParameters& params);
 

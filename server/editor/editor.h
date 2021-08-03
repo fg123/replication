@@ -56,4 +56,6 @@ struct Editor {
     void OnScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
     Node* GetSelectedNode();
     Node* GetSelectedRootNode();
+
+    bool SaveToFile();
 };

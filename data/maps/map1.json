@@ -1,99 +1,476 @@
 {
- "tilemap": "map1Tiles.png",
- "models": [
-    "ShootingRange.obj",
-    "FlatWorld.obj",
-    "Lift.obj",
-    "SpectatorArea.obj",
-    "Player.obj",
-    "NewPlayer.obj",
-    "Pistol.obj",
-    "Rifle.obj",
-    "Bullet.obj",
-    "BulletTracer.obj",
-    "Quad.obj",
-    "Grenade.obj",
-    "Explosion.obj",
-    "ArtilleryIndicator.obj",
-    "Artillery.obj",
-    "HookThrower.obj",
-    "Portal.obj",
-    "Bow.obj",
-    "Arrow.obj",
-    "BombCrate.obj",
-    "Plane.obj",
-    "Ammo.obj",
-    "Icosphere.obj",
-    "Cube.obj",
-    "Cylinder.obj",
-    "Shotgun.obj",
-    "Medkit.obj",
-    "MachineGun.obj",
-    "PlayerMarkerMinimap.obj",
-    "SubmachineGun.obj",
-    "SmokeGrenade.obj",
-    "Cone.obj",
-    "Warehouse.obj"
- ],
- "sounds": [
-    "bang.wav",
-    "reload.wav",
-    "boom.wav",
-    "ueh.wav",
-    "incoming.wav",
-    "HookThrow.wav",
-    "HookReel.wav",
-    "PortalStart.wav",
-    "PortalEnd.wav",
-    "GrenadeOut.wav",
-    "Archer/arrow-jump.wav",
-    "Archer/arrow-pullback.wav",
-    "Archer/arrow-shoot.wav",
-    "Archer/arrow-ulti-activate.wav",
-    "Archer/arrow-ulti-shoot.wav"
- ],
- "lights": [
-    [  14, 50,  11, 1, 1, 1, -0.32, -0.87, -0.38]
- ],
- "scripts": [
-   "Types.w",
-   "Object.w",
-   "Test.w"
- ],
- "root": {
-    "position": { "x": 0, "y": 0, "z": 0 },
-    "rotation": { "x": 0, "y": 0, "z": 0 },
-    "scale": { "x": 1, "y": 1, "z": 1 },
-    "name": "Root",
-    "type": "CollectionNode",
-    "children": [
-       {
-          "position": { "x": 0, "y": 0, "z": 0 },
-          "rotation": { "x": 0, "y": 0, "z": 0 },
-          "scale": { "x": 1, "y": 1, "z": 1 },
-          "name": "Map",
-          "type": "StaticModelNode",
-          "model": "ShootingRange.obj"
-       }
-      ]
+   "models": [
+       "ShootingRange.obj",
+       "FlatWorld.obj",
+       "Lift.obj",
+       "SpectatorArea.obj",
+       "Player.obj",
+       "NewPlayer.obj",
+       "Pistol.obj",
+       "Rifle.obj",
+       "Bullet.obj",
+       "BulletTracer.obj",
+       "Quad.obj",
+       "Grenade.obj",
+       "Explosion.obj",
+       "ArtilleryIndicator.obj",
+       "Artillery.obj",
+       "HookThrower.obj",
+       "Portal.obj",
+       "Bow.obj",
+       "Arrow.obj",
+       "BombCrate.obj",
+       "Plane.obj",
+       "Ammo.obj",
+       "Icosphere.obj",
+       "Cube.obj",
+       "Cylinder.obj",
+       "Shotgun.obj",
+       "Medkit.obj",
+       "MachineGun.obj",
+       "PlayerMarkerMinimap.obj",
+       "SubmachineGun.obj",
+       "SmokeGrenade.obj",
+       "Cone.obj",
+       "Warehouse.obj"
+   ],
+   "scripts": [
+       "Types.w",
+       "Object.w",
+       "Test.w"
+   ],
+   "sounds": [
+       "bang.wav",
+       "reload.wav",
+       "boom.wav",
+       "ueh.wav",
+       "incoming.wav",
+       "HookThrow.wav",
+       "HookReel.wav",
+       "PortalStart.wav",
+       "PortalEnd.wav",
+       "GrenadeOut.wav",
+       "Archer/arrow-jump.wav",
+       "Archer/arrow-pullback.wav",
+       "Archer/arrow-shoot.wav",
+       "Archer/arrow-ulti-activate.wav",
+       "Archer/arrow-ulti-shoot.wav"
+   ],
+   "root": {
+       "scale": {
+           "x": 1.0,
+           "y": 1.0,
+           "z": 1.0
+       },
+       "name": "Root",
+       "position": {
+           "x": 0.0,
+           "y": 0.0,
+           "z": 0.0
+       },
+       "rotation": {
+           "x": 0.0,
+           "y": 0.0,
+           "z": 0.0
+       },
+       "type": "CollectionNode",
+       "children": [
+           {
+               "scale": {
+                   "x": 1.0,
+                   "y": 1.0,
+                   "z": 1.0
+               },
+               "name": "Map",
+               "position": {
+                   "x": 0.0,
+                   "y": 0.0,
+                   "z": 0.0
+               },
+               "rotation": {
+                   "x": 0.0,
+                   "y": 0.0,
+                   "z": 0.0
+               },
+               "type": "StaticModelNode",
+               "model": "ShootingRange.obj"
+           }
+       ]
    },
    "collections": [
-      {
-         "position": { "x": 0, "y": 0, "z": 0 },
-         "rotation": { "x": 0, "y": 0, "z": 0 },
-         "scale": { "x": 1, "y": 1, "z": 1 },
-         "name": "Building w/ Lights",
-         "type": "CollectionNode",
-         "children": [
-            {
-              "position": { "x": 0, "y": 0, "z": 0 },
-              "rotation": { "x": 0, "y": 0, "z": 0 },
-              "scale": { "x": 1, "y": 1, "z": 1 },
-              "name": "Building",
-              "type": "StaticModelNode",
-              "model": "Warehouse.obj"
-            }
+       {
+           "scale": {
+               "x": 1.0,
+               "y": 1.0,
+               "z": 1.0
+           },
+           "name": "Building w/ Lights",
+           "position": {
+               "x": 0.0,
+               "y": 0.0,
+               "z": 0.0
+           },
+           "rotation": {
+               "x": 0.0,
+               "y": 0.0,
+               "z": 0.0
+           },
+           "type": "CollectionNode",
+           "children": [
+               {
+                   "scale": {
+                       "x": 1.0,
+                       "y": 1.0,
+                       "z": 1.0
+                   },
+                   "name": "Building",
+                   "position": {
+                       "x": 0.0,
+                       "y": 0.0,
+                       "z": 0.0
+                   },
+                   "rotation": {
+                       "x": 0.0,
+                       "y": 0.0,
+                       "z": 0.0
+                   },
+                   "type": "StaticModelNode",
+                   "model": "Warehouse.obj"
+               },
+               {
+                   "volumeSize": {
+                       "x": 17.239999771118165,
+                       "y": 7.510000228881836,
+                       "z": 8.949999809265137
+                   },
+                   "volumeOffset": {
+                       "x": 0.2070000022649765,
+                       "y": 0.2944999933242798,
+                       "z": -0.4699999988079071
+                   },
+                   "color": {
+                       "x": 1.0,
+                       "y": 1.0,
+                       "z": 1.0
+                   },
+                   "rotation": {
+                       "x": 0.0,
+                       "y": -90.0,
+                       "z": 0.0
+                   },
+                   "position": {
+                       "x": -3.2639999389648439,
+                       "y": 6.043970108032227,
+                       "z": 6.711999893188477
+                   },
+                   "shadowMapSize": 0,
+                   "scale": {
+                       "x": 0.8062040209770203,
+                       "y": 2.991260051727295,
+                       "z": 1.0
+                   },
+                   "name": "Roof Second Floor 1",
+                   "strength": 10.0,
+                   "type": "LightNode",
+                   "shape": 1
+               },
+               {
+                   "volumeSize": {
+                       "x": 17.239999771118165,
+                       "y": 7.510000228881836,
+                       "z": 8.949999809265137
+                   },
+                   "volumeOffset": {
+                       "x": 0.2070000022649765,
+                       "y": -0.13500000536441804,
+                       "z": -0.4699999988079071
+                   },
+                   "color": {
+                       "x": 1.0,
+                       "y": 1.0,
+                       "z": 1.0
+                   },
+                   "rotation": {
+                       "x": 0.0,
+                       "y": -90.0,
+                       "z": 0.0
+                   },
+                   "position": {
+                       "x": -3.2639999389648439,
+                       "y": 6.043970108032227,
+                       "z": -2.9357800483703615
+                   },
+                   "shadowMapSize": 0,
+                   "scale": {
+                       "x": 0.8062040209770203,
+                       "y": 2.991260051727295,
+                       "z": 1.0
+                   },
+                   "name": "Roof Second Floor 2",
+                   "strength": 10.0,
+                   "type": "LightNode",
+                   "shape": 1
+               },
+               {
+                   "volumeSize": {
+                       "x": 17.239999771118165,
+                       "y": 7.510000228881836,
+                       "z": 8.949999809265137
+                   },
+                   "volumeOffset": {
+                       "x": 0.2070000022649765,
+                       "y": -0.3449999988079071,
+                       "z": -0.4699999988079071
+                   },
+                   "color": {
+                       "x": 1.0,
+                       "y": 1.0,
+                       "z": 1.0
+                   },
+                   "rotation": {
+                       "x": 0.0,
+                       "y": -90.0,
+                       "z": 0.0
+                   },
+                   "position": {
+                       "x": -3.2639999389648439,
+                       "y": 6.043970108032227,
+                       "z": -7.653279781341553
+                   },
+                   "shadowMapSize": 0,
+                   "scale": {
+                       "x": 0.8062040209770203,
+                       "y": 2.991260051727295,
+                       "z": 1.0
+                   },
+                   "name": "Roof Second Floor 3",
+                   "strength": 10.0,
+                   "type": "LightNode",
+                   "shape": 1
+               },
+               {
+                   "volumeSize": {
+                       "x": 17.239999771118165,
+                       "y": 7.510000228881836,
+                       "z": 8.949999809265137
+                   },
+                   "volumeOffset": {
+                       "x": -0.36899998784065249,
+                       "y": 0.2944999933242798,
+                       "z": -0.4699999988079071
+                   },
+                   "color": {
+                       "x": 1.0,
+                       "y": 1.0,
+                       "z": 1.0
+                   },
+                   "rotation": {
+                       "x": 0.0,
+                       "y": -90.0,
+                       "z": 0.0
+                   },
+                   "position": {
+                       "x": 4.735620021820068,
+                       "y": 6.043970108032227,
+                       "z": 6.711999893188477
+                   },
+                   "shadowMapSize": 0,
+                   "scale": {
+                       "x": 0.8062040209770203,
+                       "y": 2.991260051727295,
+                       "z": 1.0
+                   },
+                   "name": "Roof Third Floor 1",
+                   "strength": 10.0,
+                   "type": "LightNode",
+                   "shape": 1
+               },
+               {
+                   "volumeSize": {
+                       "x": 17.239999771118165,
+                       "y": 7.510000228881836,
+                       "z": 8.949999809265137
+                   },
+                   "volumeOffset": {
+                       "x": -0.36899998784065249,
+                       "y": -0.13500000536441804,
+                       "z": -0.4699999988079071
+                   },
+                   "color": {
+                       "x": 1.0,
+                       "y": 1.0,
+                       "z": 1.0
+                   },
+                   "rotation": {
+                       "x": 0.0,
+                       "y": -90.0,
+                       "z": 0.0
+                   },
+                   "position": {
+                       "x": 4.735620021820068,
+                       "y": 6.043970108032227,
+                       "z": -2.9357800483703615
+                   },
+                   "shadowMapSize": 0,
+                   "scale": {
+                       "x": 0.8062040209770203,
+                       "y": 2.991260051727295,
+                       "z": 1.0
+                   },
+                   "name": "Roof Third Floor 2",
+                   "strength": 10.0,
+                   "type": "LightNode",
+                   "shape": 1
+               },
+               {
+                   "volumeSize": {
+                       "x": 17.239999771118165,
+                       "y": 7.510000228881836,
+                       "z": 8.949999809265137
+                   },
+                   "volumeOffset": {
+                       "x": -0.36899998784065249,
+                       "y": -0.3449999988079071,
+                       "z": -0.4699999988079071
+                   },
+                   "color": {
+                       "x": 1.0,
+                       "y": 1.0,
+                       "z": 1.0
+                   },
+                   "rotation": {
+                       "x": 0.0,
+                       "y": -90.0,
+                       "z": 0.0
+                   },
+                   "position": {
+                       "x": 4.735620021820068,
+                       "y": 6.043970108032227,
+                       "z": -7.653279781341553
+                   },
+                   "shadowMapSize": 0,
+                   "scale": {
+                       "x": 0.8062040209770203,
+                       "y": 2.991260051727295,
+                       "z": 1.0
+                   },
+                   "name": "Roof Third Floor 3",
+                   "strength": 10.0,
+                   "type": "LightNode",
+                   "shape": 1
+               },
+               {
+                   "volumeSize": {
+                       "x": 17.239999771118165,
+                       "y": 7.510000228881836,
+                       "z": 8.949999809265137
+                   },
+                   "volumeOffset": {
+                       "x": -0.36899998784065249,
+                       "y": 0.2944999933242798,
+                       "z": -0.4699999988079071
+                   },
+                   "color": {
+                       "x": 1.0,
+                       "y": 1.0,
+                       "z": 1.0
+                   },
+                   "rotation": {
+                       "x": 0.0,
+                       "y": -90.0,
+                       "z": 0.0
+                   },
+                   "position": {
+                       "x": 4.735620021820068,
+                       "y": 3.11397,
+                       "z": 6.711999893188477
+                   },
+                   "shadowMapSize": 0,
+                   "scale": {
+                       "x": 0.8062040209770203,
+                       "y": 2.991260051727295,
+                       "z": 1.0
+                   },
+                   "name": "Ground Floor 1",
+                   "strength": 10.0,
+                   "type": "LightNode",
+                   "shape": 1
+               },
+               {
+                   "volumeSize": {
+                       "x": 17.239999771118165,
+                       "y": 7.510000228881836,
+                       "z": 8.949999809265137
+                   },
+                   "volumeOffset": {
+                       "x": -0.36899998784065249,
+                       "y": -0.13500000536441804,
+                       "z": -0.4699999988079071
+                   },
+                   "color": {
+                       "x": 1.0,
+                       "y": 1.0,
+                       "z": 1.0
+                   },
+                   "rotation": {
+                       "x": 0.0,
+                       "y": -90.0,
+                       "z": 0.0
+                   },
+                   "position": {
+                       "x": 4.735620021820068,
+                       "y": 3.11397,
+                       "z": -2.9357800483703615
+                   },
+                   "shadowMapSize": 0,
+                   "scale": {
+                       "x": 0.8062040209770203,
+                       "y": 2.991260051727295,
+                       "z": 1.0
+                   },
+                   "name": "Ground Floor 2",
+                   "strength": 10.0,
+                   "type": "LightNode",
+                   "shape": 1
+               },
+               {
+                   "volumeSize": {
+                       "x": 17.239999771118165,
+                       "y": 7.510000228881836,
+                       "z": 8.949999809265137
+                   },
+                   "volumeOffset": {
+                       "x": -0.36899998784065249,
+                       "y": -0.3449999988079071,
+                       "z": -0.4699999988079071
+                   },
+                   "color": {
+                       "x": 1.0,
+                       "y": 1.0,
+                       "z": 1.0
+                   },
+                   "rotation": {
+                       "x": 0.0,
+                       "y": -90.0,
+                       "z": 0.0
+                   },
+                   "position": {
+                       "x": 4.735620021820068,
+                       "y": 3.11397,
+                       "z": -7.653279781341553
+                   },
+                   "shadowMapSize": 0,
+                   "scale": {
+                       "x": 0.8062040209770203,
+                       "y": 2.991260051727295,
+                       "z": 1.0
+                   },
+                   "name": "Ground Floor 3",
+                   "strength": 10.0,
+                   "type": "LightNode",
+                   "shape": 1
+               }
            ]
-        }
+       }
    ]
 }

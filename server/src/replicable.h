@@ -4,6 +4,7 @@
 #include "json/rapidjson/ostreamwrapper.h"
 #include "json/rapidjson/istreamwrapper.h"
 #include "json/rapidjson/writer.h"
+#include "json/rapidjson/prettywriter.h"
 
 #include "vector.h"
 #include "logging.h"
@@ -15,7 +16,7 @@
 #include <type_traits>
 
 using json = rapidjson::Value;
-using JSONWriter = rapidjson::Writer<rapidjson::StringBuffer>;
+using JSONWriter = rapidjson::PrettyWriter<rapidjson::StringBuffer>;
 using JSONDocument = rapidjson::Document;
 
 struct ReplicationEntry {

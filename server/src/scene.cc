@@ -80,15 +80,42 @@ void Scene::WriteToFile(std::ostream& output) {
     writer.EndArray();
 
     writer.Key("root");
+    writer.StartObject();
     root.Serialize(writer);
     writer.EndObject();
 
     writer.Key("collections");
     writer.StartArray();
     for (auto& collection : collections) {
+        writer.StartObject();
         collection->Serialize(writer);
+        writer.EndObject();
     }
     writer.EndArray();
+    writer.EndObject();
+    output << buffer.GetString();
+}
+
+Node* Node::Create(Scene& scene, json& obj) {
+    Node* node;
+    std::string str = obj["type"].GetString();
+    if (str == "CollectionNode") {
+        node = new CollectionNode(scene);
+    }
+    else if (str == "StaticModelNode") {
+        node = new StaticModelNode(scene);
+    }
+    else if (str == "LightNode") {
+        node = new LightNode(scene);
+    }
+    else if (str == "CollectionReferenceNode") {
+        node = new CollectionReferenceNode(scene);
+    }
+    else {
+        throw std::runtime_error("Unknown node type: " + str);
+    }
+    node->ProcessReplication(obj);
+    return node;
 }
 
 void StaticModelNode::ProcessReplication(json& obj) {
@@ -103,23 +130,10 @@ void CollectionNode::ProcessReplication(json& obj) {
     }
     children.clear();
     for (auto& child : obj["children"].GetArray()) {
-        std::string str = child["type"].GetString();
-        if (str == "CollectionNode") {
-            children.emplace_back(new CollectionNode(scene));
-        }
-        else if (str == "StaticModelNode") {
-            children.emplace_back(new StaticModelNode(scene));
-        }
-        else if (str == "LightNode") {
-            children.emplace_back(new LightNode(scene));
-        }
-        else if (str == "CollectionReferenceNode") {
-            children.emplace_back(new CollectionReferenceNode(scene));
-        }
-        else {
-            throw std::runtime_error("Unknown node type: " + str);
-        }
-        children.back()->ProcessReplication(child);
+        children.emplace_back(Node::Create(scene, child));
+    }
+    for (size_t i = 0; i < children.size(); i++) {
+        children[i]->parent = this;
     }
 }
 

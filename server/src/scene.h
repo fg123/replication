@@ -18,14 +18,19 @@
 #endif
 
 class Scene;
+class CollectionNode;
 
 struct Node : public Replicable {
+    CollectionNode* parent = nullptr;
+
     REPLICATED(Vector3, position, "position");
     REPLICATED(Vector3, rotation, "rotation");
     REPLICATED(Vector3, scale, "scale");
     REPLICATED(std::string, name, "name");
 
     Matrix4 transform;
+
+    Matrix4 transformWithoutScale;
 
     Scene& scene;
     Node(Scene& scene) : scene(scene) {
@@ -45,6 +50,8 @@ struct Node : public Replicable {
         return glm::yawPitchRoll(glm::radians(rotation.x), glm::radians(rotation.y),
             glm::radians(rotation.z)) * Vector4(Vector::Forward, 0.0f);
     }
+
+    static Node* Create(Scene& scene, json& obj);
 };
 
 struct CollectionNode : public Node {
@@ -64,7 +71,9 @@ struct CollectionNode : public Node {
         obj.Key("children");
         obj.StartArray();
         for (auto child : children) {
+            obj.StartObject();
             child->Serialize(obj);
+            obj.EndObject();
         }
         obj.EndArray();
     }

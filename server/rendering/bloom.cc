@@ -1,8 +1,8 @@
 #include "bloom.h"
 
 GLuint BloomShader::BloomTexture(GLuint texture, float threshold, int width, int height) {
-    width /= 4;
-    height /= 4;
+    width /= 2;
+    height /= 2;
     glDisable(GL_DEPTH_TEST);
     bloomBuffer.SetSize(width, height);
 
@@ -22,14 +22,14 @@ GLuint BloomShader::BloomTexture(GLuint texture, float threshold, int width, int
 
     blurShader.Use();
     glUniform2f(uniformDirection, 0.0f, 1.0f);
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 1; i++) {
         bloomBuffer.Bind();
         blurShader.DrawQuad(texture, blurShader.standardRemapMatrix);
 
         texture = bloomBuffer.BlitTexture();
     }
     glUniform2f(uniformDirection, 1.0f, 0.0f);
-    for (size_t i = 0; i < 4; i++) {
+    for (size_t i = 0; i < 1; i++) {
         bloomBuffer.Bind();
         blurShader.DrawQuad(texture, blurShader.standardRemapMatrix);
 

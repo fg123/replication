@@ -1,6 +1,8 @@
 #include "editor.h"
 #include "deferred_renderer.h"
 
+#include <fstream>
+
 Editor::Editor(GLFWwindow* window, const std::string& path) :
     window(window),
     path(path),
@@ -81,6 +83,17 @@ void Editor::DrawScene(int width, int height) {
                     params.isWireframe = true;
                     params.overrideMaterial = &light_node->defaultMaterial;
                 }
+
+                if (light_node->shape == LightShape::Rectangle) {
+                    // Draw bounding box
+                    DrawParams& params2 = layer.PushTransparent(
+                        glm::distance2(light_node->position, viewPos));
+                    params2.mesh = scene.assetManager.GetModel("Cube.obj")->meshes[0];
+                    params2.transform = light_node->GetRectangleVolumeTransform();
+                    params2.castShadows = false;
+                    params2.isWireframe = true;
+                    params2.overrideMaterial = &light_node->defaultMaterial;
+                }
             }
             if (light_node->shape == LightShape::Rectangle) {
                 // Setup a mesh, queue it up as a transparent so it draws after
@@ -92,15 +105,6 @@ void Editor::DrawScene(int width, int height) {
                 params.castShadows = false;
                 params.isWireframe = false;
                 params.overrideMaterial = &light_node->defaultMaterial;
-
-                // Draw bounding box
-                DrawParams& params2 = layer.PushTransparent(
-                    glm::distance2(light_node->position, viewPos));
-                params2.mesh = scene.assetManager.GetModel("Cube.obj")->meshes[0];
-                params2.transform = light_node->GetRectangleVolumeTransform();
-                params2.castShadows = false;
-                params2.isWireframe = true;
-                params2.overrideMaterial = &light_node->defaultMaterial;
             }
         }
     }
@@ -185,4 +189,13 @@ void Editor::HandleMouseInputs() {
 }
 
 void Editor::HandleKeyboardInputs() {
+}
+
+bool Editor::SaveToFile() {
+    std::ofstream oss(path + ".new");
+    if (!oss.is_open()) {
+        return false;
+    }
+    scene.WriteToFile(oss);
+    return true;
 }

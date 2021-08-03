@@ -6,7 +6,7 @@ void RenderSettingsWindow::Draw(Editor& editor) {
     ImGui::Begin("Render Settings", &isVisible, ImGuiWindowFlags_NoCollapse);
     ImGui::Separator();
     ImGui::Checkbox("Enable Bloom", &enableBloom);
-    ImGui::DragFloat("Bloom Threshold", &bloomThreshold, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Bloom Threshold", &bloomThreshold, 0.01f, 0.0f, 2.0f);
     ImGui::Separator();
     ImGui::Checkbox("Enable Tone Mapping", &enableToneMapping);
     ImGui::DragFloat("Tone Mapping Exposure", &exposure, 0.01f, 0.01f, 10.0f);

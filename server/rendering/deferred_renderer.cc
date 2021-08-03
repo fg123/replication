@@ -11,6 +11,12 @@ DeferredRenderer::DeferredRenderer(AssetManager& assetManager) :
 
     toneMappingShader.Use();
     uniformToneMappingExposure = toneMappingShader.GetUniformLocation("u_exposure");
+
+    fxaaShader.Use();
+    uniformFXAALumaThreshold = fxaaShader.GetUniformLocation("u_lumaThreshold");
+    uniformFXAAMulReduceReciprocal = fxaaShader.GetUniformLocation("u_mulReduceReciprocal");
+    uniformFXAAMinReduceReciprocal = fxaaShader.GetUniformLocation("u_minReduceReciprocal");
+    uniformFXAAMaxSpan = fxaaShader.GetUniformLocation("u_maxSpan");
 }
 
 void DeferredRenderer::NewFrame(const RenderFrameParameters& params) {
@@ -181,7 +187,22 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
         toneMappingShader.Use();
         glUniform1f(uniformToneMappingExposure, renderFrameParameters.exposure);
         toneMappingShader.DrawQuad(texture, toneMappingShader.standardRemapMatrix);
+        texture = outputBuffer.BlitTexture();
     }
+
+    if (renderFrameParameters.enableAntialiasing) {
+        outputBuffer.Bind();
+        glBlendFunc(GL_ONE, GL_ZERO);
+        glDisable(GL_DEPTH_TEST);
+        fxaaShader.Use();
+        fxaaShader.SetTextureSize(outputBuffer.width, outputBuffer.height);
+        glUniform1f(uniformFXAALumaThreshold, renderFrameParameters.fxaaLumaThreshold);
+        glUniform1f(uniformFXAAMulReduceReciprocal, renderFrameParameters.fxaaMulReduceReciprocal);
+        glUniform1f(uniformFXAAMinReduceReciprocal, renderFrameParameters.fxaaMinReduceReciprocal);
+        glUniform1f(uniformFXAAMaxSpan, renderFrameParameters.fxaaMaxSpan);
+        fxaaShader.DrawQuad(texture, toneMappingShader.standardRemapMatrix);
+    }
+
 
     // texture = outputBuffer.BlitTexture();
 

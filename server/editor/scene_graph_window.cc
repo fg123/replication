@@ -22,6 +22,22 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
         return;
     }
     ImGui::SameLine();
+    if (ImGui::Button("Duplicate Node")) {
+        if (selectedNode->parent) {
+            rapidjson::StringBuffer buffer;
+            JSONWriter writer(buffer);
+            writer.StartObject();
+            selectedNode->Serialize(writer);
+            writer.EndObject();
+
+            JSONDocument document;
+            document.Parse(buffer.GetString());
+            Node* newNode = Node::Create(editor.scene, document);
+            newNode->parent = selectedNode->parent;
+            selectedNode->parent->children.push_back(newNode);
+        }
+    }
+    ImGui::SameLine();
     if (ImGui::Button("Delete")) {
         ImGui::OpenPopup("Delete Node?");
     }
@@ -47,9 +63,9 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
 
     ImGui::InputText("Name", &selectedNode->name);
 
-    ImGui::DragFloat3("Position", glm::value_ptr(selectedNode->position), 0.05f);
-    ImGui::DragFloat3("Rotation", glm::value_ptr(selectedNode->rotation), 0.05f);
-    ImGui::DragFloat3("Scale", glm::value_ptr(selectedNode->scale), 0.05f);
+    ImGui::DragFloat3("Position", glm::value_ptr(selectedNode->position), 0.01f);
+    ImGui::DragFloat3("Rotation", glm::value_ptr(selectedNode->rotation), 0.01f);
+    ImGui::DragFloat3("Scale", glm::value_ptr(selectedNode->scale), 0.01f);
 
     if (LightNode* lightNode = dynamic_cast<LightNode*>(selectedNode)) {
         ImGui::Separator();
@@ -64,8 +80,8 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
             }
         }
         if (lightNode->shape == LightShape::Rectangle) {
-            ImGui::DragFloat3("Volume Size", glm::value_ptr(lightNode->volumeSize), 0.05f);
-            ImGui::DragFloat3("Volume Offset", glm::value_ptr(lightNode->volumeOffset), 0.05f);
+            ImGui::DragFloat3("Volume Size", glm::value_ptr(lightNode->volumeSize), 0.01f);
+            ImGui::DragFloat3("Volume Offset", glm::value_ptr(lightNode->volumeOffset), 0.01f);
         }
     }
     else if (CollectionReferenceNode* collectionNode = dynamic_cast<CollectionReferenceNode*>(selectedNode)) {
