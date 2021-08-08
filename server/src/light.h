@@ -10,12 +10,12 @@
 enum class LightShape : uint32_t {
     Point = 0, // A point light
     Rectangle = 1, // A rectangle / plane
-    Sun = 2, // Infinite area light
+    Directional = 2, // Infinite area light
 };
 
 
 struct Light : public Replicable {
-    LightShape shape = LightShape::Sun;
+    LightShape shape = LightShape::Directional;
 
     REPLICATED_D(int, shadowMapSize, "shadowMapSize", 0);
 

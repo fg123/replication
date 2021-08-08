@@ -4,6 +4,7 @@
 #include "game.h"
 #include "shader.h"
 #include "buffers.h"
+#include "deferred_renderer.h"
 
 #include <string>
 #include <algorithm>
@@ -35,8 +36,6 @@ class ClientGL {
     int windowWidth;
     int windowHeight;
 
-    std::vector<ShaderProgram*> shaderPrograms;
-
     // Drawing Maps
     DrawLayer foregroundLayer;
     DrawLayer backgroundLayer;
@@ -46,11 +45,9 @@ class ClientGL {
     GLuint minimapTexture = 0;
     Mesh minimapMarker;
 
+    DeferredRenderer renderer;
+
     DebugShaderProgram* debugShaderProgram;
-
-    DeferredShadingLightingShaderProgram* deferredLightingShaderProgram;
-
-    ShadowMapShaderProgram* shadowMapShaderProgram;
 
     // Simple Quad
     QuadShaderProgram* quadDrawShaderProgram;
@@ -68,8 +65,6 @@ class ClientGL {
 
     Matrix4 viewMat;
     Matrix4 projMat;
-
-    GBuffer worldGBuffer;
 
     GBuffer minimapGBuffer;
 

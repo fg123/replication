@@ -37,13 +37,13 @@ void main() {
 	float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));
 	float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));
 
-	// If contrast is lower than a maximum threshold ...
-	if (lumaMax - lumaMin <= lumaMax * u_lumaThreshold)
-	{
-		// ... do no AA and return.
-		OutputColor = vec4(rgbM, alpha);
-		return;
-	}
+	// // If contrast is lower than a maximum threshold ...
+	// if (lumaMax - lumaMin <= lumaMax * u_lumaThreshold)
+	// {
+	// 	// ... do no AA and return.
+	// 	OutputColor = vec4(rgbM, alpha);
+	// 	return;
+	// }
 
 	// Sampling is done along the gradient.
 	vec2 samplingDirection;

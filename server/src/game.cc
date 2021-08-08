@@ -38,7 +38,6 @@ Vector3 liveBoxSize(2000, 2000, 2000);
 
 Game::Game() : nextId(1), scriptManager(this) {
     if (GlobalSettings.RunTests) return;
-    const std::string mapModelName = "ShootingRange.obj";
 
     #ifdef BUILD_SERVER
         if (GlobalSettings.IsProduction) {
@@ -49,60 +48,52 @@ Game::Game() : nextId(1), scriptManager(this) {
         }
 
         LoadMap(RESOURCE_PATH(GlobalSettings.MapPath));
-        CreateMapBaseObject(mapModelName);
+        CreateMapBaseObject();
     #endif
 }
 
-void Game::CreateMapBaseObject(std::string obj) {
+void Game::CreateMapBaseObject() {
     // Models[0] is always the base map
-    MapObject* map = new MapObject(*this, obj);
+    MapObject* map = new MapObject(*this);
     // Model* mapModel = GetModel(obj);
     // StaticMeshObject* baseMap = new StaticMeshObject(*this, "ShootingRange.obj");
     AddObject(map);
+
+    std::vector<Node*> sceneNodes;
+    scene.FlattenHierarchy(sceneNodes, &scene.root);
+    for (Node* node : sceneNodes) {
+        Object* obj = nullptr;
+        if (StaticModelNode* staticModel = dynamic_cast<StaticModelNode*>(node)) {
+            obj = new StaticMeshObject(*this, staticModel->model->name);
+        }
+        else if (LightNode* lightNode = dynamic_cast<LightNode*>(node)) {
+            obj = new LightObject(*this, *lightNode);
+        }
+
+        if (obj) {
+            AddObject(obj);
+            obj->SetPosition(node->position);
+            obj->SetRotation(node->GetRotationQuat());
+            obj->SetScale(node->scale);
+        }
+    }
 }
 
 void Game::LoadMap(std::string mapPath) {
     LOG_INFO("Loading Map " << mapPath);
 
-    std::ifstream mapFile(mapPath);
+    scene.LoadFromFile(mapPath);
 
-    rapidjson::IStreamWrapper stream(mapFile);
-
-    JSONDocument obj;
-    obj.ParseStream(stream);
-
-    // Process Models
-    for (json& model : obj["models"].GetArray()) {
-        std::string modelName = model.GetString();
-        std::string modelPath = RESOURCE_PATH("models/" + modelName);
-        LOG_INFO("Loading " << modelPath);
-        std::ifstream modelStream (modelPath);
-        if (!modelStream.is_open()) {
-            LOG_ERROR("Could not load model " << modelPath);
-            throw std::system_error(errno, std::system_category(), "failed to open " + modelPath);
-        }
-        assetManager.LoadModel(modelName, modelPath, modelStream);
-    }
     // Process Scripts
-    for (json& script : obj["scripts"].GetArray()) {
-        std::string scriptName = script.GetString();
+    for (auto& scriptName : scene.scripts) {
         std::string scriptPath = RESOURCE_PATH("scripts/" + scriptName);
         scriptManager.AddScript(scriptPath);
     }
     scriptManager.InitializeVM();
     #ifdef BUILD_CLIENT
-    for (json& lightJson : obj["lights"].GetArray()) {
-        // Light is an array that is serializable to Light
-        Light& light = assetManager.lights.emplace_back();
-        ProcessReplicationDispatch(light, lightJson);
-        light.shape = LightShape::Sun;
-        light.shadowMapSize = 2048;
-        light.InitializeLight();
-    }
-    for (json& audio : obj["sounds"].GetArray()) {
-        std::string audioName = audio.GetString();
+    for (auto& audioName : scene.sounds) {
         std::string audioPath = RESOURCE_PATH("sounds/" + audioName);
-        assetManager.LoadAudio(audioName, audioPath);
+        GetAssetManager().LoadAudio(audioName, audioPath);
     }
     #endif
 
@@ -122,22 +113,6 @@ void Game::LoadMap(std::string mapPath) {
 
     AddObject(new SpectatorBox(*this));
     // LoadScriptedObject("TestObject");
-
-    // Setup Lighting (DEBUG FOR NOW TO TEST LIGHTING)
-    #ifdef BUILD_CLIENT
-    Model* mapModel = GetModel("ShootingRange.obj");
-    for (auto& mesh : mapModel->meshes) {
-        if (Contains(ToLower(mesh->name), "lightemit")) {
-            Light& light = assetManager.lights.emplace_back();
-            light.position = Average(Map<Vertex, Vector3>(mesh->vertices, [](const Vertex& t) -> Vector3 { return t.position; }));
-            light.direction = -Vector::Up;
-            light.color = Vector3(1, 1, 1);
-            light.shadowMapSize = 0;
-            LOG_DEBUG("Add Light " << light.position);
-            light.InitializeLight();
-        }
-    }
-    #endif
 }
 
 Game::~Game() {
@@ -713,14 +688,14 @@ bool Game::CheckLineSegmentCollide(const Vector3& start,
 void Game::PlayAudio(const std::string& audio, float volume, const Vector3& position) {
     #ifdef BUILD_CLIENT
         LOG_DEBUG("Playing audio " << audio);
-        audioRequests.emplace_back(assetManager.GetAudio(audio), volume, position);
+        audioRequests.emplace_back(GetAssetManager().GetAudio(audio), volume, position);
     #endif
 }
 
 void Game::PlayAudio(const std::string& audio, float volume, Object* boundObject) {
     #ifdef BUILD_CLIENT
         LOG_DEBUG("Playing audio " << audio);
-        audioRequests.emplace_back(assetManager.GetAudio(audio), volume, boundObject->GetId());
+        audioRequests.emplace_back(GetAssetManager().GetAudio(audio), volume, boundObject->GetId());
     #endif
 }
 

@@ -45,6 +45,7 @@ float SpecularFactor = 0.0;
 
 #require GetClosestPointOnEmitter
 #require IsPointInVolume
+#require GetLightDirection
 
 // bool IsPointInLightCone(vec3 point) {
 //     float cone_dist = dot(point - u_Light.position, u_Light.coneDirection);
@@ -89,7 +90,7 @@ float GetAttenuationAtPoint(vec4 shadowCoord, vec2 offset, float bias, int sampl
     // Do a 3x3 filtering
     float shadowAttenuation = 0.f;
 
-    vec3 lightDirection = normalize(u_Light.position - MappedFragmentPos);
+    vec3 lightDirection = GetLightDirection(MappedFragmentPos);
 
     for (int dy = -samples; dy <= samples; dy++) {
         for (int dx = -samples; dx <= samples; dx++) {
@@ -115,7 +116,7 @@ float GetShadowAttenuation() {
     vec4 shadowCoordMid = u_Light.depthBiasMVPMid * vec4(MappedFragmentPos, 1);
     vec4 shadowCoordFar = u_Light.depthBiasMVPFar * vec4(MappedFragmentPos, 1);
 
-    vec3 lightDirection = normalize(u_Light.position - MappedFragmentPos);
+    vec3 lightDirection = GetLightDirection(MappedFragmentPos);
     float farBias = max(0.08 * (1.0 - dot(MappedFragmentNormal, lightDirection)), 0.01);
     float midBias = max(0.01 * (1.0 - dot(MappedFragmentNormal, lightDirection)), 0.001);
     float nearBias = max(0.001 * (1.0 - dot(MappedFragmentNormal, lightDirection)), 0.0001);
@@ -157,7 +158,7 @@ vec3 GetLightColorWithFalloff() {
 vec3 GetDiffuseAccumulation() {
     vec3 diffuseAccum = vec3(0.0);
     float shadow = GetShadowAttenuation();
-    vec3 lightDirection = normalize(u_Light.position - MappedFragmentPos);
+    vec3 lightDirection = GetLightDirection(MappedFragmentPos);
     float lightAngle = max(dot(MappedFragmentNormal, lightDirection), 0.0);
     diffuseAccum += shadow * lightAngle * GetLightColorWithFalloff();
     return diffuseAccum;
@@ -166,7 +167,7 @@ vec3 GetDiffuseAccumulation() {
 vec3 GetSpecularAccumulation() {
     vec3 specularAccum = vec3(0.0);
     float shadow = GetShadowAttenuation();
-    vec3 lightDirection = normalize(u_Light.position - MappedFragmentPos);
+    vec3 lightDirection = GetLightDirection(MappedFragmentPos);
     vec3 viewDirection = normalize(u_ViewerPos - MappedFragmentPos);
     float lightAngle = max(dot(MappedFragmentNormal, lightDirection), 0.0);
     if (lightAngle > 0.0) {
@@ -220,6 +221,11 @@ void main()
 
     OutputColor = vec4(
         (Diffuse * diffuseAccum + Specular * specularAccum) / (r * r), alpha);
+
+    if (r < 0.0001) {
+        OutputColor = vec4(
+            (Diffuse * diffuseAccum + Specular * specularAccum), alpha);
+    }
 
     // vec3 transformedPoint = vec3(u_Light.inverseTransform * vec4(MappedFragmentPos, 1.0));
     // float d = distance(transformedPoint, u_Light.position);

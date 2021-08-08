@@ -4,14 +4,20 @@
 void RenderSettingsWindow::Draw(Editor& editor) {
     if (!isVisible) return;
     ImGui::Begin("Render Settings", &isVisible, ImGuiWindowFlags_NoCollapse);
+    ImGui::Checkbox("Enable Lighting", &parameters.enableLighting);
+    ImGui::Checkbox("Enable Shadows", &parameters.enableShadows);
     ImGui::Separator();
-    ImGui::Checkbox("Enable Bloom", &enableBloom);
-    ImGui::DragFloat("Bloom Threshold", &bloomThreshold, 0.01f, 0.0f, 2.0f);
+    ImGui::Checkbox("Enable Bloom", &parameters.enableBloom);
+    ImGui::DragFloat("Bloom Threshold", &parameters.bloomThreshold, 0.01f, 0.0f, 2.0f);
     ImGui::Separator();
-    ImGui::Checkbox("Enable Tone Mapping", &enableToneMapping);
-    ImGui::DragFloat("Tone Mapping Exposure", &exposure, 0.01f, 0.01f, 10.0f);
+    ImGui::Checkbox("Enable Tone Mapping", &parameters.enableToneMapping);
+    ImGui::DragFloat("Tone Mapping Exposure", &parameters.exposure, 0.01f, 0.01f, 10.0f);
     ImGui::Separator();
-    ImGui::Checkbox("Enable FXAA", &enableAntialiasing);
+    ImGui::Checkbox("Enable FXAA", &parameters.enableAntialiasing);
+    ImGui::DragFloat("LuminanceThreshold", &parameters.fxaaLumaThreshold, 0.01f, 0.0f, 1.0f);
+    ImGui::DragFloat("Mul Reduce Reciprocal", &parameters.fxaaMulReduceReciprocal, 1.0f, 0.0f, 512.0f);
+    ImGui::DragFloat("Min Reduce Reciprocal", &parameters.fxaaMinReduceReciprocal, 1.0f, 0.0f, 512.0f);
+    ImGui::DragFloat("Max Span", &parameters.fxaaMaxSpan, 0.0f, 0.0f, 100.0f);
     ImGui::Separator();
     GBuffer& worldGBuffer = editor.renderer.gBuffer;
     GBuffer& transparencyGBuffer = editor.renderer.transparencyGBuffer;

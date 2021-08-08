@@ -18,7 +18,7 @@
 #endif
 
 class Scene;
-class CollectionNode;
+struct CollectionNode;
 
 struct Node : public Replicable {
     CollectionNode* parent = nullptr;
@@ -32,8 +32,7 @@ struct Node : public Replicable {
 
     Matrix4 transformWithoutScale;
 
-    Scene& scene;
-    Node(Scene& scene) : scene(scene) {
+    Node() {
         scale = Vector3(1, 1, 1);
     }
 
@@ -45,10 +44,13 @@ struct Node : public Replicable {
         obj.String(GetNodeType());
     }
 
+    Matrix4 GetRotationQuat() {
+        return glm::yawPitchRoll(glm::radians(rotation.x), glm::radians(rotation.y),
+            glm::radians(rotation.z));
+    }
     Vector3 GetDirection() {
         // Euler Angles to Facing Vector
-        return glm::yawPitchRoll(glm::radians(rotation.x), glm::radians(rotation.y),
-            glm::radians(rotation.z)) * Vector4(Vector::Forward, 0.0f);
+        return GetRotationQuat() * Vector4(Vector::Forward, 0.0f);
     }
 
     static Node* Create(Scene& scene, json& obj);
@@ -56,8 +58,9 @@ struct Node : public Replicable {
 
 struct CollectionNode : public Node {
     std::vector<Node*> children;
+    Scene& scene;
 
-    CollectionNode(Scene& scene) : Node(scene) {}
+    CollectionNode(Scene& scene) : Node(), scene(scene) {}
 
     ~CollectionNode() {
         for (auto& child : children) {
@@ -83,8 +86,9 @@ struct CollectionNode : public Node {
 
 struct StaticModelNode : public Node {
     Model* model;
+    AssetManager& assetManager;
 
-    StaticModelNode(Scene& scene) : Node(scene) {}
+    StaticModelNode(AssetManager& assetManager) : Node(), assetManager(assetManager) {}
 
     virtual const char* GetNodeType() override { return "StaticModelNode"; }
 
@@ -117,11 +121,10 @@ struct LightNode : public Node {
         Matrix4 depthBiasMVPNear;
         Matrix4 depthBiasMVPMid;
         Matrix4 depthBiasMVPFar;
+
+        DefaultMaterial defaultMaterial;
+        void InitializeLight();
     #endif
-
-    DefaultMaterial defaultMaterial;
-
-    LightNode(Scene& scene) : Node(scene) {}
 
     virtual const char* GetNodeType() override { return "LightNode"; }
 
@@ -139,13 +142,12 @@ struct LightNode : public Node {
     Matrix4 GetRectangleVolumeTransform() {
         return transform * glm::scale(volumeSize) * glm::translate(volumeOffset);
     }
+
 };
 
 struct CollectionReferenceNode : public Node {
     // This is 1 indexed!!!
-    REPLICATED_D(size_t, index, "index", 0);
-
-    CollectionReferenceNode(Scene& scene) : Node(scene) {}
+    REPLICATED_D(uint64_t, index, "index", 0);
 
     virtual const char* GetNodeType() override { return "CollectionReferenceNode"; }
 };

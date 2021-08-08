@@ -1,6 +1,7 @@
 #pragma once
 
 #include "scene.h"
+#include "deferred_renderer.h"
 
 class Editor;
 
@@ -8,13 +9,7 @@ class RenderSettingsWindow {
 public:
     bool isVisible = true;
 
-    bool enableBloom = false;
-    float bloomThreshold = 1.0f;
-
-    bool enableToneMapping = false;
-    float exposure = 1.0f;
-
-    bool enableAntialiasing = false;
+    RenderFrameParameters parameters;
 
     void Draw(Editor& editor);
 };

@@ -103,13 +103,13 @@ Node* Node::Create(Scene& scene, json& obj) {
         node = new CollectionNode(scene);
     }
     else if (str == "StaticModelNode") {
-        node = new StaticModelNode(scene);
+        node = new StaticModelNode(scene.assetManager);
     }
     else if (str == "LightNode") {
-        node = new LightNode(scene);
+        node = new LightNode;
     }
     else if (str == "CollectionReferenceNode") {
-        node = new CollectionReferenceNode(scene);
+        node = new CollectionReferenceNode;
     }
     else {
         throw std::runtime_error("Unknown node type: " + str);
@@ -120,7 +120,7 @@ Node* Node::Create(Scene& scene, json& obj) {
 
 void StaticModelNode::ProcessReplication(json& obj) {
     Node::ProcessReplication(obj);
-    model = scene.assetManager.GetModel(obj["model"].GetString());
+    model = assetManager.GetModel(obj["model"].GetString());
 }
 
 void CollectionNode::ProcessReplication(json& obj) {
@@ -174,3 +174,56 @@ void Scene::FlattenHierarchy(std::vector<Node*>& output, Node* root) {
         output.push_back(node);
     }
 }
+
+#ifdef BUILD_CLIENT
+void LightNode::InitializeLight() {
+    static int setShadowMapSize = 0;
+    if (setShadowMapSize == shadowMapSize) {
+        return;
+    }
+    setShadowMapSize = shadowMapSize;
+    if (shadowFrameBuffer) {
+        glDeleteFramebuffers(1, &shadowFrameBuffer);
+        shadowFrameBuffer = 0;
+    }
+    if (shadowDepthMap) {
+        glDeleteTextures(1, &shadowDepthMap);
+        shadowDepthMap = 0;
+    }
+    if (shadowColorMap) {
+        glDeleteTextures(1, &shadowColorMap);
+        shadowColorMap = 0;
+    }
+
+    // We use SHADOW_WIDTH * 2 due to cascading shadow map and SHADOW_HEIGHT * 2
+    glGenTextures(1, &shadowColorMap);
+    glBindTexture(GL_TEXTURE_2D, shadowColorMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                shadowMapSize * 2, shadowMapSize * 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glGenTextures(1, &shadowDepthMap);
+    glBindTexture(GL_TEXTURE_2D, shadowDepthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
+                shadowMapSize * 2, shadowMapSize * 2, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glGenFramebuffers(1, &shadowFrameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowFrameBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, shadowColorMap, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowDepthMap, 0);
+
+    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LOG_ERROR("FB error, status: " << status);
+    }
+}
+#endif

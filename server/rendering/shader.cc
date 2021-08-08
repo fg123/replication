@@ -447,7 +447,6 @@ void DeferredShadingLightingShaderProgram::RenderLighting(LightNode& light, Asse
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
     glCullFace(GL_FRONT);
-    glUniform1i(uniformUseProjectionAndView, GL_TRUE);
 
     // Draw Light Volume
     Mesh* mesh = nullptr;
@@ -455,10 +454,20 @@ void DeferredShadingLightingShaderProgram::RenderLighting(LightNode& light, Asse
         // Sphere
         mesh = assetManager.GetModel("Icosphere.obj")->meshes[0];
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(light.transform));
+        glUniform1i(uniformUseProjectionAndView, GL_TRUE);
     }
     else if (light.shape == LightShape::Rectangle) {
         mesh = assetManager.GetModel("Cube.obj")->meshes[0];
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(light.GetRectangleVolumeTransform()));
+        glUniform1i(uniformUseProjectionAndView, GL_TRUE);
+    }
+    else if (light.shape == LightShape::Directional) {
+        glDisable(GL_CULL_FACE);
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(standardRemapMatrix));
+        glUniform1i(uniformUseProjectionAndView, GL_FALSE);
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glEnable(GL_CULL_FACE);
     }
 
     if (mesh) {

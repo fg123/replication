@@ -5,6 +5,7 @@ DeferredRenderer::DeferredRenderer(AssetManager& assetManager) :
     quadShader("shaders/Quad.fs"),
     pointLightShader("shaders/MeshLightingPointLight.fs"),
     rectangleLightShader("shaders/MeshLightingRectangleLight.fs"),
+    directionalLightShader("shaders/MeshLightingDirectionalLight.fs"),
 
     toneMappingShader("shaders/ToneMapping.fs"),
     fxaaShader("shaders/FXAA.fs") {
@@ -14,28 +15,38 @@ DeferredRenderer::DeferredRenderer(AssetManager& assetManager) :
 
     fxaaShader.Use();
     uniformFXAALumaThreshold = fxaaShader.GetUniformLocation("u_lumaThreshold");
-    uniformFXAAMulReduceReciprocal = fxaaShader.GetUniformLocation("u_mulReduceReciprocal");
-    uniformFXAAMinReduceReciprocal = fxaaShader.GetUniformLocation("u_minReduceReciprocal");
+    uniformFXAAMulReduceReciprocal = fxaaShader.GetUniformLocation("u_mulReduce");
+    uniformFXAAMinReduceReciprocal = fxaaShader.GetUniformLocation("u_minReduce");
     uniformFXAAMaxSpan = fxaaShader.GetUniformLocation("u_maxSpan");
 }
 
 void DeferredRenderer::NewFrame(const RenderFrameParameters& params) {
+    Matrix4 view = glm::lookAt(params.viewPos,
+        params.viewPos + params.viewDir, Vector::Up);
+    float aspectRatio = (float) params.width / (float) params.height;
+    Matrix4 proj = glm::perspective(params.FOV, aspectRatio, params.viewNear, params.viewFar);
     geometryShader.Use();
-    geometryShader.PreDraw(params.viewPos, params.view, params.proj);
+    geometryShader.PreDraw(params.viewPos, view, proj);
 
     pointLightShader.Use();
-    pointLightShader.PreDraw(params.viewPos, params.view, params.proj);
+    pointLightShader.PreDraw(params.viewPos, view, proj);
     pointLightShader.SetViewportSize(params.width, params.height);
 
     rectangleLightShader.Use();
-    rectangleLightShader.PreDraw(params.viewPos, params.view, params.proj);
+    rectangleLightShader.PreDraw(params.viewPos, view, proj);
     rectangleLightShader.SetViewportSize(params.width, params.height);
+
+    directionalLightShader.Use();
+    directionalLightShader.PreDraw(params.viewPos, view, proj);
+    directionalLightShader.SetViewportSize(params.width, params.height);
 
     gBuffer.SetSize(params.width, params.height);
     transparencyGBuffer.SetSize(params.width, params.height);
     outputBuffer.SetSize(params.width, params.height);
 
     renderFrameParameters = params;
+    renderFrameParameters.view = view;
+    renderFrameParameters.proj = proj;
 }
 
 void DeferredRenderer::DrawObject(DrawParams& params) {
@@ -61,8 +72,152 @@ void DeferredRenderer::DrawObject(DrawParams& params) {
     glEnable(GL_CULL_FACE);
 }
 
+
+Vector4 viewFrustrumPoints[] = {
+    Vector4(-1, -1, 0, 1),
+    Vector4(-1,  1, 0, 1),
+    Vector4( 1,  1, 0, 1),
+    Vector4( 1, -1, 0, 1),
+    Vector4(-1, -1, 1, 1),
+    Vector4(-1,  1, 1, 1),
+    Vector4( 1,  1, 1, 1),
+    Vector4( 1, -1, 1, 1)
+};
+
+template<typename A, typename B>
+void MultiplyAll(A* dest, const A* src, size_t count, const B& multiplyBy) {
+    for (size_t i = 0; i < count; i++) {
+        dest[i] = multiplyBy * src[i];
+    }
+}
+
+void DeferredRenderer::DrawShadowObjects(DrawLayer& layer) {
+    for (auto& pair : layer.opaque) {
+        for (auto& param : pair.second) {
+            if (!param.castShadows) continue;
+            shadowMapShader.Draw(param.transform, param.mesh);
+        }
+    }
+}
+
+void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
+    float aspectRatio = (float) renderFrameParameters.width / (float) renderFrameParameters.height;
+    Matrix4 nearProj = glm::perspective(renderFrameParameters.FOV, aspectRatio,
+        renderFrameParameters.viewNear, 10.f);
+    Matrix4 midProj = glm::perspective(renderFrameParameters.FOV, aspectRatio,
+        renderFrameParameters.viewNear, 50.f);
+    Matrix4 farProj = glm::perspective(renderFrameParameters.FOV, aspectRatio,
+        renderFrameParameters.viewNear, renderFrameParameters.viewFar);
+
+    Matrix4 inverseNear = glm::inverse(nearProj * renderFrameParameters.view);
+    Matrix4 inverseMid = glm::inverse(midProj * renderFrameParameters.view);
+    Matrix4 inverseFar = glm::inverse(farProj * renderFrameParameters.view);
+
+    Vector4 viewFrustrumPointsNear[8],
+            viewFrustrumPointsMid[8],
+            viewFrustrumPointsFar[8];
+    MultiplyAll(viewFrustrumPointsNear, viewFrustrumPoints, 8, inverseNear);
+    MultiplyAll(viewFrustrumPointsMid, viewFrustrumPoints, 8, inverseMid);
+    MultiplyAll(viewFrustrumPointsFar, viewFrustrumPoints, 8, inverseFar);
+
+    for (size_t i = 0; i < 8; i++) {
+        viewFrustrumPointsNear[i] /= viewFrustrumPointsNear[i].w;
+        viewFrustrumPointsMid[i] /= viewFrustrumPointsMid[i].w;
+        viewFrustrumPointsFar[i] /= viewFrustrumPointsFar[i].w;
+    }
+
+    for (auto& light : renderFrameParameters.lights) {
+        if (light->shadowMapSize == 0) continue;
+        light->InitializeLight();
+        Matrix4 lightView = glm::lookAt(light->position, light->position - light->GetDirection(),
+            Vector::Up);
+
+        shadowMapShader.Use();
+
+        Matrix4 biasMatrix(
+            0.5, 0.0, 0.0, 0.0,
+            0.0, 0.5, 0.0, 0.0,
+            0.0, 0.0, 0.5, 0.0,
+            0.5, 0.5, 0.5, 1.0
+        );
+
+        Vector3 boxToLight[8];
+
+        // Draw to our temporary buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, light->shadowFrameBuffer);
+        // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClearColor(1, 1, 1, 1);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+        glEnable(GL_DEPTH_TEST);
+
+        // shaderPrograms[0]->Use();
+        // shaderPrograms[0]->PreDraw(game, light.position, lightView, lightProjection);
+
+        // Draw Near Field
+        glViewport(0, 0, light->shadowMapSize, light->shadowMapSize);
+        for (size_t i = 0; i < 8; i++) {
+            boxToLight[i] = Vector3(lightView * viewFrustrumPointsNear[i]);
+        }
+
+        AABB boxExtents { boxToLight, 8 };
+        Matrix4 lightProjection = glm::ortho(
+            glm::floor(boxExtents.ptMin.x),
+            glm::ceil(boxExtents.ptMax.x),
+            glm::floor(boxExtents.ptMin.y),
+            glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
+        light->depthBiasMVPNear = biasMatrix * lightProjection * lightView;
+        shadowMapShader.PreDraw(Vector3(), lightView, lightProjection);
+
+        DrawShadowObjects(layer);
+
+        // Update stuff to middle side
+        for (size_t i = 0; i < 8; i++) {
+            boxToLight[i] = Vector3(lightView * viewFrustrumPointsMid[i]);
+        }
+
+        boxExtents = AABB(boxToLight, 8);
+        lightProjection = glm::ortho(
+            glm::floor(boxExtents.ptMin.x),
+            glm::ceil(boxExtents.ptMax.x),
+            glm::floor(boxExtents.ptMin.y),
+            glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
+
+        light->depthBiasMVPMid = biasMatrix * lightProjection * lightView;
+        shadowMapShader.PreDraw(Vector3(), lightView, lightProjection);
+
+        glViewport(light->shadowMapSize, 0, light->shadowMapSize, light->shadowMapSize);
+
+        DrawShadowObjects(layer);
+
+        // Update stuff to far side
+        for (size_t i = 0; i < 8; i++) {
+            boxToLight[i] = Vector3(lightView * viewFrustrumPointsFar[i]);
+        }
+
+        boxExtents = AABB(boxToLight, 8);
+        lightProjection = glm::ortho(
+            glm::floor(boxExtents.ptMin.x),
+            glm::ceil(boxExtents.ptMax.x),
+            glm::floor(boxExtents.ptMin.y),
+            glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
+
+        light->depthBiasMVPFar = biasMatrix * lightProjection * lightView;
+        shadowMapShader.PreDraw(Vector3(), lightView, lightProjection);
+
+        glViewport(0, light->shadowMapSize, light->shadowMapSize, light->shadowMapSize);
+
+        DrawShadowObjects(layer);
+    }
+}
+
 void DeferredRenderer::Draw(DrawLayer& layer) {
+    // Create Shadow Maps
+    DrawShadowMaps(layer);
+
     gBuffer.Bind();
+    glViewport(0, 0, gBuffer.width, gBuffer.height);
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -97,39 +252,54 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
     quadShader.Use();
-    quadShader.DrawQuad(gBuffer.g_diffuse, quadShader.standardRemapMatrix, renderFrameParameters.ambientFactor);
+    quadShader.DrawQuad(gBuffer.g_diffuse, quadShader.standardRemapMatrix,
+        renderFrameParameters.enableLighting ? renderFrameParameters.ambientFactor : 0.75);
     // quadShader.DrawQuad(gBuffer.g_position, quadShader.standardRemapMatrix, 1 / 200.f);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, gBuffer.g_position);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, gBuffer.g_normal);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, gBuffer.g_diffuse);
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, gBuffer.g_specular);
+    if (renderFrameParameters.enableLighting) {
+        pointLightShader.Use();
+        pointLightShader.SetRenderShadows(renderFrameParameters.enableShadows);
+        rectangleLightShader.Use();
+        rectangleLightShader.SetRenderShadows(renderFrameParameters.enableShadows);
+        directionalLightShader.Use();
+        directionalLightShader.SetRenderShadows(renderFrameParameters.enableShadows);
 
-    for (auto& light : renderFrameParameters.lights) {
-        if (light->shape == LightShape::Point) {
-            pointLightShader.Use();
-            pointLightShader.RenderLighting(*light, assetManager);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, gBuffer.g_position);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, gBuffer.g_normal);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, gBuffer.g_diffuse);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, gBuffer.g_specular);
+
+        for (auto& light : renderFrameParameters.lights) {
+            if (light->shape == LightShape::Point) {
+                pointLightShader.Use();
+                pointLightShader.RenderLighting(*light, assetManager);
+            }
+            else if (light->shape == LightShape::Rectangle) {
+                rectangleLightShader.Use();
+                rectangleLightShader.RenderLighting(*light, assetManager);
+            }
+            else if (light->shape == LightShape::Directional) {
+                directionalLightShader.Use();
+                directionalLightShader.RenderLighting(*light, assetManager);
+            }
         }
-        else if (light->shape == LightShape::Rectangle) {
-            rectangleLightShader.Use();
-            rectangleLightShader.RenderLighting(*light, assetManager);
-        }
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
+
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     // Draw Transparent Objects, Clear Color, keep depth
     {

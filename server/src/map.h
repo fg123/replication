@@ -11,10 +11,6 @@ struct LootSpawnZone {
 
 // Manages the map, model and looting zones
 class MapObject : public Object {
-    REPLICATED(std::string, model, "model");
-
-    bool collidersSetup = false;
-
     std::vector<LootSpawnZone> lootSpawnZones;
 
     size_t totalLootValue;
@@ -27,32 +23,14 @@ class MapObject : public Object {
 public:
     CLASS_CREATE(MapObject)
 
-    MapObject(Game& game) : MapObject(game, "") {}
-    MapObject(Game& game, const std::string& model) :
-        Object(game), model(model), gen(rd()) {
+    MapObject(Game& game) :
+        Object(game), gen(rd()) {
         SetTag(Tag::NO_GRAVITY);
         SetIsStatic(true);
-        SetTag(Tag::GROUND);
 
-        if (!model.empty()) {
-            SetModel(game.GetModel(model));
-            #ifdef BUILD_SERVER
-                InitializeMap();
-                GenerateStaticMeshCollidersFromModel(this);
-                // GenerateOBBCollidersFromModel(this);
-            #endif
-        }
-    }
-
-    virtual void ProcessReplication(json& obj) override {
-        Object::ProcessReplication(obj);
-    #ifdef BUILD_CLIENT
-        if (!collidersSetup) {
-            collidersSetup = true;
-            GenerateStaticMeshCollidersFromModel(this);
-            // GenerateOBBCollidersFromModel(this);
-        }
-    #endif
+        #ifdef BUILD_SERVER
+            InitializeMap();
+        #endif
     }
 
     // Only really needs to be done on the server
@@ -64,3 +42,18 @@ public:
 };
 
 CLASS_REGISTER(MapObject);
+
+class LightObject : public Object {
+   REPLICATED(LightNode, light, "light");
+public:
+    CLASS_CREATE(LightObject)
+
+    LightObject(Game& game) : Object(game), light() {}
+    LightObject(Game& game, LightNode light) :
+        Object(game), light(light) {
+        SetTag(Tag::NO_GRAVITY);
+        SetIsStatic(true);
+    }
+};
+
+CLASS_REGISTER(LightObject);

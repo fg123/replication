@@ -17,4 +17,10 @@
     }
 #end
 
+#define GetLightDirection
+    vec3 GetLightDirection(vec3 point) {
+        return normalize(u_Light.position - point);
+    }
+#end
+
 #include shaders/MeshLighting.fs

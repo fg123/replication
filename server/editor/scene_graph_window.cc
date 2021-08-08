@@ -69,7 +69,7 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
 
     if (LightNode* lightNode = dynamic_cast<LightNode*>(selectedNode)) {
         ImGui::Separator();
-        ImGui::Combo("Light Shape", (int*)&lightNode->shape, "Point\0Rectangular\0Sun\0");
+        ImGui::Combo("Light Shape", (int*)&lightNode->shape, "Point\0Rectangular\0Directional\0");
 
         ImGui::Separator();
         ImGui::ColorEdit3("Color", glm::value_ptr(lightNode->color));
@@ -82,6 +82,34 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
         if (lightNode->shape == LightShape::Rectangle) {
             ImGui::DragFloat3("Volume Size", glm::value_ptr(lightNode->volumeSize), 0.01f);
             ImGui::DragFloat3("Volume Offset", glm::value_ptr(lightNode->volumeOffset), 0.01f);
+        }
+
+        ImGui::Separator();
+
+        const static int items[] = { 0, 64, 128, 256, 512, 1024, 2048, 4096 };
+
+        if (ImGui::BeginCombo("Shadow Map Size", std::to_string(lightNode->shadowMapSize).c_str())) // The second parameter is the label previewed before opening the combo.
+        {
+            for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+            {
+                bool is_selected = (lightNode->shadowMapSize == items[n]);
+                if (ImGui::Selectable(std::to_string(items[n]).c_str(), is_selected))
+                    lightNode->shadowMapSize = items[n];
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + for keyboard navigation support in the upcoming navigation branch)
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::TreeNode("Shadow Map")) {
+            ImVec2 uv_min = ImVec2(0.0f, 1.0f);                 // Top-left
+            ImVec2 uv_max = ImVec2(1.0f, 0.0f);                 // Lower-right
+            ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
+            ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+            ImVec2 size = ImVec2(lightNode->shadowMapSize, lightNode->shadowMapSize);
+
+            ImGui::Image((ImTextureID)lightNode->shadowColorMap, size, uv_min, uv_max, tint_col, border_col);
+            ImGui::TreePop();
         }
     }
     else if (CollectionReferenceNode* collectionNode = dynamic_cast<CollectionReferenceNode*>(selectedNode)) {
@@ -103,7 +131,6 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
             }
             ImGui::EndCombo();
         }
-
     }
 }
 

@@ -44,6 +44,12 @@ struct DrawLayer {
 
 struct RenderFrameParameters {
     Vector3 viewPos;
+    Vector3 viewDir;
+
+    float FOV = glm::radians(55.0f);
+    float viewNear = 0.2f;
+    float viewFar = 300.f;
+
     Matrix4 view;
     Matrix4 proj;
 
@@ -52,17 +58,21 @@ struct RenderFrameParameters {
 
     float ambientFactor;
 
-    bool enableBloom;
-    float bloomThreshold;
+    bool enableLighting = false;
 
-    bool enableToneMapping;
-    float exposure;
+    bool enableShadows = false;
 
-    bool enableAntialiasing;
+    bool enableBloom = false;
+    float bloomThreshold = 1.0f;
+
+    bool enableToneMapping = false;
+    float exposure = 1.0f;
+
+    bool enableAntialiasing = false;
 
     float fxaaLumaThreshold = 0.5f;
-    float fxaaMulReduceReciprocal = 8.0f;
-    float fxaaMinReduceReciprocal = 128.0f;
+    float fxaaMulReduceReciprocal = 1.0f / 8.0f;
+    float fxaaMinReduceReciprocal = 1.0f / 128.0f;
     float fxaaMaxSpan = 8.0f;
 
     std::vector<LightNode*> lights;
@@ -85,6 +95,9 @@ public:
     // Different lighting shaders for each type of light
     DeferredShadingLightingShaderProgram pointLightShader;
     DeferredShadingLightingShaderProgram rectangleLightShader;
+    DeferredShadingLightingShaderProgram directionalLightShader;
+
+    ShadowMapShaderProgram shadowMapShader;
 
     BloomShader bloomShader;
 
@@ -101,11 +114,13 @@ public:
 
     DeferredRenderer(AssetManager& assetManager);
 
+    void DrawShadowObjects(DrawLayer& layer);
     void DrawObject(DrawParams& params);
 
     void NewFrame(const RenderFrameParameters& params);
 
     void Draw(DrawLayer& layer);
+    void DrawShadowMaps(DrawLayer& layer);
 
     QuadShaderProgram& GetQuadShader() { return quadShader; }
 

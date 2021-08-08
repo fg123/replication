@@ -16,7 +16,13 @@
 #include <type_traits>
 
 using json = rapidjson::Value;
+
+#ifdef BUILD_EDITOR
 using JSONWriter = rapidjson::PrettyWriter<rapidjson::StringBuffer>;
+#else
+using JSONWriter = rapidjson::Writer<rapidjson::StringBuffer>;
+#endif
+
 using JSONDocument = rapidjson::Document;
 
 struct ReplicationEntry {

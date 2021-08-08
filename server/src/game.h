@@ -3,6 +3,7 @@
 #include "object.h"
 #include "timer.h"
 #include "asset-manager.h"
+#include "scene.h"
 
 #include "animation.h"
 #include "ray-cast.h"
@@ -63,18 +64,14 @@ class Game {
 #endif
 
     Time gameTime;
-    AssetManager assetManager;
+    Scene scene;
 
     ScriptManager scriptManager;
 public:
     Game();
 
 #ifdef BUILD_CLIENT
-    Model* CreateNewModel() {
-        Model* model = new Model;
-        assetManager.models.push_back(model);
-        return model;
-    }
+
     struct AudioRequest {
         Audio* audio;
         float volume;
@@ -95,7 +92,7 @@ public:
 
     // Load Map from JSON File, data-path
     void LoadMap(std::string mapPath);
-    void CreateMapBaseObject(std::string obj);
+    void CreateMapBaseObject();
 
     // Simulate a tick of physics
     void Tick(Time time);
@@ -164,15 +161,15 @@ public:
     }
 
     AssetManager& GetAssetManager() {
-        return assetManager;
+        return scene.assetManager;
     }
 
     Model* GetModel(ModelID id) {
-        return assetManager.GetModel(id);
+        return GetAssetManager().GetModel(id);
     }
 
     Model* GetModel(const std::string modelName) {
-        return assetManager.GetModel(modelName);
+        return GetAssetManager().GetModel(modelName);
     }
 
     ObjectID RequestId();

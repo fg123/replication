@@ -19,7 +19,8 @@
 
 ClientGL::ClientGL(Game& game, const char* selector) :
     canvasSelector(selector),
-    game(game) {
+    game(game),
+    renderer(game.scene.assetManager) {
 }
 
 void ClientGL::SetGLCullFace(GLenum setting) {
