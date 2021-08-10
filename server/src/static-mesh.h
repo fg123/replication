@@ -36,6 +36,11 @@ public:
         }
     #endif
     }
+
+    virtual void OnClientCreate() override {
+        Object::OnClientCreate();
+        GenerateStaticMeshCollidersFromModel(this);
+    }
 };
 
 CLASS_REGISTER(StaticMeshObject);

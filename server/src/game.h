@@ -64,10 +64,16 @@ class Game {
 #endif
 
     Time gameTime;
-    Scene scene;
 
     ScriptManager scriptManager;
 public:
+
+#ifdef BUILD_CLIENT
+    std::vector<TransformedLight*> lightNodes;
+#endif
+
+    Scene scene;
+
     Game();
 
 #ifdef BUILD_CLIENT

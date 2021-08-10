@@ -179,6 +179,10 @@ public:
         collider.AddCollider(col);
     }
 
+    void ClearColliders() {
+        collider.ClearColliders();
+    }
+
     ObjectID GetId() const { return id; }
 
     void SetId(ObjectID newId) { id = newId; OnIdAssigned(); }
@@ -226,11 +230,19 @@ public:
     virtual const Matrix4 GetTransform() {
         // Vector3 direction =
         return glm::translate(clientPosition) *
-            glm::transpose(glm::toMat4(clientRotation)) *
+            glm::toMat4(clientRotation) *
             glm::scale(scale);
     }
     const Vector3& GetClientPosition() const { return clientPosition; }
     const Quaternion& GetClientRotation() const { return clientRotation; }
+#endif
+#ifdef BUILD_SERVER
+    virtual const Matrix4 GetTransform() {
+        // Vector3 direction =
+        return glm::translate(position) *
+            glm::toMat4(rotation) *
+            glm::scale(scale);
+    }
 #endif
 
     Model* GetModel() {

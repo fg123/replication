@@ -5,6 +5,7 @@
 #include "shader.h"
 #include "buffers.h"
 #include "deferred_renderer.h"
+#include "map.h"
 
 #include <string>
 #include <algorithm>
@@ -43,9 +44,7 @@ class ClientGL {
 
     GLuint minimapFBO = 0;
     GLuint minimapTexture = 0;
-    Mesh minimapMarker;
-
-    DeferredRenderer renderer;
+    Mesh* minimapMarker;
 
     DebugShaderProgram* debugShaderProgram;
 
@@ -69,7 +68,6 @@ class ClientGL {
     GBuffer minimapGBuffer;
 
     RenderBuffer worldRenderBuffer;
-    RenderBuffer bloomRenderBuffer;
 
     // Draw Steps
     void SetupDrawingLayers();
@@ -84,6 +82,7 @@ public:
     static GLLimits glLimits;
 
     Game& game;
+    DeferredRenderer renderer;
 
     ClientGL(Game& game, const char* selector);
 

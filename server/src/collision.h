@@ -117,7 +117,9 @@ struct StaticMeshCollider : public Collider {
 
     BVHTree<BVHTriangle>* bvhTree = nullptr;
 
-    StaticMeshCollider(Object* owner, const std::vector<Vertex*>& vertices);
+    StaticMeshCollider(Object* owner,
+        const std::vector<Vertex*>& vertices,
+        const Matrix4& transform);
 
     ~StaticMeshCollider();
 
@@ -169,14 +171,18 @@ struct TwoPhaseCollider {
         owner(owner) {}
 
     ~TwoPhaseCollider() {
+        ClearColliders();
+    }
+
+    CollisionResult CollidesWith(Collider* other);
+    CollisionResult CollidesWith(TwoPhaseCollider* other);
+
+    void ClearColliders() {
         for (auto& collider : children) {
             delete collider;
         }
         children.clear();
     }
-
-    CollisionResult CollidesWith(Collider* other);
-    CollisionResult CollidesWith(TwoPhaseCollider* other);
 
     bool CollidesWith(const Vector3& p1, const Vector3& p2) {
         bool ret = false;

@@ -121,7 +121,6 @@ void ImGui_ImplWeb_NewFrame() {
 }
 
 void ImGui_ImplWeb_ProcessEvent(JSONDocument& obj) {
-    LOG_DEBUG("Imgui" << obj["event"].GetString());
     ImGuiIO& io = ImGui::GetIO();
     if (obj["event"] == "ku") {
         int key = obj["key"].GetInt();

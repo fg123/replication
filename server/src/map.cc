@@ -18,15 +18,6 @@ std::unordered_map<std::string, size_t> LootTable = {
 
 void MapObject::InitializeMap() {
     // Get Loot Spawn Zones from Mesh
-    const Model* model = GetModel();
-    for (const Mesh* mesh : model->otherMeshes) {
-        if (Contains(ToLower(mesh->name), "lootzone")) {
-            LootSpawnZone zone;
-            zone.spawnZone = AABB::FromMesh(*mesh);
-            lootSpawnZones.push_back(zone);
-        }
-    }
-
     totalLootValue = 0;
     auto& classLookup = GetClassLookup();
     for (auto& pair : LootTable) {

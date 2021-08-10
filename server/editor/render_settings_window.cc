@@ -66,7 +66,7 @@ void RenderSettingsWindow::Draw(Editor& editor) {
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Bloom")) {
-        RenderBuffer& bloomBuffer = editor.renderer.bloomShader.bloomBuffer;
+        RenderBuffer& bloomBuffer = editor.renderer.bloomShader->bloomBuffer;
         ImGui::Image((ImTextureID)bloomBuffer.textureColor, size, uv_min, uv_max, tint_col, border_col);
         ImGui::TreePop();
     }

@@ -25,7 +25,7 @@ Matrix4 Collider::GetWorldTransform() {
 }
 
 Matrix4 Collider::GetWorldTransformForLocalPoint(const Vector3& point) {
-    Matrix4 model = glm::translate(point) * glm::transpose(glm::toMat4(rotation));
+    Matrix4 model = glm::translate(point) * glm::toMat4(rotation);
     if (owner) {
         // Transform to owner space
         model = glm::translate(owner->GetPosition()) *
@@ -56,6 +56,7 @@ void GenerateOBBCollidersFromModel(Object* obj) {
 }
 
 void GenerateStaticMeshCollidersFromModel(Object* obj) {
+    obj->ClearColliders();
     Model* model = obj->GetModel();
     if (model) {
         std::vector<Vertex*> allVerts;
@@ -69,7 +70,7 @@ void GenerateStaticMeshCollidersFromModel(Object* obj) {
                 }
             }
         }
-        obj->AddCollider(new StaticMeshCollider(obj, allVerts));
+        obj->AddCollider(new StaticMeshCollider(obj, allVerts, obj->GetTransform()));
     }
 }
 

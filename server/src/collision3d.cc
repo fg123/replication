@@ -979,15 +979,26 @@ CollisionResult CapsuleAndOBBCollide(CapsuleCollider* capsule, OBBCollider* obb)
     return result;
 }
 
-StaticMeshCollider::StaticMeshCollider(Object* owner, const std::vector<Vertex*>& vertices) :
+inline Vector3 TransformPoint(const Vector3& point, const Matrix4& transform) {
+    return Vector3(transform * Vector4(point, 1));
+}
+
+inline Vector3 TransformNormal(const Vector3& normal, const Matrix4& transform) {
+    return Vector3(transform * Vector4(normal, 0));
+}
+
+StaticMeshCollider::StaticMeshCollider(Object* owner, const std::vector<Vertex*>& vertices,
+    const Matrix4& transform) :
     Collider(owner, Vector3{}, Quaternion{}) {
 
+    Matrix4 normalMatrix = glm::transpose(glm::inverse(transform));
+
     if (!vertices.empty()) {
-        Vector3 min = vertices[0]->position;
-        Vector3 max = vertices[0]->position;
+        Vector3 min = TransformPoint(vertices[0]->position, transform);
+        Vector3 max = TransformPoint(vertices[0]->position, transform);
         for (size_t i = 1; i < vertices.size(); i++) {
-            min = glm::min(min, vertices[i]->position);
-            max = glm::max(max, vertices[i]->position);
+            min = glm::min(min, TransformPoint(vertices[i]->position, transform));
+            max = glm::max(max, TransformPoint(vertices[i]->position, transform));
         }
         glm::vec3 bounds = max - min;
         broad = AABB(min, max);
@@ -999,14 +1010,14 @@ StaticMeshCollider::StaticMeshCollider(Object* owner, const std::vector<Vertex*>
         std::vector<BVHTriangle*> triangles;
 
         for (size_t i = 0; i < vertices.size(); i += 3) {
-            const Vector3& a = vertices[i]->position;
-            const Vector3& b = vertices[i+1]->position;
-            const Vector3& c = vertices[i+2]->position;
+            const Vector3& a = TransformPoint(vertices[i]->position, transform);
+            const Vector3& b = TransformPoint(vertices[i+1]->position, transform);
+            const Vector3& c = TransformPoint(vertices[i+2]->position, transform);
 
             Vector3 normal = (
-                vertices[i]->normal +
-                vertices[i+1]->normal +
-                vertices[i+2]->normal) / 3.f;
+                TransformNormal(vertices[i]->normal, normalMatrix) +
+                TransformNormal(vertices[i+1]->normal, normalMatrix) +
+                TransformNormal(vertices[i+2]->normal, normalMatrix)) / 3.f;
             triangles.push_back(new BVHTriangle(a, b, c, normal));
         }
         bvhTree = BVHTree<BVHTriangle>::Create(triangles, axis, 0);

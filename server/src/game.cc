@@ -59,30 +59,66 @@ void Game::CreateMapBaseObject() {
     // StaticMeshObject* baseMap = new StaticMeshObject(*this, "ShootingRange.obj");
     AddObject(map);
 
-    std::vector<Node*> sceneNodes;
+    std::vector<TransformedNode> sceneNodes;
     scene.FlattenHierarchy(sceneNodes, &scene.root);
-    for (Node* node : sceneNodes) {
+    for (TransformedNode& transformed : sceneNodes) {
+        Node* node = transformed.node;
         Object* obj = nullptr;
+        StaticMeshObject* staticMesh = nullptr;
+
         if (StaticModelNode* staticModel = dynamic_cast<StaticModelNode*>(node)) {
-            obj = new StaticMeshObject(*this, staticModel->model->name);
+            staticMesh = new StaticMeshObject(*this, staticModel->model->name);
+            obj = staticMesh;
+
+            for (auto& mesh : staticModel->model->meshes) {
+                if (Contains(mesh->name, "lootzone")) {
+                    LootSpawnZone zone;
+                    zone.spawnZone = AABB::FromMesh(*mesh);
+                    map->lootSpawnZones.push_back(zone);
+                }
+            }
         }
-        else if (LightNode* lightNode = dynamic_cast<LightNode*>(node)) {
-            obj = new LightObject(*this, *lightNode);
-        }
+        // else if (LightNode* lightNode = dynamic_cast<LightNode*>(node)) {
+        //     obj = new LightObject(*this, *lightNode);
+        // }
 
         if (obj) {
             AddObject(obj);
-            obj->SetPosition(node->position);
-            obj->SetRotation(node->GetRotationQuat());
-            obj->SetScale(node->scale);
+            Vector3 position, scale, skew;
+            Quaternion rotation;
+            Vector4 perspective;
+            glm::decompose(transformed.transform, scale, rotation, position, skew, perspective);
+
+            obj->SetPosition(position);
+            // LOG_DEBUG(rotation);
+            obj->SetRotation(rotation);
+            obj->SetScale(scale);
+
+            if (staticMesh) {
+                GenerateStaticMeshCollidersFromModel(staticMesh);
+            }
         }
     }
+#ifdef BUILD_SERVER
+    map->InitializeMap();
+#endif
 }
 
 void Game::LoadMap(std::string mapPath) {
     LOG_INFO("Loading Map " << mapPath);
 
     scene.LoadFromFile(mapPath);
+
+    // Calculate Hierarchy Transforms
+    #ifdef BUILD_CLIENT
+        std::vector<TransformedNode> sceneNodes;
+        scene.FlattenHierarchy(sceneNodes, &scene.root);
+        for (TransformedNode& transformed : sceneNodes) {
+            if (LightNode* lightNode = dynamic_cast<LightNode*>(transformed.node)) {
+                lightNodes.push_back(new TransformedLight(transformed));
+            }
+        }
+    #endif
 
     // Process Scripts
     for (auto& scriptName : scene.scripts) {

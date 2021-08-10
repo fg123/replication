@@ -117,18 +117,18 @@
                     "z": 0.0
                 },
                 "position": {
-                    "x": 0.0,
-                    "y": 100.0,
-                    "z": 0.0
+                    "x": 300.0,
+                    "y": 300.0,
+                    "z": 300.0
                 },
-                "shadowMapSize": 256,
+                "shadowMapSize": 2048,
                 "scale": {
                     "x": 1.0,
                     "y": 1.0,
                     "z": 1.0
                 },
                 "name": "Sun Light",
-                "strength": 1.0,
+                "strength": 0.5,
                 "type": "LightNode",
                 "shape": 2
             },
@@ -147,6 +147,26 @@
                 },
                 "rotation": {
                     "x": 109.5,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "CollectionReferenceNode"
+            },
+            {
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "index": 1,
+                "name": "Warehouse",
+                "position": {
+                    "x": 0,
+                    "y": 1.2699999809265137,
+                    "z": 75.1500015258789
+                },
+                "rotation": {
+                    "x": 90.0,
                     "y": 0.0,
                     "z": 0.0
                 },

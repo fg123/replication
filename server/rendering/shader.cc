@@ -425,24 +425,25 @@ void DeferredShadingLightingShaderProgram::PreDraw(const Vector3& viewPos,
     // }
 }
 
-void DeferredShadingLightingShaderProgram::RenderLighting(LightNode& light, AssetManager& assetManager) {
+void DeferredShadingLightingShaderProgram::RenderLighting(TransformedLight& transformed, AssetManager& assetManager) {
     // Set all the uniforms
-    glUniform3fv(uniformLightPosition, 1, glm::value_ptr(light.position));
-    glUniform3fv(uniformLightDirection, 1, glm::value_ptr(light.GetDirection()));
-    glUniformMatrix4fv(uniformLightTransform, 1, GL_FALSE, glm::value_ptr(light.transform));
-    glUniformMatrix4fv(uniformLightInverseTransform, 1, GL_FALSE, glm::value_ptr(glm::inverse(light.transform)));
-    glUniformMatrix4fv(uniformInverseVolumeTransform, 1, GL_FALSE, glm::value_ptr(glm::inverse(light.GetRectangleVolumeTransform())));
-    glUniform1i(uniformShadowMapSize, light.shadowMapSize);
-    glUniform1f(uniformLightStrength, light.strength);
-    glUniform3fv(uniformLightColor, 1, glm::value_ptr(light.color));
-    glUniform3fv(uniformLightVolumeSize, 1, glm::value_ptr(light.volumeSize));
-    glUniform3fv(uniformLightVolumeOffset, 1, glm::value_ptr(light.volumeOffset));
-    glUniformMatrix4fv(uniformDepthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPNear));
-    glUniformMatrix4fv(uniformDepthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPMid));
-    glUniformMatrix4fv(uniformDepthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(light.depthBiasMVPFar));
+    LightNode* light = dynamic_cast<LightNode*>(transformed.node);
+    glUniform3fv(uniformLightPosition, 1, glm::value_ptr(transformed.transformedPosition));
+    glUniform3fv(uniformLightDirection, 1, glm::value_ptr(transformed.transformedDirection));
+    glUniformMatrix4fv(uniformLightTransform, 1, GL_FALSE, glm::value_ptr(transformed.transform));
+    glUniformMatrix4fv(uniformLightInverseTransform, 1, GL_FALSE, glm::value_ptr(glm::inverse(transformed.transform)));
+    glUniformMatrix4fv(uniformInverseVolumeTransform, 1, GL_FALSE, glm::value_ptr(glm::inverse(light->GetRectangleVolumeTransform(transformed.transform))));
+    glUniform1i(uniformShadowMapSize, light->shadowMapSize);
+    glUniform1f(uniformLightStrength, light->strength);
+    glUniform3fv(uniformLightColor, 1, glm::value_ptr(light->color));
+    glUniform3fv(uniformLightVolumeSize, 1, glm::value_ptr(light->volumeSize));
+    glUniform3fv(uniformLightVolumeOffset, 1, glm::value_ptr(light->volumeOffset));
+    glUniformMatrix4fv(uniformDepthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(transformed.depthBiasMVPNear));
+    glUniformMatrix4fv(uniformDepthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(transformed.depthBiasMVPMid));
+    glUniformMatrix4fv(uniformDepthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(transformed.depthBiasMVPFar));
 
     glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, light.shadowDepthMap);
+    glBindTexture(GL_TEXTURE_2D, transformed.shadowDepthMap);
 
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
@@ -450,18 +451,18 @@ void DeferredShadingLightingShaderProgram::RenderLighting(LightNode& light, Asse
 
     // Draw Light Volume
     Mesh* mesh = nullptr;
-    if (light.shape == LightShape::Point) {
+    if (light->shape == LightShape::Point) {
         // Sphere
         mesh = assetManager.GetModel("Icosphere.obj")->meshes[0];
-        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(light.transform));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(transformed.transform));
         glUniform1i(uniformUseProjectionAndView, GL_TRUE);
     }
-    else if (light.shape == LightShape::Rectangle) {
+    else if (light->shape == LightShape::Rectangle) {
         mesh = assetManager.GetModel("Cube.obj")->meshes[0];
-        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(light.GetRectangleVolumeTransform()));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(light->GetRectangleVolumeTransform(transformed.transform)));
         glUniform1i(uniformUseProjectionAndView, GL_TRUE);
     }
-    else if (light.shape == LightShape::Directional) {
+    else if (light->shape == LightShape::Directional) {
         glDisable(GL_CULL_FACE);
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(standardRemapMatrix));
         glUniform1i(uniformUseProjectionAndView, GL_FALSE);

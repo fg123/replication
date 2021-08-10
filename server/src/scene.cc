@@ -145,7 +145,7 @@ struct NodeIterationEntry {
         node(node), parentTransform(parentTransform) { }
 };
 
-void Scene::FlattenHierarchy(std::vector<Node*>& output, Node* root) {
+void Scene::FlattenHierarchy(std::vector<TransformedNode>& output, Node* root) {
     std::queue<NodeIterationEntry> hierarchyQueue;
     hierarchyQueue.emplace(root, Matrix4{});
     while (!hierarchyQueue.empty()) {
@@ -158,30 +158,39 @@ void Scene::FlattenHierarchy(std::vector<Node*>& output, Node* root) {
             glm::yawPitchRoll(glm::radians(node->rotation.x), glm::radians(node->rotation.y), glm::radians(node->rotation.z)) *
             glm::scale(node->scale);
 
-        node->transform = entry.parentTransform * localTransform;
+        TransformedNode& transformed = output.emplace_back();
+        transformed.node = node;
+        transformed.transform = entry.parentTransform * localTransform;
+        Quaternion worldRotation;
+        Vector3 scale;
+        Vector3 skew;
+        Vector4 perspective;
+        glm::decompose(transformed.transform, scale, worldRotation, transformed.transformedPosition, skew, perspective);
+        transformed.transformedDirection = worldRotation * Vector::Forward;
 
         if (CollectionNode* collection = dynamic_cast<CollectionNode*>(node)) {
             for (Node* child : collection->children) {
-                hierarchyQueue.emplace(child, collection->transform);
+                hierarchyQueue.emplace(child, transformed.transform);
             }
         }
         else if (CollectionReferenceNode* collection = dynamic_cast<CollectionReferenceNode*>(node)) {
             // 1 indexed
             if (collection->index > 0 && collection->index <= collections.size()) {
-                hierarchyQueue.emplace(collections[collection->index - 1], collection->transform);
+                hierarchyQueue.emplace(collections[collection->index - 1], transformed.transform);
             }
         }
-        output.push_back(node);
+
     }
 }
 
 #ifdef BUILD_CLIENT
-void LightNode::InitializeLight() {
+void TransformedLight::InitializeLight() {
     static int setShadowMapSize = 0;
-    if (setShadowMapSize == shadowMapSize) {
+    LightNode* lightNode = dynamic_cast<LightNode*>(node);
+    if (setShadowMapSize == lightNode->shadowMapSize) {
         return;
     }
-    setShadowMapSize = shadowMapSize;
+    setShadowMapSize = lightNode->shadowMapSize;
     if (shadowFrameBuffer) {
         glDeleteFramebuffers(1, &shadowFrameBuffer);
         shadowFrameBuffer = 0;
@@ -199,7 +208,7 @@ void LightNode::InitializeLight() {
     glGenTextures(1, &shadowColorMap);
     glBindTexture(GL_TEXTURE_2D, shadowColorMap);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                shadowMapSize * 2, shadowMapSize * 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                lightNode->shadowMapSize * 2, lightNode->shadowMapSize * 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -208,7 +217,7 @@ void LightNode::InitializeLight() {
     glGenTextures(1, &shadowDepthMap);
     glBindTexture(GL_TEXTURE_2D, shadowDepthMap);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24,
-                shadowMapSize * 2, shadowMapSize * 2, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
+                lightNode->shadowMapSize * 2, lightNode->shadowMapSize * 2, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, NULL);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

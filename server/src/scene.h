@@ -28,10 +28,6 @@ struct Node : public Replicable {
     REPLICATED(Vector3, scale, "scale");
     REPLICATED(std::string, name, "name");
 
-    Matrix4 transform;
-
-    Matrix4 transformWithoutScale;
-
     Node() {
         scale = Vector3(1, 1, 1);
     }
@@ -114,16 +110,7 @@ struct LightNode : public Node {
     REPLICATED_D(Vector3, volumeSize, "volumeSize", Vector3(2, 2, 2));
 
     #ifdef BUILD_CLIENT
-        GLuint shadowFrameBuffer = 0;
-        GLuint shadowDepthMap = 0;
-        GLuint shadowColorMap = 0;
-
-        Matrix4 depthBiasMVPNear;
-        Matrix4 depthBiasMVPMid;
-        Matrix4 depthBiasMVPFar;
-
         DefaultMaterial defaultMaterial;
-        void InitializeLight();
     #endif
 
     virtual const char* GetNodeType() override { return "LightNode"; }
@@ -139,7 +126,7 @@ struct LightNode : public Node {
         shape = (LightShape)(obj["shape"].GetInt());
     }
 
-    Matrix4 GetRectangleVolumeTransform() {
+    Matrix4 GetRectangleVolumeTransform(const Matrix4& transform) {
         return transform * glm::scale(volumeSize) * glm::translate(volumeOffset);
     }
 
@@ -150,6 +137,44 @@ struct CollectionReferenceNode : public Node {
     REPLICATED_D(uint64_t, index, "index", 0);
 
     virtual const char* GetNodeType() override { return "CollectionReferenceNode"; }
+};
+
+struct TransformedNode : public Replicable {
+    Node* node;
+    Matrix4 transform;
+    Vector3 transformedPosition;
+    Vector3 transformedDirection;
+};
+
+struct TransformedLight : public TransformedNode {
+    #ifdef BUILD_CLIENT
+        GLuint shadowFrameBuffer = 0;
+        GLuint shadowDepthMap = 0;
+        GLuint shadowColorMap = 0;
+
+        Matrix4 depthBiasMVPNear;
+        Matrix4 depthBiasMVPMid;
+        Matrix4 depthBiasMVPFar;
+        void InitializeLight();
+    #endif
+    TransformedLight() {}
+    TransformedLight(const TransformedNode& node) : TransformedNode(node) {}
+    ~TransformedLight() {
+        #ifdef BUILD_CLIENT
+            if (shadowFrameBuffer) {
+                glDeleteFramebuffers(1, &shadowFrameBuffer);
+                shadowFrameBuffer = 0;
+            }
+            if (shadowDepthMap) {
+                glDeleteTextures(1, &shadowDepthMap);
+                shadowDepthMap = 0;
+            }
+            if (shadowColorMap) {
+                glDeleteTextures(1, &shadowColorMap);
+                shadowColorMap = 0;
+            }
+        #endif
+    }
 };
 
 class Scene {
@@ -170,5 +195,5 @@ public:
     void LoadFromFile(const std::string& filename);
     void WriteToFile(std::ostream& output);
 
-    void FlattenHierarchy(std::vector<Node*>& output, Node* root);
+    void FlattenHierarchy(std::vector<TransformedNode>& output, Node* root);
 };

@@ -1,23 +1,31 @@
 #include "deferred_renderer.h"
 
 DeferredRenderer::DeferredRenderer(AssetManager& assetManager) :
-    assetManager(assetManager),
-    quadShader("shaders/Quad.fs"),
-    pointLightShader("shaders/MeshLightingPointLight.fs"),
-    rectangleLightShader("shaders/MeshLightingRectangleLight.fs"),
-    directionalLightShader("shaders/MeshLightingDirectionalLight.fs"),
+    assetManager(assetManager) {
+}
 
-    toneMappingShader("shaders/ToneMapping.fs"),
-    fxaaShader("shaders/FXAA.fs") {
+void DeferredRenderer::Initialize() {
+    geometryShader = new DeferredShadingGeometryShaderProgram;
+    quadShader = new QuadShaderProgram("shaders/Quad.fs");
+    pointLightShader = new DeferredShadingLightingShaderProgram("shaders/MeshLightingPointLight.fs");
+    rectangleLightShader = new DeferredShadingLightingShaderProgram("shaders/MeshLightingRectangleLight.fs");
+    directionalLightShader = new DeferredShadingLightingShaderProgram("shaders/MeshLightingDirectionalLight.fs");
 
-    toneMappingShader.Use();
-    uniformToneMappingExposure = toneMappingShader.GetUniformLocation("u_exposure");
+    shadowMapShader = new ShadowMapShaderProgram;
+    bloomShader = new BloomShader;
+    toneMappingShader = new QuadShaderProgram("shaders/ToneMapping.fs");
+    fxaaShader = new QuadShaderProgram("shaders/FXAA.fs");
 
-    fxaaShader.Use();
-    uniformFXAALumaThreshold = fxaaShader.GetUniformLocation("u_lumaThreshold");
-    uniformFXAAMulReduceReciprocal = fxaaShader.GetUniformLocation("u_mulReduce");
-    uniformFXAAMinReduceReciprocal = fxaaShader.GetUniformLocation("u_minReduce");
-    uniformFXAAMaxSpan = fxaaShader.GetUniformLocation("u_maxSpan");
+    toneMappingShader->Use();
+    uniformToneMappingExposure = toneMappingShader->GetUniformLocation("u_exposure");
+
+    fxaaShader->Use();
+    uniformFXAALumaThreshold = fxaaShader->GetUniformLocation("u_lumaThreshold");
+    uniformFXAAMulReduceReciprocal = fxaaShader->GetUniformLocation("u_mulReduce");
+    uniformFXAAMinReduceReciprocal = fxaaShader->GetUniformLocation("u_minReduce");
+    uniformFXAAMaxSpan = fxaaShader->GetUniformLocation("u_maxSpan");
+
+    isInitialized = true;
 }
 
 void DeferredRenderer::NewFrame(const RenderFrameParameters& params) {
@@ -25,20 +33,20 @@ void DeferredRenderer::NewFrame(const RenderFrameParameters& params) {
         params.viewPos + params.viewDir, Vector::Up);
     float aspectRatio = (float) params.width / (float) params.height;
     Matrix4 proj = glm::perspective(params.FOV, aspectRatio, params.viewNear, params.viewFar);
-    geometryShader.Use();
-    geometryShader.PreDraw(params.viewPos, view, proj);
+    geometryShader->Use();
+    geometryShader->PreDraw(params.viewPos, view, proj);
 
-    pointLightShader.Use();
-    pointLightShader.PreDraw(params.viewPos, view, proj);
-    pointLightShader.SetViewportSize(params.width, params.height);
+    pointLightShader->Use();
+    pointLightShader->PreDraw(params.viewPos, view, proj);
+    pointLightShader->SetViewportSize(params.width, params.height);
 
-    rectangleLightShader.Use();
-    rectangleLightShader.PreDraw(params.viewPos, view, proj);
-    rectangleLightShader.SetViewportSize(params.width, params.height);
+    rectangleLightShader->Use();
+    rectangleLightShader->PreDraw(params.viewPos, view, proj);
+    rectangleLightShader->SetViewportSize(params.width, params.height);
 
-    directionalLightShader.Use();
-    directionalLightShader.PreDraw(params.viewPos, view, proj);
-    directionalLightShader.SetViewportSize(params.width, params.height);
+    directionalLightShader->Use();
+    directionalLightShader->PreDraw(params.viewPos, view, proj);
+    directionalLightShader->SetViewportSize(params.width, params.height);
 
     gBuffer.SetSize(params.width, params.height);
     transparencyGBuffer.SetSize(params.width, params.height);
@@ -51,24 +59,30 @@ void DeferredRenderer::NewFrame(const RenderFrameParameters& params) {
 
 void DeferredRenderer::DrawObject(DrawParams& params) {
     if (params.isWireframe) {
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        #ifdef BUILD_EDITOR
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        #endif
         glDisable(GL_CULL_FACE);
     }
     else {
         glEnable(GL_CULL_FACE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        #ifdef BUILD_EDITOR
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        #endif
         if (params.hasOutline) {
             // Render Front only
             glCullFace(GL_FRONT);
-            geometryShader.SetDrawOutline(0.05, Vector3(1));
-            geometryShader.Draw(params.transform, params.mesh);
+            geometryShader->SetDrawOutline(0.05, Vector3(1));
+            geometryShader->Draw(params.transform, params.mesh);
         }
         glCullFace(GL_BACK);
     }
-    geometryShader.SetOverrideMaterial(params.overrideMaterial);
-    geometryShader.SetDrawOutline(0, Vector3());
-    geometryShader.Draw(params.transform, params.mesh);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    geometryShader->SetOverrideMaterial(params.overrideMaterial);
+    geometryShader->SetDrawOutline(0, Vector3());
+    geometryShader->Draw(params.transform, params.mesh);
+    #ifdef BUILD_EDITOR
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    #endif
     glEnable(GL_CULL_FACE);
 }
 
@@ -95,7 +109,7 @@ void DeferredRenderer::DrawShadowObjects(DrawLayer& layer) {
     for (auto& pair : layer.opaque) {
         for (auto& param : pair.second) {
             if (!param.castShadows) continue;
-            shadowMapShader.Draw(param.transform, param.mesh);
+            shadowMapShader->Draw(param.transform, param.mesh);
         }
     }
 }
@@ -126,13 +140,14 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
         viewFrustrumPointsFar[i] /= viewFrustrumPointsFar[i].w;
     }
 
-    for (auto& light : renderFrameParameters.lights) {
+    for (auto& transformed : renderFrameParameters.lights) {
+        LightNode* light = dynamic_cast<LightNode*>(transformed->node);
         if (light->shadowMapSize == 0) continue;
-        light->InitializeLight();
+        transformed->InitializeLight();
         Matrix4 lightView = glm::lookAt(light->position, light->position - light->GetDirection(),
             Vector::Up);
 
-        shadowMapShader.Use();
+        shadowMapShader->Use();
 
         Matrix4 biasMatrix(
             0.5, 0.0, 0.0, 0.0,
@@ -144,7 +159,7 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
         Vector3 boxToLight[8];
 
         // Draw to our temporary buffer
-        glBindFramebuffer(GL_FRAMEBUFFER, light->shadowFrameBuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, transformed->shadowFrameBuffer);
         // glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClearColor(1, 1, 1, 1);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -167,8 +182,8 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
             glm::ceil(boxExtents.ptMax.x),
             glm::floor(boxExtents.ptMin.y),
             glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
-        light->depthBiasMVPNear = biasMatrix * lightProjection * lightView;
-        shadowMapShader.PreDraw(Vector3(), lightView, lightProjection);
+        transformed->depthBiasMVPNear = biasMatrix * lightProjection * lightView;
+        shadowMapShader->PreDraw(Vector3(), lightView, lightProjection);
 
         DrawShadowObjects(layer);
 
@@ -184,8 +199,8 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
             glm::floor(boxExtents.ptMin.y),
             glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
 
-        light->depthBiasMVPMid = biasMatrix * lightProjection * lightView;
-        shadowMapShader.PreDraw(Vector3(), lightView, lightProjection);
+        transformed->depthBiasMVPMid = biasMatrix * lightProjection * lightView;
+        shadowMapShader->PreDraw(Vector3(), lightView, lightProjection);
 
         glViewport(light->shadowMapSize, 0, light->shadowMapSize, light->shadowMapSize);
 
@@ -203,8 +218,8 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
             glm::floor(boxExtents.ptMin.y),
             glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
 
-        light->depthBiasMVPFar = biasMatrix * lightProjection * lightView;
-        shadowMapShader.PreDraw(Vector3(), lightView, lightProjection);
+        transformed->depthBiasMVPFar = biasMatrix * lightProjection * lightView;
+        shadowMapShader->PreDraw(Vector3(), lightView, lightProjection);
 
         glViewport(0, light->shadowMapSize, light->shadowMapSize, light->shadowMapSize);
 
@@ -213,6 +228,23 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
 }
 
 void DeferredRenderer::Draw(DrawLayer& layer) {
+    for (auto& transformed : renderFrameParameters.lights) {
+        LightNode* light = dynamic_cast<LightNode*>(transformed->node);
+        light->defaultMaterial.Kd = light->color;
+        if (light->shape == LightShape::Rectangle ||
+            light->shape == LightShape::Directional) {
+            // Setup a mesh, queue it up as a transparent so it draws after
+            //   lighting is calculated
+            DrawParams& params = layer.PushTransparent(
+                glm::distance2(light->position, renderFrameParameters.viewPos));
+            params.mesh = assetManager.GetModel("Quad.obj")->meshes[0];
+            params.transform = transformed->transform;
+            params.castShadows = false;
+            params.isWireframe = false;
+            params.overrideMaterial = &light->defaultMaterial;
+        }
+    }
+
     // Create Shadow Maps
     DrawShadowMaps(layer);
 
@@ -225,7 +257,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
     glCullFace(GL_BACK);
 
     // Opaque Geometry Pass
-    geometryShader.Use();
+    geometryShader->Use();
     for (auto& pair : layer.opaque) {
         for (auto& param : pair.second) {
             DrawObject(param);
@@ -251,18 +283,18 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
     // Render ambient without writing anything to depth
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
-    quadShader.Use();
-    quadShader.DrawQuad(gBuffer.g_diffuse, quadShader.standardRemapMatrix,
+    quadShader->Use();
+    quadShader->DrawQuad(gBuffer.g_diffuse, quadShader->standardRemapMatrix,
         renderFrameParameters.enableLighting ? renderFrameParameters.ambientFactor : 0.75);
     // quadShader.DrawQuad(gBuffer.g_position, quadShader.standardRemapMatrix, 1 / 200.f);
 
     if (renderFrameParameters.enableLighting) {
-        pointLightShader.Use();
-        pointLightShader.SetRenderShadows(renderFrameParameters.enableShadows);
-        rectangleLightShader.Use();
-        rectangleLightShader.SetRenderShadows(renderFrameParameters.enableShadows);
-        directionalLightShader.Use();
-        directionalLightShader.SetRenderShadows(renderFrameParameters.enableShadows);
+        pointLightShader->Use();
+        pointLightShader->SetRenderShadows(renderFrameParameters.enableShadows);
+        rectangleLightShader->Use();
+        rectangleLightShader->SetRenderShadows(renderFrameParameters.enableShadows);
+        directionalLightShader->Use();
+        directionalLightShader->SetRenderShadows(renderFrameParameters.enableShadows);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, gBuffer.g_position);
@@ -273,18 +305,19 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, gBuffer.g_specular);
 
-        for (auto& light : renderFrameParameters.lights) {
+        for (auto& transformed : renderFrameParameters.lights) {
+            LightNode* light = dynamic_cast<LightNode*>(transformed->node);
             if (light->shape == LightShape::Point) {
-                pointLightShader.Use();
-                pointLightShader.RenderLighting(*light, assetManager);
+                pointLightShader->Use();
+                pointLightShader->RenderLighting(*transformed, assetManager);
             }
             else if (light->shape == LightShape::Rectangle) {
-                rectangleLightShader.Use();
-                rectangleLightShader.RenderLighting(*light, assetManager);
+                rectangleLightShader->Use();
+                rectangleLightShader->RenderLighting(*transformed, assetManager);
             }
             else if (light->shape == LightShape::Directional) {
-                directionalLightShader.Use();
-                directionalLightShader.RenderLighting(*light, assetManager);
+                directionalLightShader->Use();
+                directionalLightShader->RenderLighting(*transformed, assetManager);
             }
         }
 
@@ -313,7 +346,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
         transparencyGBuffer.Bind();
 
 
-        geometryShader.Use();
+        geometryShader->Use();
         for (auto it = layer.transparent.rbegin(); it != layer.transparent.rend(); ++it) {
             // LOG_DEBUG(it->second.mesh->name);
             for (auto& param : it->second) {
@@ -325,8 +358,8 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         GLuint diffuseTexture = transparencyGBuffer.g_diffuse;
-        quadShader.Use();
-        quadShader.DrawQuad(diffuseTexture, quadShader.standardRemapMatrix);
+        quadShader->Use();
+        quadShader->DrawQuad(diffuseTexture, quadShader->standardRemapMatrix);
 
     }
 
@@ -334,7 +367,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
 
     GLuint texture = outputBuffer.BlitTexture();
     if (renderFrameParameters.enableBloom) {
-        texture = bloomShader.BloomTexture(
+        texture = bloomShader->BloomTexture(
             texture,
             renderFrameParameters.bloomThreshold,
             renderFrameParameters.width,
@@ -345,8 +378,8 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
         // Additive Bloom on top
         glBlendFunc(GL_ONE, GL_ONE);
         glDisable(GL_DEPTH_TEST);
-        quadShader.Use();
-        quadShader.DrawQuad(texture, quadShader.standardRemapMatrix);
+        quadShader->Use();
+        quadShader->DrawQuad(texture, quadShader->standardRemapMatrix);
         texture = outputBuffer.BlitTexture();
     }
 
@@ -354,9 +387,9 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
         outputBuffer.Bind();
         glBlendFunc(GL_ONE, GL_ZERO);
         glDisable(GL_DEPTH_TEST);
-        toneMappingShader.Use();
+        toneMappingShader->Use();
         glUniform1f(uniformToneMappingExposure, renderFrameParameters.exposure);
-        toneMappingShader.DrawQuad(texture, toneMappingShader.standardRemapMatrix);
+        toneMappingShader->DrawQuad(texture, toneMappingShader->standardRemapMatrix);
         texture = outputBuffer.BlitTexture();
     }
 
@@ -364,13 +397,13 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
         outputBuffer.Bind();
         glBlendFunc(GL_ONE, GL_ZERO);
         glDisable(GL_DEPTH_TEST);
-        fxaaShader.Use();
-        fxaaShader.SetTextureSize(outputBuffer.width, outputBuffer.height);
+        fxaaShader->Use();
+        fxaaShader->SetTextureSize(outputBuffer.width, outputBuffer.height);
         glUniform1f(uniformFXAALumaThreshold, renderFrameParameters.fxaaLumaThreshold);
         glUniform1f(uniformFXAAMulReduceReciprocal, renderFrameParameters.fxaaMulReduceReciprocal);
         glUniform1f(uniformFXAAMinReduceReciprocal, renderFrameParameters.fxaaMinReduceReciprocal);
         glUniform1f(uniformFXAAMaxSpan, renderFrameParameters.fxaaMaxSpan);
-        fxaaShader.DrawQuad(texture, toneMappingShader.standardRemapMatrix);
+        fxaaShader->DrawQuad(texture, toneMappingShader->standardRemapMatrix);
     }
 
 

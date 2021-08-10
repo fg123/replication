@@ -186,8 +186,8 @@ void main()
     // OutputColor = vec4(FragmentTexCoords.x, FragmentTexCoords.y, 1.0, 1.0);
     // return;
     // if (u_Light.shadowMapSize == 0) {
-        // OutputColor = vec4(1, 0, 0, 1.0);
-        // return;
+    //     OutputColor = vec4(1, 0, 0, 1.0);
+    //     return;
     // }
     vec2 FragmentTexCoords = gl_FragCoord.xy / u_ViewportSize;
     vec4 texPos = texture(gbuf_position, FragmentTexCoords);

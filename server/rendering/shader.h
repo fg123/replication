@@ -311,7 +311,7 @@ public:
                  const Matrix4& proj) override;
     void Draw(const Matrix4& model, Mesh* mesh) override {}
 
-    void RenderLighting(LightNode& light, AssetManager& assetManager);
+    void RenderLighting(TransformedLight& light, AssetManager& assetManager);
 };
 
 class DebugShaderProgram : public ShaderProgram {

@@ -75,15 +75,16 @@ struct RenderFrameParameters {
     float fxaaMinReduceReciprocal = 1.0f / 128.0f;
     float fxaaMaxSpan = 8.0f;
 
-    std::vector<LightNode*> lights;
+    std::vector<TransformedLight*> lights;
 };
 
 class DeferredRenderer {
+    bool isInitialized = false;
 public:
     AssetManager& assetManager;
 
-    DeferredShadingGeometryShaderProgram geometryShader;
-    QuadShaderProgram quadShader;
+    DeferredShadingGeometryShaderProgram* geometryShader;
+    QuadShaderProgram* quadShader;
 
     GBuffer gBuffer;
     GBuffer transparencyGBuffer;
@@ -93,19 +94,19 @@ public:
     RenderFrameParameters renderFrameParameters;
 
     // Different lighting shaders for each type of light
-    DeferredShadingLightingShaderProgram pointLightShader;
-    DeferredShadingLightingShaderProgram rectangleLightShader;
-    DeferredShadingLightingShaderProgram directionalLightShader;
+    DeferredShadingLightingShaderProgram* pointLightShader;
+    DeferredShadingLightingShaderProgram* rectangleLightShader;
+    DeferredShadingLightingShaderProgram* directionalLightShader;
 
-    ShadowMapShaderProgram shadowMapShader;
+    ShadowMapShaderProgram* shadowMapShader;
 
-    BloomShader bloomShader;
+    BloomShader* bloomShader;
 
     // Tone Mapping
-    QuadShaderProgram toneMappingShader;
+    QuadShaderProgram* toneMappingShader;
     GLint uniformToneMappingExposure;
 
-    QuadShaderProgram fxaaShader;
+    QuadShaderProgram* fxaaShader;
     GLint uniformFXAALumaThreshold;
     GLint uniformFXAAMulReduceReciprocal;
     GLint uniformFXAAMinReduceReciprocal;
@@ -114,6 +115,7 @@ public:
 
     DeferredRenderer(AssetManager& assetManager);
 
+    void Initialize();
     void DrawShadowObjects(DrawLayer& layer);
     void DrawObject(DrawParams& params);
 
@@ -122,7 +124,11 @@ public:
     void Draw(DrawLayer& layer);
     void DrawShadowMaps(DrawLayer& layer);
 
-    QuadShaderProgram& GetQuadShader() { return quadShader; }
+    QuadShaderProgram& GetQuadShader() { return *quadShader; }
 
     GLuint GetRenderedTexture() { return outputBuffer.BlitTexture(); }
+
+    bool IsInitialized() {
+        return isInitialized;
+    }
 };

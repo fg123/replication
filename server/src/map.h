@@ -11,7 +11,6 @@ struct LootSpawnZone {
 
 // Manages the map, model and looting zones
 class MapObject : public Object {
-    std::vector<LootSpawnZone> lootSpawnZones;
 
     size_t totalLootValue;
 
@@ -21,6 +20,8 @@ class MapObject : public Object {
     Time lastLootSpawnTime = 0;
 
 public:
+    std::vector<LootSpawnZone> lootSpawnZones;
+
     CLASS_CREATE(MapObject)
 
     MapObject(Game& game) :
@@ -28,9 +29,6 @@ public:
         SetTag(Tag::NO_GRAVITY);
         SetIsStatic(true);
 
-        #ifdef BUILD_SERVER
-            InitializeMap();
-        #endif
     }
 
     // Only really needs to be done on the server
@@ -44,8 +42,9 @@ public:
 CLASS_REGISTER(MapObject);
 
 class LightObject : public Object {
-   REPLICATED(LightNode, light, "light");
 public:
+    REPLICATED(LightNode, light, "light");
+
     CLASS_CREATE(LightObject)
 
     LightObject(Game& game) : Object(game), light() {}

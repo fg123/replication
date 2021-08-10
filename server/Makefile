@@ -139,10 +139,10 @@ client_prod: $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
 	emcc -O2 $(CFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -g4 -MMD -MF $(<:%.c=%.wd) -c $< -o $@
 
 %.eo: %.cc
-	$(CXX) -O3 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -c $< -o $@
+	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -c $< -o $@
 
 %.eo: %.c
-	$(CC) -O3 $(CFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -c $< -o $@
+	$(CC) -O2 $(CFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -c $< -o $@
 
 $(USOCKET)/uSockets.a:
 	$(MAKE) $(USOCKET)
