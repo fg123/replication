@@ -31,6 +31,10 @@ struct Editor {
     // Yaw, Pitch
     Vector2 viewDir, targetViewDir;
 
+    std::unordered_map<LightNode*, TransformedLight*> lightNodeCache;
+
+    std::vector<LightNode*> lights;
+
     Quaternion GetRotationQuat() {
         Matrix4 matrix;
         matrix = glm::rotate(matrix, viewDir.x, Vector::Up);

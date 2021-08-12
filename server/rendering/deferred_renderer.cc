@@ -15,6 +15,7 @@ void DeferredRenderer::Initialize() {
     bloomShader = new BloomShader;
     toneMappingShader = new QuadShaderProgram("shaders/ToneMapping.fs");
     fxaaShader = new QuadShaderProgram("shaders/FXAA.fs");
+    skydomeShader = new QuadShaderProgram("shaders/Skydome.fs");
 
     toneMappingShader->Use();
     uniformToneMappingExposure = toneMappingShader->GetUniformLocation("u_exposure");
@@ -25,36 +26,42 @@ void DeferredRenderer::Initialize() {
     uniformFXAAMinReduceReciprocal = fxaaShader->GetUniformLocation("u_minReduce");
     uniformFXAAMaxSpan = fxaaShader->GetUniformLocation("u_maxSpan");
 
+    skydomeShader->Use();
+    uniformSkydomeDirection = skydomeShader->GetUniformLocation("u_cameraDirection");
+    uniformSkydomeFOV = skydomeShader->GetUniformLocation("u_fov");
+    uniformSkydomeWidth = skydomeShader->GetUniformLocation("u_width");
+    uniformSkydomeHeight = skydomeShader->GetUniformLocation("u_height");
+
     isInitialized = true;
 }
 
-void DeferredRenderer::NewFrame(const RenderFrameParameters& params) {
-    Matrix4 view = glm::lookAt(params.viewPos,
-        params.viewPos + params.viewDir, Vector::Up);
-    float aspectRatio = (float) params.width / (float) params.height;
-    Matrix4 proj = glm::perspective(params.FOV, aspectRatio, params.viewNear, params.viewFar);
+void DeferredRenderer::NewFrame(RenderFrameParameters* params) {
+    Matrix4 view = glm::lookAt(params->viewPos,
+        params->viewPos + params->viewDir, Vector::Up);
+    float aspectRatio = (float) params->width / (float) params->height;
+    Matrix4 proj = glm::perspective(params->FOV, aspectRatio, params->viewNear, params->viewFar);
     geometryShader->Use();
-    geometryShader->PreDraw(params.viewPos, view, proj);
+    geometryShader->PreDraw(params->viewPos, view, proj);
 
     pointLightShader->Use();
-    pointLightShader->PreDraw(params.viewPos, view, proj);
-    pointLightShader->SetViewportSize(params.width, params.height);
+    pointLightShader->PreDraw(params->viewPos, view, proj);
+    pointLightShader->SetViewportSize(params->width, params->height);
 
     rectangleLightShader->Use();
-    rectangleLightShader->PreDraw(params.viewPos, view, proj);
-    rectangleLightShader->SetViewportSize(params.width, params.height);
+    rectangleLightShader->PreDraw(params->viewPos, view, proj);
+    rectangleLightShader->SetViewportSize(params->width, params->height);
 
     directionalLightShader->Use();
-    directionalLightShader->PreDraw(params.viewPos, view, proj);
-    directionalLightShader->SetViewportSize(params.width, params.height);
+    directionalLightShader->PreDraw(params->viewPos, view, proj);
+    directionalLightShader->SetViewportSize(params->width, params->height);
 
-    gBuffer.SetSize(params.width, params.height);
-    transparencyGBuffer.SetSize(params.width, params.height);
-    outputBuffer.SetSize(params.width, params.height);
+    gBuffer.SetSize(params->width, params->height);
+    transparencyGBuffer.SetSize(params->width, params->height);
+    outputBuffer.SetSize(params->width, params->height);
 
     renderFrameParameters = params;
-    renderFrameParameters.view = view;
-    renderFrameParameters.proj = proj;
+    renderFrameParameters->view = view;
+    renderFrameParameters->proj = proj;
 }
 
 void DeferredRenderer::DrawObject(DrawParams& params) {
@@ -115,17 +122,17 @@ void DeferredRenderer::DrawShadowObjects(DrawLayer& layer) {
 }
 
 void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
-    float aspectRatio = (float) renderFrameParameters.width / (float) renderFrameParameters.height;
-    Matrix4 nearProj = glm::perspective(renderFrameParameters.FOV, aspectRatio,
-        renderFrameParameters.viewNear, 10.f);
-    Matrix4 midProj = glm::perspective(renderFrameParameters.FOV, aspectRatio,
-        renderFrameParameters.viewNear, 50.f);
-    Matrix4 farProj = glm::perspective(renderFrameParameters.FOV, aspectRatio,
-        renderFrameParameters.viewNear, renderFrameParameters.viewFar);
+    float aspectRatio = (float) renderFrameParameters->width / (float) renderFrameParameters->height;
+    Matrix4 nearProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
+        renderFrameParameters->viewNear, 10.f);
+    Matrix4 midProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
+        renderFrameParameters->viewNear, 50.f);
+    Matrix4 farProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
+        renderFrameParameters->viewNear, renderFrameParameters->viewFar);
 
-    Matrix4 inverseNear = glm::inverse(nearProj * renderFrameParameters.view);
-    Matrix4 inverseMid = glm::inverse(midProj * renderFrameParameters.view);
-    Matrix4 inverseFar = glm::inverse(farProj * renderFrameParameters.view);
+    Matrix4 inverseNear = glm::inverse(nearProj * renderFrameParameters->view);
+    Matrix4 inverseMid = glm::inverse(midProj * renderFrameParameters->view);
+    Matrix4 inverseFar = glm::inverse(farProj * renderFrameParameters->view);
 
     Vector4 viewFrustrumPointsNear[8],
             viewFrustrumPointsMid[8],
@@ -140,7 +147,7 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
         viewFrustrumPointsFar[i] /= viewFrustrumPointsFar[i].w;
     }
 
-    for (auto& transformed : renderFrameParameters.lights) {
+    for (auto& transformed : renderFrameParameters->lights) {
         LightNode* light = dynamic_cast<LightNode*>(transformed->node);
         if (light->shadowMapSize == 0) continue;
         transformed->InitializeLight();
@@ -228,7 +235,7 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
 }
 
 void DeferredRenderer::Draw(DrawLayer& layer) {
-    for (auto& transformed : renderFrameParameters.lights) {
+    for (auto& transformed : renderFrameParameters->lights) {
         LightNode* light = dynamic_cast<LightNode*>(transformed->node);
         light->defaultMaterial.Kd = light->color;
         if (light->shape == LightShape::Rectangle ||
@@ -236,7 +243,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
             // Setup a mesh, queue it up as a transparent so it draws after
             //   lighting is calculated
             DrawParams& params = layer.PushTransparent(
-                glm::distance2(light->position, renderFrameParameters.viewPos));
+                glm::distance2(light->position, renderFrameParameters->viewPos));
             params.mesh = assetManager.GetModel("Quad.obj")->meshes[0];
             params.transform = transformed->transform;
             params.castShadows = false;
@@ -278,23 +285,34 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
 
     // Render ambient without writing anything to depth
     glDisable(GL_DEPTH_TEST);
     glDepthMask(GL_FALSE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // Draw Skydome
+    if (renderFrameParameters->skydomeTexture) {
+        skydomeShader->Use();
+        glUniform3fv(uniformSkydomeDirection, 1, glm::value_ptr(renderFrameParameters->viewDir));
+        glUniform1f(uniformSkydomeFOV, renderFrameParameters->FOV);
+        glUniform1f(uniformSkydomeWidth, renderFrameParameters->width);
+        glUniform1f(uniformSkydomeHeight, renderFrameParameters->height);
+        skydomeShader->DrawQuad(renderFrameParameters->skydomeTexture->textureBuffer, skydomeShader->standardRemapMatrix);
+    }
+
     quadShader->Use();
     quadShader->DrawQuad(gBuffer.g_diffuse, quadShader->standardRemapMatrix,
-        renderFrameParameters.enableLighting ? renderFrameParameters.ambientFactor : 0.75);
+        renderFrameParameters->enableLighting ? renderFrameParameters->ambientFactor : 0.75);
     // quadShader.DrawQuad(gBuffer.g_position, quadShader.standardRemapMatrix, 1 / 200.f);
 
-    if (renderFrameParameters.enableLighting) {
+    glBlendFunc(GL_ONE, GL_ONE);
+    if (renderFrameParameters->enableLighting) {
         pointLightShader->Use();
-        pointLightShader->SetRenderShadows(renderFrameParameters.enableShadows);
+        pointLightShader->SetRenderShadows(renderFrameParameters->enableShadows);
         rectangleLightShader->Use();
-        rectangleLightShader->SetRenderShadows(renderFrameParameters.enableShadows);
+        rectangleLightShader->SetRenderShadows(renderFrameParameters->enableShadows);
         directionalLightShader->Use();
-        directionalLightShader->SetRenderShadows(renderFrameParameters.enableShadows);
+        directionalLightShader->SetRenderShadows(renderFrameParameters->enableShadows);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, gBuffer.g_position);
@@ -305,7 +323,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, gBuffer.g_specular);
 
-        for (auto& transformed : renderFrameParameters.lights) {
+        for (auto& transformed : renderFrameParameters->lights) {
             LightNode* light = dynamic_cast<LightNode*>(transformed->node);
             if (light->shape == LightShape::Point) {
                 pointLightShader->Use();
@@ -366,12 +384,12 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
     glBlendFunc(GL_ONE, GL_ZERO);
 
     GLuint texture = outputBuffer.BlitTexture();
-    if (renderFrameParameters.enableBloom) {
+    if (renderFrameParameters->enableBloom) {
         texture = bloomShader->BloomTexture(
             texture,
-            renderFrameParameters.bloomThreshold,
-            renderFrameParameters.width,
-            renderFrameParameters.height);
+            renderFrameParameters->bloomThreshold,
+            renderFrameParameters->width,
+            renderFrameParameters->height);
 
         outputBuffer.Bind();
 
@@ -383,26 +401,26 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
         texture = outputBuffer.BlitTexture();
     }
 
-    if (renderFrameParameters.enableToneMapping) {
+    if (renderFrameParameters->enableToneMapping) {
         outputBuffer.Bind();
         glBlendFunc(GL_ONE, GL_ZERO);
         glDisable(GL_DEPTH_TEST);
         toneMappingShader->Use();
-        glUniform1f(uniformToneMappingExposure, renderFrameParameters.exposure);
+        glUniform1f(uniformToneMappingExposure, renderFrameParameters->exposure);
         toneMappingShader->DrawQuad(texture, toneMappingShader->standardRemapMatrix);
         texture = outputBuffer.BlitTexture();
     }
 
-    if (renderFrameParameters.enableAntialiasing) {
+    if (renderFrameParameters->enableAntialiasing) {
         outputBuffer.Bind();
         glBlendFunc(GL_ONE, GL_ZERO);
         glDisable(GL_DEPTH_TEST);
         fxaaShader->Use();
         fxaaShader->SetTextureSize(outputBuffer.width, outputBuffer.height);
-        glUniform1f(uniformFXAALumaThreshold, renderFrameParameters.fxaaLumaThreshold);
-        glUniform1f(uniformFXAAMulReduceReciprocal, renderFrameParameters.fxaaMulReduceReciprocal);
-        glUniform1f(uniformFXAAMinReduceReciprocal, renderFrameParameters.fxaaMinReduceReciprocal);
-        glUniform1f(uniformFXAAMaxSpan, renderFrameParameters.fxaaMaxSpan);
+        glUniform1f(uniformFXAALumaThreshold, renderFrameParameters->fxaaLumaThreshold);
+        glUniform1f(uniformFXAAMulReduceReciprocal, renderFrameParameters->fxaaMulReduceReciprocal);
+        glUniform1f(uniformFXAAMinReduceReciprocal, renderFrameParameters->fxaaMinReduceReciprocal);
+        glUniform1f(uniformFXAAMaxSpan, renderFrameParameters->fxaaMaxSpan);
         fxaaShader->DrawQuad(texture, toneMappingShader->standardRemapMatrix);
     }
 
@@ -412,4 +430,5 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
+    renderFrameParameters = nullptr;
 }

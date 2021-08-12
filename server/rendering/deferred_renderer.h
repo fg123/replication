@@ -46,6 +46,8 @@ struct RenderFrameParameters {
     Vector3 viewPos;
     Vector3 viewDir;
 
+    Texture* skydomeTexture = nullptr;
+
     float FOV = glm::radians(55.0f);
     float viewNear = 0.2f;
     float viewFar = 300.f;
@@ -91,13 +93,14 @@ public:
 
     RenderBuffer outputBuffer;
 
-    RenderFrameParameters renderFrameParameters;
+    RenderFrameParameters* renderFrameParameters = nullptr;
 
     // Different lighting shaders for each type of light
     DeferredShadingLightingShaderProgram* pointLightShader;
     DeferredShadingLightingShaderProgram* rectangleLightShader;
     DeferredShadingLightingShaderProgram* directionalLightShader;
 
+    QuadShaderProgram* skydomeShader;
     ShadowMapShaderProgram* shadowMapShader;
 
     BloomShader* bloomShader;
@@ -111,6 +114,10 @@ public:
     GLint uniformFXAAMulReduceReciprocal;
     GLint uniformFXAAMinReduceReciprocal;
     GLint uniformFXAAMaxSpan;
+    GLint uniformSkydomeDirection;
+    GLint uniformSkydomeFOV;
+    GLint uniformSkydomeWidth;
+    GLint uniformSkydomeHeight;
 
 
     DeferredRenderer(AssetManager& assetManager);
@@ -119,7 +126,7 @@ public:
     void DrawShadowObjects(DrawLayer& layer);
     void DrawObject(DrawParams& params);
 
-    void NewFrame(const RenderFrameParameters& params);
+    void NewFrame(RenderFrameParameters* params);
 
     void Draw(DrawLayer& layer);
     void DrawShadowMaps(DrawLayer& layer);

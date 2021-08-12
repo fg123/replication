@@ -1,8 +1,8 @@
 #include "bloom.h"
 
 GLuint BloomShader::BloomTexture(GLuint texture, float threshold, int width, int height) {
-    width /= 2;
-    height /= 2;
+    // width /= 2;
+    // height /= 2;
     glDisable(GL_DEPTH_TEST);
     bloomBuffer.SetSize(width, height);
 

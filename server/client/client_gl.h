@@ -45,6 +45,7 @@ class ClientGL {
     GLuint minimapFBO = 0;
     GLuint minimapTexture = 0;
     Mesh* minimapMarker;
+    Texture* skydomeTexture;
 
     DebugShaderProgram* debugShaderProgram;
 

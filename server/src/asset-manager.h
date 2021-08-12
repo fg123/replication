@@ -16,7 +16,6 @@ public:
     #ifdef BUILD_CLIENT
         std::unordered_map<std::string, Texture*> textures;
         std::unordered_map<std::string, Audio*> sounds;
-        std::vector<Light> lights;
     #endif
 
     std::vector<Model*> models;

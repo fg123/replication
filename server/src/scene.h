@@ -175,6 +175,9 @@ struct TransformedLight : public TransformedNode {
             }
         #endif
     }
+    void Update(const TransformedNode& node) {
+        (*(TransformedNode*)this) = node;
+    }
 };
 
 class Scene {

@@ -34,15 +34,16 @@ void Editor::DrawScene(int width, int height) {
     parameters.width = width;
     parameters.height = height;
     parameters.FOV = 45.0f;
-    parameters.viewNear = 0.1f;
-    parameters.viewFar = 1000.0f;
+    parameters.viewNear = 0.2f;
+    parameters.viewFar = 300.0f;
     parameters.viewPos = viewPos;
     parameters.viewDir = Vector::Forward * GetRotationQuat();
-    parameters.ambientFactor = 0.1f;
+    parameters.ambientFactor = 0.5f;
 
     // Aggregate Meshes
     std::vector<TransformedNode> nodes;
     scene.FlattenHierarchy(nodes, GetSelectedRootNode());
+    lights.clear();
 
     DrawLayer layer;
     for (auto& transformed : nodes) {
@@ -68,8 +69,12 @@ void Editor::DrawScene(int width, int height) {
             }
         }
         else if (LightNode* light_node = dynamic_cast<LightNode*>(node)) {
-            TransformedLight* light = new TransformedLight(transformed);
-            parameters.lights.push_back(light);
+            lights.push_back(light_node);
+            if (lightNodeCache.find(light_node) == lightNodeCache.end()) {
+                lightNodeCache[light_node] = new TransformedLight;
+            }
+            lightNodeCache[light_node]->Update(transformed);
+            parameters.lights.push_back(lightNodeCache[light_node]);
 
             if (light_node == GetSelectedNode()) {
                 if (light_node->shape == LightShape::Point) {
@@ -96,12 +101,8 @@ void Editor::DrawScene(int width, int height) {
         }
     }
 
-    renderer.NewFrame(parameters);
+    renderer.NewFrame(&parameters);
     renderer.Draw(layer);
-
-    for (auto& light : parameters.lights) {
-        delete light;
-    }
     QuadShaderProgram& quadShader = renderer.GetQuadShader();
     GLuint texture = renderer.GetRenderedTexture();
 

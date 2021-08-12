@@ -151,6 +151,7 @@ void ClientGL::SetupGL() {
     // debugCylinder.indices = std::move(newIndices);
 
     minimapMarker = game.GetAssetManager().GetModel("PlayerMarkerMinimap.obj")->meshes[0];
+    skydomeTexture = game.GetAssetManager().LoadTexture(RESOURCE_PATH("textures/Skydome.png"), Texture::Format::RGB);
 }
 
 void ClientGL::DrawDebugLine(const Vector3& color, const Vector3& from, const Vector3& to) {
@@ -515,14 +516,16 @@ void ClientGL::Draw(int width, int height) {
     params.enableShadows = true;
     params.enableToneMapping = true;
     // params.enableBloom = true;
+    // params.bloomThreshold = 1.7f;
     params.enableAntialiasing = true;
     params.lights = game.lightNodes;
+    params.skydomeTexture = skydomeTexture;
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    renderer.NewFrame(params);
+    renderer.NewFrame(&params);
     renderer.Draw(backgroundLayer);
 
     RenderMinimap();
@@ -541,9 +544,9 @@ void ClientGL::Draw(int width, int height) {
 
     if (GlobalSettings.Client_DrawShadowMaps) {
         Matrix4 transform = glm::translate(Vector3(-0.5f, -0.5f, 0.0f));
-        for (auto& light : game.GetAssetManager().lights) {
+        for (auto& light : game.lightNodes) {
             quadDrawShaderProgram->Use();
-            quadDrawShaderProgram->DrawQuad(light.shadowColorMap, transform);
+            quadDrawShaderProgram->DrawQuad(light->shadowColorMap, transform);
         }
     }
     if (GlobalSettings.Client_DrawGBuffer) {

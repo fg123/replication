@@ -112,14 +112,14 @@
                     "z": 1.0
                 },
                 "rotation": {
-                    "x": 0.0,
+                    "x": 45.0,
                     "y": -45.0,
                     "z": 0.0
                 },
                 "position": {
                     "x": 300.0,
                     "y": 300.0,
-                    "z": 300.0
+                    "z": -300.0
                 },
                 "shadowMapSize": 2048,
                 "scale": {
@@ -128,7 +128,7 @@
                     "z": 1.0
                 },
                 "name": "Sun Light",
-                "strength": 0.5,
+                "strength": 1.0,
                 "type": "LightNode",
                 "shape": 2
             },
@@ -139,14 +139,14 @@
                     "z": 1.0
                 },
                 "index": 1,
-                "name": "Warehouse",
+                "name": "Island Warehouse",
                 "position": {
-                    "x": 62.91999816894531,
-                    "y": 1.2699999809265137,
-                    "z": 75.1500015258789
+                    "x": 68.54000091552735,
+                    "y": 0.9200000166893005,
+                    "z": 73.45999908447266
                 },
                 "rotation": {
-                    "x": 109.5,
+                    "x": 101.16000366210938,
                     "y": 0.0,
                     "z": 0.0
                 },
@@ -159,14 +159,134 @@
                     "z": 1.0
                 },
                 "index": 1,
-                "name": "Warehouse",
+                "name": "PlatformFirst",
                 "position": {
-                    "x": 0,
-                    "y": 1.2699999809265137,
-                    "z": 75.1500015258789
+                    "x": 85.08000183105469,
+                    "y": 10.170000076293946,
+                    "z": -72.93000030517578
                 },
                 "rotation": {
-                    "x": 90.0,
+                    "x": -45.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "CollectionReferenceNode"
+            },
+            {
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "index": 1,
+                "name": "PlatformSecond",
+                "position": {
+                    "x": 97.19999694824219,
+                    "y": 10.170000076293946,
+                    "z": -59.88999938964844
+                },
+                "rotation": {
+                    "x": 135.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "CollectionReferenceNode"
+            },
+            {
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "index": 1,
+                "name": "Regular Warehouse 1",
+                "position": {
+                    "x": 15.899999618530274,
+                    "y": 0.10000000149011612,
+                    "z": -60.0
+                },
+                "rotation": {
+                    "x": -90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "CollectionReferenceNode"
+            },
+            {
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "index": 1,
+                "name": "Regular Warehouse 2",
+                "position": {
+                    "x": -15.0,
+                    "y": 0.46000000834465029,
+                    "z": -60.0
+                },
+                "rotation": {
+                    "x": -90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "CollectionReferenceNode"
+            },
+            {
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "index": 1,
+                "name": "Regular Warehouse 3",
+                "position": {
+                    "x": 19.8700008392334,
+                    "y": 0.10000000149011612,
+                    "z": -85.0
+                },
+                "rotation": {
+                    "x": 180.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "CollectionReferenceNode"
+            },
+            {
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "index": 1,
+                "name": "Regular Warehouse 4",
+                "position": {
+                    "x": -19.68000030517578,
+                    "y": 0.10000000149011612,
+                    "z": -85.0
+                },
+                "rotation": {
+                    "x": 180.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "CollectionReferenceNode"
+            },
+            {
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "index": 1,
+                "name": "Regular Warehouse 5",
+                "position": {
+                    "x": 0.5899999737739563,
+                    "y": 0.10000000149011612,
+                    "z": -85.0
+                },
+                "rotation": {
+                    "x": 0.0,
                     "y": 0.0,
                     "z": 0.0
                 },

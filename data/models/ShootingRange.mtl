@@ -66,8 +66,7 @@ Ni 0.000000
 d 1.000000
 illum 2
 map_Bump ..\\textures\\Lava004_1K-JPG\\Lava004_1K_Normal.jpg
-map_Kd ..\\textures\\Lava004_1K-JPG\\Lava004_1K_Color.jpg
-map_Ke ..\\textures\\Lava004_1K-JPG\\Lava004_1K_Emission.jpg
+map_Kd ..\\textures\\Lava004_1K-JPG\\Water.jpg
 
 newmtl Marble
 Ns 225.000000
