@@ -292,7 +292,7 @@ void DeferredShadingGeometryShaderProgram::Draw(const Matrix4& model, Mesh* mesh
     Material* meshMat = overrideMaterial ? overrideMaterial : mesh->material;
     // Set Mesh Material
     if (meshMat != lastMaterial) {
-        lastMaterial = meshMat;
+        // lastMaterial = meshMat;
         DefaultMaterial* material = static_cast<DefaultMaterial*>(meshMat);
         glUniform3fv(uniformMaterial[0], 1, glm::value_ptr(material->Ka));
         glUniform3fv(uniformMaterial[1], 1, glm::value_ptr(material->Kd));
@@ -342,7 +342,7 @@ void DeferredShadingGeometryShaderProgram::Draw(const Matrix4& model, Mesh* mesh
         }
     }
     if (mesh != lastMesh) {
-        lastMesh = mesh;
+        // lastMesh = mesh;
         glBindVertexArray(mesh->renderInfo.vao);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
     }

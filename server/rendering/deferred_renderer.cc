@@ -267,6 +267,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
     geometryShader->Use();
     for (auto& pair : layer.opaque) {
         for (auto& param : pair.second) {
+            LOG_DEBUG("Drawing " << param.mesh->name);
             DrawObject(param);
         }
     }
@@ -302,7 +303,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
 
     quadShader->Use();
     quadShader->DrawQuad(gBuffer.g_diffuse, quadShader->standardRemapMatrix,
-        renderFrameParameters->enableLighting ? renderFrameParameters->ambientFactor : 0.75);
+        renderFrameParameters->enableLighting ? renderFrameParameters->ambientFactor : 1.0);
     // quadShader.DrawQuad(gBuffer.g_position, quadShader.standardRemapMatrix, 1 / 200.f);
 
     glBlendFunc(GL_ONE, GL_ONE);
@@ -430,5 +431,5 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
-    renderFrameParameters = nullptr;
+    // renderFrameParameters = nullptr;
 }
