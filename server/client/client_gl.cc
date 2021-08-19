@@ -151,7 +151,7 @@ void ClientGL::SetupGL() {
     // debugCylinder.indices = std::move(newIndices);
 
     minimapMarker = game.GetAssetManager().GetModel("PlayerMarkerMinimap.obj")->meshes[0];
-    skydomeTexture = game.GetAssetManager().LoadTexture(RESOURCE_PATH("textures/Skydome.png"), Texture::Format::RGB);
+    skydomeTexture = game.GetAssetManager().LoadTexture(RESOURCE_PATH("textures/nightSkydome.png"), Texture::Format::RGB);
 }
 
 void ClientGL::DrawDebugLine(const Vector3& color, const Vector3& from, const Vector3& to) {
@@ -511,7 +511,7 @@ void ClientGL::Draw(int width, int height) {
     params.viewFar = 300.f;
     params.viewPos = cameraPosition;
     params.viewDir = cameraRotation;
-    params.ambientFactor = 0.5f;
+    params.ambientFactor = 0.3f;
     params.enableLighting = true;
     params.enableShadows = true;
     params.enableToneMapping = true;

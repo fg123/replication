@@ -18,23 +18,23 @@ void main() {
     float factor = tan(u_fov / 2.0);
 
 	// Ratio
-    vec3 left = cross(vec3(0, 1, 0), normalize(u_cameraDirection));
-
+    vec3 left = normalize(cross(vec3(0.0, 1.0, 0.0), normalize(u_cameraDirection)));
+    vec3 up = normalize(cross(left, normalize(u_cameraDirection)));
 	float ratio = u_width / u_height;
 
 	float l = -ratio * factor;
     float r = ratio * factor;
     float t = factor;
     float b = -factor;
-	float offsetx = l + (r - l) * (FragmentTexCoords.x - 0.5);
-	float offsety = t + (b - t) * -(FragmentTexCoords.y - 0.5);
+	float offsetx = mix(l, r, (FragmentTexCoords.x * u_width) / u_width);
+	float offsety = mix(t, b, ((1.0 - FragmentTexCoords.y) * u_height) / u_height);
 
-	vec3 fragmentDirection = u_cameraDirection - left * offsetx + vec3(0, 1, 0) * offsety;
+	vec3 fragmentDirection = normalize(u_cameraDirection - left * offsetx - up * offsety);
 
     // u_fov is vertical
     vec3 d = -fragmentDirection;
     float u = 0.5 + atan(d.z, d.x) / (2.0 * PI);
     float v = 1.0 - (d.y * 0.5 + 0.5);
-
-    OutputColor = texture(u_texture, vec2(u, v));
+    // OutputColor = vec4(u, v, 1.0, 1.0);
+    OutputColor = texture(u_texture, vec2(u * 2.0, v));
 }

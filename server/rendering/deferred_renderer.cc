@@ -267,7 +267,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
     geometryShader->Use();
     for (auto& pair : layer.opaque) {
         for (auto& param : pair.second) {
-            LOG_DEBUG("Drawing " << param.mesh->name);
+            // LOG_DEBUG("Drawing " << param.mesh->name);
             DrawObject(param);
         }
     }
