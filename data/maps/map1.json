@@ -129,7 +129,7 @@
                     "z": 1.0
                 },
                 "name": "Sun Light",
-                "strength": 1.0,
+                "strength": 5.0,
                 "type": "LightNode",
                 "shape": 2
             },

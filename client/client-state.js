@@ -94,7 +94,7 @@ module.exports = class ClientState {
         const handler = (ev) => {
             // console.log(ev.data);
             const event = JSON.parse(ev.data);
-            console.log(event);
+            // console.log(event);
             if (event["playerLocalObjectId"] !== undefined) {
                 console.log("Player Local ID", event);
                 const id = event["playerLocalObjectId"];

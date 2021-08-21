@@ -24,11 +24,11 @@
 
 
 #ifdef BUILD_SERVER
-const int TickInterval = 16;
+const int TickInterval = 20;
 // const int TickInterval = 100;
 #endif
 #ifdef BUILD_CLIENT
-const int TickInterval = 16;
+const int TickInterval = 20;
 // const int TickInterval = 100;
 #endif
 const int ReplicateInterval = 100;

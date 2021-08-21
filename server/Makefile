@@ -70,17 +70,12 @@ WASM_FLAGS =
 
 WASM_LINKING_FLAGS = \
 	-lopenal \
-	--preload-file ../data/maps@/maps \
-	--preload-file ../data/models@/models \
-	--preload-file ../data/shaders@/shaders \
-	--preload-file ../data/sounds@/sounds \
-	--preload-file ../data/textures@/textures \
-	--preload-file ../data/scripts@/scripts \
 	-s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s INITIAL_MEMORY=128MB \
 	-s MIN_WEBGL_VERSION=2 \
 	-s MAX_WEBGL_VERSION=2 \
+	-s FORCE_FILESYSTEM=1 \
 	--source-map-base http://localhost:8000/
 
 GCC_FLAGS = -Wno-class-memaccess -fmax-errors=5
@@ -88,9 +83,11 @@ GCC_FLAGS = -Wno-class-memaccess -fmax-errors=5
 SERVER_OUTPUT = bin/$(EXE)_server
 SERVER_OUTPUT_PROD = bin/$(EXE)_server_prod
 
-CLIENT_OUTPUT = bin/$(EXE)_client.js
+CLIENT_OUTPUT = ../client/dist/$(EXE)_client.js
+CLIENT_DATA = ../client/dist/$(EXE)_client.data
+CLIENT_DATA_JS = ../client/dist/$(EXE)_client_data.js
 
-all: $(SERVER_OUTPUT) $(CLIENT_OUTPUT)
+all: $(SERVER_OUTPUT) $(CLIENT_OUTPUT) $(CLIENT_DATA)
 
 server_prod: $(SERVER_OUTPUT_PROD)
 
@@ -114,17 +111,21 @@ $(SERVER_OUTPUT_PROD): $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	mkdir -p bin
 	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o $(SERVER_OUTPUT_PROD)
 
-$(CLIENT_OUTPUT): $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
-	em++ -O2 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
-	cp bin/$(EXE)_client.wasm ../client/dist/
-	cp bin/$(EXE)_client.js ../client/dist/
-	cp bin/$(EXE)_client.data ../client/dist/
+$(CLIENT_DATA): $(DATA_DIRS) $(DATA_FILES)
+	${EMSDK}/upstream/emscripten/tools/file_packager.py $(CLIENT_DATA) \
+		--js-output=$(CLIENT_DATA_JS) \
+		--preload ../data/maps@/maps \
+		--preload ../data/textures@/textures \
+		--preload ../data/models@/models \
+		--preload ../data/shaders@/shaders \
+		--preload ../data/sounds@/sounds \
+		--preload ../data/scripts@/scripts
 
-client_prod: $(CLIENT_OBJ) $(DATA_DIRS) $(DATA_FILES)
+$(CLIENT_OUTPUT): $(CLIENT_OBJ)
+	em++ -O2 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
+
+client_prod: $(CLIENT_OBJ)
 	em++ -O2 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
-	cp bin/$(EXE)_client.wasm ../client/dist/
-	cp bin/$(EXE)_client.js ../client/dist/
-	cp bin/$(EXE)_client.data ../client/dist/
 
 %.o: %.cc
 	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
@@ -162,3 +163,6 @@ clean:
 	find . -name "*.d" -type f -delete
 	find . -name "*.wd" -type f -delete
 	find . -name "*.ed" -type f -delete
+	rm $(CLIENT_OUTPUT)
+	rm $(CLIENT_DATA)
+	rm $(CLIENT_DATA_JS)

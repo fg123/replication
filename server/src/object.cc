@@ -142,9 +142,8 @@ void Object::Tick(Time time) {
         }
 
         #ifdef BUILD_CLIENT
-            // Interpolate Over
-            clientPosition += (position - clientPosition) / 2.0f;
-            clientRotation = glm::slerp(clientRotation, rotation, 0.5f);
+            // Interpolate Over by setting up target time
+            nextTickTargetTime = Timer::Now() + delta;
 
             // clientPosition = position;
             // clientRotation = rotation;
@@ -292,18 +291,34 @@ void Object::ProcessReplication(json& object) {
     else {
         model = nullptr;
     }
-#ifdef BUILD_CLIENT
-    if (!clientPositionSet) {
-        clientPosition = position;
-        clientPositionSet = true;
-    }
-    if (!clientRotationSet) {
-        clientRotation = rotation;
-        clientRotationSet = true;
-    }
-#endif
     SetDirty(true);
 }
+
+void Object::OnClientCreate() {
+    #ifdef BUILD_CLIENT
+        clientPosition = position;
+        clientRotation = rotation;
+        lastClientDrawTime = Timer::Now();
+    #endif
+}
+
+#ifdef BUILD_CLIENT
+    void Object::PreDraw(Time now) {
+        // Target Time + position and rotation is the desired position
+        // Interpolate from lastClientDrawTime through now to nextTickTargetTime
+        float lerpRatio = GetClientInterpolationRatio(now);
+        // LOG_DEBUG("LastDraw " << lastClientDrawTime << " Now " << now << " NextTick " << nextTickTargetTime << " Ratio " << lerpRatio);
+
+        // clientPosition = glm::vec3();
+        clientPosition = glm::lerp(clientPosition, position, lerpRatio);
+        clientRotation = glm::slerp(clientRotation, rotation, lerpRatio);
+
+        // clientPosition += (position - clientPosition) / 2.0f;
+        // clientRotation = glm::slerp(clientRotation, rotation, 0.5f);
+
+        lastClientDrawTime = now;
+    }
+#endif
 
 void Object::SetPosition(const Vector3& in) {
     position = in;

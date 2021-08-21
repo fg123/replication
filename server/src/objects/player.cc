@@ -3,6 +3,7 @@
 #include "game.h"
 #include "logging.h"
 #include "floating-text.h"
+#include "util.h"
 #include "weapons/gun.h"
 
 static const int LEFT_MOUSE_BUTTON = 1;
@@ -364,6 +365,19 @@ void PlayerObject::Tick(Time time) {
     // LOG_DEBUG("Position: " << position << " Velocity: " << GetVelocity());
 }
 
+#ifdef BUILD_CLIENT
+void PlayerObject::PreDraw(Time now) {
+    // clientRotationYaw = rotationYaw;
+    // clientRotationPitch = rotationPitch;
+
+    float lerpRatio = GetClientInterpolationRatio(now);
+    // LOG_DEBUG("ClientRotationYaw " << clientRotationYaw << " rotationYaw " << rotationYaw << " lerpRatio " << lerpRatio);
+    clientRotationYaw = AngleLerpDegrees(clientRotationYaw, rotationYaw, lerpRatio);
+    clientRotationPitch = AngleLerpDegrees(clientRotationPitch, rotationPitch, lerpRatio);
+
+    Object::PreDraw(now);
+}
+#endif
 void PlayerObject::Serialize(JSONWriter& obj) {
     // LOG_DEBUG("Player Object Serialize - Start");
     Object::Serialize(obj);

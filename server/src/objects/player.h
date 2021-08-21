@@ -28,6 +28,11 @@ protected:
     REPLICATED_D(float, rotationYaw, "ry", 0.0f);
     REPLICATED_D(float, rotationPitch, "rp", 0.0f);
 
+    #ifdef BUILD_CLIENT
+        float clientRotationYaw = 0.0f;
+        float clientRotationPitch = 0.0f;
+    #endif
+
     REPLICATED(Vector3, inputVelocity, "iv");
     REPLICATED(Vector3, inputAcceleration, "ia");
 
@@ -77,7 +82,23 @@ public:
     virtual void Serialize(JSONWriter& obj) override;
     virtual void ProcessReplication(json& obj) override;
     virtual void OnCollide(CollisionResult& result) override;
-
+#ifdef BUILD_CLIENT
+    virtual void PreDraw(Time time) override;
+    virtual Vector3 GetClientLookDirection() const override {
+        Matrix4 matrix;
+        matrix = glm::rotate(matrix, glm::radians(clientRotationYaw), Vector::Up);
+        matrix = glm::rotate(matrix, glm::radians(clientRotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
+        Quaternion quat = glm::quat_cast(matrix);
+        return glm::normalize(Vector::Forward * quat);
+    }
+#endif
+    virtual void OnClientCreate() override {
+        Object::OnClientCreate();
+        #ifdef BUILD_CLIENT
+            clientRotationYaw = rotationYaw;
+            clientRotationPitch = rotationPitch;
+        #endif
+    }
     void OnInput(const JSONDocument& obj);
     void ProcessInputData(const JSONDocument& obj);
 

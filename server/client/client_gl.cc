@@ -151,7 +151,7 @@ void ClientGL::SetupGL() {
     // debugCylinder.indices = std::move(newIndices);
 
     minimapMarker = game.GetAssetManager().GetModel("PlayerMarkerMinimap.obj")->meshes[0];
-    skydomeTexture = game.GetAssetManager().LoadTexture(RESOURCE_PATH("textures/nightSkydome.png"), Texture::Format::RGB);
+    skydomeTexture = game.GetAssetManager().LoadTexture(RESOURCE_PATH("textures/Skydome.png"), Texture::Format::RGB);
 }
 
 void ClientGL::DrawDebugLine(const Vector3& color, const Vector3& from, const Vector3& to) {
@@ -284,13 +284,16 @@ void ClientGL::DrawShadowObjects(DrawLayer& layer) {
 }
 
 void ClientGL::SetupDrawingLayers() {
+    Time now = Timer::Now();
     for (auto& gameObjectPair : game.GetGameObjects()) {
+        gameObjectPair.second->PreDraw(now);
         gameObjectPair.second->RemoveTag(Tag::DRAW_FOREGROUND);
     }
 
     if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
-        cameraPosition = localPlayer->GetPosition();
-        cameraRotation = localPlayer->GetLookDirection();
+        cameraPosition = localPlayer->GetClientPosition();
+        cameraRotation = localPlayer->GetClientLookDirection();
+
         for (auto& child : localPlayer->children) {
             child->SetTag(Tag::DRAW_FOREGROUND);
         }
@@ -511,7 +514,7 @@ void ClientGL::Draw(int width, int height) {
     params.viewFar = 300.f;
     params.viewPos = cameraPosition;
     params.viewDir = cameraRotation;
-    params.ambientFactor = 0.3f;
+    params.ambientFactor = 0.5f;
     params.enableLighting = true;
     params.enableShadows = true;
     params.enableToneMapping = true;

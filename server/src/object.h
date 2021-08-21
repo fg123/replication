@@ -118,11 +118,13 @@ public:
 
 #ifdef BUILD_CLIENT
     // For Client-Side Interpolation
-    Vector3 clientPosition;
-    bool clientPositionSet = false;
 
+    // When Tick() generates a new position, we want to display this position
+    //   offset by a singular Tick basically.
+    Time lastClientDrawTime = 0;
+    Time nextTickTargetTime = 0;
+    Vector3 clientPosition;
     Quaternion clientRotation;
-    bool clientRotationSet = false;
 
     std::vector<DebugLine> debugLines;
 
@@ -147,7 +149,10 @@ public:
         }
         lastTickTime = time;
     }
-    virtual void PreDraw() {}
+    float GetClientInterpolationRatio(Time now) {
+        return (float)(now - lastClientDrawTime) / (float)(nextTickTargetTime - lastClientDrawTime);
+    }
+    virtual void PreDraw(Time time);
     bool createdThisFrameOnClient = false;
 #endif
 
@@ -161,7 +166,7 @@ public:
 
     // This is called on the first tick of the object on the client
     //   after it has been replicated
-    virtual void OnClientCreate() {}
+    virtual void OnClientCreate();
 
     virtual void OnIdAssigned() {}
 
@@ -201,6 +206,10 @@ public:
     const Quaternion& GetRotation() const { return rotation; }
     virtual Vector3 GetVelocity() { return velocity; }
     virtual Vector3 GetLookDirection() const { return glm::normalize(Vector::Forward * rotation); }
+
+    #ifdef BUILD_CLIENT
+    virtual Vector3 GetClientLookDirection() const { return glm::normalize(Vector::Forward * clientRotation); }
+    #endif
 
     void SetPosition(const Vector3& in);
     void SetRotation(const Quaternion& in);
