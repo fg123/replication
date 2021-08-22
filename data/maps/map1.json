@@ -37,8 +37,10 @@
     ],
     "scripts": [
         "Types.w",
+        "Math.w",
         "Object.w",
-        "Test.w"
+        "Test.w",
+        "Explosion.w"
     ],
     "sounds": [
         "bang.wav",

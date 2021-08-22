@@ -55,7 +55,7 @@ PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game),
     inventoryManager(game, this) {
     SetTag(Tag::PLAYER);
 
-    SetTag(Tag::NO_GRAVITY);
+    // SetTag(Tag::NO_GRAVITY);
 
     SetPosition(position);
 

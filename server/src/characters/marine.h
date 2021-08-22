@@ -3,6 +3,7 @@
 
 #include "player.h"
 #include "weapons/smoke-thrower.h"
+#include "weapons/grenade-thrower.h"
 #include "weapons/artillery-strike.h"
 #include "weapons/assault-rifle.h"
 #include "weapons/pistol.h"
@@ -14,7 +15,7 @@ public:
     Marine(Game& game) : Marine(game, Vector3()) {}
     Marine(Game& game, Vector3 position) : PlayerObject(game, position) {
         #ifdef BUILD_SERVER
-            qWeapon = new SmokeGrenadeThrower { game };
+            qWeapon = new GrenadeThrower { game };
             game.AddObject(qWeapon);
             qWeapon->AttachToPlayer(this, WeaponAttachmentPoint::LEFT);
 

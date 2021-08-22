@@ -59,6 +59,7 @@ void WeaponObject::Tick(Time time) {
         #ifdef BUILD_CLIENT
             clientPosition = GetPosition();
             clientRotation = GetRotation();
+            clientScale = GetScale();
         #endif
 
         if (attachedTo->GetCurrentWeapon() == this) {

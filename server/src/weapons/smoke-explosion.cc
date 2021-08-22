@@ -10,6 +10,7 @@ SmokeObject::SmokeObject(Game& game, float radius) :
 }
 
 void SmokeObject::OnClientCreate() {
+    Object::OnClientCreate();
     game.PlayAudio("boom.wav", 1.0f, GetPosition());
 }
 

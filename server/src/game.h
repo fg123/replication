@@ -58,7 +58,7 @@ class Game {
     std::unordered_set<ObjectID> deadSinceLastReplicate;
 
     std::mutex newObjectsMutex;
-    std::unordered_set<Object*> newObjects;
+    std::unordered_map<ObjectID, Object*> newObjects;
 
     std::unordered_set<ObjectID> replicateNextTick;
 #endif
@@ -126,7 +126,7 @@ public:
     }
 #endif
 
-    void LoadScriptedObject(const std::string& className);
+    Object* LoadScriptedObject(const std::string& className);
 
     void AddObject(Object* obj);
     void DestroyObject(ObjectID objectId);

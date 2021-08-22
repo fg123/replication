@@ -7,9 +7,11 @@ ExplosionObject::ExplosionObject(Game& game, ObjectID playerId, float radius, fl
     Object(game), radius(radius), damage(damage), playerId(playerId) {
 
     SetModel(game.GetModel("Explosion.obj"));
+    // SetIsStatic(true);
 }
 
 void ExplosionObject::OnClientCreate() {
+    Object::OnClientCreate();
     game.PlayAudio("boom.wav", 1.0f, GetPosition());
 }
 

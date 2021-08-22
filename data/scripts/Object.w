@@ -26,7 +26,7 @@ struct Object => (id) {
     SetScale     => (s) ret object_SetScale(this.id, s);
 
     // Init Function
-    OnIdAssigned => () {}
+    OnCreate => () {}
 
     // Per Tick
     OnTick => (time) {}

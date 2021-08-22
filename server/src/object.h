@@ -125,6 +125,7 @@ public:
     Time nextTickTargetTime = 0;
     Vector3 clientPosition;
     Quaternion clientRotation;
+    Vector3 clientScale;
 
     std::vector<DebugLine> debugLines;
 
@@ -143,15 +144,8 @@ public:
 #endif
 
 #ifdef BUILD_CLIENT
-    void SetLastTickTime(Time time) {
-        for (auto& child : children) {
-            child->SetLastTickTime(time);
-        }
-        lastTickTime = time;
-    }
-    float GetClientInterpolationRatio(Time now) {
-        return (float)(now - lastClientDrawTime) / (float)(nextTickTargetTime - lastClientDrawTime);
-    }
+    void SetLastTickTime(Time time);
+    float GetClientInterpolationRatio(Time now);
     virtual void PreDraw(Time time);
     bool createdThisFrameOnClient = false;
 #endif
@@ -168,7 +162,7 @@ public:
     //   after it has been replicated
     virtual void OnClientCreate();
 
-    virtual void OnIdAssigned() {}
+    virtual void OnCreate() {}
 
     void HandleAllCollisions();
     void ResolveCollision(Vector3 difference);
@@ -190,7 +184,7 @@ public:
 
     ObjectID GetId() const { return id; }
 
-    void SetId(ObjectID newId) { id = newId; OnIdAssigned(); }
+    void SetId(ObjectID newId) { id = newId; }
 
     bool IsDirty() const { return isDirty; }
     void SetDirty(bool dirty) { isDirty = dirty; }
@@ -200,6 +194,7 @@ public:
     virtual void Serialize(JSONWriter& obj) override;
     void ProcessReplication(json& object) override;
 
+    Time GetSpawnTime() const { return spawnTime; }
     const Model* GetModel() const { return model; }
     const Vector3& GetPosition() const { return position; }
     const Vector3& GetScale() const { return scale; }
@@ -230,19 +225,17 @@ public:
 
     virtual void OnCollide(CollisionResult& result);
 
-    void SetModel(Model* newModel) {
-        model = newModel;
-        isDirty = true;
-    }
+    void SetModel(Model* newModel);
 
 #ifdef BUILD_CLIENT
     virtual const Matrix4 GetTransform() {
         // Vector3 direction =
         return glm::translate(clientPosition) *
             glm::toMat4(clientRotation) *
-            glm::scale(scale);
+            glm::scale(clientScale);
     }
     const Vector3& GetClientPosition() const { return clientPosition; }
+    const Vector3& GetClientScale() const { return clientScale; }
     const Quaternion& GetClientRotation() const { return clientRotation; }
 #endif
 #ifdef BUILD_SERVER
@@ -278,35 +271,6 @@ public:
 };
 
 CLASS_REGISTER(GameObject);
-
-class ScriptableObject : public Object {
-public:
-    CLASS_CREATE(ScriptableObject);
-    REPLICATED(std::string, className, "cn");
-    REPLICATED(ScriptInstance, script, "script");
-
-    ScriptableObject(Game& game) : Object(game) {}
-    ScriptableObject(Game& game, const std::string& className) : Object(game), className(className) {
-    }
-
-    virtual void OnClientCreate() override {
-        Object::OnClientCreate();
-        script.InitializeInstance(className, GetId());
-        script.OnClientCreate();
-    }
-
-    virtual void OnIdAssigned() override {
-        script.InitializeInstance(className, GetId());
-        script.OnIdAssigned();
-    }
-
-    virtual void Tick(Time time) override {
-        Object::Tick(time);
-        script.OnTick(time);
-    }
-};
-
-CLASS_REGISTER(ScriptableObject);
 
 inline std::ostream& operator<<(std::ostream& os, const Object* obj) {
     if (!obj) {

@@ -4,6 +4,7 @@
 
 #include "util.h"
 #include "object.h"
+#include "scriptable-object.h"
 #include "vector.h"
 #include "objects/player.h"
 #include "characters/dummy.h"
@@ -202,8 +203,9 @@ void Game::Tick(Time time) {
     // New objects get queued in from HandleReplication and EnsureObjectExists
     //   on the client, not through this set.
     for (auto& newObject : newObjects) {
-        gameObjects[newObject->GetId()] = newObject;
-        RequestReplication(newObject->GetId());
+        gameObjects[newObject.first] = newObject.second;
+        gameObjects[newObject.first]->OnCreate();
+        RequestReplication(newObject.first);
     }
     newObjects.clear();
 #endif
@@ -615,11 +617,11 @@ void Game::ChangeId(ObjectID oldId, ObjectID newId) {
 void Game::AddObject(Object* obj) {
     // Client does not do anything
     #ifdef BUILD_SERVER
-        std::scoped_lock<std::mutex> lock(newObjectsMutex);
         ObjectID newId = RequestId();
         obj->SetId(newId);
         LOG_DEBUG("Add Object (" << (void*)obj << ") " << obj);
-        newObjects.insert(obj);
+        std::scoped_lock<std::mutex> lock(newObjectsMutex);
+        newObjects[newId] = obj;
     #endif
 }
 
@@ -735,7 +737,8 @@ void Game::PlayAudio(const std::string& audio, float volume, Object* boundObject
     #endif
 }
 
-void Game::LoadScriptedObject(const std::string& className) {
+Object* Game::LoadScriptedObject(const std::string& className) {
     ScriptableObject* obj = new ScriptableObject(*this, className);
     AddObject(obj);
+    return obj;
 }

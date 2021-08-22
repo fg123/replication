@@ -24,8 +24,8 @@ public:
 
     virtual void FireProjectile(Time time) override {
         InputHoldThrower<GrenadeObject>::FireProjectile(time);
-        attachedTo->DropWeapon(this);
-        game.DestroyObject(GetId());
+        // attachedTo->DropWeapon(this);
+        // game.DestroyObject(GetId());
     }
 };
 

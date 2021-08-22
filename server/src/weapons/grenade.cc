@@ -39,9 +39,14 @@ void GrenadeObject::Tick(Time time) {
 
 void GrenadeObject::Explode() {
 #ifdef BUILD_SERVER
-    ExplosionObject* explode = new ExplosionObject(game, playerId, damageRange, damage);
+    Object* explode = game.LoadScriptedObject("Explosion");
     explode->SetPosition(GetPosition());
-    game.AddObject(explode);
     game.DestroyObject(GetId());
 #endif
+// #ifdef BUILD_SERVER
+//     ExplosionObject* explode = new ExplosionObject(game, playerId, damageRange, damage);
+//     explode->SetPosition(GetPosition());
+//     game.AddObject(explode);
+//     game.DestroyObject(GetId());
+// #endif
 }

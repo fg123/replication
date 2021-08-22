@@ -312,6 +312,7 @@ void ClientGL::SetupDrawingLayers() {
         Matrix4 transform = obj->GetTransform();
         bool isForeground = obj->IsTagged(Tag::DRAW_FOREGROUND);
         DrawLayer& layerToDraw = !obj->visibleInFrustrum ? behindPlayerLayer : (isForeground ? foregroundLayer : backgroundLayer);
+        // DrawLayer& layerToDraw = backgroundLayer;
 
         if (Model* model = obj->GetModel()) {
             for (auto& mesh : model->meshes) {

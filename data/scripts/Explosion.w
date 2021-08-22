@@ -1,14 +1,17 @@
-struct Explosion : Object => () {
-    radius = 0;
-    damage = 0;
-    playerId = 0;
+struct Explosion : Object => (
+    radius,
+    damage
+) {
 
-    init => (playerId, radius, damage) {
+    init => () {
         super();
-        this.playerId = playerId;
-        this.radius = radius;
-        this.damage = damage;
+        this.radius = 5;
+        this.damage = 25;
         ret this;
+    }
+
+    OnCreate => () {
+        this.SetModel("Explosion.obj");
     }
 
     OnClientCreate => () {

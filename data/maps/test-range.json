@@ -1,0 +1,104 @@
+{
+    "models": [
+        "ShootingRange.obj",
+        "FlatWorld.obj",
+        "Lift.obj",
+        "SpectatorArea.obj",
+        "Player.obj",
+        "NewPlayer.obj",
+        "Pistol.obj",
+        "Rifle.obj",
+        "Bullet.obj",
+        "BulletTracer.obj",
+        "Quad.obj",
+        "Grenade.obj",
+        "Explosion.obj",
+        "ArtilleryIndicator.obj",
+        "Artillery.obj",
+        "HookThrower.obj",
+        "Portal.obj",
+        "Bow.obj",
+        "Arrow.obj",
+        "BombCrate.obj",
+        "Plane.obj",
+        "Ammo.obj",
+        "Icosphere.obj",
+        "Cube.obj",
+        "Cylinder.obj",
+        "Shotgun.obj",
+        "Medkit.obj",
+        "MachineGun.obj",
+        "PlayerMarkerMinimap.obj",
+        "SubmachineGun.obj",
+        "SmokeGrenade.obj",
+        "Cone.obj",
+        "Warehouse.obj",
+        "StreetLamp.obj"
+    ],
+    "scripts": [
+        "Types.w",
+        "Math.w",
+        "Object.w",
+        "Test.w",
+        "Explosion.w"
+    ],
+    "sounds": [
+        "bang.wav",
+        "reload.wav",
+        "boom.wav",
+        "ueh.wav",
+        "incoming.wav",
+        "HookThrow.wav",
+        "HookReel.wav",
+        "PortalStart.wav",
+        "PortalEnd.wav",
+        "GrenadeOut.wav",
+        "Archer/arrow-jump.wav",
+        "Archer/arrow-pullback.wav",
+        "Archer/arrow-shoot.wav",
+        "Archer/arrow-ulti-activate.wav",
+        "Archer/arrow-ulti-shoot.wav"
+    ],
+    "root": {
+        "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "name": "Root",
+        "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "type": "CollectionNode",
+        "children": [
+            {
+                "scale": {
+                    "x": 5.0,
+                    "y": 5.0,
+                    "z": 5.0
+                },
+                "name": "Quad.obj",
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 90.0,
+                    "z": 0.0
+                },
+                "type": "StaticModelNode",
+                "model": "Cube.obj"
+            }
+        ]
+    },
+    "collections": []
+}

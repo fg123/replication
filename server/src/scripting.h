@@ -44,8 +44,8 @@ public:
         CallMemberFunction(classInstance, "OnClientCreate", {});
     }
 
-    void OnIdAssigned() {
-        CallMemberFunction(classInstance, "OnIdAssigned", {});
+    void OnCreate() {
+        CallMemberFunction(classInstance, "OnCreate", {});
     }
 
 };

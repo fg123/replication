@@ -298,6 +298,7 @@ void Object::OnClientCreate() {
     #ifdef BUILD_CLIENT
         clientPosition = position;
         clientRotation = rotation;
+        clientScale = scale;
         lastClientDrawTime = Timer::Now();
     #endif
 }
@@ -310,15 +311,43 @@ void Object::OnClientCreate() {
         // LOG_DEBUG("LastDraw " << lastClientDrawTime << " Now " << now << " NextTick " << nextTickTargetTime << " Ratio " << lerpRatio);
 
         // clientPosition = glm::vec3();
+
         clientPosition = glm::lerp(clientPosition, position, lerpRatio);
         clientRotation = glm::slerp(clientRotation, rotation, lerpRatio);
+        clientScale = glm::lerp(clientScale, scale, lerpRatio);
+        if (GetClass() == std::string("ScriptableObject")) {
+            LOG_DEBUG("ScriptableObject " << lerpRatio << " " << clientPosition << " " << clientRotation << " " << clientScale);
+            LOG_DEBUG(model->name);
+        }
 
+        // clientPosition = position;
+        // clientRotation = rotation;
+        // clientScale = scale;
         // clientPosition += (position - clientPosition) / 2.0f;
         // clientRotation = glm::slerp(clientRotation, rotation, 0.5f);
 
         lastClientDrawTime = now;
     }
+    void Object::SetLastTickTime(Time time) {
+        for (auto& child : children) {
+            child->SetLastTickTime(time);
+        }
+        lastTickTime = time;
+    }
+    float Object::GetClientInterpolationRatio(Time now) {
+        float result = (float)(now - lastClientDrawTime) / (float)(nextTickTargetTime - lastClientDrawTime);
+        // Sometimes if it's created and drawn on the exact same frame we run into issues
+        if (!glm::isfinite(result)) {
+            return 0.0f;
+        }
+        return result;
+    }
 #endif
+
+void Object::SetModel(Model* newModel) {
+    model = newModel;
+    isDirty = true;
+}
 
 void Object::SetPosition(const Vector3& in) {
     position = in;

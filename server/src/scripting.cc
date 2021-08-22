@@ -13,6 +13,7 @@ extern "C"
 #include "wendy/data.h"
 #include "wendy/memory.h"
 #include "wendy/struct.h"
+#include "wendy/error.h"
 }
 
 // Wendyscript expects a popen symbol but emscripten doe
@@ -78,7 +79,7 @@ struct data Vector3ToList(const Vector3& vec) {
 }
 
 Object* GetObjectFromArg(struct data id) {
-    Object* obj = ScriptManager::game->GetObject<Object>((uint64_t)id.value.number);
+    Object* obj = ScriptManager::game->GetObject((uint64_t)id.value.number);
     if (!obj) {
         LOG_ERROR("Could not obtain object from id in script instance!");
         throw "Could not obtain object from id in script instance!";
@@ -88,6 +89,30 @@ Object* GetObjectFromArg(struct data id) {
 
 struct data object_GetPosition(struct vm* vm, struct data* args) {
     return Vector3ToList(GetObjectFromArg(args[0])->GetPosition());
+}
+
+struct data object_GetScale(struct vm* vm, struct data* args) {
+    return Vector3ToList(GetObjectFromArg(args[0])->GetScale());
+}
+
+struct data object_GetRotation(struct vm* vm, struct data* args) {
+    return Vector3ToList(GetObjectFromArg(args[0])->GetLookDirection());
+}
+
+struct data object_GetVelocity(struct vm* vm, struct data* args) {
+    return Vector3ToList(GetObjectFromArg(args[0])->GetVelocity());
+}
+
+struct data object_GetSpawnTime(struct vm* vm, struct data* args) {
+    return make_data(D_NUMBER, data_value_num(GetObjectFromArg(args[0])->GetSpawnTime()));
+}
+
+struct data object_SetModel(struct vm* vm, struct data* args) {
+    #ifdef BUILD_SERVER
+        const char* str = args[1].value.string;
+        GetObjectFromArg(args[0])->SetModel(ScriptManager::game->GetModel(str));
+    #endif
+    return noneret_data();
 }
 
 struct data object_SetPosition(struct vm* vm, struct data* args) {
@@ -100,8 +125,28 @@ struct data object_SetPosition(struct vm* vm, struct data* args) {
     return noneret_data();
 }
 
-struct data object_SetModel(struct vm* vm, struct data* args) {
-    GetObjectFromArg(args[0])->SetModel(ScriptManager::game->GetModel(args[1].value.string));
+struct data object_SetScale(struct vm* vm, struct data* args) {
+    Vector3 scale {
+        (float) args[1].value.reference[2].value.number,
+        (float) args[1].value.reference[3].value.number,
+        (float) args[1].value.reference[4].value.number
+    };
+    GetObjectFromArg(args[0])->SetScale(scale);
+    return noneret_data();
+}
+
+struct data game_PlayAudio(struct vm* vm, struct data* args) {
+    Vector3 location {
+        (float) args[2].value.reference[2].value.number,
+        (float) args[2].value.reference[3].value.number,
+        (float) args[2].value.reference[4].value.number
+    };
+    ScriptManager::game->PlayAudio(args[0].value.string, args[1].value.number, location);
+    return noneret_data();
+}
+
+struct data game_DestroyObject(struct vm* vm, struct data* args) {
+    ScriptManager::game->DestroyObject(args[0].value.number);
     return noneret_data();
 }
 
@@ -109,8 +154,18 @@ ScriptManager::ScriptManager(Game* game) {
     ScriptManager::game = game;
     vm = vm_init();
     register_native_call("object_GetPosition", 1, &object_GetPosition);
+    register_native_call("object_GetScale", 1, &object_GetScale);
+    register_native_call("object_GetRotation", 1, &object_GetRotation);
+    register_native_call("object_GetVelocity", 1, &object_GetVelocity);
+    register_native_call("object_GetSpawnTime", 1, &object_GetSpawnTime);
+
     register_native_call("object_SetModel", 2, &object_SetModel);
     register_native_call("object_SetPosition", 2, &object_SetPosition);
+    register_native_call("object_SetScale", 2, &object_SetScale);
+
+    // Game Interface
+    register_native_call("game_PlayAudio", 3, &game_PlayAudio);
+    register_native_call("game_DestroyObject", 1, &game_DestroyObject);
 }
 
 ScriptManager::~ScriptManager() {
@@ -185,5 +240,8 @@ void CallMemberFunction(struct data structInstance,
     push_arg(ScriptManager::vm->memory, fn_copy);
     vm_run_instruction(ScriptManager::vm, OP_CALL);
     vm_run(ScriptManager::vm);
+    if (get_error_flag()) {
+        throw "Scripting Error";
+    }
     // TODO: probably clean up stack here, might have a noneret?
 }
