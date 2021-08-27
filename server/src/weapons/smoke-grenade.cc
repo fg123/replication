@@ -1,6 +1,5 @@
 #include "smoke-grenade.h"
 #include "game.h"
-#include "smoke-explosion.h"
 
 SmokeGrenadeObject::SmokeGrenadeObject(Game& game, ObjectID playerId) : ThrownProjectile(game, playerId) {
     // Don't Collide with Weapons
@@ -26,19 +25,15 @@ void SmokeGrenadeObject::OnCollide(CollisionResult& result) {
 
 void SmokeGrenadeObject::Explode() {
 #ifdef BUILD_SERVER
-    SmokeObject* explode = new SmokeObject(game, 10.f);
+    Object* explode = game.LoadScriptedObject("SmokeExplosion");
     explode->SetPosition(GetPosition());
-    game.AddObject(explode);
 
-    // Vector3 dirOne = glm::cross(velocity, Vector::Up);
-    // SmokeObject* nade1 = new SmokeObject(game, 10.f);
-    // nade1->SetPosition(GetPosition() + 5.f * glm::normalize(dirOne));
-    // game.AddObject(nade1);
+    Vector3 dirOne = glm::normalize(glm::cross(glm::normalize(velocity), Vector::Up));
+    Object* nade1 = game.LoadScriptedObject("SmokeExplosion");
+    nade1->SetPosition(GetPosition() + 2.5f * dirOne);
 
-    // Vector3 dirTwo = glm::cross(velocity, Vector::Up);
-    // SmokeObject* nade2 = new SmokeObject(game, 10.f);
-    // nade2->SetPosition(GetPosition() + 5.f * glm::normalize(dirTwo));
-    // game.AddObject(nade2);
+    Object* nade2 = game.LoadScriptedObject("SmokeExplosion");
+    nade2->SetPosition(GetPosition() - 2.5f * dirOne);
 
     game.DestroyObject(GetId());
 #endif

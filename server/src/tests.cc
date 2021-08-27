@@ -80,7 +80,11 @@ void Tests::RunStaticMeshCollisionTest() {
 int Tests::Run() {
     LOG_INFO("Testing Begin");
     // RunRotatedAABBCollisionTest();
-    RunStaticMeshCollisionTest();
+    // RunStaticMeshCollisionTest();
+    Matrix4 matrix;
+    matrix = glm::rotate(matrix, glm::radians(15.0f), Vector::Up);
+    LOG_DEBUG(glm::quat_cast(matrix));
+
     LOG_INFO("Tests Complete");
     return 0;
 }

@@ -315,10 +315,6 @@ void Object::OnClientCreate() {
         clientPosition = glm::lerp(clientPosition, position, lerpRatio);
         clientRotation = glm::slerp(clientRotation, rotation, lerpRatio);
         clientScale = glm::lerp(clientScale, scale, lerpRatio);
-        if (GetClass() == std::string("ScriptableObject")) {
-            LOG_DEBUG("ScriptableObject " << lerpRatio << " " << clientPosition << " " << clientRotation << " " << clientScale);
-            LOG_DEBUG(model->name);
-        }
 
         // clientPosition = position;
         // clientRotation = rotation;

@@ -8,6 +8,7 @@ let object_GetSpawnTime => (id) native object_GetSpawnTime;
 
 let object_SetModel => (id, m) native object_SetModel;
 let object_SetPosition => (id, s) native object_SetPosition;
+let object_SetRotation => (id, s) native object_SetRotation;
 let object_SetScale => (id, s) native object_SetScale;
 
 // Interface for Object
@@ -16,13 +17,14 @@ struct Object => (id) {
 
     GetPosition  => () ret Vector3FromList(object_GetPosition(this.id));
     GetScale     => () ret Vector3FromList(object_GetScale(this.id));
-    GetRotation  => () ret Vector3FromList(object_GetRotation(this.id));
+    GetRotation  => () ret QuaternionFromList(object_GetRotation(this.id));
     GetVelocity  => () ret Vector3FromList(object_GetVelocity(this.id));
     GetSpawnTime => () ret object_GetSpawnTime(this.id);
     GetId        => () ret this.id;
 
     SetModel     => (m) ret object_SetModel(this.id, m);
     SetPosition  => (s) ret object_SetPosition(this.id, s);
+    SetRotation  => (s) ret object_SetRotation(this.id, s);
     SetScale     => (s) ret object_SetScale(this.id, s);
 
     // Init Function

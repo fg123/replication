@@ -15,7 +15,7 @@ public:
     Marine(Game& game) : Marine(game, Vector3()) {}
     Marine(Game& game, Vector3 position) : PlayerObject(game, position) {
         #ifdef BUILD_SERVER
-            qWeapon = new GrenadeThrower { game };
+            qWeapon = new SmokeGrenadeThrower { game };
             game.AddObject(qWeapon);
             qWeapon->AttachToPlayer(this, WeaponAttachmentPoint::LEFT);
 

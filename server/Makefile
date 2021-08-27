@@ -154,15 +154,17 @@ $(USOCKET)/uSockets.a:
 
 -include $(EDITOR_DEPS)
 
-.PHONY: all clean release
+.PHONY: all clean release clean_deps
 
-clean:
+clean: clean_deps
 	find . -name "*.o" -type f -delete
 	find . -name "*.wo" -type f -delete
 	find . -name "*.eo" -type f -delete
-	find . -name "*.d" -type f -delete
-	find . -name "*.wd" -type f -delete
-	find . -name "*.ed" -type f -delete
 	rm $(CLIENT_OUTPUT)
 	rm $(CLIENT_DATA)
 	rm $(CLIENT_DATA_JS)
+
+clean_deps:
+	find . -name "*.d" -type f -delete
+	find . -name "*.wd" -type f -delete
+	find . -name "*.ed" -type f -delete

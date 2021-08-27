@@ -78,6 +78,15 @@ struct data Vector3ToList(const Vector3& vec) {
     return make_data(D_LIST, data_value_ptr(list));
 }
 
+struct data QuaternionToList(const Quaternion& quat) {
+    struct data* list = wendy_list_malloc(ScriptManager::vm->memory, 4);
+    list[1] = make_data(D_NUMBER, data_value_num(quat.x));
+    list[2] = make_data(D_NUMBER, data_value_num(quat.y));
+    list[3] = make_data(D_NUMBER, data_value_num(quat.z));
+    list[4] = make_data(D_NUMBER, data_value_num(quat.w));
+    return make_data(D_LIST, data_value_ptr(list));
+}
+
 Object* GetObjectFromArg(struct data id) {
     Object* obj = ScriptManager::game->GetObject((uint64_t)id.value.number);
     if (!obj) {
@@ -96,7 +105,7 @@ struct data object_GetScale(struct vm* vm, struct data* args) {
 }
 
 struct data object_GetRotation(struct vm* vm, struct data* args) {
-    return Vector3ToList(GetObjectFromArg(args[0])->GetLookDirection());
+    return QuaternionToList(GetObjectFromArg(args[0])->GetRotation());
 }
 
 struct data object_GetVelocity(struct vm* vm, struct data* args) {
@@ -135,6 +144,17 @@ struct data object_SetScale(struct vm* vm, struct data* args) {
     return noneret_data();
 }
 
+struct data object_SetRotation(struct vm* vm, struct data* args) {
+    Quaternion rot {
+        (float) args[1].value.reference[2].value.number,
+        (float) args[1].value.reference[3].value.number,
+        (float) args[1].value.reference[4].value.number,
+        (float) args[1].value.reference[5].value.number
+    };
+    GetObjectFromArg(args[0])->SetRotation(rot);
+    return noneret_data();
+}
+
 struct data game_PlayAudio(struct vm* vm, struct data* args) {
     Vector3 location {
         (float) args[2].value.reference[2].value.number,
@@ -150,6 +170,16 @@ struct data game_DestroyObject(struct vm* vm, struct data* args) {
     return noneret_data();
 }
 
+struct data glm_Rotate(struct vm* vm, struct data* args) {
+    Vector3 axis {
+        (float) args[0].value.number,
+        (float) args[1].value.number,
+        (float) args[2].value.number,
+    };
+    float angle = (float) args[3].value.number;
+    return QuaternionToList(glm::angleAxis(angle, axis));
+}
+
 ScriptManager::ScriptManager(Game* game) {
     ScriptManager::game = game;
     vm = vm_init();
@@ -161,11 +191,15 @@ ScriptManager::ScriptManager(Game* game) {
 
     register_native_call("object_SetModel", 2, &object_SetModel);
     register_native_call("object_SetPosition", 2, &object_SetPosition);
+    register_native_call("object_SetRotation", 2, &object_SetRotation);
     register_native_call("object_SetScale", 2, &object_SetScale);
 
     // Game Interface
     register_native_call("game_PlayAudio", 3, &game_PlayAudio);
     register_native_call("game_DestroyObject", 1, &game_DestroyObject);
+
+    // Math Hooks
+    register_native_call("glm_Rotate", 4, &glm_Rotate);
 }
 
 ScriptManager::~ScriptManager() {

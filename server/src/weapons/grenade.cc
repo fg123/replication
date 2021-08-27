@@ -1,6 +1,5 @@
 #include "grenade.h"
 #include "game.h"
-#include "explosion.h"
 
 GrenadeObject::GrenadeObject(Game& game, ObjectID playerId) : ThrownProjectile(game, playerId) {
     // Don't Collide with Weapons

@@ -23,6 +23,7 @@ public:
     }
 
     virtual void OnCreate() override {
+        Object::OnCreate();
         #ifdef BUILD_SERVER
             script.InitializeInstance(className, GetId());
             script.OnCreate();

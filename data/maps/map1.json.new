@@ -33,12 +33,17 @@
         "SmokeGrenade.obj",
         "Cone.obj",
         "Warehouse.obj",
-        "StreetLamp.obj"
+        "StreetLamp.obj",
+        "SupplyBin.obj",
+        "SupplyBinLid.obj"
     ],
     "scripts": [
         "Types.w",
+        "Math.w",
         "Object.w",
-        "Test.w"
+        "Test.w",
+        "Explosion.w",
+        "SmokeExplosion.w"
     ],
     "sounds": [
         "bang.wav",
@@ -129,7 +134,7 @@
                     "z": 1.0
                 },
                 "name": "Sun Light",
-                "strength": 1.0,
+                "strength": 5.0,
                 "type": "LightNode",
                 "shape": 2
             },
@@ -805,6 +810,67 @@
                     "strength": 10.0,
                     "type": "LightNode",
                     "shape": 1
+                }
+            ]
+        },
+        {
+            "scale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "name": "Supply Bin",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "rotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "type": "CollectionNode",
+            "children": [
+                {
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "name": "SupplyBin.obj",
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "type": "StaticModelNode",
+                    "model": "SupplyBin.obj"
+                },
+                {
+                    "scale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "name": "SupplyBinLid.obj",
+                    "position": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "rotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "type": "StaticModelNode",
+                    "model": "SupplyBinLid.obj"
                 }
             ]
         }

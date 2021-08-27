@@ -1,7 +1,6 @@
 #pragma once
 
 #include "object.h"
-#include "explosion.h"
 
 class ArtilleryObject : public Object {
     int damageRange = 15;
@@ -32,9 +31,8 @@ public:
             return;
         }
         #ifdef BUILD_SERVER
-            ExplosionObject* explode = new ExplosionObject(game, playerId, damageRange, damage);
+            Object* explode = game.LoadScriptedObject("Explosion");
             explode->SetPosition(GetPosition());
-            game.AddObject(explode);
             game.DestroyObject(GetId());
             game.DestroyObject(indicatorObject->GetId());
         #endif
