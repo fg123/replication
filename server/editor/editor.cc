@@ -99,6 +99,14 @@ void Editor::DrawScene(int width, int height) {
                 }
             }
         }
+        else if (GameObjectNode* game_object_node = dynamic_cast<GameObjectNode*>(node)) {
+            Mesh* mesh = scene.assetManager.GetModel("Cube.obj")->meshes[0];
+            DrawParams& params = layer.PushOpaque(mesh->material);
+            params.mesh = mesh;
+            params.transform = transformed.transform;
+            params.castShadows = false;
+            params.hasOutline = model_node == GetSelectedNode();
+        }
     }
 
     renderer.NewFrame(&parameters);

@@ -79,6 +79,14 @@ void Game::CreateMapBaseObject() {
                 }
             }
         }
+        else if (GameObjectNode* gameObject = dynamic_cast<GameObjectNode*>(node)) {
+            auto& ClassLookup = GetClassLookup();
+            if (ClassLookup.find(gameObject->gameObjectClass) == ClassLookup.end()) {
+                LOG_ERROR("Class " << gameObject->gameObjectClass << " is not registered!");
+                throw std::runtime_error("Class " + gameObject->gameObjectClass + " is not registered!");
+            }
+            obj = ClassLookup[gameObject->gameObjectClass](*this);
+        }
         // else if (LightNode* lightNode = dynamic_cast<LightNode*>(node)) {
         //     obj = new LightObject(*this, *lightNode);
         // }

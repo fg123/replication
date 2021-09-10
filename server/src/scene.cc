@@ -111,6 +111,9 @@ Node* Node::Create(Scene& scene, json& obj) {
     else if (str == "CollectionReferenceNode") {
         node = new CollectionReferenceNode;
     }
+    else if (str == "GameObjectNode") {
+        node = new GameObjectNode;
+    }
     else {
         throw std::runtime_error("Unknown node type: " + str);
     }
@@ -121,6 +124,11 @@ Node* Node::Create(Scene& scene, json& obj) {
 void StaticModelNode::ProcessReplication(json& obj) {
     Node::ProcessReplication(obj);
     model = assetManager.GetModel(obj["model"].GetString());
+}
+
+void GameObjectNode::ProcessReplication(json& obj) {
+    Node::ProcessReplication(obj);
+    gameObjectClass = obj["gameObject"].GetString();
 }
 
 void CollectionNode::ProcessReplication(json& obj) {

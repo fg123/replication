@@ -16,3 +16,4 @@
 
 #include "objects/lift.h"
 #include "objects/spectator-box.h"
+#include "objects/supply-bin.h"

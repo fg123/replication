@@ -357,6 +357,26 @@
                     "z": 0.0
                 },
                 "type": "CollectionReferenceNode"
+            },
+            {
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "name": "SupplyBin",
+                "position": {
+                    "x": 15.229999542236329,
+                    "y": 0.6499999761581421,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 45.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "GameObjectNode",
+                "gameObject": "SupplyBinObject"
             }
         ]
     },

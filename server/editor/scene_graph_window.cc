@@ -139,6 +139,10 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
             ImGui::EndCombo();
         }
     }
+    else if (GameObjectNode* gameObjectNode = dynamic_cast<GameObjectNode*>(selectedNode)) {
+        ImGui::Separator();
+        ImGui::InputText("Game Object Class", &gameObjectNode->gameObjectClass);
+    }
 }
 
 void SceneGraphWindow::DrawTreeNode(Node* node) {
@@ -185,9 +189,16 @@ void SceneGraphWindow::Draw(Editor& editor) {
                     parent->children.push_back(node);
                 }
 
-                if (ImGui::MenuItem("CollectionReference")) {
+                if (ImGui::MenuItem("Collection Reference")) {
                     CollectionReferenceNode* node = new CollectionReferenceNode();
                     node->name = "CollectionReference";
+                    node->parent = parent;
+                    parent->children.push_back(node);
+                }
+
+                if (ImGui::MenuItem("Game Object Node")) {
+                    GameObjectNode* node = new GameObjectNode();
+                    node->name = "GameObject";
                     node->parent = parent;
                     parent->children.push_back(node);
                 }
