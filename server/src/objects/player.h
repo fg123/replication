@@ -65,8 +65,8 @@ public:
     // Ticks since we processed the last client input frame
     Time ticksSinceLastProcessed = 0;
 
-    std::array<bool, 20> keyboardState {};
-    std::array<bool, 20> lastKeyboardState {};
+    std::array<bool, 25> keyboardState {};
+    std::array<bool, 25> lastKeyboardState {};
 
     std::array<bool, 5> mouseState {};
     std::array<bool, 5> lastMouseState {};

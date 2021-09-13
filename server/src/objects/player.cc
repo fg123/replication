@@ -26,6 +26,11 @@ static const int D3_KEY = 51;
 static const int D4_KEY = 52;
 static const int E_KEY = 69;
 
+static const int LEFT_ARROW_KEY = 37;
+static const int UP_ARROW_KEY = 38;
+static const int RIGHT_ARROW_KEY = 39;
+static const int DOWN_ARROW_KEY = 40;
+
 static const int WEAPON_PICKUP_RANGE = 3.0f;
 
 std::unordered_map<int, size_t> KEY_MAP = {
@@ -45,7 +50,11 @@ std::unordered_map<int, size_t> KEY_MAP = {
     { D2_KEY, 13 },
     { D3_KEY, 14 },
     { D4_KEY, 15 },
-    { E_KEY, 16 }
+    { E_KEY, 16 },
+    { LEFT_ARROW_KEY, 17 },
+    { UP_ARROW_KEY, 18 },
+    { RIGHT_ARROW_KEY, 19 },
+    { DOWN_ARROW_KEY, 20 },
 };
 
 PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector3()) {
@@ -194,6 +203,19 @@ void PlayerObject::Tick(Time time) {
         !lastKeyboardState[KEY_MAP[E_KEY]]) {
         TryPickupItem();
     }
+    if (keyboardState[KEY_MAP[LEFT_ARROW_KEY]]) {
+        rotationYaw -= 1.f;
+    }
+    if (keyboardState[KEY_MAP[RIGHT_ARROW_KEY]]) {
+        rotationYaw += 1.f;
+    }
+    if (keyboardState[KEY_MAP[UP_ARROW_KEY]]) {
+        rotationPitch += 1.f;
+    }
+    if (keyboardState[KEY_MAP[DOWN_ARROW_KEY]]) {
+        rotationPitch -= 1.f;
+    }
+
     if (IsTagged(Tag::NO_GRAVITY)) {
         if (keyboardState[KEY_MAP[F_KEY]]) {
             upDownComponent = Vector::Up;

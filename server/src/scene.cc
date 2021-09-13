@@ -23,29 +23,6 @@ void Scene::LoadFromFile(const std::string& filename) {
     JSONDocument obj;
     obj.ParseStream(stream);
 
-    // Process Models
-    for (json& model : obj["models"].GetArray()) {
-        std::string modelName = model.GetString();
-        std::string modelPath = RESOURCE_PATH("models/" + modelName);
-        LOG_INFO("Loading " << modelPath);
-        std::ifstream modelStream (modelPath);
-        if (!modelStream.is_open()) {
-            LOG_ERROR("Could not load model " << modelPath);
-            throw std::system_error(errno, std::system_category(), "failed to open " + modelPath);
-        }
-        assetManager.LoadModel(modelName, modelPath, modelStream);
-        models.push_back(modelName);
-    }
-
-    // Process Scripts
-    for (json& script : obj["scripts"].GetArray()) {
-        scripts.push_back(script.GetString());
-    }
-
-    for (json& audio : obj["sounds"].GetArray()) {
-        sounds.push_back(audio.GetString());
-    }
-
     // Process Root
     root.ProcessReplication(obj["root"]);
 
@@ -60,24 +37,6 @@ void Scene::WriteToFile(std::ostream& output) {
     rapidjson::StringBuffer buffer;
     JSONWriter writer(buffer);
     writer.StartObject();
-    writer.Key("models");
-    writer.StartArray();
-    for (const std::string& model : models) {
-        writer.String(model.c_str());
-    }
-    writer.EndArray();
-    writer.Key("scripts");
-    writer.StartArray();
-    for (const std::string& script : scripts) {
-        writer.String(script.c_str());
-    }
-    writer.EndArray();
-    writer.Key("sounds");
-    writer.StartArray();
-    for (const std::string& sound : sounds) {
-        writer.String(sound.c_str());
-    }
-    writer.EndArray();
 
     writer.Key("root");
     writer.StartObject();

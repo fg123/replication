@@ -18,6 +18,7 @@ std::unordered_map<std::string, size_t> LootTable = {
 
 void MapObject::InitializeMap() {
     // Get Loot Spawn Zones from Mesh
+    LOG_INFO("Initializing Map - Spawning Loot");
     totalLootValue = 0;
     auto& classLookup = GetClassLookup();
     for (auto& pair : LootTable) {

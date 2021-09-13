@@ -20,7 +20,7 @@ RENDERING_SRC = $(shell find rendering/ -name "*.cc")
 SERVER_SRC = $(SRC) $(WENDY_SRC) $(shell find server/ -name "*.cc")
 SERVER_OBJ = $(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(SERVER_SRC)))
 SERVER_DEPS = $(SERVER_OBJ:%.o=%.d)
-SERVER_LDLIBS = $(LDLIBS) -lz -lpthread
+SERVER_LDLIBS = $(LDLIBS) -lz -lpthread -lstdc++fs
 
 CLIENT_SRC = $(SRC) $(WENDY_SRC) $(shell find client/ -name "*.cc") $(RENDERING_SRC)
 CLIENT_OBJ = $(patsubst %.cc,%.wo,$(patsubst %.c,%.wo,$(CLIENT_SRC)))

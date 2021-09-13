@@ -12,6 +12,9 @@
 #define DR_WAV_IMPLEMENTATION
 #include "external/dr_wav.h"
 
+#include <filesystem>
+#include <unordered_set>
+
 template<typename T>
 Vector3 ToVec3(const T& vec) {
     return { vec.X, vec.Y, vec.Z };
@@ -242,3 +245,46 @@ Audio* AssetManager::LoadAudio(const std::string& name, const std::string& path)
 }
 
 #endif
+
+namespace fs = std::filesystem;
+
+const std::unordered_set<std::string> modelExtensions = { ".obj" };
+const std::unordered_set<std::string> scriptExtensions = { ".w" };
+const std::unordered_set<std::string> audioExtensions = { ".wav" };
+
+void AssetManager::LoadDataFromDirectory(ScriptManager& scriptManager) {
+    // Models
+    for (auto& p: fs::recursive_directory_iterator(RESOURCE_PATH("models/"))) {
+        if (modelExtensions.find(p.path().extension().string()) == modelExtensions.end()) {
+            continue;
+        }
+        std::string modelName = p.path().filename().string();
+        std::string modelPath = p.path().string();
+        LOG_INFO("Loading " << modelPath);
+        std::ifstream modelStream (modelPath);
+        if (!modelStream.is_open()) {
+            LOG_ERROR("Could not load model " << modelPath);
+            throw std::system_error(errno, std::system_category(), "failed to open " + modelPath);
+        }
+        LoadModel(modelName, modelPath, modelStream);
+    }
+
+    for (auto& p: fs::recursive_directory_iterator(RESOURCE_PATH("scripts/"))) {
+        if (scriptExtensions.find(p.path().extension().string()) == scriptExtensions.end()) {
+            continue;
+        }
+        scriptManager.AddScript(p.path().string());
+    }
+    scriptManager.InitializeVM();
+
+    #ifdef BUILD_CLIENT
+    for (auto& p: fs::recursive_directory_iterator(RESOURCE_PATH("audio/"))) {
+        if (audioExtensions.find(p.path().extension().string()) == audioExtensions.end()) {
+            continue;
+        }
+        std::string audioName = p.path().filename().string();
+        std::string audioPath = p.path().string();
+        LoadAudio(audioName, audioPath);
+    }
+    #endif
+}

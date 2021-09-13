@@ -3,6 +3,7 @@
 #include "input-hold-thrower.h"
 
 class SmokeGrenadeObject : public ThrownProjectile {
+    bool exploded = false;
 public:
     CLASS_CREATE(SmokeGrenadeObject)
 

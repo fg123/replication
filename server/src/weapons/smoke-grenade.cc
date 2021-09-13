@@ -2,8 +2,8 @@
 #include "game.h"
 
 SmokeGrenadeObject::SmokeGrenadeObject(Game& game, ObjectID playerId) : ThrownProjectile(game, playerId) {
-    // Don't Collide with Weapons
-    collisionExclusion |= (uint64_t) Tag::WEAPON;
+    // Don't Collide with Anything
+    collisionExclusion |= (uint64_t) Tag::OBJECT;
     SetModel(game.GetModel("Grenade.obj"));
     GenerateOBBCollidersFromModel(this);
     game.PlayAudio("GrenadeOut.wav", 1.f, this);
@@ -25,6 +25,9 @@ void SmokeGrenadeObject::OnCollide(CollisionResult& result) {
 
 void SmokeGrenadeObject::Explode() {
 #ifdef BUILD_SERVER
+    if (exploded) return;
+    exploded = true;
+
     Object* explode = game.LoadScriptedObject("SmokeExplosion");
     explode->SetPosition(GetPosition());
 

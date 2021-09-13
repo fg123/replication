@@ -4273,6 +4273,50 @@ var ASM_CONSTS = {
   }
   }
 
+  function ___sys_getdents64(fd, dirp, count) {try {
+  
+      var stream = SYSCALLS.getStreamFromFD(fd)
+      if (!stream.getdents) {
+        stream.getdents = FS.readdir(stream.path);
+      }
+  
+      var struct_size = 280;
+      var pos = 0;
+      var off = FS.llseek(stream, 0, 1);
+  
+      var idx = Math.floor(off / struct_size);
+  
+      while (idx < stream.getdents.length && pos + struct_size <= count) {
+        var id;
+        var type;
+        var name = stream.getdents[idx];
+        if (name[0] === '.') {
+          id = 1;
+          type = 4; // DT_DIR
+        } else {
+          var child = FS.lookupNode(stream.node, name);
+          id = child.id;
+          type = FS.isChrdev(child.mode) ? 2 :  // DT_CHR, character device.
+                 FS.isDir(child.mode) ? 4 :     // DT_DIR, directory.
+                 FS.isLink(child.mode) ? 10 :   // DT_LNK, symbolic link.
+                 8;                             // DT_REG, regular file.
+        }
+        (tempI64 = [id>>>0,(tempDouble=id,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[((dirp + pos)>>2)]=tempI64[0],HEAP32[(((dirp + pos)+(4))>>2)]=tempI64[1]);
+        (tempI64 = [(idx + 1) * struct_size>>>0,(tempDouble=(idx + 1) * struct_size,(+(Math.abs(tempDouble))) >= 1.0 ? (tempDouble > 0.0 ? ((Math.min((+(Math.floor((tempDouble)/4294967296.0))), 4294967295.0))|0)>>>0 : (~~((+(Math.ceil((tempDouble - +(((~~(tempDouble)))>>>0))/4294967296.0)))))>>>0) : 0)],HEAP32[(((dirp + pos)+(8))>>2)]=tempI64[0],HEAP32[(((dirp + pos)+(12))>>2)]=tempI64[1]);
+        HEAP16[(((dirp + pos)+(16))>>1)]=280;
+        HEAP8[(((dirp + pos)+(18))>>0)]=type;
+        stringToUTF8(name, dirp + pos + 19, 256);
+        pos += struct_size;
+        idx += 1;
+      }
+      FS.llseek(stream, idx * struct_size, 0);
+      return pos;
+    } catch (e) {
+    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
+    return -e.errno;
+  }
+  }
+
   function ___sys_ioctl(fd, op, varargs) {SYSCALLS.varargs = varargs;
   try {
   
@@ -4327,6 +4371,16 @@ var ASM_CONSTS = {
   }
   }
 
+  function ___sys_lstat64(path, buf) {try {
+  
+      path = SYSCALLS.getStr(path);
+      return SYSCALLS.doStat(FS.lstat, path, buf);
+    } catch (e) {
+    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
+    return -e.errno;
+  }
+  }
+
   function ___sys_open(path, flags, varargs) {SYSCALLS.varargs = varargs;
   try {
   
@@ -4344,6 +4398,16 @@ var ASM_CONSTS = {
   
       path = SYSCALLS.getStr(path);
       return SYSCALLS.doReadlink(path, buf, bufsize);
+    } catch (e) {
+    if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
+    return -e.errno;
+  }
+  }
+
+  function ___sys_stat64(path, buf) {try {
+  
+      path = SYSCALLS.getStr(path);
+      return SYSCALLS.doStat(FS.stat, path, buf);
     } catch (e) {
     if (typeof FS === 'undefined' || !(e instanceof FS.ErrnoError)) abort(e);
     return -e.errno;
@@ -8547,9 +8611,12 @@ var asmLibraryArg = {
   "__cxa_throw": ___cxa_throw,
   "__localtime_r": ___localtime_r,
   "__sys_fcntl64": ___sys_fcntl64,
+  "__sys_getdents64": ___sys_getdents64,
   "__sys_ioctl": ___sys_ioctl,
+  "__sys_lstat64": ___sys_lstat64,
   "__sys_open": ___sys_open,
   "__sys_readlink": ___sys_readlink,
+  "__sys_stat64": ___sys_stat64,
   "__sys_wait4": ___sys_wait4,
   "abort": _abort,
   "alBufferData": _alBufferData,
@@ -8765,14 +8832,14 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 /** @type {function(...*):?} */
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module['_game'] = 137216;
-var _clientGl = Module['_clientGl'] = 137624;
-var _clientAudio = Module['_clientAudio'] = 138172;
-var _inputEvents = Module['_inputEvents'] = 138196;
-var _isPaused = Module['_isPaused'] = 135004;
-var _isInventoryOpen = Module['_isInventoryOpen'] = 135005;
-var _ping = Module['_ping'] = 138232;
-var _lastTickTime = Module['_lastTickTime'] = 138224;
+var _game = Module['_game'] = 138048;
+var _clientGl = Module['_clientGl'] = 138456;
+var _clientAudio = Module['_clientAudio'] = 139004;
+var _inputEvents = Module['_inputEvents'] = 139028;
+var _isPaused = Module['_isPaused'] = 135740;
+var _isInventoryOpen = Module['_isInventoryOpen'] = 135741;
+var _ping = Module['_ping'] = 139064;
+var _lastTickTime = Module['_lastTickTime'] = 139056;
 
 
 

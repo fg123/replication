@@ -23,14 +23,9 @@ class ScriptInstance : public Replicable {
 public:
     std::string className;
 
-    virtual void Serialize(JSONWriter& obj) override {
-        Replicable::Serialize(obj);
+    virtual void Serialize(JSONWriter& obj) override;
 
-    }
-
-    virtual void ProcessReplication(json& obj) override {
-        Replicable::ProcessReplication(obj);
-    }
+    virtual void ProcessReplication(json& obj) override;
 
     void InitializeInstance(const std::string& className, ObjectID id);
 

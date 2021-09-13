@@ -8,6 +8,7 @@
 #include "mesh.h"
 #include "logging.h"
 #include "audio.h"
+#include "scripting.h"
 
 class AssetManager {
     std::unordered_map<std::string, Model*> modelMap;
@@ -51,4 +52,6 @@ public:
         return sounds[name];
     }
 #endif
+
+    void LoadDataFromDirectory(ScriptManager& scriptManager);
 };

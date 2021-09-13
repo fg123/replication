@@ -116,6 +116,11 @@ struct data object_GetSpawnTime(struct vm* vm, struct data* args) {
     return make_data(D_NUMBER, data_value_num(GetObjectFromArg(args[0])->GetSpawnTime()));
 }
 
+struct data object_GenerateOBBCollidersFromModel(struct vm* vm, struct data* args) {
+    GenerateOBBCollidersFromModel(GetObjectFromArg(args[0]));
+    return noneret_data();
+}
+
 struct data object_SetModel(struct vm* vm, struct data* args) {
     #ifdef BUILD_SERVER
         const char* str = args[1].value.string;
@@ -144,6 +149,17 @@ struct data object_SetScale(struct vm* vm, struct data* args) {
     return noneret_data();
 }
 
+
+struct data object_SetAirFriction(struct vm* vm, struct data* args) {
+    Vector3 airFriction {
+        (float) args[1].value.reference[2].value.number,
+        (float) args[1].value.reference[3].value.number,
+        (float) args[1].value.reference[4].value.number
+    };
+    GetObjectFromArg(args[0])->airFriction = airFriction;
+    return noneret_data();
+}
+
 struct data object_SetRotation(struct vm* vm, struct data* args) {
     Quaternion rot {
         (float) args[1].value.reference[2].value.number,
@@ -156,6 +172,12 @@ struct data object_SetRotation(struct vm* vm, struct data* args) {
 }
 
 struct data game_PlayAudio(struct vm* vm, struct data* args) {
+    if (args[2].type == D_NUMBER) {
+        // ID Version
+        ScriptManager::game->PlayAudio(args[0].value.string, args[1].value.number,
+            GetObjectFromArg(args[2]));
+        return noneret_data();
+    }
     Vector3 location {
         (float) args[2].value.reference[2].value.number,
         (float) args[2].value.reference[3].value.number,
@@ -193,6 +215,9 @@ ScriptManager::ScriptManager(Game* game) {
     register_native_call("object_SetPosition", 2, &object_SetPosition);
     register_native_call("object_SetRotation", 2, &object_SetRotation);
     register_native_call("object_SetScale", 2, &object_SetScale);
+    register_native_call("object_SetAirFriction", 2, &object_SetAirFriction);
+
+    register_native_call("object_GenerateOBBCollidersFromModel", 1, &object_GenerateOBBCollidersFromModel);
 
     // Game Interface
     register_native_call("game_PlayAudio", 3, &game_PlayAudio);
@@ -219,6 +244,17 @@ void ScriptManager::AddScript(const std::string& path) {
 
 void ScriptManager::InitializeVM() {
     push_frame(vm->memory, "main", 0, 0);
+    // Create Global Variables needed for scripting
+
+    // For detecting client / server
+    #ifdef BUILD_SERVER
+        *push_stack_entry(vm->memory, "IsServer", 0) = true_data();
+        *push_stack_entry(vm->memory, "IsClient", 0) = false_data();
+    #else
+        *push_stack_entry(vm->memory, "IsServer", 0) = false_data();
+        *push_stack_entry(vm->memory, "IsClient", 0) = true_data();
+    #endif
+
     // Load all the scripts into the VM, and run them
     for (auto& script : scripts) {
         if (script->bytecode) {
@@ -278,4 +314,70 @@ void CallMemberFunction(struct data structInstance,
         throw "Scripting Error";
     }
     // TODO: probably clean up stack here, might have a noneret?
+}
+
+// Serialization of Internal Wendy Structs
+void ScriptInstance::Serialize(JSONWriter& obj) {
+    Replicable::Serialize(obj);
+    // obj.Key("s");
+    // obj.StartArray();
+    // // The number of params are stored at the struct instance header
+    // if (classInstance.type != D_STRUCT_INSTANCE ||
+    //     classInstance.value.reference[0].type != D_STRUCT_INSTANCE_HEADER) {
+    //     LOG_ERROR("Could not serialize Wendy Struct, not D_STRUCT_INSTANCE_HEADER");
+    //     throw "Could not serialize Wendy Struct, not D_STRUCT_INSTANCE_HEADER";
+    // }
+
+    // int numParams = (int)classInstance.value.reference[0].value.number;
+    // // [0] is header [1] is reference to underlying metadata
+    // // numParams includes the underlying metadata entry, so we -1
+    // for (int i = 2; i < numParams - 1; i++) {
+    //     struct data param = classInstance.value.reference[i];
+    //     if (is_numeric(param)) {
+    //         obj.Double(param.value.number);
+    //     }
+    //     else if (is_reference(param)) {
+    //         // TODO: just serialize Lists and Tables
+    //         LOG_ERROR("Serialization of references not yet supported");
+    //         throw "Serialization of references not yet supported";
+    //     }
+    //     else {
+    //         obj.String(param.value.string);
+    //     }
+    // }
+    // obj.EndArray();
+}
+
+void ScriptInstance::ProcessReplication(json& obj) {
+    Replicable::ProcessReplication(obj);
+
+    // if (classInstance.type != D_STRUCT_INSTANCE ||
+    //     classInstance.value.reference[0].type != D_STRUCT_INSTANCE_HEADER) {
+    //     // Here is a weird timing thing. The script instance gets initialized
+    //     //   on first replication by the script object, which potentially
+    //     //   initializes after ScriptInstance::ProcessReplication in
+    //     //   ScriptObject::OnClientCreate. This means we actually miss the first
+    //     //   replication data, and won't update / catchup until the second replication.
+    //     return;
+    // }
+
+    // int i = 2;
+    // // Load Data from JSON Back into the script instance in the VM
+    // for (auto& elem : obj["s"].GetArray()) {
+    //     // TODO: if we ever replicate references we cannot destroy before
+    //     //   we replace in case we drop the ref count to 0
+    //     destroy_data_runtime(ScriptManager::vm->memory,
+    //         &classInstance.value.reference[i]);
+    //     if (elem.IsDouble()) {
+    //         classInstance.value.reference[i] = make_data(D_NUMBER, data_value_num(elem.GetDouble()));
+    //     }
+    //     else if (elem.IsString()) {
+    //         classInstance.value.reference[i] = make_data(D_STRING, data_value_str(elem.GetString()));
+    //     }
+    //     else {
+    //         LOG_ERROR("Could not deserialize non string / double");
+    //         throw "Could not deserialize non string / double";
+    //     }
+    //     i += 1;
+    // }
 }

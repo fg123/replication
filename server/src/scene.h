@@ -195,9 +195,6 @@ struct TransformedLight : public TransformedNode {
 
 class Scene {
 public:
-    std::vector<std::string> models;
-    std::vector<std::string> sounds;
-    std::vector<std::string> scripts;
 
     // Scene Tree
     CollectionNode root;

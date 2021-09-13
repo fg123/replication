@@ -116,6 +116,8 @@ void Game::CreateMapBaseObject() {
 void Game::LoadMap(std::string mapPath) {
     LOG_INFO("Loading Map " << mapPath);
 
+    scene.assetManager.LoadDataFromDirectory(scriptManager);
+
     scene.LoadFromFile(mapPath);
 
     // Calculate Hierarchy Transforms
@@ -127,19 +129,6 @@ void Game::LoadMap(std::string mapPath) {
                 lightNodes.push_back(new TransformedLight(transformed));
             }
         }
-    #endif
-
-    // Process Scripts
-    for (auto& scriptName : scene.scripts) {
-        std::string scriptPath = RESOURCE_PATH("scripts/" + scriptName);
-        scriptManager.AddScript(scriptPath);
-    }
-    scriptManager.InitializeVM();
-    #ifdef BUILD_CLIENT
-    for (auto& audioName : scene.sounds) {
-        std::string audioPath = RESOURCE_PATH("sounds/" + audioName);
-        GetAssetManager().LoadAudio(audioName, audioPath);
-    }
     #endif
 
     // Collision Testing
