@@ -64,7 +64,7 @@ PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game),
     inventoryManager(game, this) {
     SetTag(Tag::PLAYER);
 
-    // SetTag(Tag::NO_GRAVITY);
+    SetTag(Tag::NO_GRAVITY);
 
     SetPosition(position);
 
@@ -202,6 +202,8 @@ void PlayerObject::Tick(Time time) {
     if (keyboardState[KEY_MAP[E_KEY]] &&
         !lastKeyboardState[KEY_MAP[E_KEY]]) {
         TryPickupItem();
+        Object* obj = game.LoadScriptedObject("BouncingBall");
+        obj->SetPosition(GetPosition() + Vector::Forward * 1.0f);
     }
     if (keyboardState[KEY_MAP[LEFT_ARROW_KEY]]) {
         rotationYaw -= 1.f;

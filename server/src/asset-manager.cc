@@ -278,7 +278,7 @@ void AssetManager::LoadDataFromDirectory(ScriptManager& scriptManager) {
     scriptManager.InitializeVM();
 
     #ifdef BUILD_CLIENT
-    for (auto& p: fs::recursive_directory_iterator(RESOURCE_PATH("audio/"))) {
+    for (auto& p: fs::recursive_directory_iterator(RESOURCE_PATH("sounds/"))) {
         if (audioExtensions.find(p.path().extension().string()) == audioExtensions.end()) {
             continue;
         }

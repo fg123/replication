@@ -24,6 +24,7 @@ struct Vector3 => (x, y, z) {
         else {
             "Invalid Arity Passed To Vector3 Constructor!";
         }
+        ret this;
     }
     Size => () {
         ret (this.x ^ 2 + this.y ^ 2 + this.z ^ 2) ^ 0.5;
@@ -48,9 +49,7 @@ struct Quaternion => (x, y, z, w) {
     }
 
     FromRotation => (rot, vec) {
-        ret QuaternionFromList(
-            glm_Rotate(vec.x, vec.y, vec.z, rot % (2 * PI))
-        );
+        ret glm_Rotate(vec.x, vec.y, vec.z, rot % (2 * PI));
     }
 };
 
@@ -65,3 +64,10 @@ let @ <Quaternion> => (p) "{" + p.x + ", " + p.y + ", " + p.z + ", " + p.w + "}"
 let Vector3FromList => (lst) Vector3(...lst);
 let Vector2FromList => (lst) Vector3(...lst);
 let QuaternionFromList => (lst) Quaternion(...lst);
+
+let <Vector3> + <Vector3> => (a, b) Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
+let - <Vector3> => (v) Vector3(-v.x, -v.y, -v.z);
+let <Vector3> * <number> => (v, s) Vector3(s * v.x, s * v.y, s * v.z);
+let <number> * <Vector3> => (s, v) v * s
+
+let - <Vector2> => (v) Vector2(-v.x, -v.y);

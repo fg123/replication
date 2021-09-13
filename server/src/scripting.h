@@ -2,6 +2,7 @@
 
 #include "replicable.h"
 #include "timer.h"
+#include "collision.h"
 #include <vector>
 
 extern "C"
@@ -35,6 +36,7 @@ public:
             make_data(D_NUMBER, data_value_num(time))
         });
     }
+    void OnCollide(CollisionResult& collision);
     void OnClientCreate() {
         CallMemberFunction(classInstance, "OnClientCreate", {});
     }
@@ -66,4 +68,6 @@ public:
 
     void AddScript(const std::string& path);
     void InitializeVM();
+
+    std::string GetBaseTypeFromScriptingType(const std::string& type);
 };

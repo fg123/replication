@@ -8832,14 +8832,14 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 /** @type {function(...*):?} */
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module['_game'] = 138048;
-var _clientGl = Module['_clientGl'] = 138456;
-var _clientAudio = Module['_clientAudio'] = 139004;
-var _inputEvents = Module['_inputEvents'] = 139028;
-var _isPaused = Module['_isPaused'] = 135740;
-var _isInventoryOpen = Module['_isInventoryOpen'] = 135741;
-var _ping = Module['_ping'] = 139064;
-var _lastTickTime = Module['_lastTickTime'] = 139056;
+var _game = Module['_game'] = 138504;
+var _clientGl = Module['_clientGl'] = 138880;
+var _clientAudio = Module['_clientAudio'] = 139428;
+var _inputEvents = Module['_inputEvents'] = 139452;
+var _isPaused = Module['_isPaused'] = 136188;
+var _isInventoryOpen = Module['_isInventoryOpen'] = 136189;
+var _ping = Module['_ping'] = 139488;
+var _lastTickTime = Module['_lastTickTime'] = 139480;
 
 
 

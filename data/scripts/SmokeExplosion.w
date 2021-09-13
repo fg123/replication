@@ -25,7 +25,7 @@ struct SmokeExplosion : Object => (
         }
         let progress = delta / 100;
         let scale = Lerp(0.01, this.radius, Min(progress, 1.0));
-        this.SetScale(Vector3(scale, scale, scale));
+        this.SetScale(Vector3(scale));
         this.SetRotation(Quaternion.FromRotation(this.rotation, Vector.Up).Normalize());
         this.rotation += 0.02;
     }

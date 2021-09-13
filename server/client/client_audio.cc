@@ -31,6 +31,7 @@ void ClientAudio::Tick() {
 
     // Start all audios that were queued up
     for (auto& request : game.audioRequests) {
+        if (!request.audio) continue;
         AudioPlayback* playback = new AudioPlayback;
         playback->boundObject = request.boundObject;
         playback->state = AL_PLAYING;

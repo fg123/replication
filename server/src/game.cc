@@ -735,7 +735,25 @@ void Game::PlayAudio(const std::string& audio, float volume, Object* boundObject
 }
 
 Object* Game::LoadScriptedObject(const std::string& className) {
-    ScriptableObject* obj = new ScriptableObject(*this, className);
+    // Get Base Type Name
+    std::string baseType = scriptManager.GetBaseTypeFromScriptingType(className);
+
+    LOG_DEBUG("BaseType Queried: " << className << "->" << baseType);
+
+    auto& ClassLookup = GetClassLookup();
+    if (ClassLookup.find(baseType) == ClassLookup.end()) {
+        LOG_ERROR("Class " << baseType << " is not registered!");
+        throw "Class " + baseType + " is not registered!";
+    }
+
+    ScriptableObject* obj = dynamic_cast<ScriptableObject*>(
+        ClassLookup[baseType](*this));
+
+    if (!obj) {
+        LOG_ERROR("Class " << baseType << " is not a ScriptableObject!");
+        throw "Class " + baseType + " is not a ScriptableObject!";
+    }
+    obj->className = className;
     AddObject(obj);
     return obj;
 }

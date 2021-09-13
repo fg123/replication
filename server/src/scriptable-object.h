@@ -34,6 +34,11 @@ public:
         Object::Tick(time);
         script.OnTick(time);
     }
+
+    virtual void OnCollide(CollisionResult& result) override {
+        Object::OnCollide(result);
+        script.OnCollide(result);
+    }
 };
 
 CLASS_REGISTER(ScriptableObject);

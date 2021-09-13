@@ -14,7 +14,7 @@ struct SmokeGrenade : Object => (
         PlayAudio("boom.wav", 1.0, this.id);
     }
 
-    OnCollide => (collisionResult) {
+    OnCollide => (otherId, difference) {
 
     }
 }
