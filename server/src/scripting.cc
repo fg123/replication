@@ -16,6 +16,9 @@ extern "C"
 #include "wendy/error.h"
 }
 
+// Contains a lot of internal interfacing with WendyScript's VM Runtime
+//   If anything changes there things might break here.
+
 // Wendyscript expects a popen symbol but emscripten doe
 #ifdef BUILD_CLIENT
 FILE *popen(const char *command, const char *type) {
@@ -170,55 +173,46 @@ struct data object_SetModel(struct vm* vm, struct data* args) {
     return noneret_data();
 }
 
+Vector3 Vector3FromWendy(const struct data& data) {
+    return Vector3(
+        (float) data.value.reference[2].value.number,
+        (float) data.value.reference[3].value.number,
+        (float) data.value.reference[4].value.number
+    );
+}
+
+Quaternion QuaternionFromWendy(const struct data& data) {
+    return Quaternion(
+        (float) data.value.reference[2].value.number,
+        (float) data.value.reference[3].value.number,
+        (float) data.value.reference[4].value.number,
+        (float) data.value.reference[5].value.number
+    );
+}
+
 struct data object_SetPosition(struct vm* vm, struct data* args) {
-    Vector3 pos {
-        (float) args[1].value.reference[2].value.number,
-        (float) args[1].value.reference[3].value.number,
-        (float) args[1].value.reference[4].value.number
-    };
-    GetObjectFromArg(args[0])->SetPosition(pos);
+    GetObjectFromArg(args[0])->SetPosition(Vector3FromWendy(args[1]));
     return noneret_data();
 }
 
 struct data object_SetVelocity(struct vm* vm, struct data* args) {
-    Vector3 vel {
-        (float) args[1].value.reference[2].value.number,
-        (float) args[1].value.reference[3].value.number,
-        (float) args[1].value.reference[4].value.number
-    };
-    GetObjectFromArg(args[0])->SetVelocity(vel);
+    GetObjectFromArg(args[0])->SetVelocity(Vector3FromWendy(args[1]));
     return noneret_data();
 }
 
 struct data object_SetScale(struct vm* vm, struct data* args) {
-    Vector3 scale {
-        (float) args[1].value.reference[2].value.number,
-        (float) args[1].value.reference[3].value.number,
-        (float) args[1].value.reference[4].value.number
-    };
-    GetObjectFromArg(args[0])->SetScale(scale);
+    GetObjectFromArg(args[0])->SetScale(Vector3FromWendy(args[1]));
     return noneret_data();
 }
 
 
 struct data object_SetAirFriction(struct vm* vm, struct data* args) {
-    Vector3 airFriction {
-        (float) args[1].value.reference[2].value.number,
-        (float) args[1].value.reference[3].value.number,
-        (float) args[1].value.reference[4].value.number
-    };
-    GetObjectFromArg(args[0])->airFriction = airFriction;
+    GetObjectFromArg(args[0])->airFriction = Vector3FromWendy(args[1]);
     return noneret_data();
 }
 
 struct data object_SetRotation(struct vm* vm, struct data* args) {
-    Quaternion rot {
-        (float) args[1].value.reference[2].value.number,
-        (float) args[1].value.reference[3].value.number,
-        (float) args[1].value.reference[4].value.number,
-        (float) args[1].value.reference[5].value.number
-    };
-    GetObjectFromArg(args[0])->SetRotation(rot);
+    GetObjectFromArg(args[0])->SetRotation(QuaternionFromWendy(args[1]));
     return noneret_data();
 }
 
@@ -229,12 +223,8 @@ struct data game_PlayAudio(struct vm* vm, struct data* args) {
             GetObjectFromArg(args[2]));
         return noneret_data();
     }
-    Vector3 location {
-        (float) args[2].value.reference[2].value.number,
-        (float) args[2].value.reference[3].value.number,
-        (float) args[2].value.reference[4].value.number
-    };
-    ScriptManager::game->PlayAudio(args[0].value.string, args[1].value.number, location);
+    ScriptManager::game->PlayAudio(args[0].value.string, args[1].value.number,
+        Vector3FromWendy(args[2]));
     return noneret_data();
 }
 
