@@ -1,7 +1,21 @@
 # Replication
-This is a 3D game engine written in C++. The client is deployed on the browser
-running a local copy of the engine in WebAssembly. A game is defined as a set
-of objects that are replicated from the server engine to the client engine.
+Replication is a 3D game engine written from scratch in C++.
+
+<p align="center" >
+<img src="https://raw.githubusercontent.com/fg123/replication/master/screenshot.png">
+</p>
+
+
+# Features
+- Game Client Runs on the browser via WebAssembly and WebGL
+- Network Replication of Game Objects with client-side prediction and interpolation
+- Fast(ish) Deferred Renderer with support for
+    - Global Shadow Mapping (CSM)
+    - Skysphere
+    - Dynamic Realtime Lighting
+    - Post-processing (Bloom, SSAA, Tone Mapping)
+- Physics Engine for collision between different primitive types
+- Game object scripting built on [WendyScript](https://wendy.felixguo.me/)
 
 # Prerequisites
 You will need:
