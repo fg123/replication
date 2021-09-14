@@ -13,10 +13,10 @@ struct Player : Object => [
     }
 
     SetQWeapon => (weapon, attachment) {
-        player_SetWeapon(this.id, 0, weapon, attachment);
+        player_SetWeapon(this.id, weapon, 0, attachment);
     }
 
     SetZWeapon => (weapon, attachment) {
-        player_SetWeapon(this.id, 1, weapon, attachment);
+        player_SetWeapon(this.id, weapon, 1, attachment);
     }
 }

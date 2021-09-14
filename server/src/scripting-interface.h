@@ -130,6 +130,34 @@ Object* ConvertToNative(struct data data) {
     return GetObjectFromArg(data);
 }
 
+template<>
+WeaponObject* ConvertToNative(struct data data) {
+    if (data.type != D_NUMBER) {
+        LOG_ERROR("Expected parameter to be a number (ObjectID).");
+        throw "Expected parameter to be a number (ObjectID).";
+    }
+    auto* obj = dynamic_cast<WeaponObject*>(GetObjectFromArg(data));
+    if (!obj) {
+        LOG_ERROR("Expected parameter to be a weapon object.");
+        throw "Expected parameter to be a weapon object.";
+    }
+    return obj;
+}
+
+template<>
+PlayerObject* ConvertToNative(struct data data) {
+    if (data.type != D_NUMBER) {
+        LOG_ERROR("Expected parameter to be a number (ObjectID).");
+        throw "Expected parameter to be a number (ObjectID).";
+    }
+    auto* obj = dynamic_cast<PlayerObject*>(GetObjectFromArg(data));
+    if (!obj) {
+        LOG_ERROR("Expected parameter to be a player object.");
+        throw "Expected parameter to be a player object.";
+    }
+    return obj;
+}
+
 struct data ConvertToWendy(int t) {
     return make_data(D_NUMBER, data_value_num(t));
 }

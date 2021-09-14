@@ -1,6 +1,8 @@
 #include "scripting.h"
 #include "object.h"
 #include "game.h"
+#include "player.h"
+#include "weapons/weapon.h"
 #include "scripting-interface.h"
 
 #include <fstream>
@@ -63,15 +65,6 @@ Script::~Script() {
     }
 }
 
-struct data player_SetWeapon(struct vm* vm, struct data* args) {
-    Object* player = GetObjectFromArg(args[0]);
-    int weaponType = args[1].value.number;
-    Object* weapon = GetObjectFromArg(args[2]);
-    int attachmentPoint = args[3].value.number;
-
-
-}
-
 ScriptManager::ScriptManager(Game* game) {
     ScriptManager::game = game;
     vm = vm_init();
@@ -132,6 +125,17 @@ ScriptManager::ScriptManager(Game* game) {
         ScriptManager::game->DestroyObject(id);
     });
 
+    REGISTER_NATIVE_CALL("player_SetWeapon", [](PlayerObject* player, WeaponObject* weapon, int slot, int attachPoint) {
+        WeaponAttachmentPoint attach = (WeaponAttachmentPoint) attachPoint;
+        if (slot == 0) {
+            player->qWeapon = weapon;
+            weapon->AttachToPlayer(player, attach);
+        }
+        else if (slot == 1) {
+            player->zWeapon = weapon;
+            weapon->AttachToPlayer(player, attach);
+        }
+    });
     // Math Hooks
     REGISTER_NATIVE_CALL("glm_Rotate", [](Vector3 axis, float angle) {
         return glm::angleAxis(angle, axis);

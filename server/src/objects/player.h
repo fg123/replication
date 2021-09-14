@@ -52,9 +52,6 @@ public:
 
     ALWAYS_REPLICATED(InventoryManager, inventoryManager, "im");
 
-    WeaponObject* qWeapon = nullptr;
-    WeaponObject* zWeapon = nullptr;
-
     std::mutex socketDataMutex;
 
     std::queue<JSONDocument> inputBuffer;
@@ -143,6 +140,8 @@ public:
     //     return glm::translate(clientPosition) * glm::scale(scale);
     // }
     // #endif
-
+public:
+    WeaponObject* qWeapon = nullptr;
+    WeaponObject* zWeapon = nullptr;
 };
 
