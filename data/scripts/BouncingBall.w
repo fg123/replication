@@ -3,7 +3,7 @@ struct BouncingBall : Object => {
         super();
     }
 
-    OnCreate => () {
+    OnServerCreate => () {
         this.SetModel("Icosphere.obj");
         this.AddSphereCollider(Vector3(0, 0, 0), 0.5);
     }

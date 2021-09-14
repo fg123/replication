@@ -24,7 +24,7 @@
   "homepage": "https://github.com/fg123/replication#readme",
   "dependencies": {
     "assert": "^2.0.0",
-    "axios": "^0.21.0",
+    "axios": "^0.21.4",
     "body-parser": "^1.19.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
@@ -32,29 +32,29 @@
     "console-browserify": "^1.2.0",
     "constants-browserify": "^1.0.0",
     "crypto-browserify": "^3.12.0",
-    "domain-browser": "^4.19.0",
-    "events": "^3.2.0",
+    "domain-browser": "^4.22.0",
+    "events": "^3.3.0",
     "express": "^4.17.1",
     "glm-js": "0.0.6-c",
     "https-browserify": "^1.0.0",
-    "jquery": "^3.5.1",
+    "jquery": "^3.6.0",
     "js-cookie": "^2.2.1",
     "path-browserify": "^1.0.1",
     "punycode": "^2.1.1",
     "querystring-es3": "^0.2.1",
     "stream-browserify": "^3.0.0",
-    "stream-http": "^3.1.1",
+    "stream-http": "^3.2.0",
     "string_decoder": "^1.3.0",
     "timers-browserify": "^2.0.12",
     "tty-browserify": "0.0.1",
     "url": "^0.11.0",
-    "util": "^0.12.3",
+    "util": "^0.12.4",
     "vm-browserify": "^1.1.2",
-    "webpack": "^5.10.3",
-    "webpack-cli": "^4.2.0",
-    "webpack-merge": "^5.7.2"
+    "webpack": "^5.52.1",
+    "webpack-cli": "^4.8.0",
+    "webpack-merge": "^5.8.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.6"
+    "nodemon": "^2.0.12"
   }
 }

@@ -10,7 +10,7 @@ struct SmokeExplosion : Object => (
         ret this;
     }
 
-    OnCreate => () {
+    OnServerCreate => () {
         this.SetModel("SmokeGrenade.obj");
     }
 

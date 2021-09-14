@@ -39,13 +39,11 @@ struct Object => (id) [BaseType = "ScriptableObject"] {
     AddSphereCollider => (offset, radius) ret object_AddSphereCollider(this.id, offset, radius);
 
     // Init Function
-    OnCreate => () {}
+    OnServerCreate => () {}
+    OnClientCreate => () {}
 
     // Per Tick
     OnTick => (time) {}
-
-    // ClientOnly
-    OnClientCreate => () {}
 
     OnCollide => () {}
 };
@@ -54,5 +52,4 @@ struct Object => (id) [BaseType = "ScriptableObject"] {
 let PlayAudio => (audio, volume, positionOrId) native game_PlayAudio;
 let DestroyObject => (id) native game_DestroyObject;
 let GetUnitsInRange => (pos, scale) native game_GetUnitsInRange;
-
-// Generate IsServer and IsClient
+let CreateObject => (class) native game_CreateObject;

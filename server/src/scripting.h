@@ -41,8 +41,8 @@ public:
         CallMemberFunction(classInstance, "OnClientCreate", {});
     }
 
-    void OnCreate() {
-        CallMemberFunction(classInstance, "OnCreate", {});
+    void OnServerCreate() {
+        CallMemberFunction(classInstance, "OnServerCreate", {});
     }
 
 };

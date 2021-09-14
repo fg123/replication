@@ -8821,6 +8821,9 @@ var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_vii
 var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
 
 /** @type {function(...*):?} */
+var dynCall_jii = Module["dynCall_jii"] = createExportWrapper("dynCall_jii");
+
+/** @type {function(...*):?} */
 var dynCall_jiji = Module["dynCall_jiji"] = createExportWrapper("dynCall_jiji");
 
 /** @type {function(...*):?} */
@@ -8832,14 +8835,14 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 /** @type {function(...*):?} */
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module['_game'] = 138488;
-var _clientGl = Module['_clientGl'] = 138864;
-var _clientAudio = Module['_clientAudio'] = 139412;
-var _inputEvents = Module['_inputEvents'] = 139436;
-var _isPaused = Module['_isPaused'] = 136172;
-var _isInventoryOpen = Module['_isInventoryOpen'] = 136173;
-var _ping = Module['_ping'] = 139472;
-var _lastTickTime = Module['_lastTickTime'] = 139464;
+var _game = Module['_game'] = 148760;
+var _clientGl = Module['_clientGl'] = 149136;
+var _clientAudio = Module['_clientAudio'] = 149684;
+var _inputEvents = Module['_inputEvents'] = 149708;
+var _isPaused = Module['_isPaused'] = 146444;
+var _isInventoryOpen = Module['_isInventoryOpen'] = 146445;
+var _ping = Module['_ping'] = 149744;
+var _lastTickTime = Module['_lastTickTime'] = 149736;
 
 
 

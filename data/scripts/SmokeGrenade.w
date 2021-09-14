@@ -8,12 +8,14 @@ struct SmokeGrenade : Object => (
         ret this;
     }
 
-    OnCreate => () {
+    OnServerCreate => () {
         this.SetModel("Grenade.obj");
         this.GenerateOBBCollidersFromModel();
-        PlayAudio("boom.wav", 1.0, this.id);
     }
 
+    OnClientCreate => () {
+        PlayAudio("boom.wav", 1.0, this.id);
+    }
     OnCollide => (otherId, difference) {
 
     }

@@ -1,20 +1,10 @@
 #include "scripting.h"
 #include "object.h"
 #include "game.h"
+#include "scripting-interface.h"
 
 #include <fstream>
 
-extern "C"
-{
-#include "wendy/source.h"
-#include "wendy/scanner.h"
-#include "wendy/ast.h"
-#include "wendy/native.h"
-#include "wendy/data.h"
-#include "wendy/memory.h"
-#include "wendy/struct.h"
-#include "wendy/error.h"
-}
 
 // Contains a lot of internal interfacing with WendyScript's VM Runtime
 //   If anything changes there things might break here.
@@ -73,201 +63,79 @@ Script::~Script() {
     }
 }
 
-struct data Vector3ToWendy(const Vector3& vec) {
-    push_arg(ScriptManager::vm->memory, make_data(D_END_OF_ARGUMENTS, data_value_num(0)));
-    push_arg(ScriptManager::vm->memory, make_data(D_NUMBER, data_value_num(vec.z)));
-    push_arg(ScriptManager::vm->memory, make_data(D_NUMBER, data_value_num(vec.y)));
-    push_arg(ScriptManager::vm->memory, make_data(D_NUMBER, data_value_num(vec.x)));
-    struct data* constructor = get_address_of_id(ScriptManager::vm->memory, "Vector3", true, NULL);
-    if (!constructor) {
-        print_call_stack(ScriptManager::vm->memory, stdout, 100);
-        LOG_ERROR("Could not find Vector3 constructor");
-        throw "Could not find Vector3 constructor";
-    }
-    push_arg(ScriptManager::vm->memory, copy_data(*constructor));
-    vm_run_instruction(ScriptManager::vm, OP_CALL);
-    vm_run(ScriptManager::vm);
-    struct data result = pop_arg(ScriptManager::vm->memory, 0);
-    if (result.type != D_STRUCT_INSTANCE) {
-        LOG_ERROR("Could not create Vector3");
-        throw "Could not create Vector3";
-    }
-    return result;
-}
-
-struct data QuaternionToWendy(const Quaternion& vec) {
-    push_arg(ScriptManager::vm->memory, make_data(D_END_OF_ARGUMENTS, data_value_num(0)));
-    push_arg(ScriptManager::vm->memory, make_data(D_NUMBER, data_value_num(vec.w)));
-    push_arg(ScriptManager::vm->memory, make_data(D_NUMBER, data_value_num(vec.z)));
-    push_arg(ScriptManager::vm->memory, make_data(D_NUMBER, data_value_num(vec.y)));
-    push_arg(ScriptManager::vm->memory, make_data(D_NUMBER, data_value_num(vec.x)));
-    struct data* constructor = get_address_of_id(ScriptManager::vm->memory, "Quaternion", true, NULL);
-    if (!constructor) {
-        print_call_stack(ScriptManager::vm->memory, stdout, 100);
-        LOG_ERROR("Could not find Quaternion constructor");
-        throw "Could not find Quaternion constructor";
-    }
-    push_arg(ScriptManager::vm->memory, copy_data(*constructor));
-    vm_run_instruction(ScriptManager::vm, OP_CALL);
-    vm_run(ScriptManager::vm);
-    struct data result = pop_arg(ScriptManager::vm->memory, 0);
-    if (result.type != D_STRUCT_INSTANCE) {
-        LOG_ERROR("Could not create Quaternion");
-        throw "Could not create Quaternion";
-    }
-    return result;
-}
-
-Object* GetObjectFromArg(struct data id) {
-    Object* obj = ScriptManager::game->GetObject((uint64_t)id.value.number);
-    if (!obj) {
-        LOG_ERROR("Could not obtain object from id in script instance!");
-        throw "Could not obtain object from id in script instance!";
-    }
-    return obj;
-}
-
-struct data object_GetPosition(struct vm* vm, struct data* args) {
-    return Vector3ToWendy(GetObjectFromArg(args[0])->GetPosition());
-}
-
-struct data object_GetScale(struct vm* vm, struct data* args) {
-    return Vector3ToWendy(GetObjectFromArg(args[0])->GetScale());
-}
-
-struct data object_GetRotation(struct vm* vm, struct data* args) {
-    return QuaternionToWendy(GetObjectFromArg(args[0])->GetRotation());
-}
-
-struct data object_GetVelocity(struct vm* vm, struct data* args) {
-    return Vector3ToWendy(GetObjectFromArg(args[0])->GetVelocity());
-}
-
-struct data object_GetSpawnTime(struct vm* vm, struct data* args) {
-    return make_data(D_NUMBER, data_value_num(GetObjectFromArg(args[0])->GetSpawnTime()));
-}
-
-struct data object_GenerateOBBCollidersFromModel(struct vm* vm, struct data* args) {
-    GenerateOBBCollidersFromModel(GetObjectFromArg(args[0]));
-    return noneret_data();
-}
-
-struct data object_AddSphereCollider(struct vm* vm, struct data* args) {
-    Vector3 offset = {
-        (float) args[1].value.reference[2].value.number,
-        (float) args[1].value.reference[3].value.number,
-        (float) args[1].value.reference[4].value.number
-    };
-    double radius = args[2].value.number;
-    Object* owner = GetObjectFromArg(args[0]);
-    owner->AddCollider(new SphereCollider(owner, offset, radius));
-
-    return noneret_data();
-}
-
-struct data object_SetModel(struct vm* vm, struct data* args) {
-    #ifdef BUILD_SERVER
-        const char* str = args[1].value.string;
-        GetObjectFromArg(args[0])->SetModel(ScriptManager::game->GetModel(str));
-    #endif
-    return noneret_data();
-}
-
-Vector3 Vector3FromWendy(const struct data& data) {
-    return Vector3(
-        (float) data.value.reference[2].value.number,
-        (float) data.value.reference[3].value.number,
-        (float) data.value.reference[4].value.number
-    );
-}
-
-Quaternion QuaternionFromWendy(const struct data& data) {
-    return Quaternion(
-        (float) data.value.reference[2].value.number,
-        (float) data.value.reference[3].value.number,
-        (float) data.value.reference[4].value.number,
-        (float) data.value.reference[5].value.number
-    );
-}
-
-struct data object_SetPosition(struct vm* vm, struct data* args) {
-    GetObjectFromArg(args[0])->SetPosition(Vector3FromWendy(args[1]));
-    return noneret_data();
-}
-
-struct data object_SetVelocity(struct vm* vm, struct data* args) {
-    GetObjectFromArg(args[0])->SetVelocity(Vector3FromWendy(args[1]));
-    return noneret_data();
-}
-
-struct data object_SetScale(struct vm* vm, struct data* args) {
-    GetObjectFromArg(args[0])->SetScale(Vector3FromWendy(args[1]));
-    return noneret_data();
-}
+struct data player_SetWeapon(struct vm* vm, struct data* args) {
+    Object* player = GetObjectFromArg(args[0]);
+    int weaponType = args[1].value.number;
+    Object* weapon = GetObjectFromArg(args[2]);
+    int attachmentPoint = args[3].value.number;
 
 
-struct data object_SetAirFriction(struct vm* vm, struct data* args) {
-    GetObjectFromArg(args[0])->airFriction = Vector3FromWendy(args[1]);
-    return noneret_data();
-}
-
-struct data object_SetRotation(struct vm* vm, struct data* args) {
-    GetObjectFromArg(args[0])->SetRotation(QuaternionFromWendy(args[1]));
-    return noneret_data();
-}
-
-struct data game_PlayAudio(struct vm* vm, struct data* args) {
-    if (args[2].type == D_NUMBER) {
-        // ID Version
-        ScriptManager::game->PlayAudio(args[0].value.string, args[1].value.number,
-            GetObjectFromArg(args[2]));
-        return noneret_data();
-    }
-    ScriptManager::game->PlayAudio(args[0].value.string, args[1].value.number,
-        Vector3FromWendy(args[2]));
-    return noneret_data();
-}
-
-struct data game_DestroyObject(struct vm* vm, struct data* args) {
-    ScriptManager::game->DestroyObject(args[0].value.number);
-    return noneret_data();
-}
-
-struct data glm_Rotate(struct vm* vm, struct data* args) {
-    Vector3 axis {
-        (float) args[0].value.number,
-        (float) args[1].value.number,
-        (float) args[2].value.number,
-    };
-    float angle = (float) args[3].value.number;
-    return QuaternionToWendy(glm::angleAxis(angle, axis));
 }
 
 ScriptManager::ScriptManager(Game* game) {
     ScriptManager::game = game;
     vm = vm_init();
-    register_native_call("object_GetPosition", 1, &object_GetPosition);
-    register_native_call("object_GetScale", 1, &object_GetScale);
-    register_native_call("object_GetRotation", 1, &object_GetRotation);
-    register_native_call("object_GetVelocity", 1, &object_GetVelocity);
-    register_native_call("object_GetSpawnTime", 1, &object_GetSpawnTime);
 
-    register_native_call("object_SetModel", 2, &object_SetModel);
-    register_native_call("object_SetPosition", 2, &object_SetPosition);
-    register_native_call("object_SetVelocity", 2, &object_SetVelocity);
-    register_native_call("object_SetRotation", 2, &object_SetRotation);
-    register_native_call("object_SetScale", 2, &object_SetScale);
-    register_native_call("object_SetAirFriction", 2, &object_SetAirFriction);
+    REGISTER_NATIVE_CALL("object_GetPosition", [](Object* object) {
+        return object->GetPosition();
+    });
+    REGISTER_NATIVE_CALL("object_GetScale", [](Object* object) {
+        return object->GetScale();
+    });
+    REGISTER_NATIVE_CALL("object_GetRotation", [](Object* object) {
+        return object->GetRotation();
+    });
+    REGISTER_NATIVE_CALL("object_GetVelocity", [](Object* object) {
+        return object->GetVelocity();
+    });
+    REGISTER_NATIVE_CALL("object_GetSpawnTime", [](Object* object) {
+        return object->GetSpawnTime();
+    });
 
-    register_native_call("object_GenerateOBBCollidersFromModel", 1, &object_GenerateOBBCollidersFromModel);
-    register_native_call("object_AddSphereCollider", 3, &object_AddSphereCollider);
+    REGISTER_NATIVE_CALL("object_SetPosition", [](Object* object, Vector3 position) {
+        object->SetPosition(position);
+    });
+    REGISTER_NATIVE_CALL("object_SetScale", [](Object* object, Vector3 scale) {
+        object->SetScale(scale);
+    });
+    REGISTER_NATIVE_CALL("object_SetRotation", [](Object* object, Quaternion rotation) {
+        object->SetRotation(rotation);
+    });
+    REGISTER_NATIVE_CALL("object_SetVelocity", [](Object* object, Vector3 velocity) {
+        object->SetVelocity(velocity);
+    });
+    REGISTER_NATIVE_CALL("object_SetModel", [](Object* object, std::string model){
+        #ifdef BUILD_SERVER
+            object->SetModel(ScriptManager::game->GetModel(model));
+        #endif
+    });
+    REGISTER_NATIVE_CALL("object_SetAirFriction", [](Object* object, Vector3 airFriction) {
+        object->airFriction = airFriction;
+    });
+
+    REGISTER_NATIVE_CALL("object_GenerateOBBCollidersFromModel", [](Object* object) {
+        GenerateOBBCollidersFromModel(object);
+    });
+
+    REGISTER_NATIVE_CALL("object_AddSphereCollider", [](Object* object, Vector3 offset, float radius) {
+        object->AddCollider(new SphereCollider(object, offset, radius));
+    });
 
     // Game Interface
-    register_native_call("game_PlayAudio", 3, &game_PlayAudio);
-    register_native_call("game_DestroyObject", 1, &game_DestroyObject);
+    REGISTER_NATIVE_CALL("game_PlayAudio", [](std::string path, int id, Vector3 location) {
+        ScriptManager::game->PlayAudio(path, id, location);
+    });
+    REGISTER_NATIVE_CALL("game_CreateObject", [](std::string path) {
+        return ScriptManager::game->LoadScriptedObject(path);
+    });
+    REGISTER_NATIVE_CALL("game_DestroyObject", [](ObjectID id) {
+        ScriptManager::game->DestroyObject(id);
+    });
 
     // Math Hooks
-    register_native_call("glm_Rotate", 4, &glm_Rotate);
+    REGISTER_NATIVE_CALL("glm_Rotate", [](Vector3 axis, float angle) {
+        return glm::angleAxis(angle, axis);
+    });
 }
 
 ScriptManager::~ScriptManager() {
@@ -441,6 +309,6 @@ std::string ScriptManager::GetBaseTypeFromScriptingType(const std::string& type)
 void ScriptInstance::OnCollide(CollisionResult& collision) {
     CallMemberFunction(classInstance, "OnCollide", {
         make_data(D_NUMBER, data_value_num(collision.collidedWith->GetId())),
-        Vector3ToWendy(collision.collisionDifference)
+        ConvertToWendy(collision.collisionDifference)
     });
 }

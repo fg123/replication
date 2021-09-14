@@ -26,7 +26,7 @@ public:
         Object::OnCreate();
         #ifdef BUILD_SERVER
             script.InitializeInstance(className, GetId());
-            script.OnCreate();
+            script.OnServerCreate();
         #endif
     }
 
