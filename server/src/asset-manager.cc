@@ -14,6 +14,7 @@
 
 #include <filesystem>
 #include <unordered_set>
+#include <set>
 
 template<typename T>
 Vector3 ToVec3(const T& vec) {
@@ -252,14 +253,22 @@ const std::unordered_set<std::string> modelExtensions = { ".obj" };
 const std::unordered_set<std::string> scriptExtensions = { ".w" };
 const std::unordered_set<std::string> audioExtensions = { ".wav" };
 
+std::set<fs::path> SortedDirectory(const fs::path& path) {
+    std::set<fs::path> sorted;
+    for (const auto& entry : fs::recursive_directory_iterator(path)) {
+        sorted.insert(entry.path());
+    }
+    return sorted;
+}
+
 void AssetManager::LoadDataFromDirectory(ScriptManager& scriptManager) {
     // Models
-    for (auto& p: fs::recursive_directory_iterator(RESOURCE_PATH("models/"))) {
-        if (modelExtensions.find(p.path().extension().string()) == modelExtensions.end()) {
+    for (auto& p: SortedDirectory(RESOURCE_PATH("models/"))) {
+        if (modelExtensions.find(p.extension().string()) == modelExtensions.end()) {
             continue;
         }
-        std::string modelName = p.path().filename().string();
-        std::string modelPath = p.path().string();
+        std::string modelName = p.filename().string();
+        std::string modelPath = p.string();
         LOG_INFO("Loading " << modelPath);
         std::ifstream modelStream (modelPath);
         if (!modelStream.is_open()) {
@@ -269,21 +278,21 @@ void AssetManager::LoadDataFromDirectory(ScriptManager& scriptManager) {
         LoadModel(modelName, modelPath, modelStream);
     }
 
-    for (auto& p: fs::recursive_directory_iterator(RESOURCE_PATH("scripts/"))) {
-        if (scriptExtensions.find(p.path().extension().string()) == scriptExtensions.end()) {
+    for (auto& p: SortedDirectory(RESOURCE_PATH("scripts/"))) {
+        if (scriptExtensions.find(p.extension().string()) == scriptExtensions.end()) {
             continue;
         }
-        scriptManager.AddScript(p.path().string());
+        scriptManager.AddScript(p.string());
     }
     scriptManager.InitializeVM();
 
     #ifdef BUILD_CLIENT
-    for (auto& p: fs::recursive_directory_iterator(RESOURCE_PATH("sounds/"))) {
-        if (audioExtensions.find(p.path().extension().string()) == audioExtensions.end()) {
+    for (auto& p: SortedDirectory(RESOURCE_PATH("sounds/"))) {
+        if (audioExtensions.find(p.extension().string()) == audioExtensions.end()) {
             continue;
         }
-        std::string audioName = p.path().filename().string();
-        std::string audioPath = p.path().string();
+        std::string audioName = p.filename().string();
+        std::string audioPath = p.string();
         LoadAudio(audioName, audioPath);
     }
     #endif
