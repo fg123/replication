@@ -14,7 +14,11 @@ Replication is a 3D game engine written from scratch in C++.
     - Skysphere
     - Dynamic Realtime Lighting
     - Post-processing (Bloom, SSAA, Tone Mapping)
-- Physics Engine for collision between different primitive types
+    - Transparent and semi-transparent textures
+- Physics Engine for multi-phase collision between different primitive types
+    - Static Mesh
+    - AABB and OBB
+    - Sphere
 - Game object scripting built on [WendyScript](https://wendy.felixguo.me/)
 
 # Prerequisites

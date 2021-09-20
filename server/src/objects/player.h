@@ -1,6 +1,6 @@
 #pragma once
 
-#include "object.h"
+#include "scriptable-object.h"
 #include "vector.h"
 #include "inventory.h"
 #include "weapons/weapon.h"
@@ -11,13 +11,13 @@
 
 class Game;
 
-static const Vector3 RESPAWN_LOCATION = Vector3(0, 150, 0);
+static const Vector3 RESPAWN_LOCATION = Vector3(-5, 5, -30);
 
 struct PlayerSettings : public Replicable {
     REPLICATED_D(float, sensitivity, "sensitivity", 1.0f);
 };
 
-class PlayerObject : public Object {
+class PlayerObject : public ScriptableObject {
     void TryPickupItem();
     WeaponObject* ScanPotentialWeapon();
 
@@ -70,6 +70,8 @@ public:
 
     REPLICATED_D(int, mouseWheelDelta, "mwd", 0);
 
+    CLASS_CREATE(PlayerObject);
+
     PlayerObject(Game& game);
     PlayerObject(Game& game, Vector3 position);
     ~PlayerObject();
@@ -78,7 +80,6 @@ public:
     virtual void Tick(Time time) override;
     virtual void Serialize(JSONWriter& obj) override;
     virtual void ProcessReplication(json& obj) override;
-    virtual void OnCollide(CollisionResult& result) override;
 #ifdef BUILD_CLIENT
     virtual void PreDraw(Time time) override;
     virtual Vector3 GetClientLookDirection() const override {
@@ -90,7 +91,7 @@ public:
     }
 #endif
     virtual void OnClientCreate() override {
-        Object::OnClientCreate();
+        ScriptableObject::OnClientCreate();
         #ifdef BUILD_CLIENT
             clientRotationYaw = rotationYaw;
             clientRotationPitch = rotationPitch;
@@ -145,3 +146,4 @@ public:
     WeaponObject* zWeapon = nullptr;
 };
 
+CLASS_REGISTER(PlayerObject);

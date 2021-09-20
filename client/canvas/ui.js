@@ -245,7 +245,7 @@ module.exports = class UICanvas {
         this.context.fillRect(100, height - 100 - 20, w + 65, 40);
         this.context.textBaseline = "middle";
         this.context.fillStyle = "white";
-        this.context.fillText(player.t, 160, height - 97);
+        this.context.fillText(player.cn, 160, height - 97);
 
         this.context.fillStyle = "green";
         this.currentHealth += (player.h - this.currentHealth) / 10;
@@ -260,14 +260,14 @@ module.exports = class UICanvas {
         this.context.fill();
 
         const characterImage = this.clientState.resourceManager.get(
-            characters[player.t].resources.base);
+            characters[player.cn].resources.base);
         drawImage(this.context, characterImage, 100, (height - 100),
             characterImage.width / 2, characterImage.height / 2);
 
         this.context.font = "13px Prompt";
         this.context.textBaseline = "hanging";
         this.context.textAlign = "left";
-        this.context.fillStyle = "black";
+        this.context.fillStyle = "white";
         this.context.fillText(`${Math.round(1000.0 / this.fps.frameTime)}FPS`, 20, 20);
 
         const ping = this.clientState.ping;

@@ -60,11 +60,11 @@ std::unordered_map<int, size_t> KEY_MAP = {
 PlayerObject::PlayerObject(Game& game) : PlayerObject(game, Vector3()) {
 }
 
-PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game),
+PlayerObject::PlayerObject(Game& game, Vector3 position) : ScriptableObject(game),
     inventoryManager(game, this) {
     SetTag(Tag::PLAYER);
 
-    SetTag(Tag::NO_GRAVITY);
+    // SetTag(Tag::NO_GRAVITY);
 
     SetPosition(position);
 
@@ -79,6 +79,7 @@ PlayerObject::PlayerObject(Game& game, Vector3 position) : Object(game),
 }
 
 void PlayerObject::OnDeath() {
+    ScriptableObject::OnDeath();
     // This calls before you get destructed, but client will already know you're
     //   dead (but you don't actually get GCed until next tick)
     LOG_DEBUG("Player Death " << GetCurrentWeapon());
@@ -380,7 +381,7 @@ void PlayerObject::Tick(Time time) {
     }
 #endif
 
-    Object::Tick(time);
+    ScriptableObject::Tick(time);
 
     lastMouseState = mouseState;
     lastKeyboardState = keyboardState;
@@ -399,12 +400,12 @@ void PlayerObject::PreDraw(Time now) {
     clientRotationYaw = AngleLerpDegrees(clientRotationYaw, rotationYaw, lerpRatio);
     clientRotationPitch = AngleLerpDegrees(clientRotationPitch, rotationPitch, lerpRatio);
 
-    Object::PreDraw(now);
+    ScriptableObject::PreDraw(now);
 }
 #endif
 void PlayerObject::Serialize(JSONWriter& obj) {
     // LOG_DEBUG("Player Object Serialize - Start");
-    Object::Serialize(obj);
+    ScriptableObject::Serialize(obj);
 
     if (qWeapon) {
         obj.Key("wq");
@@ -461,7 +462,7 @@ void PlayerObject::Serialize(JSONWriter& obj) {
 }
 
 void PlayerObject::ProcessReplication(json& obj) {
-    Object::ProcessReplication(obj);
+    ScriptableObject::ProcessReplication(obj);
     {
         std::scoped_lock lock(socketDataMutex);
         while (!inputBuffer.empty()) {
@@ -509,15 +510,6 @@ void PlayerObject::DropWeapon(WeaponObject* weapon)  {
 
 void PlayerObject::HolsterAllWeapons() {
     inventoryManager.HolsterAll();
-}
-
-void PlayerObject::OnCollide(CollisionResult& result) {
-    // if (result.collidedWith->IsTagged(Tag::WEAPON)) {
-    //     if (canPickup) {
-    //         PickupWeapon(static_cast<WeaponObject*>(result.collidedWith));
-    //     }
-    // }
-    Object::OnCollide(result);
 }
 
 void PlayerObject::DealDamage(int damage, ObjectID from) {

@@ -121,6 +121,17 @@ ScriptManager::ScriptManager(Game* game) {
     REGISTER_NATIVE_CALL("game_CreateObject", [](std::string path) {
         return ScriptManager::game->LoadScriptedObject(path);
     });
+    REGISTER_NATIVE_CALL("game_CreateNativeObject", [](std::string className) {
+        auto& classLookup = GetClassLookup();
+        auto it = classLookup.find(className);
+        if (it == classLookup.end()) {
+            LOG_ERROR("Could not find class " << className);
+            throw "Could not find class " + className;
+        }
+        Object* obj = it->second(*ScriptManager::game);
+        ScriptManager::game->AddObject(obj);
+        return obj;
+    });
     REGISTER_NATIVE_CALL("game_DestroyObject", [](ObjectID id) {
         ScriptManager::game->DestroyObject(id);
     });
@@ -315,4 +326,12 @@ void ScriptInstance::OnCollide(CollisionResult& collision) {
         make_data(D_NUMBER, data_value_num(collision.collidedWith->GetId())),
         ConvertToWendy(collision.collisionDifference)
     });
+}
+
+ScriptInstance::ScriptInstance() {
+    classInstance.type = D_EMPTY;
+}
+
+ScriptInstance::~ScriptInstance() {
+    destroy_data_runtime(ScriptManager::vm->memory, &classInstance);
 }

@@ -79,9 +79,12 @@ static inline std::string trim_copy(std::string s) {
     return s;
 }
 
-inline float AngleLerpDegrees(float from, float to, float t) {
-    float result = from + (to - from) * t;
-    if (result > 180.0f) result -= 360.0f;
-    if (result < -180.0f) result += 360.0f;
-    return result;
+inline float AngleLerpDegrees(float a, float b, float t) {
+    float d = b - a;
+    if (d > 180) {
+        d -= 360;
+    } else if (d < -180) {
+        d += 360;
+    }
+    return a + d * t;
 }

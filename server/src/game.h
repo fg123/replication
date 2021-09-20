@@ -126,6 +126,7 @@ public:
     }
 #endif
 
+    Object* CreateScriptedObject(const std::string& className);
     Object* LoadScriptedObject(const std::string& className);
 
     void AddObject(Object* obj);

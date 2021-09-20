@@ -199,12 +199,16 @@ void Game::Tick(Time time) {
 
     // New objects get queued in from HandleReplication and EnsureObjectExists
     //   on the client, not through this set.
-    for (auto& newObject : newObjects) {
+    newObjectsMutex.lock();
+    std::unordered_map<ObjectID, Object*> newObjectsCopy = newObjects;
+    newObjects.clear();
+    newObjectsMutex.unlock();
+
+    for (auto& newObject : newObjectsCopy) {
         gameObjects[newObject.first] = newObject.second;
         gameObjects[newObject.first]->OnCreate();
         RequestReplication(newObject.first);
     }
-    newObjects.clear();
 #endif
 
     for (auto& object : gameObjects) {
@@ -734,7 +738,7 @@ void Game::PlayAudio(const std::string& audio, float volume, Object* boundObject
     #endif
 }
 
-Object* Game::LoadScriptedObject(const std::string& className) {
+Object* Game::CreateScriptedObject(const std::string& className) {
     // Get Base Type Name
     std::string baseType = scriptManager.GetBaseTypeFromScriptingType(className);
 
@@ -754,6 +758,11 @@ Object* Game::LoadScriptedObject(const std::string& className) {
         throw "Class " + baseType + " is not a ScriptableObject!";
     }
     obj->className = className;
+    return obj;
+}
+
+Object* Game::LoadScriptedObject(const std::string& className) {
+    Object* obj = CreateScriptedObject(className);
     AddObject(obj);
     return obj;
 }

@@ -124,7 +124,11 @@ int main(int argc, char** argv) {
                 data->ws = ws;
                 data->eventLoop = uWS::Loop::get();
                 data->nextRespawnCharacter = "Marine";
-                PlayerObject* playerObject = new Marine(game, RESPAWN_LOCATION);
+                // PlayerObject* playerObject = new Marine(game, RESPAWN_LOCATION);
+                PlayerObject* playerObject =
+                    dynamic_cast<PlayerObject*>(game.CreateScriptedObject("Marine"));
+                playerObject->SetPosition(RESPAWN_LOCATION);
+
                 data->playerObject = playerObject;
 
                 game.AddPlayer(data, playerObject);

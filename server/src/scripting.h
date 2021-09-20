@@ -23,6 +23,8 @@ class ScriptInstance : public Replicable {
     struct data classInstance;
 public:
     std::string className;
+    ScriptInstance();
+    ~ScriptInstance();
 
     virtual void Serialize(JSONWriter& obj) override;
 

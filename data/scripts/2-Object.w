@@ -53,3 +53,4 @@ let PlayAudio => (audio, volume, positionOrId) native game_PlayAudio;
 let DestroyObject => (id) native game_DestroyObject;
 let GetUnitsInRange => (pos, scale) native game_GetUnitsInRange;
 let CreateObject => (class) native game_CreateObject;
+let CreateNativeObject => (class) native game_CreateNativeObject;
