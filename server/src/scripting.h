@@ -7,7 +7,7 @@
 
 extern "C"
 {
-#include "wendy/vm.h"
+#include "wendy/src/vm.h"
 }
 
 // Provides integration between WendyScript and the rest of the game

@@ -1,4 +1,4 @@
-struct Marine : Object => [
+struct Marine : Player => [
     BaseType = "PlayerObject"]
 {
     init => () {
@@ -6,11 +6,10 @@ struct Marine : Object => [
     }
 
     OnServerCreate => () {
-        "Server Create";
-        /*let smoke = CreateNativeObject("SmokeGrenadeThrower");
-        SetQWeapon(smoke, WeaponAttachmentPoint.LEFT);
+        let smoke = CreateNativeObject("SmokeGrenadeThrower");
+        this.SetQWeapon(smoke, WeaponAttachmentPoint.LEFT);
 
         let art = CreateNativeObject("ArtilleryStrike");
-        SetZWeapon(art, WeaponAttachmentPoint.RIGHT);*/
+        this.SetZWeapon(art, WeaponAttachmentPoint.RIGHT);
     }
 };

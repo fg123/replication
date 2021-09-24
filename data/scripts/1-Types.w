@@ -37,7 +37,7 @@ struct Vector3 => (x, y, z) {
 
 let PI = 3.1415926535;
 
-let glm_Rotate => (x, y, z, theta) native glm_Rotate;
+let glm_Rotate => (vec, theta) native glm_Rotate;
 
 struct Quaternion => (x, y, z, w) {
     Size => () {
@@ -49,7 +49,7 @@ struct Quaternion => (x, y, z, w) {
     }
 
     FromRotation => (rot, vec) {
-        ret glm_Rotate(vec.x, vec.y, vec.z, rot % (2 * PI));
+        ret glm_Rotate(vec, rot % (2 * PI));
     }
 };
 

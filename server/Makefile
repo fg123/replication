@@ -55,7 +55,8 @@ CPPFLAGS = -std=c++17 -Wall \
 	-I $(SRC_DIR)/animations \
 	-I $(SRC_DIR)/imgui \
 	-I rendering/ \
-	-I $(EXTERNAL_INCLUDE)
+	-I $(EXTERNAL_INCLUDE) \
+	-I scripting
 
 CFLAGS = -Wall \
 	-I scripting/wendy/src/
@@ -112,7 +113,7 @@ $(SERVER_OUTPUT_PROD): $(SERVER_OBJ) $(USOCKET)/uSockets.a
 	$(CXX) $(GCC_FLAGS) $(LDFLAGS) $^ $(SERVER_LDLIBS) $(SERVER_PROD) -o $(SERVER_OUTPUT_PROD)
 
 $(CLIENT_DATA): $(DATA_DIRS) $(DATA_FILES)
-	${EMSDK}/upstream/emscripten/tools/file_packager.py $(CLIENT_DATA) \
+	python3 ${EMSDK}/upstream/emscripten/tools/file_packager.py $(CLIENT_DATA) \
 		--js-output=$(CLIENT_DATA_JS) \
 		--preload ../data/maps@/maps \
 		--preload ../data/textures@/textures \

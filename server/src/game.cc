@@ -467,6 +467,16 @@ void Game::Replicate(Time time) {
         }
     }
 }
+
+Object* Game::GetObjectIncludingNewQueued(ObjectID id) {
+    Object* obj = GetObject(id);
+    if (obj == nullptr) {
+        if (newObjects.find(id) != newObjects.end()) {
+            obj = newObjects[id];
+        }
+    }
+    return obj;
+}
 #endif
 
 #ifdef BUILD_CLIENT

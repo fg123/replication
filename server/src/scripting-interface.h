@@ -6,14 +6,14 @@
 
 extern "C"
 {
-#include "wendy/source.h"
-#include "wendy/scanner.h"
-#include "wendy/ast.h"
-#include "wendy/native.h"
-#include "wendy/data.h"
-#include "wendy/memory.h"
-#include "wendy/struct.h"
-#include "wendy/error.h"
+#include "wendy/src/source.h"
+#include "wendy/src/scanner.h"
+#include "wendy/src/ast.h"
+#include "wendy/src/native.h"
+#include "wendy/src/data.h"
+#include "wendy/src/memory.h"
+#include "wendy/src/struct.h"
+#include "wendy/src/error.h"
 }
 
 // Collects internal details for generating index ranges [MIN, MAX)
@@ -113,8 +113,15 @@ Quaternion ConvertToNative(struct data data) {
 }
 
 Object* GetObjectFromArg(struct data id) {
-    Object* obj = ScriptManager::game->GetObject((uint64_t)id.value.number);
+    ObjectID objId = (ObjectID) id.value.number;
+    #ifdef BUILD_SERVER
+        Object* obj = ScriptManager::game->GetObjectIncludingNewQueued(objId);
+    #endif
+    #ifdef BUILD_CLIENT
+        Object* obj = ScriptManager::game->GetObject(objId);
+    #endif
     if (!obj) {
+        // Try New-Queued objects
         LOG_ERROR("Could not obtain object from id in script instance!");
         throw "Could not obtain object from id in script instance!";
     }

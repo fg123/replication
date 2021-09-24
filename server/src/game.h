@@ -163,6 +163,10 @@ public:
         return static_cast<T*>(GetObjectImpl(id));
     }
 
+#ifdef BUILD_SERVER
+    Object* GetObjectIncludingNewQueued(ObjectID id);
+#endif
+
     const std::unordered_map<ObjectID, Object*>& GetGameObjects() const {
         return gameObjects;
     }

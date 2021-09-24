@@ -241,7 +241,7 @@ module.exports = class UICanvas {
         this.context.fill();
 
         this.context.font = "25px Prompt";
-        const w = this.context.measureText(player.t).width;
+        const w = this.context.measureText(player.cn).width;
         this.context.fillRect(100, height - 100 - 20, w + 65, 40);
         this.context.textBaseline = "middle";
         this.context.fillStyle = "white";
