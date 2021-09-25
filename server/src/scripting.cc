@@ -147,6 +147,11 @@ ScriptManager::ScriptManager(Game* game) {
             weapon->AttachToPlayer(player, attach);
         }
     });
+
+    REGISTER_NATIVE_CALL("player_SetHealth", [](PlayerObject* player, float health) {
+        player->SetHealth(health);
+    });
+
     // Math Hooks
     REGISTER_NATIVE_CALL("glm_Rotate", [](Vector3 axis, float angle) {
         return glm::angleAxis(angle, axis);

@@ -1,6 +1,4 @@
-struct Marine : Player => [
-    BaseType = "PlayerObject"]
-{
+struct Marine : Player => {
     init => () {
         super();
     }

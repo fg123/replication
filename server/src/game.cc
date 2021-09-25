@@ -7,8 +7,6 @@
 #include "scriptable-object.h"
 #include "vector.h"
 #include "objects/player.h"
-#include "characters/dummy.h"
-#include "characters/archer.h"
 #include "collision.h"
 #include "map.h"
 

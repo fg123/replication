@@ -47,6 +47,12 @@ public:
         CallMemberFunction(classInstance, "OnServerCreate", {});
     }
 
+    void OnTakeDamage(float damage) {
+        CallMemberFunction(classInstance, "OnTakeDamage", {
+            make_data(D_NUMBER, data_value_num(damage))
+        });
+    }
+
 };
 
 // Each class has a script

@@ -22,7 +22,7 @@ class PlayerObject : public ScriptableObject {
     WeaponObject* ScanPotentialWeapon();
 
 protected:
-    REPLICATED_D(int, health, "h", 100);
+    REPLICATED_D(float, health, "h", 100);
 
     // Yaw Pitch in degrees
     REPLICATED_D(float, rotationYaw, "ry", 0.0f);
@@ -123,11 +123,17 @@ public:
     void InventorySwap();
     void HolsterAllWeapons();
 
-    void DealDamage(int damage, ObjectID from);
+    void SetHealth(float health) {
+        this->health = health;
+    }
+
+    void DealDamage(float damage, ObjectID from);
     void HealFor(int damage);
 
     // TODO: add damage source
-    virtual void OnTakeDamage(int damage) {};
+    virtual void OnTakeDamage(float damage) {
+        script.OnTakeDamage(damage);
+    }
 
     Vector3 GetLeftAttachmentPoint() const;
     Vector3 GetRightAttachmentPoint() const;

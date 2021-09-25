@@ -273,7 +273,7 @@ void PlayerObject::Tick(Time time) {
 
     if (keyboardState[KEY_MAP[K_KEY]]) {
         if (!lastKeyboardState[KEY_MAP[K_KEY]]) {
-            DealDamage(50, GetId());
+            DealDamage(50.0f, GetId());
         }
     }
     if (keyboardState[KEY_MAP[D1_KEY]]) {
@@ -512,7 +512,7 @@ void PlayerObject::HolsterAllWeapons() {
     inventoryManager.HolsterAll();
 }
 
-void PlayerObject::DealDamage(int damage, ObjectID from) {
+void PlayerObject::DealDamage(float damage, ObjectID from) {
     game.PlayAudio("ueh.wav", 1.0f, this);
 #ifdef BUILD_SERVER
     health -= damage;

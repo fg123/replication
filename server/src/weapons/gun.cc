@@ -92,7 +92,7 @@ void GunBase::FireBullet(const Vector3& from, const Vector3& direction) {
 
     if (result.isHit) {
         if (result.hitObject->IsTagged(Tag::PLAYER)) {
-            static_cast<PlayerObject*>(result.hitObject)->DealDamage(damage, attachedTo->GetId());
+            static_cast<PlayerObject*>(result.hitObject)->DealDamage((float)damage, attachedTo->GetId());
         }
         else {
             #ifdef BUILD_SERVER

@@ -500,7 +500,7 @@ CollisionResult CapsuleAndMeshCollide(CapsuleCollider* capsule, StaticMeshCollid
     if (!collider->bvhTree) {
         return CollisionResult{};
     }
-    Vector3 velocity = capsule->GetOwner()->GetVelocity();
+    // Vector3 velocity = capsule->GetOwner()->GetVelocity();
     AABB broadRect = capsule->GetBroadAABB();
 
     // Get World Position of Two Points of the Capsule Segment

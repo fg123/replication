@@ -12,7 +12,7 @@ void ArrowObject::OnCollide(CollisionResult& result) {
     // Check Player Hit
     if (!hitPlayer && result.collidedWith->IsTagged(Tag::PLAYER)) {
         hitPlayer = true;
-        static_cast<PlayerObject*>(result.collidedWith)->DealDamage(50, playerId);
+        static_cast<PlayerObject*>(result.collidedWith)->DealDamage(50.0f, playerId);
         SetVelocity(Vector3());
     }
     else if (result.collidedWith->IsStatic() && !IsStatic()) {
