@@ -1,8 +1,12 @@
 #include "inventory.h"
 #include "player.h"
 #include "game.h"
-#include "objects.h"
 #include "util.h"
+#include "weapons/ammo.h"
+#include "weapons/weapon.h"
+#include "weapons/medkit.h"
+#include "weapons/grenade-thrower.h"
+#include "weapons/gun.h"
 
 const size_t INVENTORY_MAX_SIZE = 6;
 

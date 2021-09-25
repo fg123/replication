@@ -13,9 +13,7 @@
 #include "json/json.hpp"
 
 #include "static-mesh.h"
-
-#include "objects.h"
-
+#include "objects/spectator-box.h"
 #include "scene.h"
 
 #include <fstream>

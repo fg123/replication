@@ -2,6 +2,7 @@
 
 #include "object.h"
 #include "game.h"
+#include "player.h"
 
 class LiftObject : public Object {
 
