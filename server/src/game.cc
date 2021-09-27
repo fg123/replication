@@ -662,7 +662,8 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
             if (ClassLookup.find(p->nextRespawnCharacter) == ClassLookup.end()) {
                 p->nextRespawnCharacter = "Archer";
             }
-            Object* obj = GetClassLookup()[p->nextRespawnCharacter](*this);
+            PlayerObject* obj =
+                dynamic_cast<PlayerObject*>(CreateScriptedObject(p->nextRespawnCharacter));
             obj->SetPosition(RESPAWN_LOCATION);
 
             static_cast<PlayerObject*>(obj)->lastClientInputTime = playerObject->lastClientInputTime;

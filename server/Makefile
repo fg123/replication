@@ -147,7 +147,11 @@ client_prod: $(CLIENT_OBJ) $(CLIENT_DATA)
 	$(CC) -O2 $(CFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -c $< -o $@
 
 $(SRC_DIR)/objects.h:
-	./gen_objects_h.sh $@ $(shell find src/objects -name "*.h") $(shell find src/weapons -name "*.h") $<
+	./gen_objects_h.sh $@ \
+		$(shell find src/objects -name "*.h") \
+		$(shell find src/weapons -name "*.h") \
+		$(shell find src/abilities -name "*.h")
+	$<
 
 $(USOCKET)/uSockets.a:
 	$(MAKE) $(USOCKET)

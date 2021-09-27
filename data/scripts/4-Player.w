@@ -25,4 +25,7 @@ struct Player : Object => [
     SetHealth => (health) {
         player_SetHealth(this.id, health);
     }
+
+    // Events:
+    OnTakeDamage => (damage) {}
 }

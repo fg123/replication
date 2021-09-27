@@ -227,14 +227,18 @@ void ScriptInstance::InitializeInstance(const std::string& className, ObjectID i
 
 void CallMemberFunction(struct data structInstance,
     const std::string& member, const std::vector<struct data> arguments) {
+    // Setup a member function call
+    struct data* fn = struct_get_field(ScriptManager::vm, structInstance, member.c_str());
+    if (!fn) {
+        LOG_WARN("Tried to call member function " << member << " but it was not defined!");
+        return;
+    }
 
     push_arg(ScriptManager::vm->memory, make_data(D_END_OF_ARGUMENTS, data_value_num(0)));
     for (auto it = arguments.rbegin(); it != arguments.rend(); ++it) {
         push_arg(ScriptManager::vm->memory, copy_data(*it));
     }
 
-    // Setup a member function call
-    struct data* fn = struct_get_field(ScriptManager::vm, structInstance, member.c_str());
     push_arg(ScriptManager::vm->memory, copy_data(structInstance));
     struct data fn_copy = copy_data(*fn);
     fn_copy.type = D_STRUCT_FUNCTION;

@@ -27,3 +27,6 @@
 #include "weapons/smoke-thrower.h"
 #include "weapons/submachine-gun.h"
 #include "weapons/weapon.h"
+#include "abilities/arrow-chargeup.h"
+#include "abilities/dash.h"
+#include "abilities/portal.h"

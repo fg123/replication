@@ -104,7 +104,9 @@
         "__memory": "cpp",
         "codecvt": "cpp",
         "condition_variable": "cpp",
-        "csignal": "cpp"
+        "csignal": "cpp",
+        "*.tcc": "cpp",
+        "memory_resource": "cpp"
     },
     "files.exclude": {
         "**/.git": true,
