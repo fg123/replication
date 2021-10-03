@@ -106,7 +106,8 @@
         "condition_variable": "cpp",
         "csignal": "cpp",
         "*.tcc": "cpp",
-        "memory_resource": "cpp"
+        "memory_resource": "cpp",
+        "cinttypes": "cpp"
     },
     "files.exclude": {
         "**/.git": true,

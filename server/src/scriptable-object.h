@@ -1,6 +1,7 @@
 #pragma once
 
 #include "object.h"
+#include "scripting.h"
 
 class ScriptableObject : public Object {
 public:
@@ -19,25 +20,28 @@ public:
     virtual void OnClientCreate() override {
         Object::OnClientCreate();
         script.InitializeInstance(className, GetId());
-        script.OnClientCreate();
+        script.CallMemberFunction("OnClientCreate");
     }
 
     virtual void OnCreate() override {
         Object::OnCreate();
         #ifdef BUILD_SERVER
             script.InitializeInstance(className, GetId());
-            script.OnServerCreate();
+            script.CallMemberFunction("OnServerCreate");
         #endif
     }
 
     virtual void Tick(Time time) override {
         Object::Tick(time);
-        script.OnTick(time);
+        script.CallMemberFunction("Tick", time);
     }
 
     virtual void OnCollide(CollisionResult& result) override {
         Object::OnCollide(result);
-        script.OnCollide(result);
+        script.CallMemberFunction("OnCollide", {
+            make_data(D_NUMBER, data_value_num(result.collidedWith->GetId())),
+            ConvertToWendy(result.collisionDifference)
+        });
     }
 };
 

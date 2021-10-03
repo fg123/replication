@@ -132,7 +132,7 @@ public:
 
     // TODO: add damage source
     virtual void OnTakeDamage(float damage) {
-        script.OnTakeDamage(damage);
+        script.CallMemberFunction("OnTakeDamage", damage);
     }
 
     Vector3 GetLeftAttachmentPoint() const;

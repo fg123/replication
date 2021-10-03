@@ -1,6 +1,6 @@
 #pragma once
 
-#include "object.h"
+#include "scriptable-object.h"
 
 // Make this templated probably, also might need to make a class of pickupable
 //   things
@@ -20,7 +20,7 @@ inline void ProcessReplicationDispatch(WeaponAttachmentPoint& object, json& obj)
     object = (WeaponAttachmentPoint)obj.GetInt();
 }
 
-class WeaponObject : public Object {
+class WeaponObject : public ScriptableObject {
 protected:
     PlayerObject* attachedTo = nullptr;
 public:
@@ -38,14 +38,26 @@ public:
         WeaponAttachmentPoint::RIGHT);
     void Detach();
 
-    virtual void StartFire(Time time) {}
-    virtual void Fire(Time time) {}
-    virtual void ReleaseFire(Time time) {}
+    virtual void StartFire(Time time) {
+        script.CallMemberFunction("StartFire", time);
+    }
+    virtual void Fire(Time time) {
 
-    virtual void StartAlternateFire(Time time) {}
-    virtual void ReleaseAlternateFire(Time time) {}
+    }
+    virtual void ReleaseFire(Time time) {
 
-    virtual void StartReload(Time time) {}
+    }
+
+    virtual void StartAlternateFire(Time time) {
+
+    }
+    virtual void ReleaseAlternateFire(Time time) {
+
+    }
+
+    virtual void StartReload(Time time) {
+
+    }
 
     virtual void Tick(Time time) override;
     virtual void Serialize(JSONWriter& obj) override;

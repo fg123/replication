@@ -11,7 +11,6 @@
 #include "replicable.h"
 #include "model.h"
 #include "ray-cast.h"
-#include "scripting.h"
 
 // This must be 32 bit because client side JS only supports 32 bit
 using ObjectID = uint32_t;

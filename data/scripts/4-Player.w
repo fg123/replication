@@ -1,9 +1,3 @@
-struct WeaponAttachmentPoint => [
-    LEFT = 0,
-    CENTER = 1,
-    RIGHT = 2
-];
-
 let player_SetWeapon => (id, weaponType, weaponId, attachmentPoint) native player_SetWeapon;
 let player_SetHealth => (id, health) native player_SetHealth;
 

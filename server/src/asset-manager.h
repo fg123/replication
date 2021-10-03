@@ -8,7 +8,7 @@
 #include "mesh.h"
 #include "logging.h"
 #include "audio.h"
-#include "scripting.h"
+#include "script-manager.h"
 
 class AssetManager {
     std::unordered_map<std::string, Model*> modelMap;

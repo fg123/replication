@@ -7,7 +7,7 @@
 
 #include "animation.h"
 #include "ray-cast.h"
-#include "scripting.h"
+#include "script-manager.h"
 
 #ifdef BUILD_SERVER
 #include "uWebSocket/App.h"

@@ -5,7 +5,7 @@
 
 #include <exception>
 
-WeaponObject::WeaponObject(Game& game, Vector3 position) : Object(game) {
+WeaponObject::WeaponObject(Game& game, Vector3 position) : ScriptableObject(game) {
     SetPosition(position);
     // No Colliders
     collisionExclusion |= (uint64_t)Tag::PLAYER;
@@ -49,7 +49,7 @@ void WeaponObject::Detach() {
 }
 
 void WeaponObject::Tick(Time time) {
-    Object::Tick(time);
+    ScriptableObject::Tick(time);
     if (attachedTo) {
         // Attached!
         SetIsStatic(false);
@@ -93,7 +93,7 @@ void WeaponObject::Tick(Time time) {
 }
 
 void WeaponObject::Serialize(JSONWriter& obj) {
-    Object::Serialize(obj);
+    ScriptableObject::Serialize(obj);
     if (attachedTo) {
         obj.Key("attach");
         obj.Uint(attachedTo->GetId());
@@ -101,7 +101,7 @@ void WeaponObject::Serialize(JSONWriter& obj) {
 }
 
 void WeaponObject::ProcessReplication(json& obj) {
-    Object::ProcessReplication(obj);
+    ScriptableObject::ProcessReplication(obj);
     if (obj.HasMember("attach")) {
         attachedTo = game.GetObject<PlayerObject>(obj["attach"].GetUint());
     }
