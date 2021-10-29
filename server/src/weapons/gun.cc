@@ -14,9 +14,9 @@ void GunBase::Tick(Time time) {
 
     if (reloadStartTime != 0 && time >= reloadStartTime + reloadTime) {
         reloadStartTime = 0;
-        if (attachedTo->inventoryManager.GetAmmoCount() > 0) {
+        if (GetAttachedTo()->inventoryManager.GetAmmoCount() > 0) {
         #ifdef BUILD_SERVER
-            bullets = attachedTo->inventoryManager.RemoveAmmo(magazineSize);
+            bullets = GetAttachedTo()->inventoryManager.RemoveAmmo(magazineSize);
             game.RequestReplication(GetId());
         #endif
         }
@@ -55,7 +55,7 @@ void GunBase::Serialize(JSONWriter& obj) {
     WeaponObject::Serialize(obj);
     #ifdef BUILD_CLIENT
         obj.Key("inventoryAmmo");
-        obj.Uint(attachedTo->inventoryManager.GetAmmoCount());
+        obj.Uint(GetAttachedTo()->inventoryManager.GetAmmoCount());
     #endif
 }
 
@@ -74,7 +74,7 @@ void GunBase::StartFire(Time time) {
 void GunBase::FireBullet(const Vector3& from, const Vector3& direction) {
     Vector3 bulletEnd = from + direction * 1000.f;
     RayCastRequest request;
-    request.excludeObjects.insert(attachedTo->GetId());
+    request.excludeObjects.insert(GetAttachedTo()->GetId());
     request.excludeObjects.insert(GetId());
     request.startPoint = from + direction;
     request.direction = direction;
@@ -92,7 +92,7 @@ void GunBase::FireBullet(const Vector3& from, const Vector3& direction) {
 
     if (result.isHit) {
         if (result.hitObject->IsTagged(Tag::PLAYER)) {
-            static_cast<PlayerObject*>(result.hitObject)->DealDamage((float)damage, attachedTo->GetId());
+            static_cast<PlayerObject*>(result.hitObject)->DealDamage((float)damage, GetAttachedTo()->GetId());
         }
         else {
             #ifdef BUILD_SERVER
@@ -141,8 +141,8 @@ void GunBase::ActualFire(Time time) {
         recoilRotationPitchVel = 30.f;
     }
 
-    attachedTo->pitchYawVelocity.x += 0.1;
-    attachedTo->pitchYawVelocity.y += ((std::fmod(currentSpread, 12) < 6) ? -1 : 1) *
+    GetAttachedTo()->pitchYawVelocity.x += 0.1;
+    GetAttachedTo()->pitchYawVelocity.y += ((std::fmod(currentSpread, 12) < 6) ? -1 : 1) *
         (currentSpread / 4) * ((time % 128 <= 64) ? 0.02 : 0.04);
 
     std::vector<std::pair<float, float>> points;
@@ -154,8 +154,8 @@ void GunBase::ActualFire(Time time) {
         points.emplace_back(r, theta);
     }
 
-    Vector3 ray_vec = attachedTo->GetLookDirection();
-    Vector3 ray_pos = attachedTo->GetPosition();
+    Vector3 ray_vec = GetAttachedTo()->GetLookDirection();
+    Vector3 ray_pos = GetAttachedTo()->GetPosition();
     Vector3 circle_vec;
     if (ray_vec.z != 0) {
         float z = -(ray_vec.x + ray_vec.y) / ray_vec.z;
@@ -200,7 +200,7 @@ void GunBase::ActualFire(Time time) {
 }
 
 void GunBase::StartReload(Time time) {
-    if (reloadStartTime == 0 && attachedTo->inventoryManager.GetAmmoCount() > 0 && bullets != magazineSize) {
+    if (reloadStartTime == 0 && GetAttachedTo()->inventoryManager.GetAmmoCount() > 0 && bullets != magazineSize) {
         reloadStartTime = time;
         game.PlayAudio("reload.wav", 1.0f, this);
     }

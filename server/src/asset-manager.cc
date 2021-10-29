@@ -4,13 +4,23 @@
 #include "util.h"
 #include "scene.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#ifdef BUILD_SERVER
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 #include "external/OBJ_Loader.h"
+#pragma GCC diagnostic pop
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "external/stb_image.h"
+#ifdef BUILD_CLIENT
 
-#define DR_WAV_IMPLEMENTATION
-#include "external/dr_wav.h"
+    #define STB_IMAGE_IMPLEMENTATION
+    #include "external/stb_image.h"
+
+    #define DR_WAV_IMPLEMENTATION
+    #include "external/dr_wav.h"
+
+#endif
 
 #include <filesystem>
 #include <unordered_set>
@@ -261,7 +271,7 @@ std::set<fs::path> SortedDirectory(const fs::path& path) {
     return sorted;
 }
 
-void AssetManager::LoadDataFromDirectory(ScriptManager& scriptManager) {
+void AssetManager::LoadDataFromDirectory() {
     // Models
     for (auto& p: SortedDirectory(RESOURCE_PATH("models/"))) {
         if (modelExtensions.find(p.extension().string()) == modelExtensions.end()) {
@@ -278,14 +288,6 @@ void AssetManager::LoadDataFromDirectory(ScriptManager& scriptManager) {
         LoadModel(modelName, modelPath, modelStream);
     }
 
-    for (auto& p: SortedDirectory(RESOURCE_PATH("scripts/"))) {
-        if (scriptExtensions.find(p.extension().string()) == scriptExtensions.end()) {
-            continue;
-        }
-        scriptManager.AddScript(p.string());
-    }
-    scriptManager.InitializeVM();
-
     #ifdef BUILD_CLIENT
     for (auto& p: SortedDirectory(RESOURCE_PATH("sounds/"))) {
         if (audioExtensions.find(p.extension().string()) == audioExtensions.end()) {
@@ -296,4 +298,17 @@ void AssetManager::LoadDataFromDirectory(ScriptManager& scriptManager) {
         LoadAudio(audioName, audioPath);
     }
     #endif
+}
+
+void AssetManager::LoadDataFromDirectory(ScriptManager& scriptManager) {
+    LoadDataFromDirectory();
+
+    for (auto& p: SortedDirectory(RESOURCE_PATH("scripts/"))) {
+        if (scriptExtensions.find(p.extension().string()) == scriptExtensions.end()) {
+            continue;
+        }
+        scriptManager.AddScript(p.string());
+    }
+    scriptManager.InitializeVM();
+
 }

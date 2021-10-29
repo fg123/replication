@@ -18,3 +18,6 @@ node_modules/
 
 // Assimp Binaries
 server/lib/assimp-4.1.0/bin
+
+// clang cache
+*/.cache/

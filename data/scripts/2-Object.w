@@ -18,7 +18,10 @@ let object_GenerateOBBCollidersFromModel => (id) native object_GenerateOBBCollid
 let object_AddSphereCollider => (id, offset, radius) native object_AddSphereCollider;
 
 // Interface for Object
-struct Object => (id) [BaseType = "ScriptableObject"] {
+struct Object => (
+    id
+) [BaseType = "ScriptableObject"] {
+
     init => () {}
 
     GetPosition  => () ret object_GetPosition(this.id);

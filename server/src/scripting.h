@@ -16,8 +16,8 @@ void WendyCallMemberFunction(struct data structInstance,
 // Each object holds an instance
 class ScriptInstance : public Replicable {
     struct data classInstance;
-public:
     std::string className;
+public:
     ScriptInstance();
     ~ScriptInstance();
 

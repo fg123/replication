@@ -52,6 +52,6 @@ public:
         return sounds[name];
     }
 #endif
-
+    void LoadDataFromDirectory();
     void LoadDataFromDirectory(ScriptManager& scriptManager);
 };

@@ -294,7 +294,7 @@ void ClientGL::SetupDrawingLayers() {
         cameraPosition = localPlayer->GetClientPosition();
         cameraRotation = localPlayer->GetClientLookDirection();
 
-        for (auto& child : localPlayer->children) {
+        for (auto& child : game.GetRelationshipManager().GetChildren(game.localPlayerId)) {
             child->SetTag(Tag::DRAW_FOREGROUND);
         }
     }

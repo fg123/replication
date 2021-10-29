@@ -21,8 +21,10 @@ public:
         // Calculate cooldown
         timeSinceLastUse = time - lastUse;
         if (timeSinceLastUse > cooldown) {
-            if (attachedTo && attachedTo->GetCurrentWeapon() && dynamic_cast<BowObject*>(attachedTo->GetCurrentWeapon())) {
-                dynamic_cast<BowObject*>(attachedTo->GetCurrentWeapon())->SetInstantFire(false);
+            if (auto attachedTo = GetAttachedTo()) {
+                if (attachedTo->GetCurrentWeapon() && dynamic_cast<BowObject*>(attachedTo->GetCurrentWeapon())) {
+                    dynamic_cast<BowObject*>(attachedTo->GetCurrentWeapon())->SetInstantFire(false);
+                }
             }
         }
     }
@@ -34,9 +36,11 @@ public:
         }
 
         lastUse = time;
-        if (attachedTo && attachedTo->GetCurrentWeapon() && dynamic_cast<BowObject*>(attachedTo->GetCurrentWeapon())) {
-            dynamic_cast<BowObject*>(attachedTo->GetCurrentWeapon())->SetInstantFire(true);
-            game.PlayAudio("Archer/arrow-ulti-activate.wav", 1.f, attachedTo);
+        if (auto attachedTo = GetAttachedTo()) {
+            if (attachedTo->GetCurrentWeapon() && dynamic_cast<BowObject*>(attachedTo->GetCurrentWeapon())) {
+                dynamic_cast<BowObject*>(attachedTo->GetCurrentWeapon())->SetInstantFire(true);
+                game.PlayAudio("Archer/arrow-ulti-activate.wav", 1.f, attachedTo);
+            }
         }
     }
 

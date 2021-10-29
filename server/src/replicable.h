@@ -10,6 +10,7 @@
 #include "logging.h"
 
 #include <sstream>
+#include <vector>
 #include <functional>
 #include <unordered_map>
 #include <optional>
@@ -90,26 +91,8 @@ public:
     type name = defaultValue;                               \
     REPLICATED_IMPL(type, name, repAlias)
 
-#ifdef BUILD_SERVER
-#define REPLICATED_IMPL(repType, name, repAlias)                              \
-    ReplicatedRegister<repType> name##__ {                                    \
-        entries,                                                              \
-        repAlias,                                                             \
-        [](void* _this, JSONWriter& obj) {                                    \
-            obj.Key(repAlias);                                                \
-            SerializeDispatch(static_cast<decltype(this)>(_this)->name, obj); \
-        },                                                    \
-        [](void* _this, json& obj) { \
-            if (obj.HasMember(repAlias)) { \
-                ProcessReplicationDispatch(static_cast<decltype(this)>(_this)->name, obj[repAlias]);  \
-            } \
-        } \
-    };
-#endif
-
-#ifdef BUILD_CLIENT
 #define REPLICATED_IMPL REPLICATED_STRUCT_IMPL
-#endif
+
 
 #define REPLICATED_STRUCT_IMPL(repType, name, repAlias)                              \
     ReplicatedRegister<repType> name##__ {                                    \

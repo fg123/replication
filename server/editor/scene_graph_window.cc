@@ -220,9 +220,10 @@ void SceneGraphWindow::Draw(Editor& editor) {
             static ImGuiTextFilter modelFilter;
             modelFilter.Draw("Filter Models");
             ImGui::SetItemDefaultFocus();
+            auto& models = editor.scene.assetManager.models;
             if (ImGui::BeginListBox("Models")) {
-                for (size_t i = 0; i < editor.scene.models.size(); i++) {
-                    auto& model = editor.scene.models[i];
+                for (size_t i = 0; i < models.size(); i++) {
+                    auto& model = models[i]->name;
                     if (modelFilter.PassFilter(model.c_str())) {
                         const bool is_selected = (selectedModelIdx == i);
                         if (ImGui::Selectable(model.c_str(), is_selected)) {
@@ -232,13 +233,13 @@ void SceneGraphWindow::Draw(Editor& editor) {
                 }
                 ImGui::EndListBox();
             }
-            selectedModelIdx = std::clamp(selectedModelIdx, (size_t)0, editor.scene.models.size() - 1);
+            selectedModelIdx = std::clamp(selectedModelIdx, (size_t)0, models.size() - 1);
 
-            std::string addString = "Add Model (" + editor.scene.models[selectedModelIdx] + ")";
+            std::string addString = "Add Model (" + models[selectedModelIdx]->name + ")";
             if (ImGui::Button(addString.c_str(), ImVec2(120, 0))) {
                 StaticModelNode* node = new StaticModelNode(editor.scene.assetManager);
-                node->model = editor.scene.assetManager.GetModel(editor.scene.models[selectedModelIdx]);
-                node->name = editor.scene.models[selectedModelIdx];
+                node->model = models[selectedModelIdx];
+                node->name = models[selectedModelIdx]->name;
                 node->parent = parent;
                 parent->children.push_back(node);
                 ImGui::CloseCurrentPopup();

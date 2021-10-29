@@ -11,26 +11,16 @@ WeaponObject::WeaponObject(Game& game, Vector3 position) : ScriptableObject(game
     collisionExclusion |= (uint64_t)Tag::PLAYER;
     SetTag(Tag::WEAPON);
     Detach();
+
+    className = "Weapon";
 }
 
 void WeaponObject::AttachToPlayer(PlayerObject* player, WeaponAttachmentPoint inAttachmentPoint) {
-    if (player == nullptr) {
-        LOG_ERROR("Can't attach to null! Use Detach() instead!");
-        throw std::runtime_error("Can't attach to null! Use Detach() instead!");
-    }
-    if (attachedTo != nullptr && attachedTo != player) {
-        LOG_ERROR("Weapon already attached!");
-        throw std::runtime_error("Weapon already attached!");
-    }
-    else if (player == attachedTo) {
-        return;
-    }
     LOG_DEBUG("Weapon Attach");
     // Associate hierarchy
     attachmentPoint = inAttachmentPoint;
 
     game.AssignParent(this, player);
-    attachedTo = player;
     SetDirty(true);
     // No Collision
     collisionExclusion |= (uint64_t)Tag::OBJECT;
@@ -40,7 +30,6 @@ void WeaponObject::AttachToPlayer(PlayerObject* player, WeaponAttachmentPoint in
 
 void WeaponObject::Detach() {
     game.DetachParent(this);
-    attachedTo = nullptr;
     SetVelocity(Vector3());
     collisionExclusion &= ~(uint64_t)Tag::OBJECT;
     RemoveTag(Tag::NO_KILLPLANE);
@@ -50,7 +39,7 @@ void WeaponObject::Detach() {
 
 void WeaponObject::Tick(Time time) {
     ScriptableObject::Tick(time);
-    if (attachedTo) {
+    if (auto attachedTo = GetAttachedTo()) {
         // Attached!
         SetIsStatic(false);
         SetPosition(attachedTo->GetAttachmentPoint(attachmentPoint));
@@ -92,22 +81,8 @@ void WeaponObject::Tick(Time time) {
     }
 }
 
-void WeaponObject::Serialize(JSONWriter& obj) {
-    ScriptableObject::Serialize(obj);
-    if (attachedTo) {
-        obj.Key("attach");
-        obj.Uint(attachedTo->GetId());
-    }
-}
-
-void WeaponObject::ProcessReplication(json& obj) {
-    ScriptableObject::ProcessReplication(obj);
-    if (obj.HasMember("attach")) {
-        attachedTo = game.GetObject<PlayerObject>(obj["attach"].GetUint());
-    }
-    else {
-        attachedTo = nullptr;
-    }
+PlayerObject* WeaponObject::GetAttachedTo() {
+    return dynamic_cast<PlayerObject*>(game.GetRelationshipManager().GetParent(GetId()));
 }
 
 
@@ -122,7 +97,7 @@ void WeaponWithCooldown::Tick(Time time) {
     else {
         currentCooldown = (lastUseTime + cooldown) - time;
     }
-    if (attachedTo) {
+    if (GetAttachedTo()) {
         SetDirty(true);
     }
     // LOG_DEBUG("LUT: " << lastUseTime << " CD: " << currentCooldown);

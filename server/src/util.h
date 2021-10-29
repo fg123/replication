@@ -88,3 +88,11 @@ inline float AngleLerpDegrees(float a, float b, float t) {
     }
     return a + d * t;
 }
+
+inline std::string RemoveFileExtension(const std::string& filename) {
+    auto dot = filename.find_last_of('.');
+    if (dot == std::string::npos) {
+        return filename;
+    }
+    return filename.substr(0, dot);
+}

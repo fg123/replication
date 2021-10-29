@@ -1,5 +1,4 @@
-#ifndef DASH_H
-#define DASH_H
+#pragma once
 
 #include "weapons/weapon.h"
 #include "player.h"
@@ -7,9 +6,11 @@
 class DashAbility : public WeaponWithCooldown {
     static const int DashAmount = 20;
 
+#ifdef BUILD_SERVER
     int noGravDuration = 2000;
 
     Time lastDash = 0;
+#endif
 
 public:
     CLASS_CREATE(DashAbility)
@@ -22,12 +23,12 @@ public:
         WeaponWithCooldown::Tick(time);
     #ifdef BUILD_SERVER
         // Calculate duration
-        if (!attachedTo) {
+        if (!GetAttachedTo()) {
             return;
         }
 
         if (time > noGravDuration + lastDash) {
-            attachedTo->RemoveTag(Tag::NO_GRAVITY);
+            GetAttachedTo()->RemoveTag(Tag::NO_GRAVITY);
         }
     #endif
     }
@@ -36,19 +37,19 @@ public:
         WeaponWithCooldown::StartFire(time);
         if (IsOnCooldown()) return;
         CooldownStart(time);
-    #ifdef BUILD_SERVER
-        lastDash = time;
+        if (auto attachedTo = GetAttachedTo()) {
+        #ifdef BUILD_SERVER
+            lastDash = time;
 
-        Vector3 velocity = attachedTo->GetVelocity();
-        velocity.y = DashAmount;
+            Vector3 velocity = attachedTo->GetVelocity();
+            velocity.y = DashAmount;
 
-        attachedTo->SetVelocity(velocity);
-        attachedTo->SetTag(Tag::NO_GRAVITY);
-    #endif
-        game.PlayAudio("Archer/arrow-jump.wav", 1.f, attachedTo);
+            attachedTo->SetVelocity(velocity);
+            attachedTo->SetTag(Tag::NO_GRAVITY);
+        #endif
+            game.PlayAudio("Archer/arrow-jump.wav", 1.f, attachedTo);
+        }
     }
 };
 
 CLASS_REGISTER(DashAbility);
-
-#endif

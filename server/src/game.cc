@@ -18,6 +18,7 @@
 
 #include <fstream>
 #include <exception>
+#include <thread>
 
 
 #ifdef BUILD_SERVER
@@ -33,7 +34,10 @@ const int ReplicateInterval = 100;
 Vector3 liveBoxStart(-1000, -100, -1000);
 Vector3 liveBoxSize(2000, 2000, 2000);
 
-Game::Game() : nextId(1), scriptManager(this) {
+Game::Game() :
+    nextId(1),
+    relationshipManager(*this),
+    scriptManager(this) {
     if (GlobalSettings.RunTests) return;
 
     #ifdef BUILD_SERVER
@@ -160,41 +164,23 @@ PlayerObject* Game::GetLocalPlayer() {
 #endif
 
 void Game::AssignParent(Object* child, Object* parent) {
-    if (child->parent) {
-        LOG_INFO("Reassigning parent for " << child << " from " << child->parent << " to " << parent << "!");
-        DetachParent(child);
-    }
-    child->parent = parent;
-    parent->children.insert(child);
+    relationshipManager.SetParent(child->GetId(), parent->GetId());
 }
 
 void Game::DetachParent(Object* child) {
-    if (!child->parent) {
-        return;
-    }
-    Object* parent = child->parent;
-    // TODO: assert has child
-    parent->children.erase(child);
-    child->parent = nullptr;
+    relationshipManager.RemoveParent(child->GetId());
 }
 
 bool IsPointABehindPointB(const Vector3& a, const Vector3& b, const Vector3& bLook) {
     return glm::dot(glm::normalize(a - b), glm::normalize(bLook)) < 0;
 }
 
-void Game::Tick(Time time) {
-    gameTime = time;
-
 #ifdef BUILD_SERVER
-    queuedCallsMutex.lock();
-    for (auto& call : queuedCalls) {
-        call(*this);
-    }
-    queuedCalls.clear();
-    queuedCallsMutex.unlock();
+bool Game::IsOnTickThread() {
+    return std::this_thread::get_id() == tickThreadId;
+}
 
-    // New objects get queued in from HandleReplication and EnsureObjectExists
-    //   on the client, not through this set.
+void Game::FlushNewObjects() {
     newObjectsMutex.lock();
     std::unordered_map<ObjectID, Object*> newObjectsCopy = newObjects;
     newObjects.clear();
@@ -205,17 +191,31 @@ void Game::Tick(Time time) {
         gameObjects[newObject.first]->OnCreate();
         RequestReplication(newObject.first);
     }
+}
+
 #endif
 
-    for (auto& object : gameObjects) {
-        // Only tick on root objects
-        if (object.second->parent == nullptr) {
-            Time start = Timer::NowMicro();
-            object.second->Tick(time);
-            Time end = Timer::NowMicro();
-            averageObjectTickTime.InsertValue(end - start);
-        }
+void Game::Tick(Time time) {
+    gameTime = time;
+
+#ifdef BUILD_SERVER
+
+    tickThreadId = std::this_thread::get_id();
+
+    queuedCallsMutex.lock();
+    for (auto& call : queuedCalls) {
+        call(*this);
     }
+    queuedCalls.clear();
+    queuedCallsMutex.unlock();
+
+    // New objects get queued in from HandleReplication and EnsureObjectExists
+    //   on the client, not through this set.
+    FlushNewObjects();
+#endif
+
+    relationshipManager.Tick(time);
+
     // if (time % 1024 == 0) LOG_DEBUG("Average Object Tick Time: " << averageObjectTickTime.GetAverage());
 
 #ifdef BUILD_SERVER
@@ -357,6 +357,11 @@ void Game::InitialReplication(PlayerSocketData* data) {
     writer.Key("ticks");
     writer.Int(0);
 
+    writer.Key("game");
+    writer.StartObject();
+    Serialize(writer);
+    writer.EndObject();
+
     writer.Key("objs");
     writer.StartArray();
     for (auto& object : gameObjects) {
@@ -376,7 +381,7 @@ void Game::RequestReplication(ObjectID objectId) {
     Object* obj = gameObjects[objectId];
     while (obj != nullptr) {
         replicateNextTick.insert(obj->GetId());
-        obj = obj->parent;
+        obj = relationshipManager.GetParent(obj->GetId());
     }
 }
 
@@ -395,31 +400,41 @@ void Game::Replicate(Time time) {
 
     rapidjson::StringBuffer buffer;
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    writer.StartArray();
+    {
+        writer.StartArray();
 
-    for (auto& objectId : deadSinceLastReplicate) {
-        writer.StartObject();
-        writer.Key("id");
-        writer.Uint(objectId);
-        writer.Key("dead");
-        writer.Bool(true);
-        writer.EndObject();
-    }
-
-    deadSinceLastReplicate.clear();
-
-    for (auto& objectId : replicateNextTick) {
-        if (gameObjects.find(objectId) != gameObjects.end()) {
-            gameObjects[objectId]->SetDirty(false);
-
+        for (auto& objectId : deadSinceLastReplicate) {
             writer.StartObject();
-            gameObjects[objectId]->Serialize(writer);
+            writer.Key("id");
+            writer.Uint(objectId);
+            writer.Key("dead");
+            writer.Bool(true);
             writer.EndObject();
         }
-    }
-    replicateNextTick.clear();
 
-    writer.EndArray();
+        deadSinceLastReplicate.clear();
+
+        for (auto& objectId : replicateNextTick) {
+            if (gameObjects.find(objectId) != gameObjects.end()) {
+                gameObjects[objectId]->SetDirty(false);
+
+                writer.StartObject();
+                gameObjects[objectId]->Serialize(writer);
+                writer.EndObject();
+            }
+        }
+        replicateNextTick.clear();
+
+        writer.EndArray();
+    }
+
+    rapidjson::StringBuffer gameBuffer;
+    rapidjson::Writer<rapidjson::StringBuffer> gameWriter(gameBuffer);
+    {
+        gameWriter.StartObject();
+        Serialize(gameWriter);
+        gameWriter.EndObject();
+    }
 
     // std::scoped_lock<std::mutex> lock(playersSetMutex);
     for (auto& player : players) {
@@ -445,8 +460,10 @@ void Game::Replicate(Time time) {
             writer2.Uint64(player->playerObject->ticksSinceLastProcessed);
             writer2.Key("objs");
             writer2.RawValue(buffer.GetString(), buffer.GetSize(), rapidjson::kArrayType);
-            writer2.EndObject();
+            writer2.Key("game");
+            writer2.RawValue(gameBuffer.GetString(), gameBuffer.GetSize(), rapidjson::kObjectType);
 
+            writer2.EndObject();
             SendData(player, output.GetString());
         }
         if (player->playerObjectDirty) {
@@ -464,15 +481,6 @@ void Game::Replicate(Time time) {
     }
 }
 
-Object* Game::GetObjectIncludingNewQueued(ObjectID id) {
-    Object* obj = GetObject(id);
-    if (obj == nullptr) {
-        if (newObjects.find(id) != newObjects.end()) {
-            obj = newObjects[id];
-        }
-    }
-    return obj;
-}
 #endif
 
 #ifdef BUILD_CLIENT
@@ -517,7 +525,7 @@ void Game::EnsureObjectExists(json& object) {
     }
 }
 
-void Game::ProcessReplication(json& object) {
+void Game::ProcessReplicationForObject(json& object) {
     ObjectID id = object["id"].GetUint();
     if (object.HasMember("dead")) {
         return;
@@ -623,13 +631,19 @@ void Game::ChangeId(ObjectID oldId, ObjectID newId) {
 
 void Game::AddObject(Object* obj) {
     // Client does not do anything
-    #ifdef BUILD_SERVER
-        ObjectID newId = RequestId();
-        obj->SetId(newId);
-        LOG_DEBUG("Add Object (" << (void*)obj << ") " << obj);
-        std::scoped_lock<std::mutex> lock(newObjectsMutex);
-        newObjects[newId] = obj;
-    #endif
+#ifdef BUILD_SERVER
+    ObjectID newId = RequestId();
+    obj->SetId(newId);
+    LOG_DEBUG("Add Object (" << (void*)obj << ") " << obj);
+    newObjectsMutex.lock();
+    newObjects[newId] = obj;
+    newObjectsMutex.unlock();
+    // Immediately queue into main object system
+    if (IsOnTickThread()) {
+        LOG_DEBUG("Is on main thread... flushing new objects");
+        FlushNewObjects();
+    }
+#endif
 }
 
 void Game::DestroyObject(ObjectID objectId) {

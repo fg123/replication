@@ -11,6 +11,7 @@ Editor::Editor(GLFWwindow* window, const std::string& path) :
     std::string title = "Editor: " + path;
     glfwSetWindowTitle(window, title.c_str());
 
+    scene.assetManager.LoadDataFromDirectory();
     scene.LoadFromFile(path);
 
     glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {

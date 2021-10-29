@@ -4,6 +4,7 @@
 #include "game.h"
 #include "player.h"
 #include "weapons/weapon.h"
+#include "util.h"
 
 std::string ScriptManager::GetBaseTypeFromScriptingType(const std::string& type) {
     // Make a WendyCall to retrieve BaseType

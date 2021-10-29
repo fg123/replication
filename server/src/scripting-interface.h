@@ -5,6 +5,7 @@
 // Some of the code here is sourced from: https://stackoverflow.com/questions/15036063/obtain-argument-index-while-unpacking-argument-list-with-variadic-templates
 #include "game.h"
 #include "wendy-headers.h"
+#include "object-reference.h"
 
 class PlayerObject;
 class WeaponObject;

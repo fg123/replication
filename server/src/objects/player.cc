@@ -87,14 +87,18 @@ void PlayerObject::OnDeath() {
 #ifdef BUILD_SERVER
     inventoryManager.ClearInventory();
     if (qWeapon) {
-        game.DestroyObject(qWeapon->GetId());
-        qWeapon->Detach();
-        qWeapon = nullptr;
+        if (auto weapon = qWeapon.Get(game)) {
+            game.DestroyObject(weapon->GetId());
+            weapon->Detach();
+        }
+        qWeapon.Reset();
     }
     if (zWeapon) {
-        game.DestroyObject(zWeapon->GetId());
-        zWeapon->Detach();
-        zWeapon = nullptr;
+        if (auto weapon = zWeapon.Get(game)) {
+            game.DestroyObject(weapon->GetId());
+            weapon->Detach();
+        }
+        zWeapon.Reset();
     }
 
     // Notify game so it can replace a new character
@@ -120,7 +124,7 @@ void PlayerObject::InventorySwap() {
     inventoryManager.Swap();
 }
 
-WeaponObject* PlayerObject::ScanPotentialWeapon() {
+ObjectReference<WeaponObject> PlayerObject::ScanPotentialWeapon() {
     // LOG_DEBUG("Scan Weapon");
     RayCastRequest castRay;
     castRay.startPoint = GetPosition() + GetLookDirection();
@@ -129,18 +133,20 @@ WeaponObject* PlayerObject::ScanPotentialWeapon() {
     RayCastResult result = game.RayCastInWorld(castRay);
     if (result.isHit && result.zDepth < WEAPON_PICKUP_RANGE) {
         if (WeaponObject* potentialWeapon = dynamic_cast<WeaponObject*>(result.hitObject)) {
-            return potentialWeapon;
+            return potentialWeapon->GetId();
         }
         else {
             LOG_ERROR("Scan Potential Weapon for Weapon only but did not hit weapon");
         }
     }
-    return nullptr;
+    return {};
 }
 
 void PlayerObject::TryPickupItem() {
-    if (WeaponObject* potentialWeapon = ScanPotentialWeapon()) {
-        PickupWeapon(potentialWeapon);
+    if (auto potentialWeapon = ScanPotentialWeapon()) {
+        if (auto weapon = potentialWeapon.Get(game)) {
+            PickupWeapon(weapon);
+        }
     }
 }
 
@@ -336,27 +342,27 @@ void PlayerObject::Tick(Time time) {
         }
     }
 
-    if (qWeapon) {
+    if (auto weapon = qWeapon.Get(game)) {
         if (keyboardState[KEY_MAP[Q_KEY]]) {
             if (!lastKeyboardState[KEY_MAP[Q_KEY]]) {
-                qWeapon->StartFire(time);
+                weapon->StartFire(time);
             }
-            qWeapon->Fire(time);
+            weapon->Fire(time);
         }
         else if (lastKeyboardState[KEY_MAP[Q_KEY]]) {
-            qWeapon->ReleaseFire(time);
+            weapon->ReleaseFire(time);
         }
     }
 
-    if (zWeapon) {
+    if (auto weapon = zWeapon.Get(game)) {
         if (keyboardState[KEY_MAP[Z_KEY]]) {
             if (!lastKeyboardState[KEY_MAP[Z_KEY]]) {
-                zWeapon->StartFire(time);
+                weapon->StartFire(time);
             }
-            zWeapon->Fire(time);
+            weapon->Fire(time);
         }
         else if (lastKeyboardState[KEY_MAP[Z_KEY]]) {
-            zWeapon->ReleaseFire(time);
+            weapon->ReleaseFire(time);
         }
     }
 
@@ -373,12 +379,8 @@ void PlayerObject::Tick(Time time) {
     rotation = glm::quat_cast(matrix);
 
 #ifdef BUILD_CLIENT
-    if (WeaponObject* obj = ScanPotentialWeapon()) {
-        pointedToObject = obj->GetId();
-    }
-    else {
-        pointedToObject = 0;
-    }
+    auto obj = ScanPotentialWeapon();
+    pointedToObject = obj;
 #endif
 
     ScriptableObject::Tick(time);
@@ -409,11 +411,11 @@ void PlayerObject::Serialize(JSONWriter& obj) {
 
     if (qWeapon) {
         obj.Key("wq");
-        obj.Uint(qWeapon->GetId());
+        obj.Uint(qWeapon.GetId());
     }
     if (zWeapon) {
         obj.Key("wz");
-        obj.Uint(zWeapon->GetId());
+        obj.Uint(zWeapon.GetId());
     }
     obj.Key("kb");
     obj.StartArray();
@@ -471,17 +473,18 @@ void PlayerObject::ProcessReplication(json& obj) {
     }
 
     if (obj.HasMember("wq")) {
-        qWeapon = game.GetObject<WeaponObject>(obj["wq"].GetUint());
+        qWeapon = obj["wq"].GetUint();
     }
     else {
-        qWeapon = nullptr;
+        qWeapon.Reset();
     }
     if (obj.HasMember("wz")) {
-        zWeapon = game.GetObject<WeaponObject>(obj["wz"].GetUint());
+        zWeapon = obj["wz"].GetUint();
     }
     else {
-        zWeapon = nullptr;
+        zWeapon.Reset();
     }
+
     size_t i = 0;
     for (const json &kb : obj["kb"].GetArray()) {
         keyboardState[i] = kb.GetBool();

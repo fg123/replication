@@ -20,8 +20,8 @@ public:
     BulletTracer(Game& game) : BulletTracer(game, nullptr, Vector3()) {}
     BulletTracer(Game& game, GunBase* gunBase, Vector3 to) :
         Object(game),
-        gunBase(gunBase),
-        to(to) {
+        to(to),
+        gunBase(gunBase) {
 
         if (gunBase) {
             from = gunBase->GetMuzzleLocation();

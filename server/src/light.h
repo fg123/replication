@@ -2,7 +2,11 @@
 
 #include "vector.h"
 #include "light.h"
+#include "replicable.h"
+
+#ifdef BUILD_CLIENT
 #include "opengl.h"
+#endif
 
 // Lights have shape types, which indicate falloff by the closest point
 //   Shapes also determine the corresponding light volume.

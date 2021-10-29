@@ -6,12 +6,7 @@
 
 Object* GetObjectFromArg(struct data id) {
     ObjectID objId = (ObjectID) id.value.number;
-    #ifdef BUILD_SERVER
-        Object* obj = ScriptManager::game->GetObjectIncludingNewQueued(objId);
-    #endif
-    #ifdef BUILD_CLIENT
-        Object* obj = ScriptManager::game->GetObject(objId);
-    #endif
+    Object* obj = ScriptManager::game->GetObject(objId);
     if (!obj) {
         // Try New-Queued objects
         LOG_ERROR("Could not obtain object from id in script instance!");

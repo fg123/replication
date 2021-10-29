@@ -1,5 +1,4 @@
-#ifndef VECTOR_H
-#define VECTOR_H
+#pragma once
 
 #include <cmath>
 #include <ostream>
@@ -48,4 +47,3 @@ inline bool IsZero(Vector3 a) {
 inline bool IsZero(Quaternion a) {
     return IsZero(Vector3(a.x, a.y, a.z));
 }
-#endif

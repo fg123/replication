@@ -8713,10 +8713,10 @@ var _free = Module["_free"] = createExportWrapper("free");
 var _malloc = Module["_malloc"] = createExportWrapper("malloc");
 
 /** @type {function(...*):?} */
-var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
+var _fflush = Module["_fflush"] = createExportWrapper("fflush");
 
 /** @type {function(...*):?} */
-var _fflush = Module["_fflush"] = createExportWrapper("fflush");
+var ___errno_location = Module["___errno_location"] = createExportWrapper("__errno_location");
 
 /** @type {function(...*):?} */
 var _SetLocalPlayerClient = Module["_SetLocalPlayerClient"] = createExportWrapper("SetLocalPlayerClient");
@@ -8815,10 +8815,10 @@ var _emscripten_stack_get_end = Module["_emscripten_stack_get_end"] = function()
 var _setThrew = Module["_setThrew"] = createExportWrapper("setThrew");
 
 /** @type {function(...*):?} */
-var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
+var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
 
 /** @type {function(...*):?} */
-var dynCall_vij = Module["dynCall_vij"] = createExportWrapper("dynCall_vij");
+var dynCall_viijii = Module["dynCall_viijii"] = createExportWrapper("dynCall_viijii");
 
 /** @type {function(...*):?} */
 var dynCall_jii = Module["dynCall_jii"] = createExportWrapper("dynCall_jii");
@@ -8835,14 +8835,14 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 /** @type {function(...*):?} */
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module['_game'] = 151208;
-var _clientGl = Module['_clientGl'] = 151584;
-var _clientAudio = Module['_clientAudio'] = 152132;
-var _inputEvents = Module['_inputEvents'] = 152156;
-var _isPaused = Module['_isPaused'] = 148860;
-var _isInventoryOpen = Module['_isInventoryOpen'] = 148861;
-var _ping = Module['_ping'] = 152192;
-var _lastTickTime = Module['_lastTickTime'] = 152184;
+var _game = Module['_game'] = 157560;
+var _clientGl = Module['_clientGl'] = 158032;
+var _clientAudio = Module['_clientAudio'] = 158580;
+var _inputEvents = Module['_inputEvents'] = 158604;
+var _isPaused = Module['_isPaused'] = 155120;
+var _isInventoryOpen = Module['_isInventoryOpen'] = 155121;
+var _ping = Module['_ping'] = 158640;
+var _lastTickTime = Module['_lastTickTime'] = 158632;
 
 
 

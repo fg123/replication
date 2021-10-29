@@ -60,7 +60,7 @@ public:
 
     virtual void Tick(Time time) override {
         WeaponWithCooldown::Tick(time);
-        if (attachedTo && fireHoldDownTime != 0) {
+        if (GetAttachedTo() && fireHoldDownTime != 0) {
             chargeUpTime = std::min(time - fireHoldDownTime, maxHoldDown);
             power = ((float) chargeUpTime / (float) maxHoldDown);
         }
@@ -87,28 +87,30 @@ public:
     }
 
     virtual void FireProjectile(Time time) {
-        Vector3 projEnd = attachedTo->GetPosition() + attachedTo->GetLookDirection() * maxDistance;
-        RayCastRequest request;
-        request.startPoint = attachedTo->GetPosition() + attachedTo->GetLookDirection();
-        request.direction = attachedTo->GetLookDirection();
+        if (auto attachedTo = GetAttachedTo()) {
+            Vector3 projEnd = attachedTo->GetPosition() + attachedTo->GetLookDirection() * maxDistance;
+            RayCastRequest request;
+            request.startPoint = attachedTo->GetPosition() + attachedTo->GetLookDirection();
+            request.direction = attachedTo->GetLookDirection();
 
-        RayCastResult result = game.RayCastInWorld(request);
-        if (result.isHit) {
-            projEnd = result.hitLocation;
+            RayCastResult result = game.RayCastInWorld(request);
+            if (result.isHit) {
+                projEnd = result.hitLocation;
+            }
+
+            Vector3 startPosition = GetPosition() + GetLookDirection() * 1.0f;
+
+            #ifdef BUILD_SERVER
+                Projectile* proj = new Projectile(game, attachedTo->GetId());
+                proj->SetFiredBy(this);
+                proj->SetPosition(startPosition);
+                float totalPower = (power * (powerMax - powerMin)) + powerMin;
+                proj->SetVelocity(glm::normalize(projEnd - startPosition) * totalPower);
+                game.AddObject(proj);
+            #endif
+            lastThrow = time;
+            CooldownStart(time);
         }
-
-        Vector3 startPosition = GetPosition() + GetLookDirection() * 1.0f;
-
-        #ifdef BUILD_SERVER
-            Projectile* proj = new Projectile(game, attachedTo->GetId());
-            proj->SetFiredBy(this);
-            proj->SetPosition(startPosition);
-            float totalPower = (power * (powerMax - powerMin)) + powerMin;
-            proj->SetVelocity(glm::normalize(projEnd - startPosition) * totalPower);
-            game.AddObject(proj);
-        #endif
-        lastThrow = time;
-        CooldownStart(time);
     }
 
     virtual void ReleaseFire(Time time) override {

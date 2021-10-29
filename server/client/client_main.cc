@@ -228,6 +228,10 @@ extern "C" {
             JSONDocument object;
             object.Parse(input);
 
+            if (object.HasMember("game")) {
+                game.ProcessReplication(object["game"]);
+            }
+
             bool hasPlayerIn = false;
             for (auto& event : object["objs"].GetArray()) {
                 ObjectID ids = event["id"].GetUint();
@@ -238,7 +242,7 @@ extern "C" {
             }
 
             for (auto& event : object["objs"].GetArray()) {
-                game.ProcessReplication(event);
+                game.ProcessReplicationForObject(event);
             }
 
             // If the replication doesn't correct player position, we can't

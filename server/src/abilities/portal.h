@@ -112,11 +112,11 @@ public:
 
         if (currentlyPortaling) {
             // TODO: Check if too close then we cancel
-            game.PlayAudio("PortalEnd.wav", 1.f, attachedTo);
+            game.PlayAudio("PortalEnd.wav", 1.f, GetAttachedTo());
             #ifdef BUILD_SERVER
                 PortalObject* secondPortal = new PortalObject(game);
-                secondPortal->SetPosition(attachedTo->GetPosition());
-                secondPortal->SetRotation(attachedTo->GetRotation());
+                secondPortal->SetPosition(GetAttachedTo()->GetPosition());
+                secondPortal->SetRotation(GetAttachedTo()->GetRotation());
                 secondPortal->otherPortal = firstPortal;
                 firstPortal->otherPortal = secondPortal;
 
@@ -129,11 +129,11 @@ public:
         }
         else {
             // Create First Portal
-            game.PlayAudio("PortalStart.wav", 1.f, attachedTo);
+            game.PlayAudio("PortalStart.wav", 1.f, GetAttachedTo());
             #ifdef BUILD_SERVER
                 firstPortal = new PortalObject(game);
-                firstPortal->SetPosition(attachedTo->GetPosition());
-                firstPortal->SetRotation(attachedTo->GetRotation());
+                firstPortal->SetPosition(GetAttachedTo()->GetPosition());
+                firstPortal->SetRotation(GetAttachedTo()->GetRotation());
                 game.AddObject(firstPortal);
             #endif
             currentlyPortaling = true;

@@ -3,6 +3,7 @@
 #include "scriptable-object.h"
 #include "vector.h"
 #include "inventory.h"
+#include "object-reference.h"
 #include "weapons/weapon.h"
 
 #include <mutex>
@@ -19,7 +20,7 @@ struct PlayerSettings : public Replicable {
 
 class PlayerObject : public ScriptableObject {
     void TryPickupItem();
-    WeaponObject* ScanPotentialWeapon();
+    ObjectReference<WeaponObject> ScanPotentialWeapon();
 
 protected:
     REPLICATED_D(float, health, "h", 100);
@@ -39,7 +40,7 @@ protected:
 public:
 
 #ifdef BUILD_CLIENT
-    ObjectID pointedToObject;
+    ObjectReference<Object> pointedToObject;
 #endif
 
     PlayerSettings playerSettings;
@@ -69,6 +70,10 @@ public:
     std::array<bool, 5> lastMouseState {};
 
     REPLICATED_D(int, mouseWheelDelta, "mwd", 0);
+
+    ObjectReference<WeaponObject> qWeapon;
+    ObjectReference<WeaponObject> zWeapon;
+
 
     CLASS_CREATE(PlayerObject);
 
@@ -141,15 +146,13 @@ public:
 
     Vector3 GetAttachmentPoint(WeaponAttachmentPoint attachmentPoint) const;
 
+    void SetWeaponSlot(ObjectReference<WeaponObject>& weaponSlot, ObjectID newWeapon);
     // #ifdef BUILD_CLIENT
     // // Don't show rotation on client
     // const Matrix4 GetTransform() override {
     //     return glm::translate(clientPosition) * glm::scale(scale);
     // }
     // #endif
-public:
-    WeaponObject* qWeapon = nullptr;
-    WeaponObject* zWeapon = nullptr;
 };
 
 CLASS_REGISTER(PlayerObject);

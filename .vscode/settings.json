@@ -120,5 +120,6 @@
         "**/*.o": true,
         "**/*.wo": true,
     },
-    "files.trimTrailingWhitespace": true
+    "files.trimTrailingWhitespace": true,
+    "cmake.configureOnOpen": false
 }

@@ -156,13 +156,6 @@ void Object::Tick(Time time) {
         lastFrameVelocity = velocity;
         lastFramePosition = position;
     }
-    // Tick my children, make a copy incase children detach
-    //   during their tick cycle
-    std::unordered_set<Object*> childrenCopy = children;
-    for (auto& child : childrenCopy) {
-        child->Tick(time);
-    }
-
     // AddDebugLine(position, position + GetLookDirection(), Vector3(1, 0, 1));
 }
 
@@ -249,20 +242,6 @@ void Object::Serialize(JSONWriter& obj) {
     obj.Key("t");
     obj.String(GetClass());
 
-#ifdef BUILD_SERVER
-    if (parent) {
-        obj.Key("pa");
-        obj.Int(parent->GetId());
-    }
-    if (children.size() > 0) {
-        obj.Key("ch");
-        obj.StartArray();
-        for (auto& child : children) {
-            obj.Int(child->GetId());
-        }
-        obj.EndArray();
-    }
-#endif
     if (model) {
         obj.Key("m");
         obj.Int(model->GetId());
@@ -272,19 +251,6 @@ void Object::Serialize(JSONWriter& obj) {
 void Object::ProcessReplication(json& object) {
     Replicable::ProcessReplication(object);
 
-    if (object.HasMember("pa")) {
-        parent = game.GetObject(object["pa"].GetInt());
-    }
-    else {
-        parent = nullptr;
-    }
-
-    children.clear();
-    if (object.HasMember("ch")) {
-        for (json& value : object["ch"].GetArray()) {
-            children.insert(game.GetObject(value.GetInt()));
-        }
-    }
     if (object.HasMember("m")) {
         model = game.GetModel(object["m"].GetInt());
     }
@@ -325,7 +291,8 @@ void Object::OnClientCreate() {
         lastClientDrawTime = now;
     }
     void Object::SetLastTickTime(Time time) {
-        for (auto& child : children) {
+        auto& relationshipManager = game.GetRelationshipManager();
+        for (auto& child : relationshipManager.GetChildren(id)) {
             child->SetLastTickTime(time);
         }
         lastTickTime = time;

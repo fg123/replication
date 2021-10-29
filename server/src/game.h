@@ -3,6 +3,7 @@
 #include "object.h"
 #include "timer.h"
 #include "asset-manager.h"
+#include "relationship-manager.h"
 #include "scene.h"
 
 #include "animation.h"
@@ -17,6 +18,7 @@
 #include <unordered_set>
 #include <mutex>
 #include <atomic>
+#include <thread>
 
 class PlayerObject;
 
@@ -36,7 +38,7 @@ struct PlayerSocketData {
     PlayerObject* playerObject;
 };
 
-class Game {
+class Game : public Replicable {
     std::atomic<ObjectID> nextId;
 
 #ifdef BUILD_SERVER
@@ -61,7 +63,11 @@ class Game {
     std::unordered_map<ObjectID, Object*> newObjects;
 
     std::unordered_set<ObjectID> replicateNextTick;
+
+    std::thread::id tickThreadId;
 #endif
+
+    REPLICATED(RelationshipManager, relationshipManager, "rm");
 
     Time gameTime;
 
@@ -112,8 +118,8 @@ public:
 #ifdef BUILD_SERVER
     // Replicate objects in replicateNextTick to clients
     void Replicate(Time time);
-
     void ReplicateAnimations(Time time);
+
     void RequestReplication(ObjectID objectId);
     void QueueAllForReplication(Time time);
     void InitialReplication(PlayerSocketData* data);
@@ -126,6 +132,10 @@ public:
     }
 #endif
 
+    RelationshipManager& GetRelationshipManager() {
+        return relationshipManager;
+    }
+
     Object* CreateScriptedObject(const std::string& className);
     Object* LoadScriptedObject(const std::string& className);
 
@@ -134,7 +144,7 @@ public:
 
 #ifdef BUILD_CLIENT
     void EnsureObjectExists(json& object);
-    void ProcessReplication(json& incObject);
+    void ProcessReplicationForObject(json& incObject);
 
     void RollbackTime(Time time);
 
@@ -152,19 +162,20 @@ public:
         return gameObjects.find(id) != gameObjects.end();
     }
 
-    Object* GetObjectImpl(ObjectID id) {
+    Object* GetObjectImpl(ObjectID id) const {
         if (gameObjects.find(id) != gameObjects.end())
-            return gameObjects[id];
+            return gameObjects.at(id);
         else return nullptr;
     }
 
     template<class T = Object>
-    T* GetObject(ObjectID id) {
+    T* GetObject(ObjectID id) const {
         return static_cast<T*>(GetObjectImpl(id));
     }
 
 #ifdef BUILD_SERVER
-    Object* GetObjectIncludingNewQueued(ObjectID id);
+    bool IsOnTickThread();
+    void FlushNewObjects();
 #endif
 
     const std::unordered_map<ObjectID, Object*>& GetGameObjects() const {

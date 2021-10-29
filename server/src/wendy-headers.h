@@ -10,4 +10,5 @@ extern "C"
 #include "wendy/src/memory.h"
 #include "wendy/src/struct.h"
 #include "wendy/src/error.h"
+#include "wendy/src/imports.h"
 }

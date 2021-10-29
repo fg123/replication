@@ -21,8 +21,6 @@ inline void ProcessReplicationDispatch(WeaponAttachmentPoint& object, json& obj)
 }
 
 class WeaponObject : public ScriptableObject {
-protected:
-    PlayerObject* attachedTo = nullptr;
 public:
     REPLICATED(std::string, name, "name");
     REPLICATED(std::string, logo, "logo");
@@ -33,7 +31,7 @@ public:
     }
     WeaponObject(Game& game, Vector3 position);
 
-    PlayerObject* GetAttachedTo() { return attachedTo; }
+    PlayerObject* GetAttachedTo();
     void AttachToPlayer(PlayerObject* player, WeaponAttachmentPoint attachmentPoint =
         WeaponAttachmentPoint::RIGHT);
     void Detach();
@@ -60,8 +58,6 @@ public:
     }
 
     virtual void Tick(Time time) override;
-    virtual void Serialize(JSONWriter& obj) override;
-    virtual void ProcessReplication(json& obj) override;
 };
 
 // Manages cooldown

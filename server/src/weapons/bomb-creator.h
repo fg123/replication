@@ -1,5 +1,4 @@
-#ifndef BOX_CREATOR_H
-#define BOX_CREATOR_H
+#pragma once
 
 #include "object.h"
 #include "collision.h"
@@ -53,23 +52,25 @@ public:
     virtual void StartFire(Time time) override {
         if (IsOnCooldown()) return;
 
-        Vector3 rayCastEnd = attachedTo->GetPosition() + attachedTo->GetLookDirection() * dropRange;
+        if (auto attachedTo = GetAttachedTo()) {
+            Vector3 rayCastEnd = attachedTo->GetPosition() + attachedTo->GetLookDirection() * dropRange;
 
-        RayCastRequest request;
-        request.startPoint = attachedTo->GetPosition() + attachedTo->GetLookDirection();
-        request.direction = attachedTo->GetLookDirection();
+            RayCastRequest request;
+            request.startPoint = attachedTo->GetPosition() + attachedTo->GetLookDirection();
+            request.direction = attachedTo->GetLookDirection();
 
-        RayCastResult result = game.RayCastInWorld(request);
-        if (result.isHit) {
-            if (glm::distance(attachedTo->GetPosition(), result.hitLocation) < dropRange) {
-                rayCastEnd = result.hitLocation;
+            RayCastResult result = game.RayCastInWorld(request);
+            if (result.isHit) {
+                if (glm::distance(attachedTo->GetPosition(), result.hitLocation) < dropRange) {
+                    rayCastEnd = result.hitLocation;
+                }
             }
-        }
 
-        Bomb* bomb = new Bomb(game, attachedTo->GetId(), rayCastEnd);
-        bombs.push_back(bomb);
-        game.AddObject(bomb);
-        CooldownStart(time);
+            Bomb* bomb = new Bomb(game, attachedTo->GetId(), rayCastEnd);
+            bombs.push_back(bomb);
+            game.AddObject(bomb);
+            CooldownStart(time);
+        }
     }
 
     void ExplodeAll() {
@@ -94,12 +95,14 @@ public:
 #ifdef BUILD_SERVER
     virtual void StartFire(Time time) override {
         if (IsOnCooldown()) return;
-        static_cast<BombCreator*>(attachedTo->qWeapon)->ExplodeAll();
-        CooldownStart(time);
+        if (auto attachedTo = GetAttachedTo()) {
+            if (auto weapon = attachedTo->qWeapon.Get(game)) {
+                static_cast<BombCreator*>(weapon)->ExplodeAll();
+            }
+            CooldownStart(time);
+        }
     }
 #endif
 };
 
 CLASS_REGISTER(BombExploder);
-
-#endif

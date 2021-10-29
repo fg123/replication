@@ -72,20 +72,22 @@ public:
         WeaponWithCooldown::ReleaseFire(time);
         if (IsOnCooldown()) return;
 
-        RayCastRequest request;
-        request.startPoint = attachedTo->GetPosition() + attachedTo->GetLookDirection();
-        request.direction = attachedTo->GetLookDirection();
+        if (auto attachedTo = GetAttachedTo()) {
+            RayCastRequest request;
+            request.startPoint = attachedTo->GetPosition() + attachedTo->GetLookDirection();
+            request.direction = attachedTo->GetLookDirection();
 
-        RayCastResult result = game.RayCastInWorld(request);
-        if (result.isHit) {
-            ArtilleryIndObject* indicator = new ArtilleryIndObject(game, attachedTo->GetId(), result.hitLocation);
-            indicator->SetRotation(DirectionToQuaternion(result.hitNormal));
-            game.PlayAudio("incoming.wav", 1.0f, attachedTo);
+            RayCastResult result = game.RayCastInWorld(request);
+            if (result.isHit) {
+                ArtilleryIndObject* indicator = new ArtilleryIndObject(game, attachedTo->GetId(), result.hitLocation);
+                indicator->SetRotation(DirectionToQuaternion(result.hitNormal));
+                game.PlayAudio("incoming.wav", 1.0f, attachedTo);
 
-            #ifdef BUILD_SERVER
-                game.AddObject(indicator);
-            #endif
-            CooldownStart(time);
+                #ifdef BUILD_SERVER
+                    game.AddObject(indicator);
+                #endif
+                CooldownStart(time);
+            }
         }
     }
 };

@@ -3,15 +3,16 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**",
-                "F:/emsdk/upstream/emscripten/system/include"
+                "/mnt/f/emsdk/upstream/emscripten/system/include",
+                "${workspaceFolder}/**"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE",
                 "BUILD_CLIENT",
-                "BUILD_SERVER"
+                "BUILD_SERVER",
+                "BUILD_EDITOR"
             ],
             "windowsSdkVersion": "10.0.18362.0",
             "compilerPath": "/usr/bin/g++",

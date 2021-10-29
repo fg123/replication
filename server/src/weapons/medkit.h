@@ -42,12 +42,14 @@ public:
 
     virtual void FireProjectile(Time time) override {
         if (power >= 1.f) {
-            attachedTo->HealFor(25);
-            PlayerObject* attach = attachedTo;
-            attachedTo->DropWeapon(this);
+            if (auto attachedTo = GetAttachedTo()) {
+                attachedTo->HealFor(25);
+                PlayerObject* attach = attachedTo;
+                attachedTo->DropWeapon(this);
 
-            attach->HolsterAllWeapons();
-            game.DestroyObject(GetId());
+                attach->HolsterAllWeapons();
+                game.DestroyObject(GetId());
+            }
         }
     }
 };

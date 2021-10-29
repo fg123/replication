@@ -36,9 +36,12 @@ struct ObjectRegister {
     }
 };
 
-#define CLASS_CREATE(name) \
-    static Object* Create(Game& game) { return new name(game); } \
-    const char* GetClass() const override { return #name; }
+#define CLASS_CREATE(name)                                                     \
+    protected:                                                                 \
+        using super = name;                                                    \
+    public:                                                                    \
+        static Object* Create(Game& game) { return new name(game); }           \
+        const char* GetClass() const override { return #name; }                \
 
 #define CLASS_REGISTER(name) static ObjectRegister<name> name##_Register { #name }
 
@@ -130,11 +133,6 @@ public:
 
     bool visibleInFrustrum = true;
 #endif
-
-    // For object hierarchy, this is all managed from the game, used for
-    //   knowing who ticks(). Parents tick their own children.
-    std::unordered_set<Object*> children;
-    Object* parent = nullptr;
 
     REPLICATED(Vector3, airFriction, "af");
 
