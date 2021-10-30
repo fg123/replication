@@ -640,7 +640,6 @@ void Game::AddObject(Object* obj) {
     newObjectsMutex.unlock();
     // Immediately queue into main object system
     if (IsOnTickThread()) {
-        LOG_DEBUG("Is on main thread... flushing new objects");
         FlushNewObjects();
     }
 #endif

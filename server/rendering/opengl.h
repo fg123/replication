@@ -7,7 +7,7 @@
     #include <GLFW/glfw3.h>
 #endif
 
-#ifdef BUILD_CLIENT
+#if defined(BUILD_CLIENT) && !defined(BUILD_EDITOR)
     #include <GLES3/gl3.h>
     #include <GLES3/gl2ext.h>
 #endif

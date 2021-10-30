@@ -73,9 +73,6 @@ class ClientGL {
     // Draw Steps
     void SetupDrawingLayers();
     void RenderMinimap();
-    void RenderWorld();
-    void RenderLighting();
-    void RenderTransparentObjects();
     void RenderUI(int width, int height);
 
 public:
