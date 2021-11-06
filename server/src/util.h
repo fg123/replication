@@ -96,3 +96,7 @@ inline std::string RemoveFileExtension(const std::string& filename) {
     }
     return filename.substr(0, dot);
 }
+
+inline bool IsPointABehindPointB(const Vector3& a, const Vector3& b, const Vector3& bLook) {
+    return glm::dot(glm::normalize(a - b), glm::normalize(bLook)) < 0;
+}

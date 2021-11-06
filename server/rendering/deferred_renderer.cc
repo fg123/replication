@@ -37,9 +37,16 @@ void DeferredRenderer::Initialize() {
 
 void DeferredRenderer::NewFrame(RenderFrameParameters* params) {
     Matrix4 view = glm::lookAt(params->viewPos,
-        params->viewPos + params->viewDir, Vector::Up);
+        params->viewPos + params->viewDir, params->viewUp);
     float aspectRatio = (float) params->width / (float) params->height;
-    Matrix4 proj = glm::perspective(params->FOV, aspectRatio, params->viewNear, params->viewFar);
+    Matrix4 proj;
+    if (params->projection == RenderFrameParameters::Projection::PERSPECTIVE) {
+        proj = glm::perspective(params->FOV, aspectRatio, params->viewNear, params->viewFar);
+    }
+    else {
+        proj = glm::ortho(-params->orthoSize, params->orthoSize, -params->orthoSize,
+            params->orthoSize, params->viewNear, params->viewFar);
+    }
     geometryShader->Use();
     geometryShader->PreDraw(params->viewPos, view, proj);
 

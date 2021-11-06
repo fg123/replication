@@ -157,7 +157,6 @@ void PlayerObject::Tick(Time time) {
         #else
             Time clientTime = time;
         #endif
-
         // if (glm::length(GetVelocity()) > 1) {
         //     // LOG_DEBUG(clientTime << ": " << GetPosition() << " " << GetVelocity());
         //     LOG_DEBUG(clientTime << ": " << GetPosition().y);

@@ -20,7 +20,8 @@
 ClientGL::ClientGL(Game& game, const char* selector) :
     canvasSelector(selector),
     game(game),
-    renderer(game.scene.assetManager) {
+    worldRenderer(game.scene.assetManager),
+    minimapRenderer(game.scene.assetManager) {
 }
 
 void ClientGL::SetGLCullFace(GLenum setting) {
@@ -61,10 +62,8 @@ void ClientGL::SetupContext() {
 
     antialiasShaderProgram = new QuadShaderProgram("shaders/Antialias.fs");
 
-    renderer.Initialize();
-
-    // Generate Texture for Minimap FBO
-    minimapGBuffer.SetSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
+    worldRenderer.Initialize();
+    minimapRenderer.Initialize();
 
     // Setup IMGUI
     IMGUI_CHECKVERSION();
@@ -236,28 +235,6 @@ void ClientGL::DrawDebug(Object* obj) {
     }
 }
 
-void ClientGL::DrawObject(DrawParams& params, int& lastProgram) {
-    // int program = params.mesh->material->GetShaderProgram();
-    // if (program != lastProgram) {
-    //     lastProgram = program;
-    //     shaderPrograms[program]->Use();
-    // }
-    // DeferredShadingGeometryShaderProgram* defaultProgram = dynamic_cast<
-    //     DeferredShadingGeometryShaderProgram*>(
-    //         shaderPrograms[program]);
-    // if (params.hasOutline && defaultProgram) {
-    //     // Render Front only
-    //     SetGLCullFace(GL_FRONT);
-    //     defaultProgram->SetDrawOutline(0.02, Vector3(1));
-    //     shaderPrograms[program]->Draw(params.transform, params.mesh);
-    // }
-    // if (defaultProgram) {
-    //     defaultProgram->SetDrawOutline(0, Vector3());
-    // }
-    // SetGLCullFace(GL_BACK);
-    // shaderPrograms[program]->Draw(params.transform, params.mesh);
-}
-
 template<typename T>
 T CalculateCenter(T* arr, size_t size) {
     T res;
@@ -272,15 +249,6 @@ void MultiplyAll(A* dest, const A* src, size_t count, const B& multiplyBy) {
     for (size_t i = 0; i < count; i++) {
         dest[i] = multiplyBy * src[i];
     }
-}
-
-void ClientGL::DrawShadowObjects(DrawLayer& layer) {
-    // for (auto& pair : layer.opaque) {
-    //     for (auto& param : pair.second) {
-    //         if (!param.castShadows) continue;
-    //         shadowMapShaderProgram->Draw( param.transform, param.mesh);
-    //     }
-    // }
 }
 
 void ClientGL::SetupDrawingLayers() {
@@ -311,8 +279,8 @@ void ClientGL::SetupDrawingLayers() {
         }
         Matrix4 transform = obj->GetTransform();
         bool isForeground = obj->IsTagged(Tag::DRAW_FOREGROUND);
-        DrawLayer& layerToDraw = !obj->visibleInFrustrum ? behindPlayerLayer : (isForeground ? foregroundLayer : backgroundLayer);
-        // DrawLayer& layerToDraw = backgroundLayer;
+        DrawLayer& layerToDraw = !obj->IsVisibleInFrustrum(cameraPosition, cameraRotation) ?
+            behindPlayerLayer : (isForeground ? foregroundLayer : backgroundLayer);
 
         if (Model* model = obj->GetModel()) {
             for (auto& mesh : model->meshes) {
@@ -341,61 +309,60 @@ void ClientGL::SetupDrawingLayers() {
 }
 
 void ClientGL::RenderMinimap() {
-    minimapGBuffer.Bind();
-    glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    RenderFrameParameters params;
+    params.width = MINIMAP_WIDTH;
+    params.height = MINIMAP_HEIGHT;
+    params.viewNear = 1.0f;
+    params.viewFar = 500.f;
+    params.viewPos = Vector3(cameraPosition.x, 100, cameraPosition.z);
+    params.viewDir = -Vector::Up;
+    params.viewUp = Vector3(cameraRotation.x, 0, cameraRotation.z);
+    params.ambientFactor = 1.0f;
+    params.enableLighting = false;
+    params.enableShadows = false;
+    params.enableToneMapping = true;
+    params.enableAntialiasing = true;
+    params.lights = game.lightNodes;
+    params.skydomeTexture = skydomeTexture;
+    params.projection = RenderFrameParameters::Projection::ORTHOGRAPHIC;
+    params.orthoSize = 50.f;
 
-    Vector3 minimapCamPosition = Vector3(cameraPosition.x, 100, cameraPosition.z);
-    // Matrix4 minimapView = glm::lookAt(minimapCamPosition,
-    //     cameraPosition, cameraRotation);
+    minimapRenderer.NewFrame(&params);
+    // We need to "inject" the player into the background set
+    if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
+        DrawParams& params = backgroundLayer.PushTransparent(-INFINITY);
+        params.id = localPlayer->GetId();
+        params.mesh = minimapMarker;
+        params.transform = glm::translate(Vector3(cameraPosition.x, 95, cameraPosition.z)) *
+            glm::transpose(glm::toMat4(localPlayer->clientRotation)) * glm::scale(Vector3(2, 2, 2));
+        params.castShadows = false;
+    }
 
-    Matrix4 minimapView = glm::lookAt(minimapCamPosition,
-        minimapCamPosition - Vector::Up, Vector3(cameraRotation.x, 0, cameraRotation.z));
-
-    Matrix4 minimapProj = glm::ortho(-50.0, 50.0, -50.0, 50.0, 1.0, 500.0);
-
-    // for (auto& program : shaderPrograms) {
-    //     program->Use();
-    //     program->PreDraw(game, minimapCamPosition, minimapView, minimapProj);
-    //     program->SetRenderShadows(false);
-    // }
-
-    debugShaderProgram->Use();
-    debugShaderProgram->PreDraw(minimapCamPosition, minimapView, minimapProj);
-    DrawLayerOptions options;
-    DrawObjects(options);
-
-    // if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
-    //     shaderPrograms[0]->Use();
-    //     glDisable(GL_DEPTH_TEST);
-
-    //     shaderPrograms[0]->Draw(glm::translate(Vector3(cameraPosition.x, 95, cameraPosition.z)) *
-    //             glm::transpose(glm::toMat4(localPlayer->clientRotation)) * glm::scale(Vector3(2, 2, 2)), &minimapMarker);
-    // }
+    minimapRenderer.Draw(backgroundLayer);
 
     // Draw Minimap onto base
+    GLuint texture = minimapRenderer.outputBuffer.BlitTexture();
+    defaultFrameBuffer.Bind();
     glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    // // glDisable(GL_DEPTH_TEST);
-
-    GLuint minimapTexture = minimapGBuffer.g_diffuse;
-    worldRenderBuffer.Bind();
     minimapShaderProgram->Use();
     Matrix4 minimapQuadTransform = glm::translate(
-        Vector3((1 - (0.75 * (windowHeight / (float) windowWidth))), 0.25, 0)) *
-        glm::scale(Vector3(0.75f * (windowHeight / (float)windowWidth), 0.75f, 1));
-    minimapShaderProgram->DrawQuad(minimapTexture, minimapQuadTransform);
-
+        Vector3((1 - (0.75 * (windowHeight / (float) windowWidth))), 0.25f, 0)
+    ) * glm::scale(Vector3(0.75f * (windowHeight / (float)windowWidth), 0.75f, 1));
+    minimapShaderProgram->DrawQuad(texture, minimapQuadTransform);
+    glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 }
 
 void ClientGL::Draw(int width, int height) {
-    if (!renderer.IsInitialized()) return;
+    if (!worldRenderer.IsInitialized()) return;
+    if (!minimapRenderer.IsInitialized()) return;
     // LOG_DEBUG("Draw " << width << " " << height);
     windowWidth = width;
     windowHeight = height;
 
-    worldRenderBuffer.SetSize(width, height);
+    defaultFrameBuffer.SetSize(width, height);
 
     SetupDrawingLayers();
 
@@ -425,25 +392,27 @@ void ClientGL::Draw(int width, int height) {
     params.lights = game.lightNodes;
     params.skydomeTexture = skydomeTexture;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(135.0 / 255.0, 206.0 / 255.0, 235.0 / 255.0, 1);
+    defaultFrameBuffer.Bind();
+    glClearColor(0, 0, 0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    renderer.NewFrame(&params);
-    renderer.Draw(backgroundLayer);
-
-    RenderMinimap();
+    worldRenderer.NewFrame(&params);
+    worldRenderer.Draw(backgroundLayer);
 
     // Finally render everything to the main buffer
-    GLuint texture = renderer.outputBuffer.BlitTexture();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    GLuint texture = worldRenderer.outputBuffer.BlitTexture();
+    defaultFrameBuffer.Bind();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     quadDrawShaderProgram->Use();
     quadDrawShaderProgram->DrawQuad(texture, quadDrawShaderProgram->standardRemapMatrix);
     glDisable(GL_BLEND);
+
+    defaultFrameBuffer.Bind();
+    RenderMinimap();
+
     // Handle any UI drawing
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    defaultFrameBuffer.Bind();
     RenderUI(width, height);
 
     if (GlobalSettings.Client_DrawShadowMaps) {
@@ -455,7 +424,6 @@ void ClientGL::Draw(int width, int height) {
     }
     if (GlobalSettings.Client_DrawGBuffer) {
         // Matrix4 transform = glm::translate(Vector3(-0.5f, -0.5f, 0.0f));
-        // // worldRenderBuffer.BlitTexture();
 
         // quadDrawShaderProgram->Use();
         // quadDrawShaderProgram->SetIsDepth(true);
@@ -525,67 +493,6 @@ void ClientGL::RenderUI(int width, int height) {
 
     // ImGui::Render();
     // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void ClientGL::DrawObjects(DrawLayerOptions options) {
-    int lastProgram = -1;
-    glEnable(GL_CULL_FACE);
-    SetGLCullFace(GL_BACK);
-    // Draw Background
-    if (options.drawBackground && options.drawOpaque) {
-        for (auto& pair : backgroundLayer.opaque) {
-            for (auto& param : pair.second) {
-                if (param.id == game.localPlayerId) continue;
-                DrawObject(param, lastProgram);
-            }
-        }
-    }
-    if (options.drawBackground && options.drawTransparent) {
-        for (auto it = backgroundLayer.transparent.rbegin(); it != backgroundLayer.transparent.rend(); ++it) {
-            // LOG_DEBUG(it->second.mesh->name);
-            for (auto& param : it->second) {
-                DrawObject(param, lastProgram);
-            }
-        }
-    }
-    if (options.drawBehind && options.drawOpaque) {
-        for (auto& pair : behindPlayerLayer.opaque) {
-            for (auto& param : pair.second) {
-                DrawObject(param, lastProgram);
-            }
-        }
-    }
-    if (options.drawBehind && options.drawTransparent) {
-        for (auto it = behindPlayerLayer.transparent.rbegin(); it != behindPlayerLayer.transparent.rend(); ++it) {
-            // LOG_DEBUG(it->second.mesh->name);
-             for (auto& param : it->second) {
-                DrawObject(param, lastProgram);
-            }
-        }
-    }
-    // Draw Foreground
-    // glClear(GL_DEPTH_BUFFER_BIT);
-
-    glDisable(GL_CULL_FACE);
-    if (options.drawForeground && options.drawOpaque) {
-        for (auto& pair : foregroundLayer.opaque) {
-            for (auto& param : pair.second) {
-                DrawObject(param, lastProgram);
-            }
-        }
-    }
-    if (options.drawForeground && options.drawTransparent) {
-        for (auto it = foregroundLayer.transparent.rbegin(); it != foregroundLayer.transparent.rend(); ++it) {
-             for (auto& param : it->second) {
-                DrawObject(param, lastProgram);
-            }
-        }
-    }
-
-    // Debug Drawing
-    for (auto& gameObjectPair : game.GetGameObjects()) {
-        DrawDebug(gameObjectPair.second);
-    }
 }
 
 bool ClientGL::HandleInput(JSONDocument& input) {

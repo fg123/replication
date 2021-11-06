@@ -21,3 +21,6 @@ server/lib/assimp-4.1.0/bin
 
 // clang cache
 */.cache/
+
+// Temporary Object Files
+*.tmp

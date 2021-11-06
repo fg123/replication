@@ -66,12 +66,14 @@ CFLAGS = -Wall \
 SERVER_DEBUG = -g -O2
 SERVER_PROD = -O2
 # -s SAFE_HEAP=1
-WASM_DEBUG = -g4 -s ASSERTIONS=2 -s STACK_OVERFLOW_CHECK=1
+WASM_DEBUG = -gsource-map -s ASSERTIONS=2 -s STACK_OVERFLOW_CHECK=1
 WASM_FLAGS =
 
 WASM_LINKING_FLAGS = \
 	-lopenal \
-	-s EXTRA_EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
+	--no-entry \
+	-s EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
+	-s LLD_REPORT_UNDEFINED \
 	-s ALLOW_MEMORY_GROWTH=1 \
 	-s INITIAL_MEMORY=128MB \
 	-s MIN_WEBGL_VERSION=2 \
@@ -135,10 +137,10 @@ client_prod: $(CLIENT_OBJ) $(CLIENT_DATA)
 	$(CC) -O2 $(CFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
 %.wo: %.cc
-	em++ -O2 $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -g4 -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
+	em++ -O2 $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
 
 %.wo: %.c
-	emcc -O2 $(CFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -g4 -MMD -MF $(<:%.c=%.wd) -c $< -o $@
+	emcc -O2 $(CFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.c=%.wd) -c $< -o $@
 
 %.eo: %.cc
 	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -c $< -o $@

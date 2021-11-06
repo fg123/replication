@@ -100,8 +100,8 @@ float GetAttenuationAtPoint(vec4 shadowCoord, vec2 offset, float bias, int sampl
             // Jitter uv
 
             // if (useJitter) {
-                // uv.x += ((random(uv) - 0.5)) * pixel;
-                // uv.y += ((random(uv) - 0.5)) * pixel;
+            //     uv.x += ((random(uv) - 0.5)) * pixel;
+            //     uv.y += ((random(uv) - 0.5)) * pixel;
             // }
 
             shadowAttenuation += QueryMap(u_shadowMap, uv, offset) + bias < shadowCoord.z ? 0.f : 1.f; break;

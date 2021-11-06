@@ -12,13 +12,6 @@
 // Contains a lot of internal interfacing with WendyScript's VM Runtime
 //   If anything changes there things might break here.
 
-// Wendyscript expects a popen symbol but emscripten doe
-#ifdef BUILD_CLIENT
-FILE *popen(const char *command, const char *type) {
-    return NULL;
-}
-#endif
-
 // These have to be globals because the native calls
 //   bound to the WendyVM has no context
 struct vm* ScriptManager::vm = nullptr;

@@ -66,10 +66,6 @@ class ClientGL {
     Matrix4 viewMat;
     Matrix4 projMat;
 
-    GBuffer minimapGBuffer;
-
-    RenderBuffer worldRenderBuffer;
-
     // Draw Steps
     void SetupDrawingLayers();
     void RenderMinimap();
@@ -80,7 +76,12 @@ public:
     static GLLimits glLimits;
 
     Game& game;
-    DeferredRenderer renderer;
+
+    // We create an instance for each, because switching internal buffer
+    //   sizes are expensive, as it requires a reallocation.
+    DeferredRenderer worldRenderer;
+    DeferredRenderer minimapRenderer;
+    DefaultFrameBuffer defaultFrameBuffer;
 
     ClientGL(Game& game, const char* selector);
 
@@ -94,11 +95,7 @@ public:
 
     void Draw(int width, int height);
     void DrawDebugLine(const Vector3& color, const Vector3& from, const Vector3& to);
-    void DrawObject(DrawParams& param, int& lastProgram);
     void DrawDebug(Object* obj);
-
-    void DrawShadowObjects(DrawLayer& layer);
-    void DrawObjects(DrawLayerOptions options);
 
     void SetGLCullFace(GLenum setting);
     Vector2 WorldToScreenCoordinates(Vector3 worldCoord);

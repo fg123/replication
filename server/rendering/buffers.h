@@ -51,6 +51,14 @@ struct GBuffer {
     }
 };
 
+struct DefaultFrameBuffer : public GBuffer {
+    // Shadow both methods, basically an injected interface
+    void SetSize(int newWidth, int newHeight) {
+        width = newWidth;
+        height = newHeight;
+    }
+};
+
 struct GLLimits {
     GLint MAX_SAMPLES = 0;
 };

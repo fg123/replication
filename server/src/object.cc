@@ -3,6 +3,7 @@
 #include "ray-cast.h"
 #include "vector.h"
 #include "json/json.hpp"
+#include "util.h"
 
 static const double GRAVITY = 30;
 static const double EPSILON = 10e-10;
@@ -142,12 +143,10 @@ void Object::Tick(Time time) {
         }
 
         #ifdef BUILD_CLIENT
-            // Interpolate Over by setting up target time
+            // This allows the client to run at a faster frame rate than the
+            //   tick rate, by pushing client updates one frame in the past
+            //   so we can lerp our way towards the next tick.
             nextTickTargetTime = Timer::Now() + delta;
-
-            // clientPosition = position;
-            // clientRotation = rotation;
-
             // Always set dirty for client because we want client
             //   GetObjectSerialized to work properly
             SetDirty(true);
@@ -156,7 +155,6 @@ void Object::Tick(Time time) {
         lastFrameVelocity = velocity;
         lastFramePosition = position;
     }
-    // AddDebugLine(position, position + GetLookDirection(), Vector3(1, 0, 1));
 }
 
 void Object::ResolveCollision(Vector3 difference) {
@@ -257,6 +255,10 @@ void Object::ProcessReplication(json& object) {
     else {
         model = nullptr;
     }
+    #ifdef BUILD_CLIENT
+        // Decay per draw
+        clientSmoothingTargetTime = Timer::Now() + 125;
+    #endif
     SetDirty(true);
 }
 
@@ -276,17 +278,9 @@ void Object::OnClientCreate() {
         float lerpRatio = GetClientInterpolationRatio(now);
         // LOG_DEBUG("LastDraw " << lastClientDrawTime << " Now " << now << " NextTick " << nextTickTargetTime << " Ratio " << lerpRatio);
 
-        // clientPosition = glm::vec3();
-
         clientPosition = glm::lerp(clientPosition, position, lerpRatio);
         clientRotation = glm::slerp(clientRotation, rotation, lerpRatio);
         clientScale = glm::lerp(clientScale, scale, lerpRatio);
-
-        // clientPosition = position;
-        // clientRotation = rotation;
-        // clientScale = scale;
-        // clientPosition += (position - clientPosition) / 2.0f;
-        // clientRotation = glm::slerp(clientRotation, rotation, 0.5f);
 
         lastClientDrawTime = now;
     }
@@ -303,9 +297,63 @@ void Object::OnClientCreate() {
         if (!glm::isfinite(result)) {
             return 0.0f;
         }
-        return result;
+        return result; //glm::clamp(result, 0.0f, 1.0f);
+    }
+    const Matrix4 Object::GetTransform() {
+        return glm::translate(GetClientPosition()) *
+            glm::toMat4(GetClientRotation()) *
+            glm::scale(GetClientScale());
+    }
+    const Vector3& Object::GetClientPosition() const {
+        return clientPosition;
+    }
+    const Vector3& Object::GetClientScale() const {
+        return clientScale;
+    }
+    const Quaternion& Object::GetClientRotation() const {
+        return clientRotation;
+    }
+
+    bool Object::IsVisibleInFrustrum(const Vector3& camPos, const Vector3& camDir) {
+        if (GetColliderCount() == 0) {
+            // We don't know the bounds of this object, so assume visible
+            return true;
+        }
+        AABB b = GetCollider().GetBroadAABB();
+        if (!IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMin.y, b.ptMin.z), camPos, camDir) ||
+            !IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMin.y, b.ptMax.z), camPos, camDir) ||
+            !IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMax.y, b.ptMin.z), camPos, camDir) ||
+            !IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMax.y, b.ptMax.z), camPos, camDir) ||
+            !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMin.y, b.ptMin.z), camPos, camDir) ||
+            !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMin.y, b.ptMax.z), camPos, camDir) ||
+            !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMax.y, b.ptMin.z), camPos, camDir) ||
+            !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMax.y, b.ptMax.z), camPos, camDir)
+        ) {
+            return true;
+        }
+        return false;
     }
 #endif
+
+#ifdef BUILD_SERVER
+    const Matrix4 Object::GetTransform() {
+        return glm::translate(position) *
+            glm::toMat4(rotation) *
+            glm::scale(scale);
+    }
+#endif
+
+Model* Object::GetModel() {
+    return model;
+}
+
+void Object::AddCollider(Collider* col) {
+    collider.AddCollider(col);
+}
+
+void Object::ClearColliders() {
+    collider.ClearColliders();
+}
 
 void Object::SetModel(Model* newModel) {
     model = newModel;

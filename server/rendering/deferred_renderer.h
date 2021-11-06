@@ -48,7 +48,15 @@ struct RenderFrameParameters {
 
     Texture* skydomeTexture = nullptr;
 
+    enum class Projection { ORTHOGRAPHIC, PERSPECTIVE } projection = Projection::PERSPECTIVE;
+
+    // For PERSPECTIVE
     float FOV = glm::radians(55.0f);
+
+    // For ORTHOGRAPHIC
+    float orthoSize = 10.0f;
+
+    Vector3 viewUp = Vector::Up;
     float viewNear = 0.2f;
     float viewFar = 300.f;
 

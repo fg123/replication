@@ -171,10 +171,6 @@ void Game::DetachParent(Object* child) {
     relationshipManager.RemoveParent(child->GetId());
 }
 
-bool IsPointABehindPointB(const Vector3& a, const Vector3& b, const Vector3& bLook) {
-    return glm::dot(glm::normalize(a - b), glm::normalize(bLook)) < 0;
-}
-
 #ifdef BUILD_SERVER
 bool Game::IsOnTickThread() {
     return std::this_thread::get_id() == tickThreadId;
@@ -259,33 +255,6 @@ void Game::Tick(Time time) {
             delete object;
         }
     }
-#ifdef BUILD_CLIENT
-    if (PlayerObject* player = GetLocalPlayer()) {
-        Vector3 playerPosition = player->GetPosition();
-        Vector3 playerLook = player->GetLookDirection();
-        for (auto& object : gameObjects) {
-            if (object.second->GetColliderCount() == 0) {
-                object.second->visibleInFrustrum = true;
-                continue;
-            }
-            AABB b = object.second->GetCollider().GetBroadAABB();
-            if (!IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMin.y, b.ptMin.z), playerPosition, playerLook) ||
-                !IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMin.y, b.ptMax.z), playerPosition, playerLook) ||
-                !IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMax.y, b.ptMin.z), playerPosition, playerLook) ||
-                !IsPointABehindPointB(Vector3(b.ptMin.x, b.ptMax.y, b.ptMax.z), playerPosition, playerLook) ||
-                !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMin.y, b.ptMin.z), playerPosition, playerLook) ||
-                !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMin.y, b.ptMax.z), playerPosition, playerLook) ||
-                !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMax.y, b.ptMin.z), playerPosition, playerLook) ||
-                !IsPointABehindPointB(Vector3(b.ptMax.x, b.ptMax.y, b.ptMax.z), playerPosition, playerLook)
-            ) {
-                object.second->visibleInFrustrum = true;
-            }
-            else {
-                object.second->visibleInFrustrum = false;
-            }
-        }
-    }
-#endif
 #ifdef BUILD_SERVER
     Replicate(time);
     ReplicateAnimations(time);
@@ -541,6 +510,7 @@ void Game::ProcessReplicationForObject(json& object) {
         obj->createdThisFrameOnClient = false;
     }
 }
+
 #endif
 
 RayCastResult Game::RayCastInWorld(RayCastRequest request) {

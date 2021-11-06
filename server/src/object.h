@@ -129,9 +129,13 @@ public:
     Quaternion clientRotation;
     Vector3 clientScale;
 
+    // Replication Smoothing
+    Vector3 clientMeshPositionOffset;
+    Time clientSmoothingTargetTime = 0;
+
     std::vector<DebugLine> debugLines;
 
-    bool visibleInFrustrum = true;
+    bool IsVisibleInFrustrum(const Vector3& camPos, const Vector3& camDir);
 #endif
 
     REPLICATED(Vector3, airFriction, "af");
@@ -171,13 +175,9 @@ public:
     bool CollidesWith(const Vector3& p1, const Vector3& p2);
     bool CollidesWith(RayCastRequest& ray, RayCastResult& result);
 
-    void AddCollider(Collider* col) {
-        collider.AddCollider(col);
-    }
+    void AddCollider(Collider* col);
 
-    void ClearColliders() {
-        collider.ClearColliders();
-    }
+    void ClearColliders();
 
     ObjectID GetId() const { return id; }
 
@@ -200,7 +200,7 @@ public:
     virtual Vector3 GetLookDirection() const { return glm::normalize(Vector::Forward * rotation); }
 
     #ifdef BUILD_CLIENT
-    virtual Vector3 GetClientLookDirection() const { return glm::normalize(Vector::Forward * clientRotation); }
+    virtual Vector3 GetClientLookDirection() const { return glm::normalize(Vector::Forward * GetClientRotation()); }
     #endif
 
     void SetPosition(const Vector3& in);
@@ -225,35 +225,16 @@ public:
     void SetModel(Model* newModel);
 
 #ifdef BUILD_CLIENT
-    virtual const Matrix4 GetTransform() {
-        // Vector3 direction =
-        return glm::translate(clientPosition) *
-            glm::toMat4(clientRotation) *
-            glm::scale(clientScale);
-    }
-    const Vector3& GetClientPosition() const { return clientPosition; }
-    const Vector3& GetClientScale() const { return clientScale; }
-    const Quaternion& GetClientRotation() const { return clientRotation; }
+    virtual const Matrix4 GetTransform();
+    const Vector3& GetClientPosition() const;
+    const Vector3& GetClientScale() const;
+    const Quaternion& GetClientRotation() const;
 #endif
 #ifdef BUILD_SERVER
-    virtual const Matrix4 GetTransform() {
-        // Vector3 direction =
-        return glm::translate(position) *
-            glm::toMat4(rotation) *
-            glm::scale(scale);
-    }
+    virtual const Matrix4 GetTransform();
 #endif
 
-    Model* GetModel() {
-        return model;
-    }
-
-    // Debug Data
-    void AddDebugLine(const Vector3& from, const Vector3& to, const Vector3& color) {
-        #ifdef BUILD_CLIENT
-            debugLines.emplace_back(from, to, color);
-        #endif
-    }
+    Model* GetModel();
 };
 
 // Non abstract Object
