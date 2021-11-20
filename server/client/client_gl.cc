@@ -251,6 +251,26 @@ void MultiplyAll(A* dest, const A* src, size_t count, const B& multiplyBy) {
     }
 }
 
+void ClientGL::AddMeshToLayer(Object* obj, Mesh* mesh, DrawLayer* layer, const Vector3& centerPt) {
+    if (mesh->material->IsTransparent()) {
+        DrawParams& params = layer->PushTransparent(
+            glm::distance2(centerPt, cameraPosition));
+        params.id = obj->GetId();
+        params.mesh = mesh;
+        params.transform = obj->GetTransform();
+        params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
+        params.hasOutline = obj->IsTagged(Tag::DRAW_OUTLINE);
+    }
+    else {
+        DrawParams& params = layer->PushOpaque(mesh->material);
+        params.id = obj->GetId();
+        params.mesh = mesh;
+        params.transform = obj->GetTransform();
+        params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
+        params.hasOutline = obj->IsTagged(Tag::DRAW_OUTLINE);
+    }
+}
+
 void ClientGL::SetupDrawingLayers() {
     Time now = Timer::Now();
     for (auto& gameObjectPair : game.GetGameObjects()) {
@@ -270,6 +290,7 @@ void ClientGL::SetupDrawingLayers() {
     foregroundLayer.Clear();
     backgroundLayer.Clear();
     behindPlayerLayer.Clear();
+    minimapLayer.Clear();
 
     for (auto& gameObjectPair : game.GetGameObjects()) {
         Object* obj = gameObjectPair.second;
@@ -285,24 +306,11 @@ void ClientGL::SetupDrawingLayers() {
         if (Model* model = obj->GetModel()) {
             for (auto& mesh : model->meshes) {
                 Vector3 centerPt = Vector3(obj->GetTransform() * Vector4(mesh->center, 1));
-                if (mesh->material->IsTransparent()) {
-                    DrawParams& params = layerToDraw.PushTransparent(
-                        glm::distance2(centerPt, cameraPosition));
-                    params.id = obj->GetId();
-                    params.mesh = mesh;
-                    params.transform = transform;
-                    params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
-                    params.hasOutline = obj->IsTagged(Tag::DRAW_OUTLINE);
-                }
-                else {
-                    // auto& list = layerToDraw.opaque[glm::distance2(centerPt, cameraPosition)];
-                    DrawParams& params = layerToDraw.PushOpaque(mesh->material);
-                    params.id = obj->GetId();
-                    params.mesh = mesh;
-                    params.transform = transform;
-                    params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
-                    params.hasOutline = obj->IsTagged(Tag::DRAW_OUTLINE);
-                }
+                AddMeshToLayer(obj, mesh, &layerToDraw, centerPt);
+
+                // if () {
+                //     AddMeshToLayer(obj, mesh, &minimapLayer, centerPt);
+                // }
             }
         }
     }
@@ -338,10 +346,10 @@ void ClientGL::RenderMinimap() {
         params.castShadows = false;
     }
 
-    minimapRenderer.Draw(backgroundLayer);
+    minimapRenderer.Draw({ &backgroundLayer, &behindPlayerLayer });
 
     // Draw Minimap onto base
-    GLuint texture = minimapRenderer.outputBuffer.BlitTexture();
+    GLuint texture = minimapRenderer.GetRenderedTexture();
     defaultFrameBuffer.Bind();
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
@@ -397,10 +405,10 @@ void ClientGL::Draw(int width, int height) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     worldRenderer.NewFrame(&params);
-    worldRenderer.Draw(backgroundLayer);
+    worldRenderer.Draw({ &backgroundLayer, &foregroundLayer });
 
     // Finally render everything to the main buffer
-    GLuint texture = worldRenderer.outputBuffer.BlitTexture();
+    GLuint texture = worldRenderer.GetRenderedTexture();
     defaultFrameBuffer.Bind();
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

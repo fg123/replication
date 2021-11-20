@@ -71,7 +71,7 @@ void DeferredRenderer::NewFrame(RenderFrameParameters* params) {
     renderFrameParameters->proj = proj;
 }
 
-void DeferredRenderer::DrawObject(DrawParams& params) {
+void DeferredRenderer::DrawObject(const DrawParams& params) {
     if (params.isWireframe) {
         #ifdef BUILD_EDITOR
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -119,16 +119,18 @@ void MultiplyAll(A* dest, const A* src, size_t count, const B& multiplyBy) {
     }
 }
 
-void DeferredRenderer::DrawShadowObjects(DrawLayer& layer) {
-    for (auto& pair : layer.opaque) {
-        for (auto& param : pair.second) {
-            if (!param.castShadows) continue;
-            shadowMapShader->Draw(param.transform, param.mesh);
+void DeferredRenderer::DrawShadowObjects(std::initializer_list<DrawLayer*> layers) {
+    for (auto& layer : layers) {
+        for (auto& pair : layer->opaque) {
+            for (auto& param : pair.second) {
+                if (!param.castShadows) continue;
+                shadowMapShader->Draw(param.transform, param.mesh);
+            }
         }
     }
 }
 
-void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
+void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) {
     float aspectRatio = (float) renderFrameParameters->width / (float) renderFrameParameters->height;
     Matrix4 nearProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
         renderFrameParameters->viewNear, 10.f);
@@ -199,7 +201,7 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
         transformed->depthBiasMVPNear = biasMatrix * lightProjection * lightView;
         shadowMapShader->PreDraw(Vector3(), lightView, lightProjection);
 
-        DrawShadowObjects(layer);
+        DrawShadowObjects(layers);
 
         // Update stuff to middle side
         for (size_t i = 0; i < 8; i++) {
@@ -218,7 +220,7 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
 
         glViewport(light->shadowMapSize, 0, light->shadowMapSize, light->shadowMapSize);
 
-        DrawShadowObjects(layer);
+        DrawShadowObjects(layers);
 
         // Update stuff to far side
         for (size_t i = 0; i < 8; i++) {
@@ -237,11 +239,11 @@ void DeferredRenderer::DrawShadowMaps(DrawLayer& layer) {
 
         glViewport(0, light->shadowMapSize, light->shadowMapSize, light->shadowMapSize);
 
-        DrawShadowObjects(layer);
+        DrawShadowObjects(layers);
     }
 }
 
-void DeferredRenderer::Draw(DrawLayer& layer) {
+void DeferredRenderer::Draw(std::initializer_list<DrawLayer*> layers) {
     for (auto& transformed : renderFrameParameters->lights) {
         LightNode* light = dynamic_cast<LightNode*>(transformed->node);
         light->defaultMaterial.Kd = light->color;
@@ -249,7 +251,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
             light->shape == LightShape::Directional) {
             // Setup a mesh, queue it up as a transparent so it draws after
             //   lighting is calculated
-            DrawParams& params = layer.PushTransparent(
+            DrawParams& params = (*layers.begin())->PushTransparent(
                 glm::distance2(light->position, renderFrameParameters->viewPos));
             params.mesh = assetManager.GetModel("Quad.obj")->meshes[0];
             params.transform = transformed->transform;
@@ -260,7 +262,7 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
     }
 
     // Create Shadow Maps
-    DrawShadowMaps(layer);
+    DrawShadowMaps(layers);
 
     gBuffer.Bind();
     glViewport(0, 0, gBuffer.width, gBuffer.height);
@@ -272,9 +274,11 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
 
     // Opaque Geometry Pass
     geometryShader->Use();
-    for (auto& pair : layer.opaque) {
-        for (auto& param : pair.second) {
-            DrawObject(param);
+    for (auto& layer : layers) {
+        for (auto& pair : layer->opaque) {
+            for (auto& param : pair.second) {
+                DrawObject(param);
+            }
         }
     }
 
@@ -372,10 +376,12 @@ void DeferredRenderer::Draw(DrawLayer& layer) {
 
 
         geometryShader->Use();
-        for (auto it = layer.transparent.rbegin(); it != layer.transparent.rend(); ++it) {
-            // LOG_DEBUG(it->second.mesh->name);
-            for (auto& param : it->second) {
-                DrawObject(param);
+        for (auto& layer : layers) {
+            for (auto it = layer->transparent.rbegin(); it != layer->transparent.rend(); ++it) {
+                // LOG_DEBUG(it->second.mesh->name);
+                for (auto& param : it->second) {
+                    DrawObject(param);
+                }
             }
         }
 

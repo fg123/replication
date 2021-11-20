@@ -111,7 +111,7 @@ void Editor::DrawScene(int width, int height) {
     }
 
     renderer.NewFrame(&parameters);
-    renderer.Draw(layer);
+    renderer.Draw({ &layer });
 
     QuadShaderProgram& quadShader = renderer.GetQuadShader();
     GLuint texture = renderer.GetRenderedTexture();

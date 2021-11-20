@@ -41,6 +41,7 @@ class ClientGL {
     DrawLayer foregroundLayer;
     DrawLayer backgroundLayer;
     DrawLayer behindPlayerLayer;
+    DrawLayer minimapLayer;
 
     GLuint minimapFBO = 0;
     GLuint minimapTexture = 0;
@@ -70,6 +71,8 @@ class ClientGL {
     void SetupDrawingLayers();
     void RenderMinimap();
     void RenderUI(int width, int height);
+    void AddMeshToLayer(Object* obj, Mesh* mesh, DrawLayer* layer,
+        const Vector3& centerPt);
 
 public:
 

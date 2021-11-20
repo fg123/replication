@@ -90,7 +90,6 @@ struct RenderFrameParameters {
 
 class DeferredRenderer {
     bool isInitialized = false;
-public:
     AssetManager& assetManager;
 
     DeferredShadingGeometryShaderProgram* geometryShader;
@@ -127,17 +126,18 @@ public:
     GLint uniformSkydomeWidth;
     GLint uniformSkydomeHeight;
 
+public:
 
     DeferredRenderer(AssetManager& assetManager);
 
     void Initialize();
-    void DrawShadowObjects(DrawLayer& layer);
-    void DrawObject(DrawParams& params);
+    void DrawShadowObjects(std::initializer_list<DrawLayer*> layers);
+    void DrawObject(const DrawParams& params);
 
     void NewFrame(RenderFrameParameters* params);
 
-    void Draw(DrawLayer& layer);
-    void DrawShadowMaps(DrawLayer& layer);
+    void Draw(std::initializer_list<DrawLayer*> layers);
+    void DrawShadowMaps(std::initializer_list<DrawLayer*> layers);
 
     QuadShaderProgram& GetQuadShader() { return *quadShader; }
 
