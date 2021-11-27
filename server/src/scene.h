@@ -193,12 +193,17 @@ struct TransformedLight : public TransformedNode {
     }
 };
 
+struct SceneProperties : public Replicable {
+    REPLICATED(std::string, skydomeTexture, "skydomeTexture");
+};
+
 class Scene {
 public:
 
     // Scene Tree
     CollectionNode root;
     std::vector<CollectionNode*> collections;
+    SceneProperties properties;
 
     AssetManager assetManager;
 

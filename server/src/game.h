@@ -65,6 +65,8 @@ class Game : public Replicable {
     std::unordered_set<ObjectID> replicateNextTick;
 
     std::thread::id tickThreadId;
+    bool tickThreadIdSet = false;
+
 #endif
 
     REPLICATED(RelationshipManager, relationshipManager, "rm");
@@ -195,8 +197,6 @@ public:
     }
 
     ObjectID RequestId();
-
-    void ChangeId(ObjectID oldId, ObjectID newId);
 
 #ifdef BUILD_SERVER
     void QueueNextTick(const std::function <void(Game& game)>& func) {

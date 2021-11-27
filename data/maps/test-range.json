@@ -1,64 +1,4 @@
 {
-    "models": [
-        "ShootingRange.obj",
-        "FlatWorld.obj",
-        "Lift.obj",
-        "SpectatorArea.obj",
-        "Player.obj",
-        "NewPlayer.obj",
-        "Pistol.obj",
-        "Rifle.obj",
-        "Bullet.obj",
-        "BulletTracer.obj",
-        "Quad.obj",
-        "Grenade.obj",
-        "Explosion.obj",
-        "ArtilleryIndicator.obj",
-        "Artillery.obj",
-        "HookThrower.obj",
-        "Portal.obj",
-        "Bow.obj",
-        "Arrow.obj",
-        "BombCrate.obj",
-        "Plane.obj",
-        "Ammo.obj",
-        "Icosphere.obj",
-        "Cube.obj",
-        "Cylinder.obj",
-        "Shotgun.obj",
-        "Medkit.obj",
-        "MachineGun.obj",
-        "PlayerMarkerMinimap.obj",
-        "SubmachineGun.obj",
-        "SmokeGrenade.obj",
-        "Cone.obj",
-        "Warehouse.obj",
-        "StreetLamp.obj"
-    ],
-    "scripts": [
-        "Types.w",
-        "Math.w",
-        "Object.w",
-        "Test.w",
-        "Explosion.w"
-    ],
-    "sounds": [
-        "bang.wav",
-        "reload.wav",
-        "boom.wav",
-        "ueh.wav",
-        "incoming.wav",
-        "HookThrow.wav",
-        "HookReel.wav",
-        "PortalStart.wav",
-        "PortalEnd.wav",
-        "GrenadeOut.wav",
-        "Archer/arrow-jump.wav",
-        "Archer/arrow-pullback.wav",
-        "Archer/arrow-shoot.wav",
-        "Archer/arrow-ulti-activate.wav",
-        "Archer/arrow-ulti-shoot.wav"
-    ],
     "root": {
         "scale": {
             "x": 1.0,
@@ -80,11 +20,11 @@
         "children": [
             {
                 "scale": {
-                    "x": 5.0,
-                    "y": 5.0,
-                    "z": 5.0
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
                 },
-                "name": "Quad.obj",
+                "name": "ShootingRange2.obj",
                 "position": {
                     "x": 0.0,
                     "y": 0.0,
@@ -92,13 +32,73 @@
                 },
                 "rotation": {
                     "x": 0.0,
-                    "y": 90.0,
+                    "y": 0.0,
                     "z": 0.0
                 },
                 "type": "StaticModelNode",
-                "model": "Cube.obj"
+                "model": "ShootingRange2.obj"
+            },
+            {
+                "volumeSize": {
+                    "x": 38.63999938964844,
+                    "y": 28.049999237060548,
+                    "z": 27.420000076293947
+                },
+                "volumeOffset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": -0.5
+                },
+                "color": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "rotation": {
+                    "x": -45.02000045776367,
+                    "y": -45.0,
+                    "z": 0.0
+                },
+                "position": {
+                    "x": -10.0,
+                    "y": 10.0,
+                    "z": 3.380000114440918
+                },
+                "shadowMapSize": 1024,
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "name": "New Light",
+                "strength": 300.0,
+                "type": "LightNode",
+                "shape": 1
+            },
+            {
+                "scale": {
+                    "x": 2.0,
+                    "y": 2.0,
+                    "z": 2.0
+                },
+                "name": "Player.obj",
+                "position": {
+                    "x": -2.7300000190734865,
+                    "y": 4.670000076293945,
+                    "z": 3.640000104904175
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "StaticModelNode",
+                "model": "Player.obj"
             }
         ]
     },
-    "collections": []
+    "collections": [],
+    "properties": {
+        "skydomeTexture": "textures/Skydome.png"
+    }
 }

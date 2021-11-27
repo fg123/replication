@@ -6,7 +6,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
-#ifdef BUILD_SERVER
+#if defined(BUILD_SERVER) || defined(BUILD_EDITOR)
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 #include "external/OBJ_Loader.h"
@@ -199,7 +199,6 @@ Texture* AssetManager::LoadTexture(const std::string& name, Texture::Format form
         int channels = (format == Texture::Format::RGB) ? 3 : 4;
         unsigned char *data = stbi_load((path).c_str(), &width, &height, &nrChannels, channels);
         if (!data) {
-            LOG_ERROR("Could not load texture " << path);
             throw std::runtime_error("Could not load texture");
         }
         Texture* tex = new Texture;

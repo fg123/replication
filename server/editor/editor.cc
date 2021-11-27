@@ -22,6 +22,36 @@ Editor::Editor(GLFWwindow* window, const std::string& path) :
     });
 
     renderer.Initialize();
+
+    // Initialize Grid Mesh
+    InitializeGridMesh();
+}
+
+void Editor::InitializeGridMesh() {
+    // Grid from -100 to 100
+    const int size = 100;
+
+    // Top to bottom
+    for (int i = -size; i <= size; i++) {
+        Vertex& v = gridMesh.vertices.emplace_back();
+        v.position = Vector3(i, 0, -size);
+        Vertex& v2 = gridMesh.vertices.emplace_back();
+        v2.position = Vector3(i, 0, size);
+    }
+    // Left to Right
+    for (int i = -size; i <= size; i++) {
+        Vertex& v = gridMesh.vertices.emplace_back();
+        v.position = Vector3(-size, 0, i);
+        Vertex& v2 = gridMesh.vertices.emplace_back();
+        v2.position = Vector3(size, 0, i);
+    }
+
+    // Add indices for line drawing
+    for (size_t i = 0; i < gridMesh.vertices.size(); i++) {
+        gridMesh.indices.emplace_back(i);
+    }
+
+    gridMesh.InitializeMesh();
 }
 
 void Editor::DrawScene(int width, int height) {
@@ -40,6 +70,14 @@ void Editor::DrawScene(int width, int height) {
     parameters.viewPos = viewPos;
     parameters.viewDir = Vector::Forward * GetRotationQuat();
     parameters.ambientFactor = 0.5f;
+
+    parameters.skydomeTexture = nullptr;
+    try {
+        parameters.skydomeTexture = scene.assetManager.LoadTexture(scene.properties.skydomeTexture, Texture::Format::RGB);
+    }
+    catch (std::exception& e) {
+        // TODO: load error into a warning list
+    }
 
     // Aggregate Meshes
     std::vector<TransformedNode> nodes;
@@ -117,6 +155,11 @@ void Editor::DrawScene(int width, int height) {
     GLuint texture = renderer.GetRenderedTexture();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // Draw Editor Sky
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
     quadShader.Use();
     quadShader.DrawQuad(texture, quadShader.standardRemapMatrix);
 }
@@ -192,8 +235,29 @@ void Editor::HandleMouseInputs() {
 void Editor::HandleKeyboardInputs() {
 }
 
+// Get current date/time, format is YYYY-MM-DD.HH:mm:ss
+const std::string GetCurrentDateTime() {
+    time_t now = time(0);
+    struct tm tstruct;
+    char buf[80];
+    tstruct = *localtime(&now);
+    // Visit http://en.cppreference.com/w/cpp/chrono/c/strftime
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%Y%m%d-%H%M%S", &tstruct);
+
+    return buf;
+}
+
+
 bool Editor::SaveToFile() {
-    std::ofstream oss(path + ".new");
+    // Backup Current File
+    {
+        std::ifstream src(path, std::ios::binary);
+        std::ofstream dst(path + "." + GetCurrentDateTime() + ".bak", std::ios::binary);
+        dst << src.rdbuf();
+    }
+
+    std::ofstream oss(path);
     if (!oss.is_open()) {
         return false;
     }

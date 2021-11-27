@@ -24,12 +24,20 @@ void Scene::LoadFromFile(const std::string& filename) {
     obj.ParseStream(stream);
 
     // Process Root
-    root.ProcessReplication(obj["root"]);
+    if (obj.HasMember("root")) {
+        root.ProcessReplication(obj["root"]);
+    }
 
-    for (json& collectionObj : obj["collections"].GetArray()) {
-        CollectionNode* node = new CollectionNode(*this);
-        collections.push_back(node);
-        node->ProcessReplication(collectionObj);
+    if (obj.HasMember("collections")) {
+        for (json& collectionObj : obj["collections"].GetArray()) {
+            CollectionNode* node = new CollectionNode(*this);
+            collections.push_back(node);
+            node->ProcessReplication(collectionObj);
+        }
+    }
+
+    if (obj.HasMember("properties")) {
+        properties.ProcessReplication(obj["properties"]);
     }
 }
 
@@ -51,6 +59,12 @@ void Scene::WriteToFile(std::ostream& output) {
         writer.EndObject();
     }
     writer.EndArray();
+
+    writer.Key("properties");
+    writer.StartObject();
+    properties.Serialize(writer);
+    writer.EndObject();
+
     writer.EndObject();
     output << buffer.GetString();
 }

@@ -49,6 +49,7 @@ Game::Game() :
         }
 
         LoadMap(RESOURCE_PATH(GlobalSettings.MapPath));
+
         CreateMapBaseObject();
     #endif
 }
@@ -173,7 +174,8 @@ void Game::DetachParent(Object* child) {
 
 #ifdef BUILD_SERVER
 bool Game::IsOnTickThread() {
-    return std::this_thread::get_id() == tickThreadId;
+    // Not set means we're on main thread, still initializing
+    return !tickThreadIdSet || std::this_thread::get_id() == tickThreadId;
 }
 
 void Game::FlushNewObjects() {
@@ -183,6 +185,7 @@ void Game::FlushNewObjects() {
     newObjectsMutex.unlock();
 
     for (auto& newObject : newObjectsCopy) {
+        LOG_DEBUG("Flush New Object (" << (void*)newObject.second << ") " << newObject.second);
         gameObjects[newObject.first] = newObject.second;
         gameObjects[newObject.first]->OnCreate();
         RequestReplication(newObject.first);
@@ -197,6 +200,7 @@ void Game::Tick(Time time) {
 #ifdef BUILD_SERVER
 
     tickThreadId = std::this_thread::get_id();
+    tickThreadIdSet = true;
 
     queuedCallsMutex.lock();
     for (auto& call : queuedCalls) {
@@ -585,26 +589,11 @@ void Game::HandleCollisions(Object* obj) {
     }
 }
 
-void Game::ChangeId(ObjectID oldId, ObjectID newId) {
-    if (oldId == newId) return;
-    if (gameObjects.find(oldId) == gameObjects.end()) {
-        throw std::runtime_error("Invalid old ID " + std::to_string(oldId));
-    }
-    else if (gameObjects.find(newId) != gameObjects.end()) {
-        throw std::runtime_error("New ID already exists " + std::to_string(newId));
-    }
-    LOG_DEBUG("Changing ID " << oldId << " -> " << newId << " " << gameObjects[oldId]);
-    gameObjects[newId] = gameObjects[oldId];
-    gameObjects[newId]->SetId(newId);
-    gameObjects.erase(oldId);
-}
-
 void Game::AddObject(Object* obj) {
     // Client does not do anything
 #ifdef BUILD_SERVER
     ObjectID newId = RequestId();
     obj->SetId(newId);
-    LOG_DEBUG("Add Object (" << (void*)obj << ") " << obj);
     newObjectsMutex.lock();
     newObjects[newId] = obj;
     newObjectsMutex.unlock();

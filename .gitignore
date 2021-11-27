@@ -24,3 +24,6 @@ server/lib/assimp-4.1.0/bin
 
 // Temporary Object Files
 *.tmp
+
+// Backup Map Files
+*.bak

@@ -1,6 +1,11 @@
 #include "render_settings_window.h"
 #include "editor.h"
 
+RenderSettingsWindow::RenderSettingsWindow() {
+    parameters.enableLighting = true;
+    parameters.enableShadows = true;
+}
+
 void RenderSettingsWindow::Draw(Editor& editor) {
     if (!isVisible) return;
     ImGui::Begin("Render Settings", &isVisible, ImGuiWindowFlags_NoCollapse);
@@ -19,8 +24,8 @@ void RenderSettingsWindow::Draw(Editor& editor) {
     ImGui::DragFloat("Min Reduce Reciprocal", &parameters.fxaaMinReduceReciprocal, 1.0f, 0.0f, 512.0f);
     ImGui::DragFloat("Max Span", &parameters.fxaaMaxSpan, 0.0f, 0.0f, 100.0f);
     ImGui::Separator();
-    GBuffer& worldGBuffer = editor.renderer.gBuffer;
-    GBuffer& transparencyGBuffer = editor.renderer.transparencyGBuffer;
+    GBuffer& worldGBuffer = editor.renderer.GetGBuffer();
+    GBuffer& transparencyGBuffer = editor.renderer.GetTransparencyGBuffer();
     ImVec2 uv_min = ImVec2(0.0f, 1.0f);                 // Top-left
     ImVec2 uv_max = ImVec2(1.0f, 0.0f);                 // Lower-right
     ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
@@ -66,7 +71,7 @@ void RenderSettingsWindow::Draw(Editor& editor) {
         ImGui::TreePop();
     }
     if (ImGui::TreeNode("Bloom")) {
-        RenderBuffer& bloomBuffer = editor.renderer.bloomShader->bloomBuffer;
+        RenderBuffer& bloomBuffer = editor.renderer.GetBloomShader()->bloomBuffer;
         ImGui::Image((ImTextureID)bloomBuffer.textureColor, size, uv_min, uv_max, tint_col, border_col);
         ImGui::TreePop();
     }
@@ -83,7 +88,7 @@ void RenderSettingsWindow::Draw(Editor& editor) {
 
     }
     if (ImGui::TreeNode("Final")) {
-        RenderBuffer& final = editor.renderer.outputBuffer;
+        RenderBuffer& final = editor.renderer.GetOutputBuffer();
         ImGui::Image((ImTextureID)final.textureColor, size, uv_min, uv_max, tint_col, border_col);
         ImGui::TreePop();
     }

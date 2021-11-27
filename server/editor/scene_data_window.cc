@@ -8,6 +8,12 @@ void SceneDataWindow::Draw(Editor& editor) {
     ImGui::Text("Scene Path: %s", editor.path.c_str());
 
     ImGui::Separator();
+
+    ImGui::Text("Scene Properties");
+    SceneProperties& properties = editor.scene.properties;
+    ImGui::InputText("SkySphere Texture", &properties.skydomeTexture);
+
+    ImGui::Separator();
     if (ImGui::BeginListBox("Collections")) {
         if (ImGui::Selectable("RootCollection##-1", selectedNode == &editor.scene.root)) {
             selectedNode = &editor.scene.root;

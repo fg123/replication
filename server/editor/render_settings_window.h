@@ -7,6 +7,7 @@ class Editor;
 
 class RenderSettingsWindow {
 public:
+    RenderSettingsWindow();
     bool isVisible = true;
 
     RenderFrameParameters parameters;

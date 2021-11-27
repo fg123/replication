@@ -146,4 +146,20 @@ public:
     bool IsInitialized() {
         return isInitialized;
     }
+
+    GBuffer& GetGBuffer() {
+        return gBuffer;
+    }
+
+    GBuffer& GetTransparencyGBuffer() {
+        return transparencyGBuffer;
+    }
+
+    BloomShader* GetBloomShader() {
+        return bloomShader;
+    }
+
+    RenderBuffer& GetOutputBuffer() {
+        return outputBuffer;
+    }
 };

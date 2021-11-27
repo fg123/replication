@@ -35,6 +35,9 @@ struct Editor {
 
     std::vector<LightNode*> lights;
 
+    Mesh gridMesh;
+    void InitializeGridMesh();
+
     Quaternion GetRotationQuat() {
         Matrix4 matrix;
         matrix = glm::rotate(matrix, viewDir.x, Vector::Up);

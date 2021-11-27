@@ -305,7 +305,7 @@ void ClientGL::SetupDrawingLayers() {
 
         if (Model* model = obj->GetModel()) {
             for (auto& mesh : model->meshes) {
-                Vector3 centerPt = Vector3(obj->GetTransform() * Vector4(mesh->center, 1));
+                Vector3 centerPt = Vector3(transform * Vector4(mesh->center, 1));
                 AddMeshToLayer(obj, mesh, &layerToDraw, centerPt);
 
                 // if () {
