@@ -2,9 +2,9 @@
 #include <thread>
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLEW
-#include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -51,6 +51,8 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
     glfwWindowHint(GLFW_MAXIMIZED, true);
+
+    // glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 
     // Create window with graphics context
@@ -78,7 +80,8 @@ int main(int argc, char* argv[]) {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
-    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
     // Setup Dear ImGui style
@@ -114,12 +117,14 @@ int main(int argc, char* argv[]) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        if (!io.WantCaptureMouse) {
-            editor.HandleMouseInputs();
-        }
+        editor.HandleMouseInputs();
+
         if (!io.WantCaptureKeyboard) {
             editor.HandleKeyboardInputs();
         }
+
+        ImGuiID dockspace_id = ImGui::GetID("Main Dockspace");
+        ImGui::DockSpaceOverViewport();
 
         editor.Draw(width, height);
 
@@ -129,6 +134,7 @@ int main(int argc, char* argv[]) {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         glfwSwapBuffers(window);
+        // glFinish();
     }
 
     // Cleanup

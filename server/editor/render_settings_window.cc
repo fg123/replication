@@ -77,9 +77,9 @@ void RenderSettingsWindow::Draw(Editor& editor) {
     }
     if (ImGui::TreeNode("Lights")) {
         for (auto& light : editor.lights) {
-            if (dynamic_cast<LightNode*>(light)->shadowMapSize) {
-                if (ImGui::TreeNode(light->name.c_str())) {
-                    ImGui::Image((ImTextureID)editor.lightNodeCache[light]->shadowColorMap, size, uv_min, uv_max, tint_col, border_col);
+            if (dynamic_cast<LightNode*>(light->node)->shadowMapSize) {
+                if (ImGui::TreeNode(light->node->name.c_str())) {
+                    ImGui::Image((ImTextureID)light->shadowColorMap, size, uv_min, uv_max, tint_col, border_col);
                     ImGui::TreePop();
                 }
             }

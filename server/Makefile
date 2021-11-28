@@ -36,7 +36,7 @@ EDITOR_SRC = $(SRC) $(WENDY_SRC) $(shell find editor/ -name "*.cc") $(RENDERING_
 EDITOR_OBJ = $(patsubst %.cc,%.eo,$(patsubst %.c,%.eo,$(EDITOR_SRC)))
 EDITOR_DEPS = $(EDITOR_OBJ:%.eo=%.ed)
 EDITOR_OUTPUT = bin/$(EXE)_editor
-EDITOR_LDLIBS = $(SERVER_LDLIBS) -lz -lpthread -lGL -lGLEW -lglfw -lopenal
+EDITOR_LDLIBS = $(SERVER_LDLIBS) -lGL -lGLEW -lglfw -lopenal -ldl
 
 DATA_DIRS = $(shell find ../data/ -type d)
 DATA_FILES = $(shell find ../data/ -type f -name '*')
@@ -143,10 +143,10 @@ client_prod: $(CLIENT_OBJ) $(CLIENT_DATA)
 	emcc -O2 $(CFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.c=%.wd) -c $< -o $@
 
 %.eo: %.cc
-	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -c $< -o $@
+	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -MF $(<:%.cc=%.ed) -c $< -o $@
 
 %.eo: %.c
-	$(CC) -O2 $(CFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -c $< -o $@
+	$(CC) -O2 $(CFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -MF $(<:%.c=%.ed) -c $< -o $@
 
 $(SRC_DIR)/objects.h:
 	./gen_objects_h.sh $@ \

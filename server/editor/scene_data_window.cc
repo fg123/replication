@@ -2,16 +2,14 @@
 #include "editor.h"
 
 void SceneDataWindow::Draw(Editor& editor) {
-    if (!isVisible) return;
-    ImGui::Begin("Scene Data", &isVisible, ImGuiWindowFlags_NoCollapse);
+    ImGui::Begin("Scene Data", NULL, ImGuiWindowFlags_NoCollapse);
     ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
     ImGui::Text("Scene Path: %s", editor.path.c_str());
 
     ImGui::Separator();
 
     ImGui::Text("Scene Properties");
-    SceneProperties& properties = editor.scene.properties;
-    ImGui::InputText("SkySphere Texture", &properties.skydomeTexture);
+    ImGui::InputText("SkySphere Texture", &editor.scene.properties.skydomeTexture);
 
     ImGui::Separator();
     if (ImGui::BeginListBox("Collections")) {

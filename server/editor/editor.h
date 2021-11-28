@@ -5,8 +5,8 @@
 #include "opengl.h"
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLEW
-#include "imgui.h"
-#include "imgui_stdlib.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_stdlib.h"
 
 #include "scene.h"
 #include "deferred_renderer.h"
@@ -19,10 +19,13 @@ struct Editor {
     struct MouseState {
         double mx, my;
         bool lmb, rmb, mmb;
-    } prevMouseState;
+    };
+    MouseState sceneMouseState, prevSceneMouseState;
 
     GLFWwindow* window;
     std::string path;
+
+    bool showSceneWindow = true;
 
     Scene scene;
     DeferredRenderer renderer;
@@ -31,9 +34,7 @@ struct Editor {
     // Yaw, Pitch
     Vector2 viewDir, targetViewDir;
 
-    std::unordered_map<LightNode*, TransformedLight*> lightNodeCache;
-
-    std::vector<LightNode*> lights;
+    std::vector<TransformedLight*> lights;
 
     Mesh gridMesh;
     void InitializeGridMesh();

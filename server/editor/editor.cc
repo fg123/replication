@@ -14,13 +14,6 @@ Editor::Editor(GLFWwindow* window, const std::string& path) :
     scene.assetManager.LoadDataFromDirectory();
     scene.LoadFromFile(path);
 
-    glfwSetScrollCallback(window, [](GLFWwindow* window, double xoffset, double yoffset) {
-        if (ImGui::GetIO().WantCaptureMouse) return;
-        Editor* editor = (Editor*)glfwGetWindowUserPointer(window);
-        Vector3 forward = glm::normalize(Vector::Forward * editor->GetRotationQuat());
-        editor->targetViewPos += forward * (float) yoffset;
-    });
-
     renderer.Initialize();
 
     // Initialize Grid Mesh
@@ -56,14 +49,18 @@ void Editor::InitializeGridMesh() {
 
 void Editor::DrawScene(int width, int height) {
     // Render Scene
+    // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+    ImGui::Begin("Scene", NULL, ImGuiWindowFlags_NoCollapse);
+    ImVec2 windowSize = ImGui::GetContentRegionAvail();
 
     // Move viewPos towards targetViewPos
     viewPos += (targetViewPos - viewPos) * 0.5f;
     viewDir += (targetViewDir - viewDir) * 0.5f;
 
     RenderFrameParameters parameters = render_settings_window.parameters;
-    parameters.width = width;
-    parameters.height = height;
+    parameters.width = windowSize.x;
+    parameters.height = windowSize.y;
     parameters.FOV = 45.0f;
     parameters.viewNear = 0.2f;
     parameters.viewFar = 300.0f;
@@ -82,7 +79,8 @@ void Editor::DrawScene(int width, int height) {
     // Aggregate Meshes
     std::vector<TransformedNode> nodes;
     scene.FlattenHierarchy(nodes, GetSelectedRootNode());
-    lights.clear();
+
+    size_t lightNodeCount = 0;
 
     DrawLayer layer;
     for (auto& transformed : nodes) {
@@ -108,12 +106,13 @@ void Editor::DrawScene(int width, int height) {
             }
         }
         else if (LightNode* light_node = dynamic_cast<LightNode*>(node)) {
-            lights.push_back(light_node);
-            if (lightNodeCache.find(light_node) == lightNodeCache.end()) {
-                lightNodeCache[light_node] = new TransformedLight;
+            lightNodeCount += 1;
+
+            while (lights.size() < lightNodeCount) {
+                lights.push_back(new TransformedLight);
             }
-            lightNodeCache[light_node]->Update(transformed);
-            parameters.lights.push_back(lightNodeCache[light_node]);
+
+            lights[lightNodeCount - 1]->Update(transformed);
 
             if (light_node == GetSelectedNode()) {
                 if (light_node->shape == LightShape::Point) {
@@ -148,20 +147,53 @@ void Editor::DrawScene(int width, int height) {
         }
     }
 
+    for (size_t i = lightNodeCount; i < lights.size(); i++) {
+        delete lights[i];
+    }
+    if (lightNodeCount != lights.size()) {
+        lights.resize(lightNodeCount);
+    }
+
+    parameters.lights = lights;
+
     renderer.NewFrame(&parameters);
     renderer.Draw({ &layer });
 
     QuadShaderProgram& quadShader = renderer.GetQuadShader();
     GLuint texture = renderer.GetRenderedTexture();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    // Draw Editor Sky
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    ImGui::Image((ImTextureID) texture, windowSize, ImVec2(0, 1), ImVec2(1, 0));
 
-    quadShader.Use();
-    quadShader.DrawQuad(texture, quadShader.standardRemapMatrix);
+    ImGui::SetCursorPos(ImVec2(0, 0));
+    ImGui::InvisibleButton("Scene", windowSize, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight | ImGuiButtonFlags_MouseButtonMiddle);
+    if (ImGui::IsItemHovered()) {
+        // LOG_DEBUG("Hovered");
+        ImVec2 mousePositionAbsolute = ImGui::GetMousePos();
+        ImVec2 screenPositionAbsolute = ImGui::GetItemRectMin();
+        ImVec2 mousePositionRelative = ImVec2(mousePositionAbsolute.x - screenPositionAbsolute.x, mousePositionAbsolute.y - screenPositionAbsolute.y);
+
+        sceneMouseState.mx = mousePositionRelative.x;
+        sceneMouseState.my = mousePositionRelative.y;
+
+        Vector3 forward = glm::normalize(Vector::Forward * GetRotationQuat());
+        targetViewPos += forward * (float) ImGui::GetIO().MouseWheel;
+    }
+
+    if (ImGui::IsItemFocused()) {
+        // LOG_DEBUG("Focused");
+        sceneMouseState.lmb = ImGui::IsMouseDown(ImGuiMouseButton_Left);
+        sceneMouseState.rmb = ImGui::IsMouseDown(ImGuiMouseButton_Right);
+        sceneMouseState.mmb = ImGui::IsMouseDown(ImGuiMouseButton_Middle);
+    }
+    else {
+        // LOG_DEBUG("Not Focused");
+        sceneMouseState.lmb = false;
+        sceneMouseState.rmb = false;
+        sceneMouseState.mmb = false;
+    }
+
+    ImGui::End();
+    // ImGui::PopStyleVar();
 }
 
 Node* Editor::GetSelectedNode() {
@@ -178,14 +210,6 @@ Node* Editor::GetSelectedRootNode() {
 void Editor::DrawUI(int width, int height) {
     if(ImGui::BeginMainMenuBar()) {
         if (ImGui::BeginMenu("Windows")) {
-            ImGui::MenuItem(
-                "Scene Data", NULL,
-                &scene_data_window.isVisible, true);
-
-            ImGui::MenuItem(
-                "Scene Graph", NULL,
-                &scene_graph_window.isVisible, true);
-
             ImGui::MenuItem(
                 "Render Settings", NULL,
                 &render_settings_window.isVisible, true);
@@ -208,15 +232,9 @@ void Editor::Draw(int width, int height) {
 
 void Editor::HandleMouseInputs() {
     // Mouse Inputs
-    MouseState currMouseState;
-    glfwGetCursorPos(window, &currMouseState.mx, &currMouseState.my);
-    currMouseState.lmb = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
-    currMouseState.rmb = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT);
-    currMouseState.mmb = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE);
-
-    if (currMouseState.mmb) {
-        double movementX = (currMouseState.mx - prevMouseState.mx);
-        double movementY = (currMouseState.my - prevMouseState.my);
+    if (sceneMouseState.mmb) {
+        double movementX = (sceneMouseState.mx - prevSceneMouseState.mx);
+        double movementY = (sceneMouseState.my - prevSceneMouseState.my);
 
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
             // Move along the plane
@@ -229,7 +247,7 @@ void Editor::HandleMouseInputs() {
             targetViewDir.y -= (float) movementY / 100.f;
         }
     }
-    prevMouseState = currMouseState;
+    prevSceneMouseState = sceneMouseState;
 }
 
 void Editor::HandleKeyboardInputs() {

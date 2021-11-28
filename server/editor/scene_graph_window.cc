@@ -171,8 +171,7 @@ void SceneGraphWindow::DrawTreeNode(Node* node) {
 }
 
 void SceneGraphWindow::Draw(Editor& editor) {
-    if (!isVisible) return;
-    ImGui::Begin("Scene Graph", &isVisible, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar);
+    ImGui::Begin("Scene Graph", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar);
     bool showSelectModelMenu = false;
 
     if (ImGui::BeginMenuBar()) {

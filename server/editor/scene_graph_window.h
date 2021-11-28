@@ -6,7 +6,6 @@ class Editor;
 
 class SceneGraphWindow {
 public:
-    bool isVisible = true;
     Node* selectedNode = nullptr;
 
     void DrawCurrentProperties(Editor& editor);

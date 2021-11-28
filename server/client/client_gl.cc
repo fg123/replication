@@ -150,7 +150,9 @@ void ClientGL::SetupGL() {
     // debugCylinder.indices = std::move(newIndices);
 
     minimapMarker = game.GetAssetManager().GetModel("PlayerMarkerMinimap.obj")->meshes[0];
-    skydomeTexture = game.GetAssetManager().LoadTexture(RESOURCE_PATH("textures/Skydome.png"), Texture::Format::RGB);
+    skydomeTexture = game.GetAssetManager().LoadTexture(RESOURCE_PATH(
+        game.scene.properties.skydomeTexture
+    ), Texture::Format::RGB);
 }
 
 void ClientGL::DrawDebugLine(const Vector3& color, const Vector3& from, const Vector3& to) {

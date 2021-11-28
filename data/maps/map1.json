@@ -770,5 +770,8 @@
                 }
             ]
         }
-    ]
+    ],
+    "properties": {
+        "skydomeTexture": "textures/Skydome.png"
+    }
 }
