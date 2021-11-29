@@ -69,6 +69,12 @@ void DeferredRenderer::NewFrame(RenderFrameParameters* params) {
     renderFrameParameters = params;
     renderFrameParameters->view = view;
     renderFrameParameters->proj = proj;
+
+    debugRenderer.NewFrame(view, proj);
+}
+
+void DeferredRenderer::EndFrame() {
+    // No-op for now
 }
 
 void DeferredRenderer::DrawObject(const DrawParams& params) {
@@ -431,6 +437,20 @@ void DeferredRenderer::Draw(std::initializer_list<DrawLayer*> layers) {
         texture = outputBuffer.BlitTexture();
     }
 
+    // Render Debug Artifacts Before Antialiasing
+    {
+        outputBuffer.Bind();
+
+        // Copy depth into output
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.fbo);
+        glBlitFramebuffer(0, 0, gBuffer.width, gBuffer.height,
+            0, 0, outputBuffer.width, outputBuffer.height,
+            GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+        debugRenderer.Render();
+        texture = outputBuffer.BlitTexture();
+    }
+
     if (renderFrameParameters->enableAntialiasing) {
         outputBuffer.Bind();
         glBlendFunc(GL_ONE, GL_ZERO);
@@ -444,9 +464,7 @@ void DeferredRenderer::Draw(std::initializer_list<DrawLayer*> layers) {
         fxaaShader->DrawQuad(texture, toneMappingShader->standardRemapMatrix);
     }
 
-
     // texture = outputBuffer.BlitTexture();
-
 
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);

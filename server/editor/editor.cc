@@ -15,36 +15,26 @@ Editor::Editor(GLFWwindow* window, const std::string& path) :
     scene.LoadFromFile(path);
 
     renderer.Initialize();
-
-    // Initialize Grid Mesh
-    InitializeGridMesh();
 }
 
-void Editor::InitializeGridMesh() {
+void Editor::DrawGridMesh() {
     // Grid from -100 to 100
     const int size = 100;
 
     // Top to bottom
     for (int i = -size; i <= size; i++) {
-        Vertex& v = gridMesh.vertices.emplace_back();
-        v.position = Vector3(i, 0, -size);
-        Vertex& v2 = gridMesh.vertices.emplace_back();
-        v2.position = Vector3(i, 0, size);
+        renderer.GetDebugRenderer().DrawLine(
+            glm::vec3(i, 0, -size),
+            glm::vec3(i, 0, size),
+            glm::vec3(0.5f, 0.5f, 0.5f));
     }
     // Left to Right
     for (int i = -size; i <= size; i++) {
-        Vertex& v = gridMesh.vertices.emplace_back();
-        v.position = Vector3(-size, 0, i);
-        Vertex& v2 = gridMesh.vertices.emplace_back();
-        v2.position = Vector3(size, 0, i);
+        renderer.GetDebugRenderer().DrawLine(
+            glm::vec3(-size, 0, i),
+            glm::vec3(size, 0, i),
+            glm::vec3(0.5f, 0.5f, 0.5f));
     }
-
-    // Add indices for line drawing
-    for (size_t i = 0; i < gridMesh.vertices.size(); i++) {
-        gridMesh.indices.emplace_back(i);
-    }
-
-    gridMesh.InitializeMesh();
 }
 
 void Editor::DrawScene(int width, int height) {
@@ -53,6 +43,9 @@ void Editor::DrawScene(int width, int height) {
 
     ImGui::Begin("Scene", NULL, ImGuiWindowFlags_NoCollapse);
     ImVec2 windowSize = ImGui::GetContentRegionAvail();
+
+    // Setup Debug Lines
+    DrawGridMesh();
 
     // Move viewPos towards targetViewPos
     viewPos += (targetViewPos - viewPos) * 0.5f;
@@ -158,6 +151,7 @@ void Editor::DrawScene(int width, int height) {
 
     renderer.NewFrame(&parameters);
     renderer.Draw({ &layer });
+    renderer.EndFrame();
 
     QuadShaderProgram& quadShader = renderer.GetQuadShader();
     GLuint texture = renderer.GetRenderedTexture();

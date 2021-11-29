@@ -6,6 +6,7 @@
 #include "asset-manager.h"
 #include "scene.h"
 #include "bloom.h"
+#include "debug_renderer.h"
 
 // Everything must be loaded in, don't depend on game instance
 
@@ -92,6 +93,7 @@ class DeferredRenderer {
     bool isInitialized = false;
     AssetManager& assetManager;
 
+    DebugRenderer debugRenderer;
     DeferredShadingGeometryShaderProgram* geometryShader;
     QuadShaderProgram* quadShader;
 
@@ -135,6 +137,7 @@ public:
     void DrawObject(const DrawParams& params);
 
     void NewFrame(RenderFrameParameters* params);
+    void EndFrame();
 
     void Draw(std::initializer_list<DrawLayer*> layers);
     void DrawShadowMaps(std::initializer_list<DrawLayer*> layers);
@@ -161,5 +164,9 @@ public:
 
     RenderBuffer& GetOutputBuffer() {
         return outputBuffer;
+    }
+
+    DebugRenderer& GetDebugRenderer() {
+        return debugRenderer;
     }
 };

@@ -36,8 +36,7 @@ struct Editor {
 
     std::vector<TransformedLight*> lights;
 
-    Mesh gridMesh;
-    void InitializeGridMesh();
+    void DrawGridMesh();
 
     Quaternion GetRotationQuat() {
         Matrix4 matrix;

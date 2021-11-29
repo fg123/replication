@@ -325,7 +325,6 @@ class DebugShaderProgram : public ShaderProgram {
     GLint uniformModel;
 
     GLint uniformColor;
-    GLenum drawType;
 public:
     DebugShaderProgram() {
         AddShader(LoadURL("shaders/Debug.vs"), GL_VERTEX_SHADER);
@@ -344,9 +343,6 @@ public:
                  const Matrix4& proj) override;
     void Draw(const Matrix4& model, Mesh* mesh) override;
 
-    void SetDrawType(GLenum inDrawType) {
-        drawType = inDrawType;
-    }
     void SetColor(Vector3 color) {
         glUniform3f(uniformColor, color.r, color.g, color.b);
     }

@@ -81,29 +81,6 @@ void ClientGL::SetupContext() {
 //   but at this point the game either closes and ends, there's no
 //   shutdown procedure on the client side.
 
-void SetupMesh(Mesh& mesh, const std::vector<float>& verts, const std::vector<unsigned int>& indices) {
-    glGenVertexArrays(1, &mesh.renderInfo.vao);
-    glBindVertexArray(mesh.renderInfo.vao);
-
-    glGenBuffers(1, &mesh.renderInfo.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, mesh.renderInfo.vbo);
-    glBufferData(GL_ARRAY_BUFFER,
-        verts.size() * sizeof(float),
-        verts.data(), GL_STATIC_DRAW
-    );
-
-    glVertexAttribPointer(0,
-        3, GL_FLOAT, false, 3 * sizeof(float), (const void*)0);
-    glEnableVertexAttribArray(0);
-
-    glGenBuffers(1, &mesh.renderInfo.ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.renderInfo.ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-        indices.size() * sizeof(unsigned int),
-        indices.data(), GL_STATIC_DRAW);
-    mesh.renderInfo.iboCount = indices.size();
-}
-
 void ClientGL::SetupGL() {
     // Setup Cube
     // std::vector<float> cubeVerts = {
@@ -349,6 +326,7 @@ void ClientGL::RenderMinimap() {
     }
 
     minimapRenderer.Draw({ &backgroundLayer, &behindPlayerLayer });
+    minimapRenderer.EndFrame();
 
     // Draw Minimap onto base
     GLuint texture = minimapRenderer.GetRenderedTexture();
@@ -408,6 +386,7 @@ void ClientGL::Draw(int width, int height) {
 
     worldRenderer.NewFrame(&params);
     worldRenderer.Draw({ &backgroundLayer, &foregroundLayer });
+    worldRenderer.EndFrame();
 
     // Finally render everything to the main buffer
     GLuint texture = worldRenderer.GetRenderedTexture();
