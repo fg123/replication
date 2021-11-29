@@ -4,6 +4,8 @@
 RenderSettingsWindow::RenderSettingsWindow() {
     parameters.enableLighting = true;
     parameters.enableShadows = true;
+    parameters.enableToneMapping = true;
+    parameters.enableAntialiasing = true;
 }
 
 void RenderSettingsWindow::Draw(Editor& editor) {
@@ -75,11 +77,23 @@ void RenderSettingsWindow::Draw(Editor& editor) {
         ImGui::Image((ImTextureID)bloomBuffer.textureColor, size, uv_min, uv_max, tint_col, border_col);
         ImGui::TreePop();
     }
+
+    static std::unordered_map<TransformedLight*, bool> showShadowColorMap;
     if (ImGui::TreeNode("Lights")) {
         for (auto& light : editor.lights) {
             if (dynamic_cast<LightNode*>(light->node)->shadowMapSize) {
                 if (ImGui::TreeNode(light->node->name.c_str())) {
-                    ImGui::Image((ImTextureID)light->shadowColorMap, size, uv_min, uv_max, tint_col, border_col);
+                    if (ImGui::ImageButton((ImTextureID)light->shadowColorMap, size, uv_min, uv_max)) {
+                        showShadowColorMap[light] = true;
+                    }
+                    ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
+                    std::string id = "Shadow Color Map #" + std::to_string((unsigned long)light);
+                    if (showShadowColorMap[light]) {
+                        ImGui::Begin(id.c_str(), &showShadowColorMap[light], ImGuiWindowFlags_NoCollapse);
+                        ImGui::Image((ImTextureID)light->shadowColorMap, ImGui::GetContentRegionAvail(), uv_min, uv_max, tint_col, border_col);
+                        ImGui::End();
+                    }
+
                     ImGui::TreePop();
                 }
             }

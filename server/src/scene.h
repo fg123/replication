@@ -114,6 +114,9 @@ struct LightNode : public Node {
 
     REPLICATED_D(int, shadowMapSize, "shadowMapSize", 0);
 
+    REPLICATED_D(float, nearBoundary, "nearBoundary", 10.f);
+    REPLICATED_D(float, farBoundary, "farBoundary", 50.f);
+
     // For all lights
     REPLICATED_D(float, strength, "strength", 10.0f);
     REPLICATED_D(Vector3, color, "color", Vector3(1));

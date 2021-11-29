@@ -131,34 +131,36 @@ void DeferredRenderer::DrawShadowObjects(std::initializer_list<DrawLayer*> layer
 }
 
 void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) {
-    float aspectRatio = (float) renderFrameParameters->width / (float) renderFrameParameters->height;
-    Matrix4 nearProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
-        renderFrameParameters->viewNear, 10.f);
-    Matrix4 midProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
-        renderFrameParameters->viewNear, 50.f);
-    Matrix4 farProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
-        renderFrameParameters->viewNear, renderFrameParameters->viewFar);
-
-    Matrix4 inverseNear = glm::inverse(nearProj * renderFrameParameters->view);
-    Matrix4 inverseMid = glm::inverse(midProj * renderFrameParameters->view);
-    Matrix4 inverseFar = glm::inverse(farProj * renderFrameParameters->view);
-
-    Vector4 viewFrustrumPointsNear[8],
-            viewFrustrumPointsMid[8],
-            viewFrustrumPointsFar[8];
-    MultiplyAll(viewFrustrumPointsNear, viewFrustrumPoints, 8, inverseNear);
-    MultiplyAll(viewFrustrumPointsMid, viewFrustrumPoints, 8, inverseMid);
-    MultiplyAll(viewFrustrumPointsFar, viewFrustrumPoints, 8, inverseFar);
-
-    for (size_t i = 0; i < 8; i++) {
-        viewFrustrumPointsNear[i] /= viewFrustrumPointsNear[i].w;
-        viewFrustrumPointsMid[i] /= viewFrustrumPointsMid[i].w;
-        viewFrustrumPointsFar[i] /= viewFrustrumPointsFar[i].w;
-    }
 
     for (auto& transformed : renderFrameParameters->lights) {
         LightNode* light = dynamic_cast<LightNode*>(transformed->node);
         if (light->shadowMapSize == 0) continue;
+
+        float aspectRatio = (float) renderFrameParameters->width / (float) renderFrameParameters->height;
+        Matrix4 nearProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
+            renderFrameParameters->viewNear, light->nearBoundary);
+        Matrix4 midProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
+            light->nearBoundary, light->farBoundary);
+        Matrix4 farProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
+            light->farBoundary, renderFrameParameters->viewFar);
+
+        Matrix4 inverseNear = glm::inverse(nearProj * renderFrameParameters->view);
+        Matrix4 inverseMid = glm::inverse(midProj * renderFrameParameters->view);
+        Matrix4 inverseFar = glm::inverse(farProj * renderFrameParameters->view);
+
+        Vector4 viewFrustrumPointsNear[8],
+                viewFrustrumPointsMid[8],
+                viewFrustrumPointsFar[8];
+        MultiplyAll(viewFrustrumPointsNear, viewFrustrumPoints, 8, inverseNear);
+        MultiplyAll(viewFrustrumPointsMid, viewFrustrumPoints, 8, inverseMid);
+        MultiplyAll(viewFrustrumPointsFar, viewFrustrumPoints, 8, inverseFar);
+
+        for (size_t i = 0; i < 8; i++) {
+            viewFrustrumPointsNear[i] /= viewFrustrumPointsNear[i].w;
+            viewFrustrumPointsMid[i] /= viewFrustrumPointsMid[i].w;
+            viewFrustrumPointsFar[i] /= viewFrustrumPointsFar[i].w;
+        }
+
         transformed->InitializeLight();
         Matrix4 lightView = glm::lookAt(light->position, light->position - light->GetDirection(),
             Vector::Up);
@@ -194,10 +196,10 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
 
         AABB boxExtents { boxToLight, 8 };
         Matrix4 lightProjection = glm::ortho(
-            glm::floor(boxExtents.ptMin.x),
-            glm::ceil(boxExtents.ptMax.x),
-            glm::floor(boxExtents.ptMin.y),
-            glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
+            boxExtents.ptMin.x,
+            boxExtents.ptMax.x,
+            boxExtents.ptMin.y,
+            boxExtents.ptMax.y, 1.0f, 400.f);
         transformed->depthBiasMVPNear = biasMatrix * lightProjection * lightView;
         shadowMapShader->PreDraw(Vector3(), lightView, lightProjection);
 
@@ -209,11 +211,16 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
         }
 
         boxExtents = AABB(boxToLight, 8);
+        // lightProjection = glm::ortho(
+        //     glm::floor(boxExtents.ptMin.x),
+        //     glm::ceil(boxExtents.ptMax.x),
+        //     glm::floor(boxExtents.ptMin.y),
+        //     glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
         lightProjection = glm::ortho(
-            glm::floor(boxExtents.ptMin.x),
-            glm::ceil(boxExtents.ptMax.x),
-            glm::floor(boxExtents.ptMin.y),
-            glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
+            boxExtents.ptMin.x,
+            boxExtents.ptMax.x,
+            boxExtents.ptMin.y,
+            boxExtents.ptMax.y, 1.0f, 400.f);
 
         transformed->depthBiasMVPMid = biasMatrix * lightProjection * lightView;
         shadowMapShader->PreDraw(Vector3(), lightView, lightProjection);
@@ -229,10 +236,10 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
 
         boxExtents = AABB(boxToLight, 8);
         lightProjection = glm::ortho(
-            glm::floor(boxExtents.ptMin.x),
-            glm::ceil(boxExtents.ptMax.x),
-            glm::floor(boxExtents.ptMin.y),
-            glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
+            boxExtents.ptMin.x,
+            boxExtents.ptMax.x,
+            boxExtents.ptMin.y,
+            boxExtents.ptMax.y, 1.0f, 400.f);
 
         transformed->depthBiasMVPFar = biasMatrix * lightProjection * lightView;
         shadowMapShader->PreDraw(Vector3(), lightView, lightProjection);

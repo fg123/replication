@@ -13,6 +13,8 @@ struct Light {
     mat4 inverseTransform;
 
     int shadowMapSize;
+    float nearBoundary;
+    float farBoundary;
 
     float strength;
     vec3 color;
@@ -33,9 +35,8 @@ uniform Light u_Light;
 uniform sampler2D u_shadowMap;
 uniform bool u_RenderShadows;
 
-const float nearBound = 10.0;
-const float middleBound = 50.0;
-const float shadowTransitionZone = 5.0;
+// const float shadowTransitionZone = 5.0;
+const float shadowTransitionZone = 0;
 
 // Retreived from maps
 vec3 MappedFragmentPos = vec3(0.0);
@@ -92,6 +93,7 @@ float GetAttenuationAtPoint(vec4 shadowCoord, vec2 offset, float bias, int sampl
 
     vec3 lightDirection = GetLightDirection(MappedFragmentPos);
 
+    int numSamples = 0;
     for (int dy = -samples; dy <= samples; dy++) {
         for (int dx = -samples; dx <= samples; dx++) {
             vec2 uv = shadowCoordNorm.xy + vec2(float(dx) * pixel, float(dy) * pixel);
@@ -104,10 +106,11 @@ float GetAttenuationAtPoint(vec4 shadowCoord, vec2 offset, float bias, int sampl
             //     uv.y += ((random(uv) - 0.5)) * pixel;
             // }
 
-            shadowAttenuation += QueryMap(u_shadowMap, uv, offset) + bias < shadowCoord.z ? 0.f : 1.f; break;
+            shadowAttenuation += QueryMap(u_shadowMap, uv, offset) + bias < shadowCoord.z ? 0.f : 1.f;
+            numSamples += 1;
         }
     }
-    return shadowAttenuation / pow(float(2 * samples + 1), 2.0);
+    return shadowAttenuation / float(numSamples);
 }
 
 float GetShadowAttenuation() {
@@ -134,17 +137,17 @@ float GetShadowAttenuation() {
     float farAtten = GetAttenuationAtPoint(shadowCoordFar, vec2(0.0, 0.5), farBias, 1, false);
 
     float z = abs(MappedFragmentPosClipSpace.z);
-    if (z < nearBound - shadowTransitionZone) {
+    if (z < u_Light.nearBoundary - shadowTransitionZone) {
         return nearAtten;
     }
-    else if (z < nearBound) {
-        return mix(nearAtten, midAtten, clamp((z - (nearBound - shadowTransitionZone)) / shadowTransitionZone, 0.0, 1.0));
+    else if (z < u_Light.nearBoundary) {
+        return mix(nearAtten, midAtten, clamp((z - (u_Light.nearBoundary - shadowTransitionZone)) / shadowTransitionZone, 0.0, 1.0));
     }
-    else if (z < middleBound - shadowTransitionZone) {
+    else if (z < u_Light.farBoundary - shadowTransitionZone) {
         return midAtten;
     }
-    else if (z < middleBound) {
-        return mix(midAtten, farAtten, clamp((z - (middleBound - shadowTransitionZone)) / shadowTransitionZone, 0.0, 1.0));
+    else if (z < u_Light.farBoundary) {
+        return mix(midAtten, farAtten, clamp((z - (u_Light.farBoundary - shadowTransitionZone)) / shadowTransitionZone, 0.0, 1.0));
     }
     else {
         return farAtten;

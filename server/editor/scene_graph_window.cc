@@ -108,6 +108,9 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
             ImGui::EndCombo();
         }
 
+        ImGui::DragFloat("NearBoundary", &lightNode->nearBoundary, 0.01f);
+        ImGui::DragFloat("FarBoundary", &lightNode->farBoundary, 0.01f);
+
         // if (ImGui::TreeNode("Shadow Map")) {
         //     ImVec2 uv_min = ImVec2(0.0f, 1.0f);                 // Top-left
         //     ImVec2 uv_max = ImVec2(1.0f, 0.0f);                 // Lower-right

@@ -434,6 +434,8 @@ void DeferredShadingLightingShaderProgram::RenderLighting(TransformedLight& tran
     glUniformMatrix4fv(uniformLightInverseTransform, 1, GL_FALSE, glm::value_ptr(glm::inverse(transformed.transform)));
     glUniformMatrix4fv(uniformInverseVolumeTransform, 1, GL_FALSE, glm::value_ptr(glm::inverse(light->GetRectangleVolumeTransform(transformed.transform))));
     glUniform1i(uniformShadowMapSize, light->shadowMapSize);
+    glUniform1f(uniformNearBoundary, light->nearBoundary);
+    glUniform1f(uniformFarBoundary, light->farBoundary);
     glUniform1f(uniformLightStrength, light->strength);
     glUniform3fv(uniformLightColor, 1, glm::value_ptr(light->color));
     glUniform3fv(uniformLightVolumeSize, 1, glm::value_ptr(light->volumeSize));
