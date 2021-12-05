@@ -9,26 +9,26 @@ void SceneDataWindow::Draw(Editor& editor) {
     ImGui::Separator();
 
     ImGui::Text("Scene Properties");
-    ImGui::InputText("SkySphere Texture", &editor.scene.properties.skydomeTexture);
+    ImGui::InputText("SkySphere Texture", &editor.GetScene().properties.skydomeTexture);
 
     ImGui::Separator();
     if (ImGui::BeginListBox("Collections")) {
-        if (ImGui::Selectable("RootCollection##-1", selectedNode == &editor.scene.root)) {
-            selectedNode = &editor.scene.root;
+        if (ImGui::Selectable("RootCollection##-1", selectedNode == &editor.GetScene().root)) {
+            selectedNode = &editor.GetScene().root;
         }
-        for (size_t i = 0; i < editor.scene.collections.size(); i++) {
-            auto& collection = editor.scene.collections[i];
+        for (size_t i = 0; i < editor.GetScene().collections.size(); i++) {
+            auto& collection = editor.GetScene().collections[i];
             if (ImGui::Selectable((collection->name + "##" + std::to_string(i)).c_str(),
-                    selectedNode == editor.scene.collections[i])) {
-                selectedNode = editor.scene.collections[i];
+                    selectedNode == editor.GetScene().collections[i])) {
+                selectedNode = editor.GetScene().collections[i];
             }
         }
         ImGui::EndListBox();
     }
 
     if (ImGui::Button("Add Collection")) {
-        CollectionNode* node = new CollectionNode(editor.scene);
-        editor.scene.collections.emplace_back(node);
+        CollectionNode* node = new CollectionNode(editor.GetScene());
+        editor.GetScene().collections.emplace_back(node);
         node->name = "New Collection";
     }
 

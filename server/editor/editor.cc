@@ -6,13 +6,13 @@
 Editor::Editor(GLFWwindow* window, const std::string& path) :
     window(window),
     path(path),
-    renderer(scene.assetManager) {
+    renderer(GetScene().assetManager) {
 
     std::string title = "Editor: " + path;
     glfwSetWindowTitle(window, title.c_str());
 
-    scene.assetManager.LoadDataFromDirectory();
-    scene.LoadFromFile(path);
+    GetScene().assetManager.LoadDataFromDirectory();
+    GetScene().LoadFromFile(path);
 
     renderer.Initialize();
 }
@@ -42,6 +42,26 @@ void Editor::DrawScene(int width, int height) {
     // ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
     ImGui::Begin("Scene", NULL, ImGuiWindowFlags_NoCollapse);
+    if (!isSimulatingGame) {
+        if (ImGui::Button("Start Simulation")) {
+            std::lock_guard lock(gameMutex);
+            isSimulatingGame = true;
+            // Setup Game
+            game.CreateMapBaseObject();
+        }
+    }
+    else {
+        if (ImGui::Button("Stop Simulation")) {
+            std::lock_guard lock(gameMutex);
+            isSimulatingGame = false;
+            // Cleanup Game
+            for (auto& entry: game.GetGameObjects()) {
+                game.DestroyObject(entry.first);
+            }
+
+        }
+    }
+
     ImVec2 windowSize = ImGui::GetContentRegionAvail();
 
     // Setup Debug Lines
@@ -63,7 +83,7 @@ void Editor::DrawScene(int width, int height) {
 
     parameters.skydomeTexture = nullptr;
     try {
-        parameters.skydomeTexture = scene.assetManager.LoadTexture(scene.properties.skydomeTexture, Texture::Format::RGB);
+        parameters.skydomeTexture = GetScene().assetManager.LoadTexture(GetScene().properties.skydomeTexture, Texture::Format::RGB);
     }
     catch (std::exception& e) {
         // TODO: load error into a warning list
@@ -71,7 +91,7 @@ void Editor::DrawScene(int width, int height) {
 
     // Aggregate Meshes
     std::vector<TransformedNode> nodes;
-    scene.FlattenHierarchy(nodes, GetSelectedRootNode());
+    GetScene().FlattenHierarchy(nodes, GetSelectedRootNode());
 
     size_t lightNodeCount = 0;
 
@@ -107,36 +127,51 @@ void Editor::DrawScene(int width, int height) {
 
             lights[lightNodeCount - 1]->Update(transformed);
 
-            if (light_node == GetSelectedNode()) {
-                if (light_node->shape == LightShape::Point) {
-                    DrawParams& params = layer.PushTransparent(
-                        glm::distance2(light_node->position, viewPos));
-                    params.mesh = scene.assetManager.GetModel("Icosphere.obj")->meshes[0];
-                    params.transform = transformed.transform;
-                    params.castShadows = false;
-                    params.isWireframe = true;
-                    params.overrideMaterial = &light_node->defaultMaterial;
-                }
+            // if (light_node == GetSelectedNode()) {
+            //     if (light_node->shape == LightShape::Point) {
+            //         DrawParams& params = layer.PushTransparent(
+            //             glm::distance2(light_node->position, viewPos));
+            //         params.mesh = GetScene().assetManager.GetModel("Icosphere.obj")->meshes[0];
+            //         params.transform = transformed.transform;
+            //         params.castShadows = false;
+            //         params.isWireframe = true;
+            //         params.overrideMaterial = &light_node->defaultMaterial;
+            //     }
 
-                if (light_node->shape == LightShape::Rectangle) {
-                    // Draw bounding box
-                    DrawParams& params2 = layer.PushTransparent(
-                        glm::distance2(light_node->position, viewPos));
-                    params2.mesh = scene.assetManager.GetModel("Cube.obj")->meshes[0];
-                    params2.transform = light_node->GetRectangleVolumeTransform(transformed.transform);
-                    params2.castShadows = false;
-                    params2.isWireframe = true;
-                    params2.overrideMaterial = &light_node->defaultMaterial;
-                }
-            }
+            //     if (light_node->shape == LightShape::Rectangle) {
+            //         // Draw bounding box
+            //         DrawParams& params2 = layer.PushTransparent(
+            //             glm::distance2(light_node->position, viewPos));
+            //         params2.mesh = GetScene().assetManager.GetModel("Cube.obj")->meshes[0];
+            //         params2.transform = light_node->GetRectangleVolumeTransform(transformed.transform);
+            //         params2.castShadows = false;
+            //         params2.isWireframe = true;
+            //         params2.overrideMaterial = &light_node->defaultMaterial;
+            //     }
+            // }
+
+            renderer.GetDebugRenderer().DrawCube(
+                transformed.transform * glm::scale(Vector3{1.f, 1.f, 0.5f}),
+                light_node->color
+            );
+            renderer.GetDebugRenderer().DrawLine(
+                transformed.transform * Vector4(0, 0, 0, 1),
+                transformed.transform * Vector4(0, 0, -2, 1),
+                light_node->color
+            );
+
         }
         else if (GameObjectNode* game_object_node = dynamic_cast<GameObjectNode*>(node)) {
-            Mesh* mesh = scene.assetManager.GetModel("Cube.obj")->meshes[0];
-            DrawParams& params = layer.PushOpaque(mesh->material);
-            params.mesh = mesh;
-            params.transform = transformed.transform;
-            params.castShadows = false;
-            params.hasOutline = model_node == GetSelectedNode();
+            Object* obj = game_object_node->object;
+            if (Model* model = obj->GetModel()) {
+                for (auto& mesh : model->meshes) {
+                    DrawParams& params = layer.PushOpaque(mesh->material);
+                    params.mesh = mesh;
+                    params.transform = transformed.transform;
+                    params.castShadows = false;
+                    params.hasOutline = model_node == GetSelectedNode();
+                }
+            }
         }
     }
 
@@ -196,7 +231,7 @@ Node* Editor::GetSelectedNode() {
 
 Node* Editor::GetSelectedRootNode() {
     if (!scene_data_window.selectedNode) {
-        scene_data_window.selectedNode = &scene.root;
+        scene_data_window.selectedNode = &GetScene().root;
     }
     return scene_data_window.selectedNode;
 }
@@ -224,6 +259,12 @@ void Editor::Draw(int width, int height) {
     DrawUI(width, height);
 }
 
+void Editor::Tick(Time time) {
+    std::lock_guard lock(gameMutex);
+    if (!isSimulatingGame) return;
+    game.Tick(time);
+}
+
 void Editor::HandleMouseInputs() {
     // Mouse Inputs
     if (sceneMouseState.mmb) {
@@ -239,6 +280,11 @@ void Editor::HandleMouseInputs() {
         else {
             targetViewDir.x += (float) movementX / 100.f;
             targetViewDir.y -= (float) movementY / 100.f;
+
+            targetViewDir.y = glm::clamp(targetViewDir.y, glm::radians(-89.f), glm::radians(89.f));
+
+            targetViewDir.x = std::fmod(targetViewDir.x, glm::pi<float>() * 2.f);
+            targetViewDir.y = std::fmod(targetViewDir.y, glm::pi<float>() * 2.f);
         }
     }
     prevSceneMouseState = sceneMouseState;
@@ -273,6 +319,6 @@ bool Editor::SaveToFile() {
     if (!oss.is_open()) {
         return false;
     }
-    scene.WriteToFile(oss);
+    GetScene().WriteToFile(oss);
     return true;
 }

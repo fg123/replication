@@ -204,19 +204,27 @@ void main()
     // return;
 
     MappedFragmentNormal = texture(gbuf_normal, FragmentTexCoords).rgb;
+    float RenderFlag = texture(gbuf_normal, FragmentTexCoords).a;
+
     MappedFragmentPosClipSpace = vec3(u_View * vec4(MappedFragmentPos, 1.0));
     SpecularFactor = texture(gbuf_specular, FragmentTexCoords).a;
-
-    if (!IsPointInVolume(MappedFragmentPos)) {
-        OutputColor = vec4(0.0, 0.0, 0.0, 0.0);
-        return;
-    }
 
     // This is fully additive factors on top of ambient base color
     vec4 fullDiffuse = texture(gbuf_diffuse, FragmentTexCoords);
     vec3 Diffuse = fullDiffuse.rgb;
     float alpha = fullDiffuse.a;
     vec3 Specular = texture(gbuf_specular, FragmentTexCoords).rgb;
+
+    if (RenderFlag < 0.9f) {
+        // Anything less than this, we keep as full.
+        OutputColor = fullDiffuse;
+        return;
+    }
+
+    if (!IsPointInVolume(MappedFragmentPos)) {
+        OutputColor = vec4(0.0, 0.0, 0.0, 0.0);
+        return;
+    }
 
     vec3 diffuseAccum = GetDiffuseAccumulation();
     vec3 specularAccum = GetSpecularAccumulation();

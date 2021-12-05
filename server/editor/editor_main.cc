@@ -1,5 +1,7 @@
 #include <iostream>
 #include <thread>
+#include <chrono>
+#include <functional>
 
 #define IMGUI_IMPL_OPENGL_LOADER_GLEW
 #include "imgui/imgui.h"
@@ -10,7 +12,7 @@
 #include <GLFW/glfw3.h>
 
 #include "editor.h"
-
+#include "timer.h"
 #include "logging.h"
 
 static void glfw_error_callback(int error, const char* description) {
@@ -94,6 +96,13 @@ int main(int argc, char* argv[]) {
     // Our state
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    Timer timer;
+
+    // Setup Editor Underlying Tick
+    timer.ScheduleInterval(
+        std::bind(&Editor::Tick, &editor, std::placeholders::_1),
+        TickInterval);
+
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -123,7 +132,6 @@ int main(int argc, char* argv[]) {
             editor.HandleKeyboardInputs();
         }
 
-        ImGuiID dockspace_id = ImGui::GetID("Main Dockspace");
         ImGui::DockSpaceOverViewport();
 
         editor.Draw(width, height);

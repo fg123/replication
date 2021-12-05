@@ -447,7 +447,7 @@ void DeferredRenderer::Draw(std::initializer_list<DrawLayer*> layers) {
             0, 0, outputBuffer.width, outputBuffer.height,
             GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-        debugRenderer.Render();
+        debugRenderer.Render(renderFrameParameters->viewPos);
         texture = outputBuffer.BlitTexture();
     }
 

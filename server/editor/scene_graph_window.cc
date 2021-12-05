@@ -1,6 +1,13 @@
 #include "scene_graph_window.h"
 #include "editor.h"
 #include "scene.h"
+#include "object.h"
+
+SceneGraphWindow::SceneGraphWindow() {
+    for (auto& lookup : GetClassLookup()) {
+        gameObjectNames.push_back(lookup.first);
+    }
+}
 
 std::string MakeID(const std::string& label, void* ptr) {
     return (label + "##" + std::to_string((unsigned long)ptr));
@@ -32,7 +39,7 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
 
             JSONDocument document;
             document.Parse(buffer.GetString());
-            Node* newNode = Node::Create(editor.scene, document);
+            Node* newNode = Node::Create(editor.GetScene(), document);
             newNode->parent = selectedNode->parent;
             selectedNode->parent->children.push_back(newNode);
         }
@@ -125,15 +132,15 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
     else if (CollectionReferenceNode* collectionNode = dynamic_cast<CollectionReferenceNode*>(selectedNode)) {
         ImGui::Separator();
         std::string currentTitle = "None";
-        if (collectionNode->index > 0 && collectionNode->index <= editor.scene.collections.size()) {
-            currentTitle = editor.scene.collections[collectionNode->index - 1]->name;
+        if (collectionNode->index > 0 && collectionNode->index <= editor.GetScene().collections.size()) {
+            currentTitle = editor.GetScene().collections[collectionNode->index - 1]->name;
         }
         if (ImGui::BeginCombo("Collections", currentTitle.c_str())) {
             if (ImGui::Selectable("None", collectionNode->index == 0)) {
                 collectionNode->index = 0;
             }
-            for (size_t i = 0; i < editor.scene.collections.size(); i++) {
-                auto& collection = editor.scene.collections[i];
+            for (size_t i = 0; i < editor.GetScene().collections.size(); i++) {
+                auto& collection = editor.GetScene().collections[i];
                 if (ImGui::Selectable((collection->name + "##" + std::to_string(i)).c_str(),
                         collectionNode->index == i + 1)) {
                     collectionNode->index = i + 1;
@@ -173,9 +180,64 @@ void SceneGraphWindow::DrawTreeNode(Node* node) {
     }
 }
 
+template<typename T>
+std::string ToDisplayName(T node);
+
+template<>
+std::string ToDisplayName(Model* node) {
+    return node->name;
+}
+
+template<>
+std::string ToDisplayName(std::string node) { return node; }
+
+template<const char* id, typename T>
+void ShowSelectionPopup(
+    const std::string& objectType,
+    const std::vector<T>& objects,
+    std::function<void(T)> onSelected
+) {
+    if (ImGui::BeginPopupModal(id, NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
+        static size_t selectIdx = 0;
+        static ImGuiTextFilter textFilter;
+        textFilter.Draw(("Filter " + objectType).c_str());
+        ImGui::SetItemDefaultFocus();
+        if (ImGui::BeginListBox(objectType.c_str())) {
+            for (size_t i = 0; i < objects.size(); i++) {
+                std::string objString = ToDisplayName(objects[i]);
+                if (textFilter.PassFilter(objString.c_str())) {
+                    const bool is_selected = (selectIdx == i);
+                    if (ImGui::Selectable(objString.c_str(), is_selected)) {
+                        selectIdx = i;
+                    }
+                }
+            }
+            ImGui::EndListBox();
+        }
+        selectIdx = std::clamp(selectIdx, (size_t)0, objects.size() - 1);
+
+        std::string addString = "Add " + objectType + " (" + ToDisplayName(objects[selectIdx]) + ")";
+        if (ImGui::Button(addString.c_str(), ImVec2(120, 0))) {
+            onSelected(objects[selectIdx]);
+            selectIdx = 0;
+            textFilter.Clear();
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel", ImVec2(120, 0))) {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+}
+
+static const char selectModelTitle[] = "Select Model";
+static const char selectGameObjectTitle[] = "Select Game Object";
+
 void SceneGraphWindow::Draw(Editor& editor) {
     ImGui::Begin("Scene Graph", NULL, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_MenuBar);
     bool showSelectModelMenu = false;
+    bool showSelectGameObjectMenu = false;
 
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("Add")) {
@@ -199,10 +261,7 @@ void SceneGraphWindow::Draw(Editor& editor) {
                 }
 
                 if (ImGui::MenuItem("Game Object Node")) {
-                    GameObjectNode* node = new GameObjectNode();
-                    node->name = "GameObject";
-                    node->parent = parent;
-                    parent->children.push_back(node);
+                    showSelectGameObjectMenu = true;
                 }
             }
             ImGui::EndMenu();
@@ -210,48 +269,36 @@ void SceneGraphWindow::Draw(Editor& editor) {
         ImGui::EndMenuBar();
     }
 
+
     if (showSelectModelMenu) {
-        ImGui::OpenPopup("Select Model");
+        ImGui::OpenPopup(selectModelTitle);
     }
+
+    if (showSelectGameObjectMenu) {
+        ImGui::OpenPopup(selectGameObjectTitle);
+    }
+
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
     if (CollectionNode* parent = dynamic_cast<CollectionNode*>(editor.GetSelectedRootNode())) {
-        if (ImGui::BeginPopupModal("Select Model", NULL, ImGuiWindowFlags_AlwaysAutoResize)) {
-            static size_t selectedModelIdx = 0;
-            static ImGuiTextFilter modelFilter;
-            modelFilter.Draw("Filter Models");
-            ImGui::SetItemDefaultFocus();
-            auto& models = editor.scene.assetManager.models;
-            if (ImGui::BeginListBox("Models")) {
-                for (size_t i = 0; i < models.size(); i++) {
-                    auto& model = models[i]->name;
-                    if (modelFilter.PassFilter(model.c_str())) {
-                        const bool is_selected = (selectedModelIdx == i);
-                        if (ImGui::Selectable(model.c_str(), is_selected)) {
-                            selectedModelIdx = i;
-                        }
-                    }
-                }
-                ImGui::EndListBox();
-            }
-            selectedModelIdx = std::clamp(selectedModelIdx, (size_t)0, models.size() - 1);
-
-            std::string addString = "Add Model (" + models[selectedModelIdx]->name + ")";
-            if (ImGui::Button(addString.c_str(), ImVec2(120, 0))) {
-                StaticModelNode* node = new StaticModelNode(editor.scene.assetManager);
-                node->model = models[selectedModelIdx];
-                node->name = models[selectedModelIdx]->name;
+        ShowSelectionPopup<selectModelTitle, Model*>("Models", editor.GetScene().assetManager.models,
+            [&parent, &editor](Model* model) {
+                StaticModelNode* node = new StaticModelNode(editor.GetScene().assetManager);
+                node->model = model;
+                node->name = model->name;
                 node->parent = parent;
                 parent->children.push_back(node);
-                ImGui::CloseCurrentPopup();
             }
-            ImGui::SameLine();
-            if (ImGui::Button("Cancel", ImVec2(120, 0))) {
-                ImGui::CloseCurrentPopup();
+        );
+        ShowSelectionPopup<selectGameObjectTitle, std::string>("Game Objects", gameObjectNames,
+            [&parent, &editor](std::string obj) {
+                GameObjectNode* node = new GameObjectNode(GetClassLookup()[obj](editor.game));
+                node->name = "GameObject - " + obj;
+                node->parent = parent;
+                parent->children.push_back(node);
             }
-            ImGui::EndPopup();
-        }
+        );
     }
 
     DrawTreeNode(editor.GetSelectedRootNode());

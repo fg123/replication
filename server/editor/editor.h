@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <mutex>
+#include <atomic>
 
 #include "opengl.h"
 
@@ -13,6 +15,7 @@
 #include "scene_data_window.h"
 #include "scene_graph_window.h"
 #include "render_settings_window.h"
+#include "game.h"
 
 // Primary Editor Class
 struct Editor {
@@ -27,8 +30,9 @@ struct Editor {
 
     bool showSceneWindow = true;
 
-    Scene scene;
     DeferredRenderer renderer;
+
+    Game game;
 
     Vector3 viewPos, targetViewPos;
     // Yaw, Pitch
@@ -44,6 +48,8 @@ struct Editor {
         matrix = glm::rotate(matrix, viewDir.y, Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
         return glm::quat_cast(matrix);
     }
+
+    Scene& GetScene() { return game.scene; }
 
     void DrawScene(int width, int height);
     void DrawUI(int width, int height);
@@ -65,4 +71,8 @@ struct Editor {
     Node* GetSelectedRootNode();
 
     bool SaveToFile();
+
+    std::mutex gameMutex;
+    std::atomic<bool> isSimulatingGame = false;
+    void Tick(Time time);
 };

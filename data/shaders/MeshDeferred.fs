@@ -91,6 +91,7 @@ void main() {
 
     if (FragmentOutline > 0.0) {
         gbuf_diffuse = vec4(u_OutlineColor, 1);
+        gbuf_normal.a = 0.5;
         return;
     }
 

@@ -1,4 +1,6 @@
 #include "scene.h"
+#include "object.h"
+
 #include <fstream>
 #include <queue>
 
@@ -97,6 +99,10 @@ Node* Node::Create(Scene& scene, json& obj) {
 void StaticModelNode::ProcessReplication(json& obj) {
     Node::ProcessReplication(obj);
     model = assetManager.GetModel(obj["model"].GetString());
+}
+
+GameObjectNode::GameObjectNode(Object* obj) : object(obj) {
+
 }
 
 void GameObjectNode::ProcessReplication(json& obj) {

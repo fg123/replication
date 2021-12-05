@@ -30,8 +30,14 @@ DebugRenderer::DebugRenderer() {
 
     // Setup Cube
     std::vector<float> cubeVerts = {
-        0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1,
-        1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f,  0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
     };
     std::vector<unsigned int> cubeIndices = {
         0, 1, 1, 3, 3, 2, 2, 0,
@@ -48,6 +54,21 @@ DebugRenderer::DebugRenderer() {
         0, 1
     };
     SetupMesh(debugLine, lineVerts, lineIndices);
+
+    std::vector<float> circleVerts;
+    std::vector<unsigned int> circleIndices;
+    const int numCircleVerts = 256;
+    for (size_t i = 0; i < numCircleVerts; i++) {
+        float angle = (float)i / (float)numCircleVerts * 2.0f * glm::pi<float>();
+        circleVerts.push_back(cos(angle));
+        circleVerts.push_back(sin(angle));
+        circleVerts.push_back(0);
+        if (i > 0) {
+            circleIndices.push_back(i - 1);
+            circleIndices.push_back(i);
+        }
+    }
+    SetupMesh(debugSphere, circleVerts, circleIndices);
 }
 
 void DebugRenderer::DrawLine(const Vector3& start, const Vector3& end, const Vector3& color, bool depthTest) {
@@ -65,13 +86,20 @@ void DebugRenderer::DrawCube(const Matrix4& transform, const Vector3& color, boo
     params.depthTest = depthTest;
 }
 
+void DebugRenderer::DrawSphere(const Vector3& center, float radius, const Vector3& color, bool depthTest) {
+    SphereParams& params = spheres.emplace_back();
+    params.center = center;
+    params.radius = radius;
+    params.color = color;
+    params.depthTest = depthTest;
+}
 
 void DebugRenderer::NewFrame(const Matrix4& view, const Matrix4& proj) {
     debugShaderProgram->Use();
     debugShaderProgram->PreDraw(Vector3{}, view, proj);
 }
 
-void DebugRenderer::Render() {
+void DebugRenderer::Render(Vector3 cameraPos) {
     debugShaderProgram->Use();
     for (const LineParams& line : lines) {
         if (line.depthTest) {
@@ -95,6 +123,19 @@ void DebugRenderer::Render() {
         }
         debugShaderProgram->SetColor(cube.color);
         debugShaderProgram->Draw(cube.transform, &debugCube);
+    }
+    for (const SphereParams& sphere : spheres) {
+        if (sphere.depthTest) {
+            glEnable(GL_DEPTH_TEST);
+        } else {
+            glDisable(GL_DEPTH_TEST);
+        }
+        debugShaderProgram->SetColor(sphere.color);
+        // Setup the transform to always point towards the camera
+        Matrix4 model = glm::translate(sphere.center) *
+            glm::transpose(glm::toMat4(DirectionToQuaternion(cameraPos - sphere.center))) *
+            glm::scale(Vector3(sphere.radius));
+        debugShaderProgram->Draw(model, &debugSphere);
     }
     lines.clear();
     cubes.clear();

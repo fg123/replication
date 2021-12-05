@@ -9,6 +9,7 @@
 #include "asset-manager.h"
 #include "light.h"
 
+
 // Manages / Serializes / De-serializes a Scene / SceneGraph
 
 #if defined(BUILD_SERVER) || defined(BUILD_EDITOR)
@@ -18,6 +19,7 @@
 #endif
 
 class Scene;
+class Object;
 struct CollectionNode;
 
 struct Node : public Replicable {
@@ -98,6 +100,11 @@ struct StaticModelNode : public Node {
 
 struct GameObjectNode : public Node {
     std::string gameObjectClass;
+
+    Object* object = nullptr;
+
+    GameObjectNode() {}
+    GameObjectNode(Object* obj);
 
     virtual const char* GetNodeType() override { return "GameObjectNode"; }
 
