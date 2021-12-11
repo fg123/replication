@@ -1,7 +1,7 @@
 #pragma once
 
 #define GLM_FORCE_CTOR_INIT
-
+#define GLM_FORCE_SWIZZLE
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
 #include "glm/gtx/string_cast.hpp"

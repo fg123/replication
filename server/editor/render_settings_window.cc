@@ -11,6 +11,9 @@ RenderSettingsWindow::RenderSettingsWindow() {
 void RenderSettingsWindow::Draw(Editor& editor) {
     if (!isVisible) return;
     ImGui::Begin("Render Settings", &isVisible, ImGuiWindowFlags_NoCollapse);
+    ImGui::Checkbox("DEBUG: Lock Shadow Map to ViewPort", &lockShadowMapToViewport);
+    ImGui::Checkbox("DEBUG: Draw ShadowMap Debug", &parameters.debugSettings.drawShadowMapDebug);
+    ImGui::Separator();
     ImGui::Checkbox("Enable Lighting", &parameters.enableLighting);
     ImGui::Checkbox("Enable Shadows", &parameters.enableShadows);
     ImGui::Separator();

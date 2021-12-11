@@ -71,6 +71,11 @@ void Editor::DrawScene(int width, int height) {
     viewPos += (targetViewPos - viewPos) * 0.5f;
     viewDir += (targetViewDir - viewDir) * 0.5f;
 
+    if (render_settings_window.lockShadowMapToViewport) {
+        shadowMapViewPos = viewPos;
+        shadowMapViewDir = viewDir;
+    }
+
     RenderFrameParameters parameters = render_settings_window.parameters;
     parameters.width = windowSize.x;
     parameters.height = windowSize.y;
@@ -78,8 +83,12 @@ void Editor::DrawScene(int width, int height) {
     parameters.viewNear = 0.2f;
     parameters.viewFar = 300.0f;
     parameters.viewPos = viewPos;
-    parameters.viewDir = Vector::Forward * GetRotationQuat();
+    parameters.viewDir = Vector::Forward * GetRotationQuat(viewDir);
     parameters.ambientFactor = 0.5f;
+
+    parameters.debugSettings.overrideShadowView = true;
+    parameters.debugSettings.overrideShadowViewPos = shadowMapViewPos;
+    parameters.debugSettings.overrideShadowViewDir = Vector::Forward * GetRotationQuat(shadowMapViewDir);
 
     parameters.skydomeTexture = nullptr;
     try {
@@ -162,14 +171,22 @@ void Editor::DrawScene(int width, int height) {
 
         }
         else if (GameObjectNode* game_object_node = dynamic_cast<GameObjectNode*>(node)) {
+            if (!game_object_node->object) {
+                auto& classLookup = GetClassLookup();
+                if (classLookup.find(game_object_node->gameObjectClass) != classLookup.end()) {
+                    game_object_node->object = classLookup[game_object_node->gameObjectClass](game);
+                }
+            }
             Object* obj = game_object_node->object;
-            if (Model* model = obj->GetModel()) {
-                for (auto& mesh : model->meshes) {
-                    DrawParams& params = layer.PushOpaque(mesh->material);
-                    params.mesh = mesh;
-                    params.transform = transformed.transform;
-                    params.castShadows = false;
-                    params.hasOutline = model_node == GetSelectedNode();
+            if (!obj) {
+                if (Model* model = obj->GetModel()) {
+                    for (auto& mesh : model->meshes) {
+                        DrawParams& params = layer.PushOpaque(mesh->material);
+                        params.mesh = mesh;
+                        params.transform = transformed.transform;
+                        params.castShadows = false;
+                        params.hasOutline = model_node == GetSelectedNode();
+                    }
                 }
             }
         }
@@ -204,7 +221,7 @@ void Editor::DrawScene(int width, int height) {
         sceneMouseState.mx = mousePositionRelative.x;
         sceneMouseState.my = mousePositionRelative.y;
 
-        Vector3 forward = glm::normalize(Vector::Forward * GetRotationQuat());
+        Vector3 forward = glm::normalize(Vector::Forward * GetRotationQuat(viewDir));
         targetViewPos += forward * (float) ImGui::GetIO().MouseWheel;
     }
 
@@ -273,8 +290,8 @@ void Editor::HandleMouseInputs() {
 
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
             // Move along the plane
-            Vector3 left = glm::normalize(Vector::Left * GetRotationQuat());
-            Vector3 top = glm::normalize(Vector::Up * GetRotationQuat());
+            Vector3 left = glm::normalize(Vector::Left * GetRotationQuat(viewDir));
+            Vector3 top = glm::normalize(Vector::Up * GetRotationQuat(viewDir));
             targetViewPos += left * (float) movementX / 10.f + top * (float) movementY / 10.f;
         }
         else {

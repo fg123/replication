@@ -47,30 +47,45 @@ void DeferredRenderer::NewFrame(RenderFrameParameters* params) {
         proj = glm::ortho(-params->orthoSize, params->orthoSize, -params->orthoSize,
             params->orthoSize, params->viewNear, params->viewFar);
     }
+
+    renderFrameParameters = params;
+
+    Vector3 shadowViewPos = params->viewPos;
+    if (params->debugSettings.overrideShadowView) {
+        renderFrameParameters->shadowView =
+            glm::lookAt(params->debugSettings.overrideShadowViewPos,
+                params->debugSettings.overrideShadowViewPos +
+                params->debugSettings.overrideShadowViewDir, params->viewUp);
+        shadowViewPos = params->debugSettings.overrideShadowViewPos;
+    }
+    else {
+        renderFrameParameters->shadowView = view;
+    }
+
     geometryShader->Use();
     geometryShader->PreDraw(params->viewPos, view, proj);
 
     pointLightShader->Use();
-    pointLightShader->PreDraw(params->viewPos, view, proj);
+    pointLightShader->PreDraw(shadowViewPos, renderFrameParameters->shadowView, proj);
     pointLightShader->SetViewportSize(params->width, params->height);
 
     rectangleLightShader->Use();
-    rectangleLightShader->PreDraw(params->viewPos, view, proj);
+    rectangleLightShader->PreDraw(shadowViewPos, renderFrameParameters->shadowView, proj);
     rectangleLightShader->SetViewportSize(params->width, params->height);
 
     directionalLightShader->Use();
-    directionalLightShader->PreDraw(params->viewPos, view, proj);
+    directionalLightShader->PreDraw(shadowViewPos, renderFrameParameters->shadowView, proj);
     directionalLightShader->SetViewportSize(params->width, params->height);
 
     gBuffer.SetSize(params->width, params->height);
     transparencyGBuffer.SetSize(params->width, params->height);
     outputBuffer.SetSize(params->width, params->height);
 
-    renderFrameParameters = params;
     renderFrameParameters->view = view;
     renderFrameParameters->proj = proj;
 
     debugRenderer.NewFrame(view, proj);
+
 }
 
 void DeferredRenderer::EndFrame() {
@@ -108,10 +123,10 @@ void DeferredRenderer::DrawObject(const DrawParams& params) {
 
 
 Vector4 viewFrustrumPoints[] = {
-    Vector4(-1, -1, 0, 1),
-    Vector4(-1,  1, 0, 1),
-    Vector4( 1,  1, 0, 1),
-    Vector4( 1, -1, 0, 1),
+    Vector4(-1, -1, -1, 1),
+    Vector4(-1,  1, -1, 1),
+    Vector4( 1,  1, -1, 1),
+    Vector4( 1, -1, -1, 1),
     Vector4(-1, -1, 1, 1),
     Vector4(-1,  1, 1, 1),
     Vector4( 1,  1, 1, 1),
@@ -150,9 +165,9 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
         Matrix4 farProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
             light->farBoundary, renderFrameParameters->viewFar);
 
-        Matrix4 inverseNear = glm::inverse(nearProj * renderFrameParameters->view);
-        Matrix4 inverseMid = glm::inverse(midProj * renderFrameParameters->view);
-        Matrix4 inverseFar = glm::inverse(farProj * renderFrameParameters->view);
+        Matrix4 inverseNear = glm::inverse(nearProj * renderFrameParameters->shadowView);
+        Matrix4 inverseMid = glm::inverse(midProj * renderFrameParameters->shadowView);
+        Matrix4 inverseFar = glm::inverse(farProj * renderFrameParameters->shadowView);
 
         Vector4 viewFrustrumPointsNear[8],
                 viewFrustrumPointsMid[8],
@@ -165,6 +180,15 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
             viewFrustrumPointsNear[i] /= viewFrustrumPointsNear[i].w;
             viewFrustrumPointsMid[i] /= viewFrustrumPointsMid[i].w;
             viewFrustrumPointsFar[i] /= viewFrustrumPointsFar[i].w;
+            // LOG_DEBUG(viewFrustrumPointsNear[i]);
+            // LOG_DEBUG(viewFrustrumPointsMid[i]);
+            // LOG_DEBUG(viewFrustrumPointsFar[i]);
+        }
+
+        if (renderFrameParameters->debugSettings.drawShadowMapDebug) {
+            GetDebugRenderer().DrawCube(viewFrustrumPointsNear, Vector4(1, 0, 0, 1));
+            GetDebugRenderer().DrawCube(viewFrustrumPointsMid, Vector4(0, 1, 0, 1));
+            GetDebugRenderer().DrawCube(viewFrustrumPointsFar, Vector4(0, 0, 1, 1));
         }
 
         transformed->InitializeLight();
@@ -200,12 +224,24 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
             boxToLight[i] = Vector3(lightView * viewFrustrumPointsNear[i]);
         }
 
+        // IMPORTANT NOTE OUR Z-AXES HAVE TO BE REVERSED BECAUSE FOR SOME
+        // REASON I DECIDED TO USE A +Z AS FORWARD POST TRANFORM SO ... YEAH
         AABB boxExtents { boxToLight, 8 };
         Matrix4 lightProjection = glm::ortho(
             boxExtents.ptMin.x,
             boxExtents.ptMax.x,
             boxExtents.ptMin.y,
-            boxExtents.ptMax.y, 1.0f, 400.f);
+            boxExtents.ptMax.y,
+            glm::max(0.01f, -boxExtents.ptMax.z),
+            glm::min(-boxExtents.ptMin.z, 400.f));
+        // LOG_DEBUG(boxExtents.ptMin.z << " " <<  boxExtents.ptMax.z);
+        if (renderFrameParameters->debugSettings.drawShadowMapDebug) {
+            Matrix4 transform =
+                glm::inverse(lightView) *
+                glm::translate((boxExtents.ptMin + boxExtents.ptMax) / 2.f) *
+                glm::scale(boxExtents.ptMax - boxExtents.ptMin);
+            GetDebugRenderer().DrawCube(transform, Vector4(0, 1, 1, 1));
+        }
         transformed->depthBiasMVPNear = biasMatrix * lightProjection * lightView;
         shadowMapShader->PreDraw(Vector3(), lightView, lightProjection);
 
@@ -226,8 +262,16 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
             boxExtents.ptMin.x,
             boxExtents.ptMax.x,
             boxExtents.ptMin.y,
-            boxExtents.ptMax.y, 1.0f, 400.f);
-
+            boxExtents.ptMax.y,
+            glm::max(0.01f, -boxExtents.ptMax.z),
+            glm::min(-boxExtents.ptMin.z, 400.f));
+        if (renderFrameParameters->debugSettings.drawShadowMapDebug) {
+            Matrix4 transform =
+                glm::inverse(lightView) *
+                glm::translate((boxExtents.ptMin + boxExtents.ptMax) / 2.f) *
+                glm::scale(boxExtents.ptMax - boxExtents.ptMin);
+            GetDebugRenderer().DrawCube(transform, Vector4(1, 0, 1, 1));
+        }
         transformed->depthBiasMVPMid = biasMatrix * lightProjection * lightView;
         shadowMapShader->PreDraw(Vector3(), lightView, lightProjection);
 
@@ -245,7 +289,16 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
             boxExtents.ptMin.x,
             boxExtents.ptMax.x,
             boxExtents.ptMin.y,
-            boxExtents.ptMax.y, 1.0f, 400.f);
+            boxExtents.ptMax.y,
+            glm::max(0.01f, -boxExtents.ptMax.z),
+            glm::min(-boxExtents.ptMin.z, 400.f));
+        if (renderFrameParameters->debugSettings.drawShadowMapDebug) {
+            Matrix4 transform =
+                glm::inverse(lightView) *
+                glm::translate((boxExtents.ptMin + boxExtents.ptMax) / 2.f) *
+                glm::scale(boxExtents.ptMax - boxExtents.ptMin);
+            GetDebugRenderer().DrawCube(transform, Vector4(1, 1, 0, 1));
+        }
 
         transformed->depthBiasMVPFar = biasMatrix * lightProjection * lightView;
         shadowMapShader->PreDraw(Vector3(), lightView, lightProjection);

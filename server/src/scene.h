@@ -121,8 +121,12 @@ struct LightNode : public Node {
 
     REPLICATED_D(int, shadowMapSize, "shadowMapSize", 0);
 
+    // How far from the viewer do we transition CSM
     REPLICATED_D(float, nearBoundary, "nearBoundary", 10.f);
     REPLICATED_D(float, farBoundary, "farBoundary", 50.f);
+
+    // How far from the light do we want to "see"
+    REPLICATED_D(float, maxBoundary, "maxBoundary", 400.f);
 
     // For all lights
     REPLICATED_D(float, strength, "strength", 10.0f);

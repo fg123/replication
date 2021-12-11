@@ -63,6 +63,7 @@ struct RenderFrameParameters {
 
     Matrix4 view;
     Matrix4 proj;
+    Matrix4 shadowView;
 
     int width;
     int height;
@@ -87,6 +88,14 @@ struct RenderFrameParameters {
     float fxaaMaxSpan = 8.0f;
 
     std::vector<TransformedLight*> lights;
+
+    // Debug Settings
+    struct {
+        bool drawShadowMapDebug = false;
+        bool overrideShadowView = false;
+        Vector3 overrideShadowViewDir;
+        Vector3 overrideShadowViewPos;
+    } debugSettings;
 };
 
 class DeferredRenderer {

@@ -94,6 +94,26 @@ void DebugRenderer::DrawSphere(const Vector3& center, float radius, const Vector
     params.depthTest = depthTest;
 }
 
+
+void DebugRenderer::DrawCube(const AABB& cube, const Vector3& color, bool depthTest) {
+    DrawCube(glm::translate((cube.ptMin + cube.ptMax) / 2.f) * glm::scale(cube.ptMax - cube.ptMin), color, depthTest);
+}
+
+void DebugRenderer::DrawCube(const Vector4* points, const Vector3& color, bool depthTest) {
+    DrawLine(Vector3(points[0]), Vector3(points[1]), color, depthTest);
+    DrawLine(Vector3(points[1]), Vector3(points[2]), color, depthTest);
+    DrawLine(Vector3(points[2]), Vector3(points[3]), color, depthTest);
+    DrawLine(Vector3(points[3]), Vector3(points[0]), color, depthTest);
+    DrawLine(Vector3(points[4]), Vector3(points[5]), color, depthTest);
+    DrawLine(Vector3(points[5]), Vector3(points[6]), color, depthTest);
+    DrawLine(Vector3(points[6]), Vector3(points[7]), color, depthTest);
+    DrawLine(Vector3(points[7]), Vector3(points[4]), color, depthTest);
+    DrawLine(Vector3(points[0]), Vector3(points[4]), color, depthTest);
+    DrawLine(Vector3(points[1]), Vector3(points[5]), color, depthTest);
+    DrawLine(Vector3(points[2]), Vector3(points[6]), color, depthTest);
+    DrawLine(Vector3(points[3]), Vector3(points[7]), color, depthTest);
+}
+
 void DebugRenderer::NewFrame(const Matrix4& view, const Matrix4& proj) {
     debugShaderProgram->Use();
     debugShaderProgram->PreDraw(Vector3{}, view, proj);

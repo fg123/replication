@@ -38,14 +38,17 @@ struct Editor {
     // Yaw, Pitch
     Vector2 viewDir, targetViewDir;
 
+    Vector3 shadowMapViewPos;
+    Vector2 shadowMapViewDir;
+
     std::vector<TransformedLight*> lights;
 
     void DrawGridMesh();
 
-    Quaternion GetRotationQuat() {
+    Quaternion GetRotationQuat(Vector2 dir) {
         Matrix4 matrix;
-        matrix = glm::rotate(matrix, viewDir.x, Vector::Up);
-        matrix = glm::rotate(matrix, viewDir.y, Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
+        matrix = glm::rotate(matrix, dir.x, Vector::Up);
+        matrix = glm::rotate(matrix, dir.y, Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
         return glm::quat_cast(matrix);
     }
 

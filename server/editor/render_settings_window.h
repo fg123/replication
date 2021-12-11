@@ -9,6 +9,7 @@ class RenderSettingsWindow {
 public:
     RenderSettingsWindow();
     bool isVisible = true;
+    bool lockShadowMapToViewport = true;
 
     RenderFrameParameters parameters;
 
