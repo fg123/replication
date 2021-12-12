@@ -228,6 +228,12 @@ class DeferredShadingLightingShaderProgram : public ShaderProgram {
     GLint uniformShadowMapSize;
     GLint uniformNearBoundary;
     GLint uniformFarBoundary;
+
+    GLint uniformNearBiasRange;
+    GLint uniformMidBiasRange;
+    GLint uniformFarBiasRange;
+    GLint uniformShadowTransitionZone;
+
     GLint uniformLightStrength;
     GLint uniformLightColor;
     GLint uniformLightVolumeSize;
@@ -283,6 +289,10 @@ public:
         uniformShadowMapSize = GetUniformLocation("u_Light.shadowMapSize");
         uniformNearBoundary = GetUniformLocation("u_Light.nearBoundary");
         uniformFarBoundary = GetUniformLocation("u_Light.farBoundary");
+        uniformNearBiasRange = GetUniformLocation("u_Light.nearBiasRange");
+        uniformMidBiasRange = GetUniformLocation("u_Light.midBiasRange");
+        uniformFarBiasRange = GetUniformLocation("u_Light.farBiasRange");
+        uniformShadowTransitionZone = GetUniformLocation("u_Light.shadowTransitionZone");
         uniformLightStrength = GetUniformLocation("u_Light.strength");
         uniformLightColor = GetUniformLocation("u_Light.color");
         uniformLightVolumeSize = GetUniformLocation("u_Light.volumeSize");

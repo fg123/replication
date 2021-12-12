@@ -1,0 +1,100 @@
+{
+    "root": {
+        "scale": {
+            "x": 1.0,
+            "y": 1.0,
+            "z": 1.0
+        },
+        "name": "",
+        "position": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "rotation": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+        },
+        "type": "CollectionNode",
+        "children": [
+            {
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "name": "de_dust2.obj",
+                "position": {
+                    "x": 0.0,
+                    "y": 1.0,
+                    "z": 0.0
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "StaticModelNode",
+                "model": "de_dust2.obj"
+            },
+            {
+                "volumeSize": {
+                    "x": 2.0,
+                    "y": 2.0,
+                    "z": 2.0
+                },
+                "volumeOffset": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": -0.5
+                },
+                "maxBoundary": 400.0,
+                "shadowTransitionZone": 1.0,
+                "farBiasRange": {
+                    "x": 0.0010000000474974514,
+                    "y": 0.0010000000474974514
+                },
+                "midBiasRange": {
+                    "x": 0.0010000000474974514,
+                    "y": 0.0010000000474974514
+                },
+                "color": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "rotation": {
+                    "x": -53.529998779296878,
+                    "y": -52.040000915527347,
+                    "z": 0.0
+                },
+                "nearBiasRange": {
+                    "x": 0.00009999999747378752,
+                    "y": 0.0010000000474974514
+                },
+                "position": {
+                    "x": -85.19000244140625,
+                    "y": 57.27000045776367,
+                    "z": 63.63999938964844
+                },
+                "strength": 3.0,
+                "name": "New Light",
+                "farBoundary": 50.0,
+                "shadowMapSize": 4096,
+                "scale": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "nearBoundary": 10.0,
+                "type": "LightNode",
+                "shape": 2
+            }
+        ]
+    },
+    "collections": [],
+    "properties": {
+        "skydomeTexture": "textures/Skydome.png"
+    }
+}

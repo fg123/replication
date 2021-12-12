@@ -70,7 +70,6 @@ class ClientGL {
     // Draw Steps
     void SetupDrawingLayers();
     void RenderMinimap();
-    void RenderUI(int width, int height);
     void AddMeshToLayer(Object* obj, Mesh* mesh, DrawLayer* layer,
         const Vector3& centerPt);
 
@@ -103,5 +102,4 @@ public:
     void SetGLCullFace(GLenum setting);
     Vector2 WorldToScreenCoordinates(Vector3 worldCoord);
 
-    bool HandleInput(JSONDocument& input);
 };

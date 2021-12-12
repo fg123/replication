@@ -25,7 +25,9 @@ void SetupMesh(Mesh& mesh, const std::vector<float>& verts, const std::vector<un
 }
 
 
-DebugRenderer::DebugRenderer() {
+DebugRenderer::DebugRenderer() { }
+
+void DebugRenderer::Initialize() {
     debugShaderProgram = new DebugShaderProgram;
 
     // Setup Cube

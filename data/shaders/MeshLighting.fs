@@ -25,6 +25,12 @@ struct Light {
     mat4 depthBiasMVPNear;
     mat4 depthBiasMVPMid;
     mat4 depthBiasMVPFar;
+
+    vec2 nearBiasRange;
+    vec2 midBiasRange;
+    vec2 farBiasRange;
+
+    float shadowTransitionZone;
 };
 
 uniform vec2 u_ViewportSize;
@@ -34,9 +40,6 @@ uniform vec3 u_ViewerPos;
 uniform Light u_Light;
 uniform sampler2D u_shadowMap;
 uniform bool u_RenderShadows;
-
-// const float shadowTransitionZone = 5.0;
-const float shadowTransitionZone = 0;
 
 // Retreived from maps
 vec3 MappedFragmentPos = vec3(0.0);
@@ -120,9 +123,10 @@ float GetShadowAttenuation() {
     vec4 shadowCoordFar = u_Light.depthBiasMVPFar * vec4(MappedFragmentPos, 1);
 
     vec3 lightDirection = GetLightDirection(MappedFragmentPos);
-    float farBias = max(0.08 * (1.0 - dot(MappedFragmentNormal, lightDirection)), 0.01);
-    float midBias = max(0.01 * (1.0 - dot(MappedFragmentNormal, lightDirection)), 0.001);
-    float nearBias = max(0.001 * (1.0 - dot(MappedFragmentNormal, lightDirection)), 0.0001);
+    float lerpVal = (1.0 - dot(MappedFragmentNormal, lightDirection));
+    float farBias = mix(u_Light.farBiasRange.x, u_Light.farBiasRange.y, lerpVal);
+    float midBias = mix(u_Light.midBiasRange.x, u_Light.midBiasRange.y, lerpVal);
+    float nearBias = mix(u_Light.nearBiasRange.x, u_Light.nearBiasRange.y, lerpVal);
     // return min(GetAttenuationAtPoint(i, shadowCoordNear, 0.0, 0.0),
     //     GetAttenuationAtPoint(i, shadowCoordFar, 0.5, 0.001));
 
@@ -137,17 +141,17 @@ float GetShadowAttenuation() {
     float farAtten = GetAttenuationAtPoint(shadowCoordFar, vec2(0.0, 0.5), farBias, 1, false);
 
     float z = abs(MappedFragmentPosClipSpace.z);
-    if (z < u_Light.nearBoundary - shadowTransitionZone) {
+    if (z < u_Light.nearBoundary - u_Light.shadowTransitionZone) {
         return nearAtten;
     }
     else if (z < u_Light.nearBoundary) {
-        return mix(nearAtten, midAtten, clamp((z - (u_Light.nearBoundary - shadowTransitionZone)) / shadowTransitionZone, 0.0, 1.0));
+        return mix(nearAtten, midAtten, clamp((z - (u_Light.nearBoundary - u_Light.shadowTransitionZone)) / u_Light.shadowTransitionZone, 0.0, 1.0));
     }
-    else if (z < u_Light.farBoundary - shadowTransitionZone) {
+    else if (z < u_Light.farBoundary - u_Light.shadowTransitionZone) {
         return midAtten;
     }
     else if (z < u_Light.farBoundary) {
-        return mix(midAtten, farAtten, clamp((z - (u_Light.farBoundary - shadowTransitionZone)) / shadowTransitionZone, 0.0, 1.0));
+        return mix(midAtten, farAtten, clamp((z - (u_Light.farBoundary - u_Light.shadowTransitionZone)) / u_Light.shadowTransitionZone, 0.0, 1.0));
     }
     else {
         return farAtten;
@@ -159,12 +163,10 @@ vec3 GetLightColorWithFalloff() {
 }
 
 vec3 GetDiffuseAccumulation() {
-    vec3 diffuseAccum = vec3(0.0);
     float shadow = GetShadowAttenuation();
     vec3 lightDirection = GetLightDirection(MappedFragmentPos);
     float lightAngle = max(dot(MappedFragmentNormal, lightDirection), 0.0);
-    diffuseAccum += shadow * lightAngle * GetLightColorWithFalloff();
-    return diffuseAccum;
+    return shadow * lightAngle * GetLightColorWithFalloff();
 }
 
 vec3 GetSpecularAccumulation() {
@@ -178,6 +180,7 @@ vec3 GetSpecularAccumulation() {
         vec3 h = normalize(viewDirection + lightAngle);
         float n_dot_h = max(dot(MappedFragmentNormal, h), 0.0);
 
+        if (n_dot_h == 0.0 && SpecularFactor <= 0.0) return specularAccum;
         specularAccum += shadow * pow(n_dot_h, SpecularFactor) * GetLightColorWithFalloff();
     }
     return specularAccum;
@@ -230,14 +233,20 @@ void main()
     vec3 specularAccum = GetSpecularAccumulation();
     float r = distance(MappedFragmentPos, GetClosestPointOnEmitter(MappedFragmentPos));
 
-    OutputColor = vec4(
-        (Diffuse * diffuseAccum + Specular * specularAccum) / (r * r), alpha);
 
-    if (r < 0.0001) {
+    if (abs(r) < 0.001) {
         OutputColor = vec4(
             (Diffuse * diffuseAccum + Specular * specularAccum), alpha);
     }
+    else {
+        OutputColor = vec4(
+            (Diffuse * diffuseAccum + Specular * specularAccum) / (r * r), alpha);
+    }
 
+    // float shadow = GetShadowAttenuation();
+    // vec3 lightDirection = GetLightDirection(MappedFragmentPos);
+    // float lightAngle = max(dot(MappedFragmentNormal, lightDirection), 0.0);
+    // OutputColor = vec4(specularAccum, alpha);
     // vec3 transformedPoint = vec3(u_Light.inverseTransform * vec4(MappedFragmentPos, 1.0));
     // float d = distance(transformedPoint, u_Light.position);
     // OutputColor = vec4(d / 200.0 + 0.3, d / 200.0 + 0.3, d / 200.0 + 0.3, 1.0);

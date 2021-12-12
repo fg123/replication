@@ -174,7 +174,6 @@ extern "C" {
 
         if (isPaused) {
             // UI Captured
-            clientGl.HandleInput(doc);
             return false;
         }
 

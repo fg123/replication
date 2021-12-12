@@ -125,6 +125,12 @@ struct LightNode : public Node {
     REPLICATED_D(float, nearBoundary, "nearBoundary", 10.f);
     REPLICATED_D(float, farBoundary, "farBoundary", 50.f);
 
+    REPLICATED_D(Vector2, nearBiasRange, "nearBiasRange", Vector2(0.0001, 0.001));
+    REPLICATED_D(Vector2, midBiasRange, "midBiasRange", Vector2(0.001, 0.01));
+    REPLICATED_D(Vector2, farBiasRange, "farBiasRange", Vector2(0.01, 0.08));
+
+    REPLICATED_D(float, shadowTransitionZone, "shadowTransitionZone", 1.0f);
+
     // How far from the light do we want to "see"
     REPLICATED_D(float, maxBoundary, "maxBoundary", 400.f);
 

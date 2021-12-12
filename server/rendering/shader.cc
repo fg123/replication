@@ -436,6 +436,10 @@ void DeferredShadingLightingShaderProgram::RenderLighting(TransformedLight& tran
     glUniform1i(uniformShadowMapSize, light->shadowMapSize);
     glUniform1f(uniformNearBoundary, light->nearBoundary);
     glUniform1f(uniformFarBoundary, light->farBoundary);
+    glUniform2fv(uniformNearBiasRange, 1, glm::value_ptr(light->nearBiasRange));
+    glUniform2fv(uniformMidBiasRange, 1, glm::value_ptr(light->midBiasRange));
+    glUniform2fv(uniformFarBiasRange, 1, glm::value_ptr(light->farBiasRange));
+    glUniform1f(uniformShadowTransitionZone, light->shadowTransitionZone);
     glUniform1f(uniformLightStrength, light->strength);
     glUniform3fv(uniformLightColor, 1, glm::value_ptr(light->color));
     glUniform3fv(uniformLightVolumeSize, 1, glm::value_ptr(light->volumeSize));

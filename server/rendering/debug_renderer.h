@@ -41,6 +41,8 @@ class DebugRenderer {
 public:
     DebugRenderer();
 
+    void Initialize();
+
     void DrawCube(const AABB& cube, const Vector3& color, bool depthTest = true);
     void DrawCube(const Vector4* points, const Vector3& color, bool depthTest = true);
 

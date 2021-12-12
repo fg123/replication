@@ -222,3 +222,5 @@ bool AABBAndAABBCollide(const AABB& a, const AABB& b);
 
 void ClearCollisionStatistics();
 void PrintCollisionStatistics();
+
+Vector3 ClosestPointOnAABB(const AABB& aabb, const Vector3& vec);

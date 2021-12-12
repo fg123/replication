@@ -103,6 +103,7 @@ class DeferredRenderer {
     AssetManager& assetManager;
 
     DebugRenderer debugRenderer;
+
     DeferredShadingGeometryShaderProgram* geometryShader;
     QuadShaderProgram* quadShader;
 

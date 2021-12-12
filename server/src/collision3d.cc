@@ -241,6 +241,23 @@ Vector3 AABBSurfaceNormal(AABB& rect, Vector3 point) {
     return glm::normalize(Vector3((int)norm.x, (int)norm.y, (int)norm.z));
 }
 
+Vector3 ClosestPointOnAABB(const AABB& aabb, const Vector3& vec) {
+    Vector3 rectSize = aabb.ptMax - aabb.ptMin;
+    Vector3 rectPosition = aabb.ptMin;
+    if (IsPointInAABB(rectPosition, rectSize, vec)) {
+        return vec;
+    }
+    Vector3 rectHalf = rectSize / 2.0f;
+    Vector3 rectCenter = rectPosition + rectHalf;
+
+    // get difference vector between both centers
+    Vector3 difference = vec - rectCenter;
+
+    Vector3 clamped = glm::clamp(difference, -rectHalf, rectHalf);
+    // add clamped value to AABB_center and we get the value of box closest to circle
+    return rectCenter + clamped;
+}
+
 CollisionResult AABBAndSphereCollide(Vector3 rectPosition, Vector3 rectSize,
     Vector3 circPosition, float radius) {
 

@@ -7,11 +7,6 @@
 #include "bvh.h"
 #include "global.h"
 
-#define IMGUI_IMPL_OPENGL_ES3
-#include "imgui.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui_impl_web.h"
-
 #include <vector>
 #include <fstream>
 #include <map>
@@ -64,68 +59,9 @@ void ClientGL::SetupContext() {
 
     worldRenderer.Initialize();
     minimapRenderer.Initialize();
-
-    // Setup IMGUI
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    UNUSED(io);
-    ImGui::StyleColorsDark();
-    ImGuiStyle* style = &ImGui::GetStyle();
-    style->WindowRounding = 5.0f;
-    ImGui_ImplWeb_Init();
-    ImGui_ImplOpenGL3_Init("#version 300 es");
 }
 
-// TODO: somewhere we probably want to destroy the context for the imgui
-//   but at this point the game either closes and ends, there's no
-//   shutdown procedure on the client side.
-
 void ClientGL::SetupGL() {
-    // Setup Cube
-    // std::vector<float> cubeVerts = {
-    //     0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1,
-    //     1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1,
-    // };
-    // std::vector<unsigned int> cubeIndices = {
-    //     0, 1, 1, 3, 3, 2, 2, 0,
-    //     4, 5, 5, 7, 7, 6, 6, 4,
-    //     0, 4, 1, 5, 2, 6, 3, 7
-    // };
-    // SetupMesh(debugCube, cubeVerts, cubeIndices);
-
-    // // Setup Line
-    // std::vector<float> lineVerts = {
-    //     0, 0, 0, 0, 0, -1
-    // };
-    // std::vector<unsigned int> lineIndices = {
-    //     0, 1
-    // };
-    // SetupMesh(debugLine, lineVerts, lineIndices);
-
-    // debugCircle = game.GetAssetManager().GetModel("Icosphere.obj")->meshes[0];
-
-    // // Copied over, reorder indices to work with GL_LINES
-    // std::vector<unsigned int> newIndices;
-    // for (size_t i = 0; i < debugCircle.indices.size(); i += 3) {
-    //     newIndices.push_back(debugCircle.indices[i]);
-    //     newIndices.push_back(debugCircle.indices[i + 1]);
-    //     newIndices.push_back(debugCircle.indices[i + 2]);
-    //     newIndices.push_back(debugCircle.indices[i]);
-    // }
-    // debugCircle.indices = std::move(newIndices);
-
-    // debugCylinder = game.GetAssetManager().GetModel("Cylinder.obj")->meshes[0];
-    // // Copied over, reorder indices to work with GL_LINES
-    // newIndices.clear();
-    // for (size_t i = 0; i < debugCylinder.indices.size(); i += 3) {
-    //     newIndices.push_back(debugCylinder.indices[i]);
-    //     newIndices.push_back(debugCylinder.indices[i + 1]);
-    //     newIndices.push_back(debugCylinder.indices[i + 2]);
-    //     newIndices.push_back(debugCylinder.indices[i]);
-    // }
-    // debugCylinder.indices = std::move(newIndices);
-
     minimapMarker = game.GetAssetManager().GetModel("PlayerMarkerMinimap.obj")->meshes[0];
     skydomeTexture = game.GetAssetManager().LoadTexture(RESOURCE_PATH(
         game.scene.properties.skydomeTexture
@@ -282,14 +218,18 @@ void ClientGL::SetupDrawingLayers() {
         DrawLayer& layerToDraw = !obj->IsVisibleInFrustrum(cameraPosition, cameraRotation) ?
             behindPlayerLayer : (isForeground ? foregroundLayer : backgroundLayer);
 
+        AABB broad = obj->GetCollider().GetBroadAABB();
+        Vector3 delta = ClosestPointOnAABB(broad, cameraPosition) - cameraPosition;
+        float distanceXZ = glm::sqrt(delta.x * delta.x + delta.z * delta.z);
+        bool isWithinMinimapRange = distanceXZ < 30.f;
         if (Model* model = obj->GetModel()) {
             for (auto& mesh : model->meshes) {
                 Vector3 centerPt = Vector3(transform * Vector4(mesh->center, 1));
                 AddMeshToLayer(obj, mesh, &layerToDraw, centerPt);
 
-                // if () {
-                //     AddMeshToLayer(obj, mesh, &minimapLayer, centerPt);
-                // }
+                if (isWithinMinimapRange) {
+                    AddMeshToLayer(obj, mesh, &minimapLayer, centerPt);
+                }
             }
         }
     }
@@ -312,7 +252,7 @@ void ClientGL::RenderMinimap() {
     params.lights = game.lightNodes;
     params.skydomeTexture = skydomeTexture;
     params.projection = RenderFrameParameters::Projection::ORTHOGRAPHIC;
-    params.orthoSize = 50.f;
+    params.orthoSize = 30.f;
 
     minimapRenderer.NewFrame(&params);
     // We need to "inject" the player into the background set
@@ -325,7 +265,7 @@ void ClientGL::RenderMinimap() {
         params.castShadows = false;
     }
 
-    minimapRenderer.Draw({ &backgroundLayer, &behindPlayerLayer });
+    minimapRenderer.Draw({ &minimapLayer });
     minimapRenderer.EndFrame();
 
     // Draw Minimap onto base
@@ -399,27 +339,6 @@ void ClientGL::Draw(int width, int height) {
 
     defaultFrameBuffer.Bind();
     RenderMinimap();
-
-    // Handle any UI drawing
-    defaultFrameBuffer.Bind();
-    RenderUI(width, height);
-
-    if (GlobalSettings.Client_DrawShadowMaps) {
-        Matrix4 transform = glm::translate(Vector3(-0.5f, -0.5f, 0.0f));
-        for (auto& light : game.lightNodes) {
-            quadDrawShaderProgram->Use();
-            quadDrawShaderProgram->DrawQuad(light->shadowColorMap, transform);
-        }
-    }
-    if (GlobalSettings.Client_DrawGBuffer) {
-        // Matrix4 transform = glm::translate(Vector3(-0.5f, -0.5f, 0.0f));
-
-        // quadDrawShaderProgram->Use();
-        // quadDrawShaderProgram->SetIsDepth(true);
-        // quadDrawShaderProgram->DrawQuad(worldGBuffer.g_depth, transform);
-        // quadDrawShaderProgram->SetIsDepth(false);
-        // quadDrawShaderProgram->DrawQuad(worldGBuffer.internalDepth, transform);
-    }
 }
 
 Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
@@ -427,66 +346,4 @@ Vector2 ClientGL::WorldToScreenCoordinates(Vector3 worldCoord) {
     Vector3 NDC = Vector3(clipCoords) / clipCoords.w;
     // LOG_DEBUG(NDC);
     return Vector2((NDC.x + 1) * (windowWidth / 2), windowHeight - (NDC.y + 1) * (windowHeight / 2));
-}
-
-void ClientGL::RenderUI(int width, int height) {
-    // ImGuiIO& io = ImGui::GetIO();
-    // io.DisplaySize = ImVec2(width, height);
-
-    // ImGui_ImplOpenGL3_NewFrame();
-    // ImGui_ImplWeb_NewFrame();
-    // ImGui::NewFrame();
-
-    // // bool demoWindowOpen;
-    // // ImGui::ShowDemoWindow(&isOpen);
-
-    // bool renderSettingWindowActive = true;
-    // ImGui::Begin("Render Settings", &renderSettingWindowActive, ImGuiWindowFlags_None);
-    // ImGui::Separator();
-
-    // if (ImGui::CollapsingHeader("GBuffer")) {
-    //     ImVec2 uv_min = ImVec2(0.0f, 1.0f);                 // Top-left
-    //     ImVec2 uv_max = ImVec2(1.0f, 0.0f);                 // Lower-right
-    //     ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
-    //     ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
-    //     ImVec2 size = ImVec2(worldGBuffer.width / 4.0, worldGBuffer.height / 4.0);
-    //     if (ImGui::TreeNode("Diffuse")) {
-    //         ImGui::Image((ImTextureID)worldGBuffer.g_diffuse, size, uv_min, uv_max, tint_col, border_col);
-    //         ImGui::TreePop();
-    //     }
-    //     if (ImGui::TreeNode("Position")) {
-    //         ImGui::Image((ImTextureID)worldGBuffer.g_position, size, uv_min, uv_max, tint_col, border_col);
-    //         ImGui::TreePop();
-    //     }
-    //     if (ImGui::TreeNode("Normal")) {
-    //         ImGui::Image((ImTextureID)worldGBuffer.g_normal, size, uv_min, uv_max, tint_col, border_col);
-    //         ImGui::TreePop();
-    //     }
-    //     if (ImGui::TreeNode("Specular")) {
-    //         ImGui::Image((ImTextureID)worldGBuffer.g_specular, size, uv_min, uv_max, tint_col, border_col);
-    //         ImGui::TreePop();
-    //     }
-    // }
-    // if (ImGui::CollapsingHeader("Minimap GBuffer")) {
-    //     ImVec2 uv_min = ImVec2(0.0f, 1.0f);                 // Top-left
-    //     ImVec2 uv_max = ImVec2(1.0f, 0.0f);                 // Lower-right
-    //     ImVec4 tint_col = ImVec4(1.0f, 1.0f, 1.0f, 1.0f);   // No tint
-    //     ImVec4 border_col = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
-    //     ImVec2 size = ImVec2(minimapGBuffer.width, minimapGBuffer.height);
-    //     if (ImGui::TreeNode("Diffuse")) {
-    //         ImGui::Image((ImTextureID)minimapGBuffer.g_diffuse, size, uv_min, uv_max, tint_col, border_col);
-    //         ImGui::TreePop();
-    //     }
-    // }
-    // ImGui::End();
-
-    // ImGui::Render();
-    // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-bool ClientGL::HandleInput(JSONDocument& input) {
-    ImGui_ImplWeb_ProcessEvent(input);
-    if (ImGui::GetIO().WantCaptureMouse) return true;
-    if (ImGui::GetIO().WantCaptureKeyboard) return true;
-    return false;
 }

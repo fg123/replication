@@ -119,6 +119,12 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
         ImGui::DragFloat("FarBoundary", &lightNode->farBoundary, 0.01f);
         ImGui::DragFloat("MaxBoundary", &lightNode->maxBoundary, 0.01f);
 
+        ImGui::DragFloat2("Near Bias", glm::value_ptr(lightNode->nearBiasRange), 0.01f, 0.0001f, 1.f, "%.04f");
+        ImGui::DragFloat2("Mid Bias", glm::value_ptr(lightNode->midBiasRange), 0.01f, 0.0001f, 1.f, "%.04f");
+        ImGui::DragFloat2("Far Bias", glm::value_ptr(lightNode->farBiasRange), 0.01f, 0.0001f, 1.f, "%.04f");
+
+        ImGui::DragFloat("CSM Transition", &lightNode->shadowTransitionZone, 0.1f);
+
         // if (ImGui::TreeNode("Shadow Map")) {
         //     ImVec2 uv_min = ImVec2(0.0f, 1.0f);                 // Top-left
         //     ImVec2 uv_max = ImVec2(1.0f, 0.0f);                 // Lower-right

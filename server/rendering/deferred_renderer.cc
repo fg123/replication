@@ -5,6 +5,8 @@ DeferredRenderer::DeferredRenderer(AssetManager& assetManager) :
 }
 
 void DeferredRenderer::Initialize() {
+    GetDebugRenderer().Initialize();
+
     geometryShader = new DeferredShadingGeometryShaderProgram;
     quadShader = new QuadShaderProgram("shaders/Quad.fs");
     pointLightShader = new DeferredShadingLightingShaderProgram("shaders/MeshLightingPointLight.fs");
@@ -84,8 +86,7 @@ void DeferredRenderer::NewFrame(RenderFrameParameters* params) {
     renderFrameParameters->view = view;
     renderFrameParameters->proj = proj;
 
-    debugRenderer.NewFrame(view, proj);
-
+    GetDebugRenderer().NewFrame(view, proj);
 }
 
 void DeferredRenderer::EndFrame() {
@@ -141,6 +142,7 @@ void MultiplyAll(A* dest, const A* src, size_t count, const B& multiplyBy) {
 }
 
 void DeferredRenderer::DrawShadowObjects(std::initializer_list<DrawLayer*> layers) {
+    glDisable(GL_CULL_FACE);
     for (auto& layer : layers) {
         for (auto& pair : layer->opaque) {
             for (auto& param : pair.second) {
@@ -149,6 +151,7 @@ void DeferredRenderer::DrawShadowObjects(std::initializer_list<DrawLayer*> layer
             }
         }
     }
+    glEnable(GL_CULL_FACE);
 }
 
 void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) {
@@ -226,13 +229,15 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
 
         // IMPORTANT NOTE OUR Z-AXES HAVE TO BE REVERSED BECAUSE FOR SOME
         // REASON I DECIDED TO USE A +Z AS FORWARD POST TRANFORM SO ... YEAH
+        // Also our near plane has to be 0.01 otherwise things that occlude
+        // might get cut out and you get wrong shadows.
         AABB boxExtents { boxToLight, 8 };
         Matrix4 lightProjection = glm::ortho(
             boxExtents.ptMin.x,
             boxExtents.ptMax.x,
             boxExtents.ptMin.y,
             boxExtents.ptMax.y,
-            glm::max(0.01f, -boxExtents.ptMax.z),
+            0.01f,
             glm::min(-boxExtents.ptMin.z, 400.f));
         // LOG_DEBUG(boxExtents.ptMin.z << " " <<  boxExtents.ptMax.z);
         if (renderFrameParameters->debugSettings.drawShadowMapDebug) {
@@ -263,7 +268,7 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
             boxExtents.ptMax.x,
             boxExtents.ptMin.y,
             boxExtents.ptMax.y,
-            glm::max(0.01f, -boxExtents.ptMax.z),
+            0.01f,
             glm::min(-boxExtents.ptMin.z, 400.f));
         if (renderFrameParameters->debugSettings.drawShadowMapDebug) {
             Matrix4 transform =
@@ -290,7 +295,7 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
             boxExtents.ptMax.x,
             boxExtents.ptMin.y,
             boxExtents.ptMax.y,
-            glm::max(0.01f, -boxExtents.ptMax.z),
+            0.01f,
             glm::min(-boxExtents.ptMin.z, 400.f));
         if (renderFrameParameters->debugSettings.drawShadowMapDebug) {
             Matrix4 transform =
@@ -500,7 +505,7 @@ void DeferredRenderer::Draw(std::initializer_list<DrawLayer*> layers) {
             0, 0, outputBuffer.width, outputBuffer.height,
             GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-        debugRenderer.Render(renderFrameParameters->viewPos);
+        GetDebugRenderer().Render(renderFrameParameters->viewPos);
         texture = outputBuffer.BlitTexture();
     }
 
