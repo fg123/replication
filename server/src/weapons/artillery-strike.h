@@ -31,7 +31,7 @@ public:
             return;
         }
         #ifdef BUILD_SERVER
-            Object* explode = game.LoadScriptedObject("Explosion");
+            Object* explode = game.CreateAndAddScriptedObject("Explosion");
             explode->SetPosition(GetPosition());
             game.DestroyObject(GetId());
             game.DestroyObject(indicatorObject->GetId());

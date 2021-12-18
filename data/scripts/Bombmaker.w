@@ -1,4 +1,4 @@
-struct BombMaker : Player => {
+struct Bombmaker : Player => {
     init => () {
         super();
     }

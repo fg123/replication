@@ -71,7 +71,7 @@ ScriptManager::ScriptManager(Game* game) {
         ScriptManager::game->PlayAudio(path, id, location);
     });
     REGISTER_NATIVE_CALL("game_CreateObject", [](std::string path) {
-        return ScriptManager::game->LoadScriptedObject(path);
+        return ScriptManager::game->CreateAndAddScriptedObject(path);
     });
     REGISTER_NATIVE_CALL("game_CreateNativeObject", [](std::string className) {
         auto& classLookup = GetClassLookup();

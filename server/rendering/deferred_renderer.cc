@@ -155,18 +155,19 @@ void DeferredRenderer::DrawShadowObjects(std::initializer_list<DrawLayer*> layer
 }
 
 void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) {
-
     for (auto& transformed : renderFrameParameters->lights) {
         LightNode* light = dynamic_cast<LightNode*>(transformed->node);
         if (light->shadowMapSize == 0) continue;
+
+        float shadowTransitionZone = light->shadowTransitionZone;
 
         float aspectRatio = (float) renderFrameParameters->width / (float) renderFrameParameters->height;
         Matrix4 nearProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
             renderFrameParameters->viewNear, light->nearBoundary);
         Matrix4 midProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
-            light->nearBoundary, light->farBoundary);
+            light->nearBoundary - light->shadowTransitionZone, light->farBoundary);
         Matrix4 farProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
-            light->farBoundary, renderFrameParameters->viewFar);
+            light->farBoundary - light->shadowTransitionZone, renderFrameParameters->viewFar);
 
         Matrix4 inverseNear = glm::inverse(nearProj * renderFrameParameters->shadowView);
         Matrix4 inverseMid = glm::inverse(midProj * renderFrameParameters->shadowView);

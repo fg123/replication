@@ -102,7 +102,7 @@ void StaticModelNode::ProcessReplication(json& obj) {
 }
 
 GameObjectNode::GameObjectNode(Object* obj) : object(obj) {
-
+    gameObjectClass = obj->GetClass();
 }
 
 void GameObjectNode::ProcessReplication(json& obj) {

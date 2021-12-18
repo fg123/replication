@@ -59,19 +59,7 @@ void Object::HandleAllCollisions() {
     // LOG_WARN("Object still unstable after 1 iterations of collision resolution!");
 }
 
-void Object::TickRigidBody(Time time) {
-    float inverseMass = 1.0f / mass;
-    float inverseInertia = 1.0f / inertia;
-    velocity = momentum * inverseMass;
-    angularVelocity = angularMomentum * inverseInertia;
-
-    Quaternion q(0, angularVelocity);
-
-    spin = 0.5f * q * rotation;
-}
-
 void Object::Tick(Time time) {
-    // TickRigidBody(time);
 
     #ifdef BUILD_CLIENT
         debugLines.clear();

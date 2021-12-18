@@ -28,14 +28,14 @@ void SmokeGrenadeObject::Explode() {
     if (exploded) return;
     exploded = true;
 
-    Object* explode = game.LoadScriptedObject("SmokeExplosion");
+    Object* explode = game.CreateAndAddScriptedObject("SmokeExplosion");
     explode->SetPosition(GetPosition());
 
     Vector3 dirOne = glm::normalize(glm::cross(glm::normalize(velocity), Vector::Up));
-    Object* nade1 = game.LoadScriptedObject("SmokeExplosion");
+    Object* nade1 = game.CreateAndAddScriptedObject("SmokeExplosion");
     nade1->SetPosition(GetPosition() + 2.5f * dirOne);
 
-    Object* nade2 = game.LoadScriptedObject("SmokeExplosion");
+    Object* nade2 = game.CreateAndAddScriptedObject("SmokeExplosion");
     nade2->SetPosition(GetPosition() - 2.5f * dirOne);
 
     game.DestroyObject(GetId());

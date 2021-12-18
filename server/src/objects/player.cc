@@ -208,7 +208,7 @@ void PlayerObject::Tick(Time time) {
     if (keyboardState[KEY_MAP[E_KEY]] &&
         !lastKeyboardState[KEY_MAP[E_KEY]]) {
         TryPickupItem();
-        Object* obj = game.LoadScriptedObject("BouncingBall");
+        Object* obj = game.CreateAndAddScriptedObject("BouncingBall");
         obj->SetPosition(GetPosition() + Vector::Forward * 1.0f);
     }
     if (keyboardState[KEY_MAP[LEFT_ARROW_KEY]]) {

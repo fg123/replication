@@ -177,15 +177,22 @@ void Editor::DrawScene(int width, int height) {
                     game_object_node->object = classLookup[game_object_node->gameObjectClass](game);
                 }
             }
+            Matrix4 transform = transformed.transform;
             Object* obj = game_object_node->object;
-            if (!obj) {
+            if (obj) {
                 if (Model* model = obj->GetModel()) {
+                    if (isSimulatingGame) {
+                        transform = obj->GetTransform();
+                    }
+                    else {
+                        LOG_DEBUG(game_object_node->name << ": " << transform);
+                    }
                     for (auto& mesh : model->meshes) {
                         DrawParams& params = layer.PushOpaque(mesh->material);
                         params.mesh = mesh;
-                        params.transform = transformed.transform;
+                        params.transform = transform;
                         params.castShadows = false;
-                        params.hasOutline = model_node == GetSelectedNode();
+                        params.hasOutline = game_object_node == GetSelectedNode();
                     }
                 }
             }

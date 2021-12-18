@@ -20,9 +20,8 @@ public:
 
     void Explode() {
     #ifdef BUILD_SERVER
-        Object* explode = game.LoadScriptedObject("Explosion");
+        Object* explode = game.CreateAndAddScriptedObject("Explosion");
         explode->SetPosition(GetPosition());
-        game.AddObject(explode);
         game.DestroyObject(GetId());
     #endif
     }

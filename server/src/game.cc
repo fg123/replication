@@ -86,7 +86,12 @@ void Game::CreateMapBaseObject() {
                 LOG_ERROR("Class " << gameObject->gameObjectClass << " is not registered!");
                 throw std::runtime_error("Class " + gameObject->gameObjectClass + " is not registered!");
             }
-            obj = ClassLookup[gameObject->gameObjectClass](*this);
+            if (gameObject->object) {
+                obj = gameObject->object;
+            }
+            else {
+                obj = ClassLookup[gameObject->gameObjectClass](*this);
+            }
         }
         // else if (LightNode* lightNode = dynamic_cast<LightNode*>(node)) {
         //     obj = new LightObject(*this, *lightNode);
@@ -630,12 +635,14 @@ void Game::OnPlayerDead(PlayerObject* playerObject) {
             p->playerObjectDirty = true;
 
             // Implement letting user select things
-            auto& ClassLookup = GetClassLookup();
-            if (ClassLookup.find(p->nextRespawnCharacter) == ClassLookup.end()) {
-                p->nextRespawnCharacter = "Archer";
+            PlayerObject* obj = nullptr;
+            try {
+                obj = dynamic_cast<PlayerObject*>(CreateScriptedObject(p->nextRespawnCharacter));
             }
-            PlayerObject* obj =
-                dynamic_cast<PlayerObject*>(CreateScriptedObject(p->nextRespawnCharacter));
+            catch (...) {
+                p->nextRespawnCharacter = "Archer";
+                obj = dynamic_cast<PlayerObject*>(CreateScriptedObject(p->nextRespawnCharacter));
+            }
             obj->SetPosition(RESPAWN_LOCATION);
 
             static_cast<PlayerObject*>(obj)->lastClientInputTime = playerObject->lastClientInputTime;
@@ -740,7 +747,7 @@ Object* Game::CreateScriptedObject(const std::string& className) {
     return obj;
 }
 
-Object* Game::LoadScriptedObject(const std::string& className) {
+Object* Game::CreateAndAddScriptedObject(const std::string& className) {
     Object* obj = CreateScriptedObject(className);
     AddObject(obj);
     return obj;

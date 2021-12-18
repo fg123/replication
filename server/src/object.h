@@ -92,16 +92,6 @@ protected:
     REPLICATED(Vector3, scale, "sc");
     REPLICATED(Vector3, velocity, "v");
 
-    REPLICATED(Vector3, angularVelocity, "av");
-
-    // Rigid Body Parameters
-    REPLICATED_D(float, mass, "ma", 1.0f);
-    REPLICATED_D(float, inertia, "i", 1.0f);
-    REPLICATED(Vector3, momentum, "n");
-    REPLICATED(Vector3, angularMomentum, "a");
-    REPLICATED(Quaternion, spin, "s");
-
-
     Vector3 lastFramePosition;
     Vector3 lastFrameVelocity;
 
@@ -166,7 +156,6 @@ public:
 
     Time DeltaTime(Time currentTime);
     virtual void Tick(Time time);
-    void TickRigidBody(Time time);
 
     virtual void OnDeath() {}
 

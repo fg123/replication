@@ -158,7 +158,14 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
     }
     else if (GameObjectNode* gameObjectNode = dynamic_cast<GameObjectNode*>(selectedNode)) {
         ImGui::Separator();
-        ImGui::InputText("Game Object Class", &gameObjectNode->gameObjectClass);
+        if (editor.isSimulatingGame) {
+            if (Object* obj = gameObjectNode->object) {
+                ImGui::Text("Position: %s", glm::to_string(obj->GetPosition()).c_str());
+                ImGui::Text("Rotation: %s", glm::to_string(obj->GetRotation()).c_str());
+                ImGui::Text("Scale: %s", glm::to_string(obj->GetScale()).c_str());
+                ImGui::Text("Transform: %s", glm::to_string(obj->GetTransform()).c_str());
+            }
+        }
     }
 }
 

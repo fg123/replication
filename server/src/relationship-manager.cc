@@ -66,7 +66,13 @@ void RelationshipManager::Tick(Time time) {
         tickQueue.pop();
 
         Time start = Timer::NowMicro();
-        game.GetObject(object)->Tick(time);
+        if (Object* obj = game.GetObject(object)) {
+            obj->Tick(time);
+        }
+        else {
+            LOG_ERROR("Object " << object << " got added to tickQueue but did not find it in GameObjects!");
+        }
+
         Time end = Timer::NowMicro();
         game.averageObjectTickTime.InsertValue(end - start);
 

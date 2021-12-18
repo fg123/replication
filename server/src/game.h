@@ -139,7 +139,7 @@ public:
     }
 
     Object* CreateScriptedObject(const std::string& className);
-    Object* LoadScriptedObject(const std::string& className);
+    Object* CreateAndAddScriptedObject(const std::string& className);
 
     void AddObject(Object* obj);
     void DestroyObject(ObjectID objectId);
