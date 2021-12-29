@@ -28,6 +28,8 @@ public:
 
     // warning: will override current fbo
     GLuint BlitTexture();
+
+    GLuint SwapBuffers();
 };
 
 struct GBuffer {

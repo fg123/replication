@@ -407,6 +407,7 @@ module.exports = class ClientState {
         });
         // this.SendData(JSON.stringify(
         //     {
+        //         "time": this.wasm._GetLastTickTime() + this.wasm._GetTickInterval(),
         //         "event": "inventoryDrop",
         //         "id": id
         //     }));
@@ -419,6 +420,7 @@ module.exports = class ClientState {
         });
         // this.SendData(JSON.stringify(
         //     {
+        //         "time": this.wasm._GetLastTickTime() + this.wasm._GetTickInterval(),
         //         "event": "inventorySwap"
         //     }));
     }

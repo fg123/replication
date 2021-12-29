@@ -93,12 +93,15 @@ void Game::CreateMapBaseObject() {
                 obj = ClassLookup[gameObject->gameObjectClass](*this);
             }
         }
+        else if (ScriptableObjectNode* scriptObject = dynamic_cast<ScriptableObjectNode*>(node)) {
+            obj = new ScriptableObject(*this, scriptObject->scriptClass);
+        }
+
         // else if (LightNode* lightNode = dynamic_cast<LightNode*>(node)) {
         //     obj = new LightObject(*this, *lightNode);
         // }
 
         if (obj) {
-            AddObject(obj);
             Vector3 position, scale, skew;
             Quaternion rotation;
             Vector4 perspective;
@@ -112,6 +115,7 @@ void Game::CreateMapBaseObject() {
             if (staticMesh) {
                 GenerateStaticMeshCollidersFromModel(staticMesh);
             }
+            AddObject(obj);
         }
     }
 #ifdef BUILD_SERVER

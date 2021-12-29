@@ -6,7 +6,8 @@
 Editor::Editor(GLFWwindow* window, const std::string& path) :
     window(window),
     path(path),
-    renderer(GetScene().assetManager) {
+    renderer(GetScene().assetManager),
+    scene_graph_window(*this) {
 
     std::string title = "Editor: " + path;
     glfwSetWindowTitle(window, title.c_str());
@@ -136,29 +137,6 @@ void Editor::DrawScene(int width, int height) {
 
             lights[lightNodeCount - 1]->Update(transformed);
 
-            // if (light_node == GetSelectedNode()) {
-            //     if (light_node->shape == LightShape::Point) {
-            //         DrawParams& params = layer.PushTransparent(
-            //             glm::distance2(light_node->position, viewPos));
-            //         params.mesh = GetScene().assetManager.GetModel("Icosphere.obj")->meshes[0];
-            //         params.transform = transformed.transform;
-            //         params.castShadows = false;
-            //         params.isWireframe = true;
-            //         params.overrideMaterial = &light_node->defaultMaterial;
-            //     }
-
-            //     if (light_node->shape == LightShape::Rectangle) {
-            //         // Draw bounding box
-            //         DrawParams& params2 = layer.PushTransparent(
-            //             glm::distance2(light_node->position, viewPos));
-            //         params2.mesh = GetScene().assetManager.GetModel("Cube.obj")->meshes[0];
-            //         params2.transform = light_node->GetRectangleVolumeTransform(transformed.transform);
-            //         params2.castShadows = false;
-            //         params2.isWireframe = true;
-            //         params2.overrideMaterial = &light_node->defaultMaterial;
-            //     }
-            // }
-
             renderer.GetDebugRenderer().DrawCube(
                 transformed.transform * glm::scale(Vector3{1.f, 1.f, 0.5f}),
                 light_node->color
@@ -184,9 +162,6 @@ void Editor::DrawScene(int width, int height) {
                     if (isSimulatingGame) {
                         transform = obj->GetTransform();
                     }
-                    else {
-                        LOG_DEBUG(game_object_node->name << ": " << transform);
-                    }
                     for (auto& mesh : model->meshes) {
                         DrawParams& params = layer.PushOpaque(mesh->material);
                         params.mesh = mesh;
@@ -196,6 +171,12 @@ void Editor::DrawScene(int width, int height) {
                     }
                 }
             }
+        }
+        else if (ScriptableObjectNode* scriptable_object_node = dynamic_cast<ScriptableObjectNode*>(node)) {
+            renderer.GetDebugRenderer().DrawCube(
+                transformed.transform,
+                Vector3(1)
+            );
         }
     }
 

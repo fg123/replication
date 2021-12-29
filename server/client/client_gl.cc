@@ -315,7 +315,7 @@ void ClientGL::Draw(int width, int height) {
     params.enableShadows = true;
     params.enableToneMapping = true;
     // params.enableBloom = true;
-    // params.bloomThreshold = 1.7f;
+    // params.bloomThreshold = 2.5f;
     params.enableAntialiasing = true;
     params.lights = game.lightNodes;
     params.skydomeTexture = skydomeTexture;

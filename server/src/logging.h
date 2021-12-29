@@ -53,5 +53,5 @@ namespace Log {
 #define LOG_WARN(...) Log::Warning << __VA_ARGS__ << std::endl
 #define LOG_ERROR(...) Log::Error << __VA_ARGS__ << std::endl
 
-#define LOG_BREADCRUMB() Log::Debug << __FILE__ << ": " << __LINE__ << std::endl
+#define LOG_BREADCRUMB() Log::Debug << __FILE__ << ":" << __LINE__ << ":" << __FUNCTION__ << std::endl
 #endif

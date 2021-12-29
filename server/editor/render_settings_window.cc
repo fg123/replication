@@ -18,7 +18,7 @@ void RenderSettingsWindow::Draw(Editor& editor) {
     ImGui::Checkbox("Enable Shadows", &parameters.enableShadows);
     ImGui::Separator();
     ImGui::Checkbox("Enable Bloom", &parameters.enableBloom);
-    ImGui::DragFloat("Bloom Threshold", &parameters.bloomThreshold, 0.01f, 0.0f, 2.0f);
+    ImGui::DragFloat("Bloom Threshold", &parameters.bloomThreshold, 0.01f, 0.0f, 10.0f);
     ImGui::Separator();
     ImGui::Checkbox("Enable Tone Mapping", &parameters.enableToneMapping);
     ImGui::DragFloat("Tone Mapping Exposure", &parameters.exposure, 0.01f, 0.01f, 10.0f);

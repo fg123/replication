@@ -17,6 +17,8 @@ class RelationshipManager : public Replicable {
     std::unordered_map<ObjectID, std::unordered_set<ObjectID>> parentChildren;
 
     bool isDirty = false;
+
+    void PrintDebug();
 public:
     RelationshipManager(Game& game);
 

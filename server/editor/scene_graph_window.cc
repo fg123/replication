@@ -3,7 +3,7 @@
 #include "scene.h"
 #include "object.h"
 
-SceneGraphWindow::SceneGraphWindow() {
+SceneGraphWindow::SceneGraphWindow(Editor& editor) {
     for (auto& lookup : GetClassLookup()) {
         gameObjectNames.push_back(lookup.first);
     }
@@ -167,6 +167,10 @@ void SceneGraphWindow::DrawCurrentProperties(Editor& editor) {
             }
         }
     }
+    else if (ScriptableObjectNode* scriptObjectNode = dynamic_cast<ScriptableObjectNode*>(selectedNode)) {
+        ImGui::Separator();
+        ImGui::InputText("Script Class", &scriptObjectNode->scriptClass);
+    }
 }
 
 void SceneGraphWindow::DrawTreeNode(Node* node) {
@@ -276,6 +280,13 @@ void SceneGraphWindow::Draw(Editor& editor) {
 
                 if (ImGui::MenuItem("Game Object Node")) {
                     showSelectGameObjectMenu = true;
+                }
+
+                if (ImGui::MenuItem("Scriptable Object Node")) {
+                    ScriptableObjectNode* node = new ScriptableObjectNode();
+                    node->name = "ScriptableObject";
+                    node->parent = parent;
+                    parent->children.push_back(node);
                 }
             }
             ImGui::EndMenu();

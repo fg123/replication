@@ -18,23 +18,23 @@ GLuint BloomShader::BloomTexture(GLuint texture, float threshold, int width, int
     glUniform1f(uniformThreshold, threshold);
     highPassFilter.DrawQuad(texture, highPassFilter.standardRemapMatrix);
 
-    texture = bloomBuffer.BlitTexture();
+    texture = bloomBuffer.SwapBuffers();
 
     blurShader.Use();
     glUniform2f(uniformDirection, 0.0f, 1.0f);
-    for (size_t i = 0; i < 1; i++) {
+    for (size_t i = 0; i < 50; i++) {
         bloomBuffer.Bind();
         blurShader.DrawQuad(texture, blurShader.standardRemapMatrix);
 
-        texture = bloomBuffer.BlitTexture();
+        texture = bloomBuffer.SwapBuffers();
     }
     glUniform2f(uniformDirection, 1.0f, 0.0f);
-    for (size_t i = 0; i < 1; i++) {
+    for (size_t i = 0; i < 50; i++) {
         bloomBuffer.Bind();
         blurShader.DrawQuad(texture, blurShader.standardRemapMatrix);
 
-        texture = bloomBuffer.BlitTexture();
+        texture = bloomBuffer.SwapBuffers();
     }
     glEnable(GL_DEPTH_TEST);
-    return bloomBuffer.BlitTexture();
+    return texture;
 }

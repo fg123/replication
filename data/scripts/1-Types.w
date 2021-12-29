@@ -66,8 +66,17 @@ let Vector2FromList => (lst) Vector3(...lst);
 let QuaternionFromList => (lst) Quaternion(...lst);
 
 let <Vector3> + <Vector3> => (a, b) Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
+let <Vector3> - <Vector3> => (a, b) Vector3(a.x - b.x, a.y - b.y, a.z - b.z);
 let - <Vector3> => (v) Vector3(-v.x, -v.y, -v.z);
 let <Vector3> * <number> => (v, s) Vector3(s * v.x, s * v.y, s * v.z);
 let <number> * <Vector3> => (s, v) v * s
 
 let - <Vector2> => (v) Vector2(-v.x, -v.y);
+
+
+// Utils
+struct Random => [float_between, float, int];
+
+Random.float => () native random_float;
+Random.float_between => (min, max) this.float() * (max - min) + min;
+Random.int => (min, max) (this.float() * (max - min) + min) \ 1;

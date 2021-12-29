@@ -10,6 +10,7 @@ class SpriteObject : public Object {
 
     #ifdef BUILD_CLIENT
         bool materialSetup = false;
+        DefaultMaterial* material = nullptr;
     #endif
 public:
     CLASS_CREATE(SpriteObject);
@@ -17,9 +18,21 @@ public:
     SpriteObject(Game& game) : SpriteObject(game, "") { }
     SpriteObject(Game& game, const std::string& texture) : Object(game), texture(texture) {
         // Make a Copy
-        customQuad = *game.GetModel("Quad.obj");
+        if (auto model = game.GetAssetManager().GetModel("Quad.obj")) {
+            customQuad = Model(*model);
+        }
+        else {
+            LOG_ERROR("Could not find quad model!");
+            throw std::runtime_error("Could not find quad model!");
+        }
 
         isStatic = true;
+    }
+
+    ~SpriteObject() {
+        #ifdef BUILD_CLIENT
+            delete material;
+        #endif
     }
 
     virtual void ProcessReplication(json& obj) override {
@@ -29,7 +42,7 @@ public:
         model = &customQuad;
         if (!materialSetup) {
             materialSetup = true;
-            DefaultMaterial* material = new DefaultMaterial;
+            material = new DefaultMaterial;
             customQuad.meshes[0]->material = material;
 
             // Custom Model

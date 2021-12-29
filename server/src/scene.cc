@@ -89,6 +89,9 @@ Node* Node::Create(Scene& scene, json& obj) {
     else if (str == "GameObjectNode") {
         node = new GameObjectNode;
     }
+    else if (str == "ScriptableObjectNode") {
+        node = new ScriptableObjectNode;
+    }
     else {
         throw std::runtime_error("Unknown node type: " + str);
     }

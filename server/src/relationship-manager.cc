@@ -106,23 +106,26 @@ void RelationshipManager::Serialize(JSONWriter& obj) {
         obj.Uint64(pair.second);
     }
     obj.EndArray();
+    // PrintDebug();
 }
 
 void RelationshipManager::ProcessReplication(json& obj) {
     Replicable::ProcessReplication(obj);
+    LOG_DEBUG("Processing Replication for Relationship Manager");
     childParent.clear();
     parentChildren.clear();
 
-    ObjectID parent = 0;
+    ObjectID child = 0;
     for (auto& entry : obj["r"].GetArray()) {
-        if (parent == 0) {
-            parent = entry.GetUint64();
+        if (child == 0) {
+            child = entry.GetUint64();
         }
         else {
-            SetParent(entry.GetUint64(), parent);
-            parent = 0;
+            SetParent(child, entry.GetUint64());
+            child = 0;
         }
     }
+    // PrintDebug();
 }
 
 bool RelationshipManager::IsDirty() const {
@@ -131,4 +134,11 @@ bool RelationshipManager::IsDirty() const {
 
 void RelationshipManager::ResetDirty() {
     isDirty = false;
+}
+
+void RelationshipManager::PrintDebug() {
+    LOG_DEBUG("RelationshipManager:");
+    for (auto& pair : childParent) {
+        LOG_DEBUG("\tC" << pair.first << " -> P" << pair.second);
+    }
 }

@@ -170,7 +170,7 @@ extern "C" {
         JSONDocument doc;
         doc.Parse(input);
 
-        if (isInventoryOpen) return false;
+        // if (isInventoryOpen) return false;
 
         if (isPaused) {
             // UI Captured

@@ -101,6 +101,13 @@ void RenderBuffer::SetSize(int newWidth, int newHeight) {
 
 }
 
+GLuint RenderBuffer::SwapBuffers() {
+    std::swap(textureColor, internalTexture);
+    std::swap(textureDepth, internalDepth);
+    std::swap(fbo, internalFBO);
+    return internalTexture;
+}
+
 GLuint RenderBuffer::BlitTexture() {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, internalFBO);

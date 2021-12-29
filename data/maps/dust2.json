@@ -70,7 +70,7 @@
                     "z": 0.0
                 },
                 "nearBiasRange": {
-                    "x": 0.00009999999747378752,
+                    "x": 0.0010000000474974514,
                     "y": 0.0010000000474974514
                 },
                 "position": {
@@ -110,6 +110,26 @@
                 },
                 "type": "GameObjectNode",
                 "gameObject": "AmmoObject"
+            },
+            {
+                "scale": {
+                    "x": 7.079999923706055,
+                    "y": 3.4000000953674318,
+                    "z": 20.200000762939454
+                },
+                "name": "ScriptableObject",
+                "position": {
+                    "x": -10.729999542236329,
+                    "y": 4.670000076293945,
+                    "z": -24.31999969482422
+                },
+                "rotation": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "type": "ScriptableObjectNode",
+                "scriptClass": "LootZone"
             }
         ]
     },

@@ -38,6 +38,8 @@ void InventoryManager::Pickup(WeaponObject* weapon) {
 }
 
 void InventoryManager::Drop(int id) {
+    LOG_BREADCRUMB();
+    LOG_DEBUG("Inventory drop " << id);
     if (id == 0) Drop(primary);
     else if (id == 1) Drop(secondary);
     else if (id == 2 && objects.size() > 0) Drop(objects[0]);

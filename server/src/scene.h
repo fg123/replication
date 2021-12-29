@@ -116,6 +116,26 @@ struct GameObjectNode : public Node {
     virtual void ProcessReplication(json& obj) override;
 };
 
+
+struct ScriptableObjectNode : public Node {
+    std::string scriptClass;
+
+    ScriptableObjectNode() {}
+
+    virtual const char* GetNodeType() override { return "ScriptableObjectNode"; }
+
+    virtual void Serialize(JSONWriter& obj) override {
+        Node::Serialize(obj);
+        obj.Key("scriptClass");
+        obj.String(scriptClass.c_str());
+    }
+
+    virtual void ProcessReplication(json& obj) override {
+        Node::ProcessReplication(obj);
+        scriptClass = obj["scriptClass"].GetString();
+    }
+};
+
 struct LightNode : public Node {
     LightShape shape = LightShape::Point;
 

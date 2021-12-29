@@ -29,6 +29,18 @@ public:
             delete mesh;
         }
     }
+
+    Model() {}
+    Model(Model& other) {
+        name = other.name;
+        id = other.id;
+        for (Mesh* mesh : other.meshes) {
+            meshes.push_back(new Mesh(*mesh));
+        }
+        for (Mesh* mesh : other.otherMeshes) {
+            otherMeshes.push_back(new Mesh(*mesh));
+        }
+    }
     ModelID GetId() { return id; }
 };
 
