@@ -48,8 +48,6 @@ class ClientGL {
     Mesh* minimapMarker;
     Texture* skydomeTexture;
 
-    DebugShaderProgram* debugShaderProgram;
-
     // Simple Quad
     QuadShaderProgram* quadDrawShaderProgram;
 

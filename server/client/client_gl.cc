@@ -48,9 +48,6 @@ void ClientGL::SetupContext() {
     LOG_INFO("GL_MAX_SAMPLES = " << glLimits.MAX_SAMPLES);
 
     // Setup Available Shaders
-    // shaderPrograms.push_back(new DefaultMaterialShaderProgram());
-    // shaderPrograms.push_back(new DeferredShadingGeometryShaderProgram());
-    debugShaderProgram = new DebugShaderProgram();
     quadDrawShaderProgram = new QuadShaderProgram("shaders/Quad.fs");
     minimapShaderProgram = new QuadShaderProgram("shaders/Minimap.fs");
     minimapShaderProgram->SetTextureSize(MINIMAP_WIDTH, MINIMAP_HEIGHT);
@@ -68,26 +65,15 @@ void ClientGL::SetupGL() {
     ), Texture::Format::RGB);
 }
 
-void ClientGL::DrawDebugLine(const Vector3& color, const Vector3& from, const Vector3& to) {
-    // debugShaderProgram->Use();
-    // float length = glm::distance(from, to);
-
-    // Matrix4 model = glm::translate(from) *
-    //     glm::transpose(glm::toMat4(DirectionToQuaternion(to - from))) *
-    //     glm::scale(Vector3(length));
-    // debugShaderProgram->SetColor(color);
-    // debugShaderProgram->Draw(model, &debugLine);
-}
-
 void ClientGL::DrawDebug(Object* obj) {
-    // debugShaderProgram->Use();
-    // if (GlobalSettings.Client_DrawDebugLines) {
-    //     for (auto& line : obj->debugLines) {
-    //         DrawDebugLine(line.color, line.from, line.to);
-    //     }
-    // }
-
+    auto& debugRenderer = worldRenderer.GetDebugRenderer();
     if (GlobalSettings.Client_DrawColliders) {
+        debugRenderer.DrawLine(obj->GetClientPosition(),
+            obj->GetClientPosition() + obj->GetClientLookDirection(),
+            Vector3(0, 0, 1));
+        debugRenderer.DrawLine(obj->GetClientPosition(),
+            obj->GetClientPosition() + glm::normalize(Vector::Forward * obj->GetClientRotation()),
+            Vector3(0, 1, 0));
         // for (auto& cptr : obj->GetCollider().children) {
         //     // Draw the Broad Phase
         //     debugShaderProgram->SetColor(Vector3(1, 0, 0));
@@ -325,6 +311,9 @@ void ClientGL::Draw(int width, int height) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     worldRenderer.NewFrame(&params);
+    for (auto& objPair : game.GetGameObjects()) {
+        DrawDebug(objPair.second);
+    }
     worldRenderer.Draw({ &backgroundLayer, &foregroundLayer });
     worldRenderer.EndFrame();
 

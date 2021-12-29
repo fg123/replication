@@ -54,9 +54,6 @@ int main(int argc, char** argv) {
             else if (arg == "--client-draw-colliders") {
                 GlobalSettings.Client_DrawColliders = true;
             }
-            else if (arg == "--client-draw-debug") {
-                GlobalSettings.Client_DrawDebugLines = true;
-            }
             else if (arg == "--client-ignore-server") {
                 GlobalSettings.Client_IgnoreServer = true;
             }

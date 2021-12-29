@@ -9,7 +9,6 @@ struct _GlobalSettings : Replicable {
     ALWAYS_REPLICATED_D(bool, RunTests, "RunTests", false);
 
     // Client Settings
-    ALWAYS_REPLICATED_D(bool, Client_DrawDebugLines, "Client_DrawDebugLines", false);
     ALWAYS_REPLICATED_D(bool, Client_DrawColliders, "Client_DrawColliders", false);
     ALWAYS_REPLICATED_D(bool, Client_DrawBVH, "Client_DrawBVH", false);
     ALWAYS_REPLICATED_D(bool, Client_IgnoreServer, "Client_IgnoreServer", false);

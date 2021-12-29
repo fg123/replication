@@ -111,7 +111,6 @@ void RelationshipManager::Serialize(JSONWriter& obj) {
 
 void RelationshipManager::ProcessReplication(json& obj) {
     Replicable::ProcessReplication(obj);
-    LOG_DEBUG("Processing Replication for Relationship Manager");
     childParent.clear();
     parentChildren.clear();
 

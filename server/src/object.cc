@@ -61,10 +61,6 @@ void Object::HandleAllCollisions() {
 
 void Object::Tick(Time time) {
 
-    #ifdef BUILD_CLIENT
-        debugLines.clear();
-    #endif
-
     Time delta = DeltaTime(time);
     if (delta != 0) {
         // Apply Physics
@@ -279,10 +275,13 @@ void Object::OnClientCreate() {
         float lerpRatio = GetClientInterpolationRatio(now);
         // LOG_DEBUG("LastDraw " << lastClientDrawTime << " Now " << now << " NextTick " << nextTickTargetTime << " Ratio " << lerpRatio);
 
-        clientPosition = glm::lerp(clientPosition, position, lerpRatio);
-        clientRotation = glm::slerp(clientRotation, rotation, lerpRatio);
-        clientScale = glm::lerp(clientScale, scale, lerpRatio);
+        // clientPosition = glm::lerp(clientPosition, position, lerpRatio);
+        // clientRotation = glm::slerp(clientRotation, rotation, lerpRatio);
+        // clientScale = glm::lerp(clientScale, scale, lerpRatio);
 
+        clientPosition = position;
+        clientRotation = rotation;
+        clientScale = scale;
         lastClientDrawTime = now;
     }
     void Object::SetLastTickTime(Time time) {

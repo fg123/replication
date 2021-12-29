@@ -73,14 +73,6 @@ enum Tag : uint64_t {
     DRAW_OUTLINE        = 0b0000000000100000000
 };
 
-struct DebugLine {
-    Vector3 from;
-    Vector3 to;
-    Vector3 color;
-    DebugLine(Vector3 from, Vector3 to, Vector3 color) : from(from),
-        to(to), color(color) {}
-};
-
 class Object : public Replicable {
 protected:
     Game& game;
@@ -132,8 +124,6 @@ public:
     // Replication Smoothing
     Vector3 clientMeshPositionOffset;
     Time clientSmoothingTargetTime = 0;
-
-    std::vector<DebugLine> debugLines;
 
     bool IsVisibleInFrustrum(const Vector3& camPos, const Vector3& camDir);
 #endif
