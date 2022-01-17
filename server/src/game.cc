@@ -109,7 +109,7 @@ void Game::CreateMapBaseObject() {
 
             obj->SetPosition(position);
             // LOG_DEBUG(rotation);
-            obj->SetRotation(rotation);
+            obj->SetRotation(glm::inverse(rotation));
             obj->SetScale(scale);
 
             if (staticMesh) {

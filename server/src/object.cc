@@ -301,7 +301,7 @@ void Object::OnClientCreate() {
     }
     const Matrix4 Object::GetTransform() {
         return glm::translate(GetClientPosition()) *
-            glm::toMat4(GetClientRotation()) *
+            glm::inverse(glm::toMat4(GetClientRotation())) *
             glm::scale(GetClientScale());
     }
     const Vector3& Object::GetClientPosition() const {
@@ -338,7 +338,7 @@ void Object::OnClientCreate() {
 #ifdef BUILD_SERVER
     const Matrix4 Object::GetTransform() {
         return glm::translate(position) *
-            glm::toMat4(rotation) *
+            glm::inverse(glm::toMat4(rotation)) *
             glm::scale(scale);
     }
 #endif

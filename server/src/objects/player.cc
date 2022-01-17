@@ -70,7 +70,7 @@ PlayerObject::PlayerObject(Game& game, Vector3 position) : ScriptableObject(game
 
     // collisionExclusion |= (uint64_t) Tag::PLAYER;
 
-    SetModel(game.GetModel("NewPlayer.obj"));
+    SetModel(game.GetModel("NewPlayer2.obj"));
     // GenerateOBBCollidersFromModel(this);
     AddCollider(new CapsuleCollider(this, Vector3(0, 0, 0), Vector3(0, -1.35, 0), 0.5f));
     // AddCollider(new SphereCollider(this, Vector3(0, 0, 0), 0.25f));
@@ -372,7 +372,7 @@ void PlayerObject::Tick(Time time) {
 
     Matrix4 matrix;
     matrix = glm::rotate(matrix, glm::radians(rotationYaw), Vector::Up);
-    // matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
+    matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
     rotation = glm::quat_cast(matrix);
 
 #ifdef BUILD_CLIENT

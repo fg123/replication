@@ -88,12 +88,11 @@ public:
 #ifdef BUILD_CLIENT
     virtual void PreDraw(Time time) override;
     virtual Vector3 GetClientLookDirection() const override {
-        return GetLookDirection();
-        // Matrix4 matrix;
-        // matrix = glm::rotate(matrix, glm::radians(clientRotationYaw), Vector::Up);
-        // matrix = glm::rotate(matrix, glm::radians(clientRotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
-        // Quaternion quat = glm::quat_cast(matrix);
-        // return glm::normalize(Vector::Forward * quat);
+        Matrix4 matrix;
+        matrix = glm::rotate(matrix, glm::radians(clientRotationYaw), Vector::Up);
+        matrix = glm::rotate(matrix, glm::radians(clientRotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
+        Quaternion quat = glm::quat_cast(matrix);
+        return glm::normalize(Vector::Forward * quat);
     }
 #endif
     virtual void OnClientCreate() override {

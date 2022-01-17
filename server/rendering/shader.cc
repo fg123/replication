@@ -181,14 +181,15 @@ GLint ShaderProgram::GetUniformLocation(const std::string& uniName) {
     return result;
 }
 
-void DefaultMaterialShaderProgram::Draw(const Matrix4& model, Mesh* mesh) {
+void DeferredShadingGeometryShaderProgram::Draw(const Matrix4& model, Mesh* mesh) {
     // Set Model Transform
     glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
+    Material* meshMat = overrideMaterial ? overrideMaterial : mesh->material;
     // Set Mesh Material
-    if (mesh->material != lastMaterial) {
-        lastMaterial = mesh->material;
-        DefaultMaterial* material = static_cast<DefaultMaterial*>(mesh->material);
+    if (meshMat != lastMaterial) {
+        lastMaterial = meshMat;
+        DefaultMaterial* material = static_cast<DefaultMaterial*>(meshMat);
         glUniform3fv(uniformMaterial[0], 1, glm::value_ptr(material->Ka));
         glUniform3fv(uniformMaterial[1], 1, glm::value_ptr(material->Kd));
         glUniform3fv(uniformMaterial[2], 1, glm::value_ptr(material->Ks));
@@ -244,111 +245,6 @@ void DefaultMaterialShaderProgram::Draw(const Matrix4& model, Mesh* mesh) {
     glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
 }
 
-void DefaultMaterialShaderProgram::PreDraw(const Vector3& viewPos,
-                const Matrix4& view,
-                const Matrix4& proj) {
-
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    glUniform3fv(uniformViewerPosition, 1, glm::value_ptr(viewPos));
-    glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
-
-    // Load Lights Into Shader
-    // auto& lights = game.GetAssetManager().lights;
-    // int numLights = lights.size();
-    // // LOG_DEBUG("Loading " << numLights << " into uniform");
-    // glUniform1i(uniformNumLights, numLights);
-    // for (int i = 0; i < numLights; i++) {
-    //     GLint lightPosition = GetUniformLocation("u_Lights[" + std::to_string(i) + "].position");
-    //     GLint lightColor = GetUniformLocation("u_Lights[" + std::to_string(i) + "].color");
-    //     GLint depthBiasMVPNear = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPNear");
-    //     GLint depthBiasMVPMid = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPMid");
-    //     GLint depthBiasMVPFar = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPFar");
-
-    //     GLint shadowMapSize = GetUniformLocation("u_Lights[" + std::to_string(i) + "].shadowMapSize");
-    //     glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
-    //     glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
-    //     glUniformMatrix4fv(depthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPNear));
-    //     glUniformMatrix4fv(depthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPMid));
-    //     glUniformMatrix4fv(depthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPFar));
-    //     glUniform1i(shadowMapSize, lights[i].shadowMapSize);
-
-    //     // See client_shader.h:83
-    //     glActiveTexture(GL_TEXTURE7 + i);
-    //     glBindTexture(GL_TEXTURE_2D, lights[i].shadowDepthMap);
-    // }
-}
-
-
-void DeferredShadingGeometryShaderProgram::Draw(const Matrix4& model, Mesh* mesh) {
-    // Set Model Transform
-    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
-
-    Material* meshMat = overrideMaterial ? overrideMaterial : mesh->material;
-    // Set Mesh Material
-    if (meshMat != lastMaterial) {
-        // lastMaterial = meshMat;
-        DefaultMaterial* material = static_cast<DefaultMaterial*>(meshMat);
-        glUniform3fv(uniformMaterial[0], 1, glm::value_ptr(material->Ka));
-        glUniform3fv(uniformMaterial[1], 1, glm::value_ptr(material->Kd));
-        glUniform3fv(uniformMaterial[2], 1, glm::value_ptr(material->Ks));
-        glUniform1f (uniformMaterial[3], material->Ns);
-        glUniform1f (uniformMaterial[4], material->Ni);
-        glUniform1f (uniformMaterial[5], material->d);
-        glUniform1i (uniformMaterial[6], material->illum);
-
-        // Texture Booleans
-        glUniform1i (uniformMaterial[7],  material->map_Ka != nullptr);
-        glUniform1i (uniformMaterial[8],  material->map_Kd != nullptr);
-        glUniform1i (uniformMaterial[9],  material->map_Ks != nullptr);
-        glUniform1i (uniformMaterial[10], material->map_Ns != nullptr);
-        glUniform1i (uniformMaterial[11], material->map_d != nullptr);
-        glUniform1i (uniformMaterial[12], material->map_bump != nullptr);
-        glUniform1i (uniformMaterial[13], material->map_refl != nullptr);
-
-        // Actual Textures, the units are previously mapped
-        if (material->map_Ka) {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, material->map_Ka->textureBuffer);
-        }
-        if (material->map_Kd) {
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, material->map_Kd->textureBuffer);
-        }
-        if (material->map_Ks) {
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, material->map_Ks->textureBuffer);
-        }
-        if (material->map_Ns) {
-            glActiveTexture(GL_TEXTURE3);
-            glBindTexture(GL_TEXTURE_2D, material->map_Ns->textureBuffer);
-        }
-        if (material->map_d) {
-            glActiveTexture(GL_TEXTURE4);
-            glBindTexture(GL_TEXTURE_2D, material->map_d->textureBuffer);
-        }
-        if (material->map_bump) {
-            glActiveTexture(GL_TEXTURE5);
-            glBindTexture(GL_TEXTURE_2D, material->map_bump->textureBuffer);
-        }
-        if (material->map_refl) {
-            glActiveTexture(GL_TEXTURE6);
-            glBindTexture(GL_TEXTURE_2D, material->map_refl->textureBuffer);
-        }
-    }
-    if (mesh != lastMesh) {
-        // lastMesh = mesh;
-        glBindVertexArray(mesh->renderInfo.vao);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
-    }
-    glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, nullptr);
-}
-
 void DeferredShadingGeometryShaderProgram::PreDraw(const Vector3& viewPos,
                 const Matrix4& view,
                 const Matrix4& proj) {
@@ -398,31 +294,6 @@ void DeferredShadingLightingShaderProgram::PreDraw(const Vector3& viewPos,
     glUniform3fv(uniformViewerPosition, 1, glm::value_ptr(viewPos));
     glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(uniformProj, 1, GL_FALSE, glm::value_ptr(proj));
-
-    // // Load Lights Into Shader
-    // auto& lights = game.GetAssetManager().lights;
-    // int numLights = lights.size();
-    // // LOG_DEBUG("Loading " << numLights << " into uniform");
-    // glUniform1i(uniformNumLights, numLights);
-    // for (int i = 0; i < numLights; i++) {
-    //     GLint lightPosition = GetUniformLocation("u_Lights[" + std::to_string(i) + "].position");
-    //     GLint lightColor = GetUniformLocation("u_Lights[" + std::to_string(i) + "].color");
-    //     GLint depthBiasMVPNear = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPNear");
-    //     GLint depthBiasMVPMid = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPMid");
-    //     GLint depthBiasMVPFar = GetUniformLocation("u_Lights[" + std::to_string(i) + "].depthBiasMVPFar");
-
-    //     GLint shadowMapSize = GetUniformLocation("u_Lights[" + std::to_string(i) + "].shadowMapSize");
-    //     glUniform3fv(lightPosition, 1, glm::value_ptr(lights[i].position));
-    //     glUniform3fv(lightColor, 1, glm::value_ptr(lights[i].color));
-    //     glUniformMatrix4fv(depthBiasMVPNear, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPNear));
-    //     glUniformMatrix4fv(depthBiasMVPMid, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPMid));
-    //     glUniformMatrix4fv(depthBiasMVPFar, 1, GL_FALSE, glm::value_ptr(lights[i].depthBiasMVPFar));
-    //     glUniform1i(shadowMapSize, lights[i].shadowMapSize);
-
-    //     // See client_shader.h:83
-    //     glActiveTexture(GL_TEXTURE4 + i);
-    //     glBindTexture(GL_TEXTURE_2D, lights[i].shadowDepthMap);
-    // }
 }
 
 void DeferredShadingLightingShaderProgram::RenderLighting(TransformedLight& transformed, AssetManager& assetManager) {
@@ -482,13 +353,6 @@ void DeferredShadingLightingShaderProgram::RenderLighting(TransformedLight& tran
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->renderInfo.ibo);
         glDrawElements(GL_TRIANGLES, mesh->renderInfo.iboCount, GL_UNSIGNED_INT, 0);
     }
-
-    // glCullFace(GL_BACK);
-
-    // glUniform1i(uniformUseProjectionAndView, GL_FALSE);
-    // glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(standardRemapMatrix));
-    // glBindVertexArray(quadVAO);
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glEnable(GL_DEPTH_TEST);
 }

@@ -159,8 +159,6 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
         LightNode* light = dynamic_cast<LightNode*>(transformed->node);
         if (light->shadowMapSize == 0) continue;
 
-        float shadowTransitionZone = light->shadowTransitionZone;
-
         float aspectRatio = (float) renderFrameParameters->width / (float) renderFrameParameters->height;
         Matrix4 nearProj = glm::perspective(renderFrameParameters->FOV, aspectRatio,
             renderFrameParameters->viewNear, light->nearBoundary);
@@ -184,9 +182,6 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
             viewFrustrumPointsNear[i] /= viewFrustrumPointsNear[i].w;
             viewFrustrumPointsMid[i] /= viewFrustrumPointsMid[i].w;
             viewFrustrumPointsFar[i] /= viewFrustrumPointsFar[i].w;
-            // LOG_DEBUG(viewFrustrumPointsNear[i]);
-            // LOG_DEBUG(viewFrustrumPointsMid[i]);
-            // LOG_DEBUG(viewFrustrumPointsFar[i]);
         }
 
         if (renderFrameParameters->debugSettings.drawShadowMapDebug) {
@@ -259,11 +254,6 @@ void DeferredRenderer::DrawShadowMaps(std::initializer_list<DrawLayer*> layers) 
         }
 
         boxExtents = AABB(boxToLight, 8);
-        // lightProjection = glm::ortho(
-        //     glm::floor(boxExtents.ptMin.x),
-        //     glm::ceil(boxExtents.ptMax.x),
-        //     glm::floor(boxExtents.ptMin.y),
-        //     glm::ceil(boxExtents.ptMax.y), 1.0f, 400.f);
         lightProjection = glm::ortho(
             boxExtents.ptMin.x,
             boxExtents.ptMax.x,
@@ -334,7 +324,9 @@ void DeferredRenderer::Draw(std::initializer_list<DrawLayer*> layers) {
     }
 
     // Create Shadow Maps
-    DrawShadowMaps(layers);
+    if (renderFrameParameters->enableShadows) {
+        DrawShadowMaps(layers);
+    }
 
     gBuffer.Bind();
     glViewport(0, 0, gBuffer.width, gBuffer.height);
