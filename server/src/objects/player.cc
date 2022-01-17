@@ -372,7 +372,7 @@ void PlayerObject::Tick(Time time) {
 
     Matrix4 matrix;
     matrix = glm::rotate(matrix, glm::radians(rotationYaw), Vector::Up);
-    matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
+    // matrix = glm::rotate(matrix, glm::radians(rotationPitch), Vector3(matrix[0][0], matrix[1][0], matrix[2][0]));
     rotation = glm::quat_cast(matrix);
 
 #ifdef BUILD_CLIENT
@@ -595,25 +595,40 @@ void PlayerObject::ProcessInputData(const JSONDocument& obj) {
 }
 
 Vector3 PlayerObject::GetRightAttachmentPoint() const {
-    Vector3 left = glm::normalize(Vector::Left * rotation);
-    // Vector3 up = glm::normalize(Vector::Up * rotation);
-
-    return GetPosition()
-        - left * 0.5f
-        + GetLookDirection() * 0.5f;
+    #ifdef BUILD_SERVER
+        return GetPosition()
+            - glm::normalize(Vector::Left * GetRotation()) * 0.5f
+            + GetLookDirection() * 0.5f;
+    #endif
+    #ifdef BUILD_CLIENT
+        return GetClientPosition()
+            - glm::normalize(Vector::Left * GetClientRotation()) * 0.5f
+            + GetClientLookDirection() * 0.5f;
+    #endif
 }
 
 Vector3 PlayerObject::GetLeftAttachmentPoint() const {
-    Vector3 left = glm::normalize(Vector::Left * rotation);
-    // Vector3 up = glm::normalize(Vector::Up * rotation);
+    #ifdef BUILD_SERVER
+        return GetPosition()
+            + glm::normalize(Vector::Left * GetRotation()) * 0.5f
+            + GetLookDirection() * 0.5f;
+    #endif
 
-    return GetPosition()
-        + left * 0.5f
-        + GetLookDirection() * 0.5f;
+    #ifdef BUILD_CLIENT
+        return GetClientPosition()
+            + glm::normalize(Vector::Left * GetClientRotation()) * 0.5f
+            + GetClientLookDirection() * 0.5f;
+    #endif
 }
 
 Vector3 PlayerObject::GetCenterAttachmentPoint() const {
-    return GetPosition() + GetLookDirection() * 0.5f;
+    #ifdef BUILD_SERVER
+        return GetPosition() + GetLookDirection() * 0.5f;
+    #endif
+
+    #ifdef BUILD_CLIENT
+        return GetClientPosition() + GetClientLookDirection() * 0.5f;
+    #endif
 }
 
 

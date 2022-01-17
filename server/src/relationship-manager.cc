@@ -53,24 +53,38 @@ std::unordered_set<Object*> RelationshipManager::GetChildren(ObjectID parent) {
     return children;
 }
 
+#ifdef BUILD_CLIENT
+    void RelationshipManager::PreDraw(Time time) {
+        Execute([](Object* obj, Time time) {
+            obj->PreDraw(time);
+        }, time);
+    }
+#endif
+
 void RelationshipManager::Tick(Time time) {
-    std::queue<ObjectID> tickQueue;
+    Execute([](Object* obj, Time time) {
+        obj->Tick(time);
+    }, time);
+}
+
+void RelationshipManager::Execute(std::function<void(Object*, Time)> func, Time time) {
+    std::queue<ObjectID> queue;
 
     for (auto& object : game.GetGameObjects()) {
         if (GetParent(object.first)) continue;
-        tickQueue.push(object.first);
+        queue.push(object.first);
     }
 
-    while (!tickQueue.empty()) {
-        ObjectID object = tickQueue.front();
-        tickQueue.pop();
+    while (!queue.empty()) {
+        ObjectID object = queue.front();
+        queue.pop();
 
         Time start = Timer::NowMicro();
         if (Object* obj = game.GetObject(object)) {
-            obj->Tick(time);
+            func(obj, time);
         }
         else {
-            LOG_ERROR("Object " << object << " got added to tickQueue but did not find it in GameObjects!");
+            LOG_ERROR("Object " << object << " got added to queue but did not find it in GameObjects!");
         }
 
         Time end = Timer::NowMicro();
@@ -81,7 +95,7 @@ void RelationshipManager::Tick(Time time) {
                 RemoveParent(child);
                 continue;
             }
-            tickQueue.push(child);
+            queue.push(child);
         }
     }
     auto it = parentChildren.begin();
@@ -95,7 +109,6 @@ void RelationshipManager::Tick(Time time) {
         }
     }
 }
-
 
 void RelationshipManager::Serialize(JSONWriter& obj) {
     Replicable::Serialize(obj);

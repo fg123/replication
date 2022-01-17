@@ -63,8 +63,8 @@ CFLAGS = -Wall \
 
 # -I lib/assimp-4.1.0/include
 
-SERVER_DEBUG = -g -O2
-SERVER_PROD = -O2
+SERVER_DEBUG = -g -O3
+SERVER_PROD = -O3
 # -s SAFE_HEAP=1
 # -s ALLOW_MEMORY_GROWTH=1
 WASM_DEBUG = -gsource-map -s ASSERTIONS=2 -s STACK_OVERFLOW_CHECK=1
@@ -126,28 +126,28 @@ $(CLIENT_DATA): $(DATA_DIRS) $(DATA_FILES)
 		--preload ../data/scripts@/scripts
 
 $(CLIENT_OUTPUT): $(CLIENT_OBJ)
-	em++ -O2 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
+	em++ -O3 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
 
 client_prod: $(CLIENT_OBJ) $(CLIENT_DATA)
-	em++ -O2 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
+	em++ -O3 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
 
 %.o: %.cc
-	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
+	$(CXX) -O3 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
 %.o: %.c
-	$(CC) -O2 $(CFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
+	$(CC) -O3 $(CFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
 %.wo: %.cc
-	em++ -O2 $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
+	em++ -O3 $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
 
 %.wo: %.c
-	emcc -O2 $(CFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.c=%.wd) -c $< -o $@
+	emcc -O3 $(CFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.c=%.wd) -c $< -o $@
 
 %.eo: %.cc
-	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -MF $(<:%.cc=%.ed) -c $< -o $@
+	$(CXX) -O3 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -MF $(<:%.cc=%.ed) -c $< -o $@
 
 %.eo: %.c
-	$(CC) -O2 $(CFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -MF $(<:%.c=%.ed) -c $< -o $@
+	$(CC) -O3 $(CFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -MF $(<:%.c=%.ed) -c $< -o $@
 
 $(SRC_DIR)/objects.h:
 	./gen_objects_h.sh $@ \

@@ -4,9 +4,7 @@
 #include "replicable.h"
 #include <unordered_set>
 
-class Game;
-
-// Handles how objects are scheduled to tick relative to one another
+// Handles relationships between two objects
 class RelationshipManager : public Replicable {
     Game& game;
 
@@ -31,8 +29,15 @@ public:
 
     void RemoveParent(ObjectID child);
 
+#ifdef BUILD_CLIENT
+    // Delegates PreDraw to all the objects
+    void PreDraw(Time time);
+#endif
+
     // Actually delegates the tick to all the objects
     void Tick(Time time);
+
+    void Execute(std::function<void(Object*, Time)> func, Time time);
 
     // Serialization Methods
     bool IsDirty() const;

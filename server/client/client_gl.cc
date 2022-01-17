@@ -174,8 +174,8 @@ void ClientGL::AddMeshToLayer(Object* obj, Mesh* mesh, DrawLayer* layer, const V
 
 void ClientGL::SetupDrawingLayers() {
     Time now = Timer::Now();
+    game.GetRelationshipManager().PreDraw(now);
     for (auto& gameObjectPair : game.GetGameObjects()) {
-        gameObjectPair.second->PreDraw(now);
         gameObjectPair.second->RemoveTag(Tag::DRAW_FOREGROUND);
     }
 

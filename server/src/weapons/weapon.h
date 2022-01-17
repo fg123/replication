@@ -58,6 +58,9 @@ public:
     }
 
     virtual void Tick(Time time) override;
+    #ifdef BUILD_CLIENT
+        virtual void PreDraw(Time time) override;
+    #endif
 };
 
 // Manages cooldown

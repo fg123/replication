@@ -37,6 +37,17 @@ void WeaponObject::Detach() {
     SetDirty(true);
 }
 
+#ifdef BUILD_CLIENT
+void WeaponObject::PreDraw(Time time) {
+    ScriptableObject::PreDraw(time);
+     if (auto attachedTo = GetAttachedTo()) {
+        clientPosition = GetAttachedTo()->GetAttachmentPoint(attachmentPoint);
+        clientRotation = GetAttachedTo()->GetClientRotationWithPitch();
+        clientScale = GetAttachedTo()->GetClientScale();
+     }
+}
+#endif
+
 void WeaponObject::Tick(Time time) {
     ScriptableObject::Tick(time);
     if (auto attachedTo = GetAttachedTo()) {
@@ -45,11 +56,11 @@ void WeaponObject::Tick(Time time) {
         SetPosition(attachedTo->GetAttachmentPoint(attachmentPoint));
         SetVelocity(attachedTo->GetVelocity());
         SetRotation(attachedTo->GetRotationWithPitch());
-        #ifdef BUILD_CLIENT
-            clientPosition = GetPosition();
-            clientRotation = GetRotation();
-            clientScale = GetScale();
-        #endif
+        // #ifdef BUILD_CLIENT
+        //     clientPosition = GetPosition();
+        //     clientRotation = GetRotation();
+        //     clientScale = GetScale();
+        // #endif
 
         if (attachedTo->GetCurrentWeapon() == this) {
             SetScale(Vector3(1));

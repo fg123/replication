@@ -13,6 +13,7 @@ class Mesh;
 class Game;
 
 class ShaderProgram {
+protected:
     GLint program;
     std::vector<GLuint> shaders;
 
