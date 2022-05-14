@@ -126,6 +126,8 @@ public:
     Time clientSmoothingTargetTime = 0;
 
     bool IsVisibleInFrustrum(const Vector3& camPos, const Vector3& camDir);
+
+    std::unordered_map<Mesh*, Material*> materialOverrides;
 #endif
 
     REPLICATED(Vector3, airFriction, "af");

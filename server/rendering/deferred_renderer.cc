@@ -144,6 +144,9 @@ void MultiplyAll(A* dest, const A* src, size_t count, const B& multiplyBy) {
 void DeferredRenderer::DrawShadowObjects(std::initializer_list<DrawLayer*> layers) {
     glDisable(GL_CULL_FACE);
     for (auto& layer : layers) {
+        if (layer->clearDepth) {
+            glClear(GL_DEPTH_BUFFER_BIT);
+        }
         for (auto& pair : layer->opaque) {
             for (auto& param : pair.second) {
                 if (!param.castShadows) continue;
@@ -339,6 +342,12 @@ void DeferredRenderer::Draw(std::initializer_list<DrawLayer*> layers) {
     // Opaque Geometry Pass
     geometryShader->Use();
     for (auto& layer : layers) {
+        if (layer->clearDepth) {
+            glDisable(GL_DEPTH_TEST);
+        }
+        else {
+            glEnable(GL_DEPTH_TEST);
+        }
         for (auto& pair : layer->opaque) {
             for (auto& param : pair.second) {
                 DrawObject(param);

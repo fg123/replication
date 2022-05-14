@@ -6,7 +6,6 @@
 
 class SpriteObject : public Object {
     REPLICATED(std::string, texture, "tex");
-    Model customQuad;
 
     #ifdef BUILD_CLIENT
         bool materialSetup = false;
@@ -18,8 +17,8 @@ public:
     SpriteObject(Game& game) : SpriteObject(game, "") { }
     SpriteObject(Game& game, const std::string& texture) : Object(game), texture(texture) {
         // Make a Copy
-        if (auto model = game.GetAssetManager().GetModel("Quad.obj")) {
-            customQuad = Model(*model);
+        if (const auto& _model = game.GetAssetManager().GetModel("Quad.obj")) {
+            SetModel(_model);
         }
         else {
             LOG_ERROR("Could not find quad model!");
@@ -39,15 +38,16 @@ public:
         Object::ProcessReplication(obj);
     #ifdef BUILD_CLIENT
         // Override Model
-        model = &customQuad;
         if (!materialSetup) {
             materialSetup = true;
+            if (!model || model->meshes.empty()) return;
             material = new DefaultMaterial;
-            customQuad.meshes[0]->material = material;
 
             // Custom Model
             material->illum = -1;
             material->map_Kd = game.GetAssetManager().LoadTexture(texture, Texture::Format::RGBA);
+
+            materialOverrides[model->meshes[0]] = material;
         }
     #endif
     }

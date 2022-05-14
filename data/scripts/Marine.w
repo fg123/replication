@@ -4,10 +4,10 @@ struct Marine : Player => {
     }
 
     OnServerCreate => () {
-        // let smoke = CreateNativeObject("SmokeGrenadeThrower");
-        // this.SetQWeapon(smoke, WeaponAttachmentPoint.LEFT);
+        let smoke = CreateNativeObject("SmokeGrenadeThrower");
+        this.SetQWeapon(smoke, WeaponAttachmentPoint.LEFT);
 
-        // let art = CreateNativeObject("ArtilleryStrike");
-        // this.SetZWeapon(art, WeaponAttachmentPoint.RIGHT);
+        let art = CreateNativeObject("ArtilleryStrike");
+        this.SetZWeapon(art, WeaponAttachmentPoint.RIGHT);
     }
 };

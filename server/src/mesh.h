@@ -140,11 +140,8 @@ public:
     Material* material = nullptr;
     MeshRenderInfo renderInfo;
 #endif
-
     ~Mesh() {
-        #ifdef BUILD_CLIENT
-            delete material;
-        #endif
+        LOG_INFO("Mesh Destroy " << this);
     }
     void InitializeMesh();
 };

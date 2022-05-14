@@ -21,7 +21,6 @@ struct DrawParams {
 };
 
 struct DrawLayer {
-    // std::map<float, std::vector<DrawParams>> opaque;
     std::map<Material*, std::vector<DrawParams>> opaque;
     std::map<float, std::vector<DrawParams>> transparent;
 
@@ -41,6 +40,8 @@ struct DrawLayer {
         list.reserve(500);
         return list.emplace_back();
     }
+
+    bool clearDepth = false;
 };
 
 struct RenderFrameParameters {

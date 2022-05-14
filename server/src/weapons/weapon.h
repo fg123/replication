@@ -24,7 +24,7 @@ class WeaponObject : public ScriptableObject {
 public:
     REPLICATED(std::string, name, "name");
     REPLICATED(std::string, logo, "logo");
-    REPLICATED(WeaponAttachmentPoint, attachmentPoint, "atp");
+    REPLICATED_D(WeaponAttachmentPoint, attachmentPoint, "atp", WeaponAttachmentPoint::RIGHT);
     REPLICATED_D(float, currentSpread, "spread", 0.f);
 
     WeaponObject(Game& game) : WeaponObject(game, Vector3()) {

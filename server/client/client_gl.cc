@@ -153,7 +153,14 @@ void MultiplyAll(A* dest, const A* src, size_t count, const B& multiplyBy) {
 }
 
 void ClientGL::AddMeshToLayer(Object* obj, Mesh* mesh, DrawLayer* layer, const Vector3& centerPt) {
-    if (mesh->material->IsTransparent()) {
+    auto findIter = obj->materialOverrides.find(mesh);
+    Material* material = findIter != obj->materialOverrides.end() ? findIter->second : mesh->material;
+
+    if (!material) {
+        return;
+    }
+
+    if (material->IsTransparent()) {
         DrawParams& params = layer->PushTransparent(
             glm::distance2(centerPt, cameraPosition));
         params.id = obj->GetId();
@@ -161,14 +168,20 @@ void ClientGL::AddMeshToLayer(Object* obj, Mesh* mesh, DrawLayer* layer, const V
         params.transform = obj->GetTransform();
         params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
         params.hasOutline = obj->IsTagged(Tag::DRAW_OUTLINE);
+        if (findIter != obj->materialOverrides.end()) {
+            params.overrideMaterial = findIter->second;
+        }
     }
     else {
-        DrawParams& params = layer->PushOpaque(mesh->material);
+        DrawParams& params = layer->PushOpaque(material);
         params.id = obj->GetId();
         params.mesh = mesh;
         params.transform = obj->GetTransform();
         params.castShadows = !obj->IsTagged(Tag::NO_CAST_SHADOWS);
         params.hasOutline = obj->IsTagged(Tag::DRAW_OUTLINE);
+        if (findIter != obj->materialOverrides.end()) {
+            params.overrideMaterial = findIter->second;
+        }
     }
 }
 
@@ -219,6 +232,8 @@ void ClientGL::SetupDrawingLayers() {
             }
         }
     }
+
+    foregroundLayer.clearDepth = true;
 }
 
 void ClientGL::RenderMinimap() {
@@ -298,7 +313,7 @@ void ClientGL::Draw(int width, int height) {
     params.viewDir = cameraRotation;
     params.ambientFactor = 0.5f;
     params.enableLighting = true;
-    params.enableShadows = true;
+    // params.enableShadows = true;
     params.enableToneMapping = true;
     // params.enableBloom = true;
     // params.bloomThreshold = 2.5f;

@@ -44,6 +44,12 @@ void WeaponObject::PreDraw(Time time) {
         clientPosition = GetAttachedTo()->GetAttachmentPoint(attachmentPoint);
         clientRotation = GetAttachedTo()->GetClientRotationWithPitch();
         clientScale = GetAttachedTo()->GetClientScale();
+        if (attachedTo->GetCurrentWeapon() == this) {
+            clientScale = Vector3(1);
+        }
+        else if (!IsZero(GetScale())) {
+            clientScale = Vector3(0);
+        }
      }
 }
 #endif

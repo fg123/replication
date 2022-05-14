@@ -76,7 +76,7 @@ WASM_LINKING_FLAGS = \
 	-s EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
 	-s LLD_REPORT_UNDEFINED \
 	-s ALLOW_MEMORY_GROWTH=1 \
-	-s INITIAL_MEMORY=128MB \
+	-s INITIAL_MEMORY=512MB \
 	-s MIN_WEBGL_VERSION=2 \
 	-s MAX_WEBGL_VERSION=2 \
 	-s FORCE_FILESYSTEM=1 \
@@ -126,28 +126,28 @@ $(CLIENT_DATA): $(DATA_DIRS) $(DATA_FILES)
 		--preload ../data/scripts@/scripts
 
 $(CLIENT_OUTPUT): $(CLIENT_OBJ)
-	em++ -O3 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
+	em++ -O2 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_DEBUG) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
 
 client_prod: $(CLIENT_OBJ) $(CLIENT_DATA)
-	em++ -O3 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
+	em++ -O2 $(LDFLAGS) $(CLIENT_OBJ) $(LDLIBS) $(WASM_FLAGS) $(WASM_LINKING_FLAGS) -o $(CLIENT_OUTPUT)
 
 %.o: %.cc
-	$(CXX) -O3 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
+	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
 %.o: %.c
-	$(CC) -O3 $(CFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
+	$(CC) -O2 $(CFLAGS) -DBUILD_SERVER -g -MMD -c $< -o $@
 
 %.wo: %.cc
-	em++ -O3 $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
+	em++ -O2 $(CPPFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.cc=%.wd) -c $< -o $@
 
 %.wo: %.c
-	emcc -O3 $(CFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.c=%.wd) -c $< -o $@
+	emcc -O2 $(CFLAGS) $(WASM_FLAGS) -DBUILD_CLIENT -gsource-map -MMD -MF $(<:%.c=%.wd) -c $< -o $@
 
 %.eo: %.cc
-	$(CXX) -O3 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -MF $(<:%.cc=%.ed) -c $< -o $@
+	$(CXX) -O2 $(GCC_FLAGS) $(CPPFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -MF $(<:%.cc=%.ed) -c $< -o $@
 
 %.eo: %.c
-	$(CC) -O3 $(CFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -MF $(<:%.c=%.ed) -c $< -o $@
+	$(CC) -O2 $(CFLAGS) -DBUILD_CLIENT -DBUILD_EDITOR -g -MMD -MF $(<:%.c=%.ed) -c $< -o $@
 
 $(SRC_DIR)/objects.h:
 	./gen_objects_h.sh $@ \

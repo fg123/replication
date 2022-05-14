@@ -1246,7 +1246,7 @@ function updateGlobalBufferAndViews(buf) {
 var TOTAL_STACK = 5242880;
 if (Module['TOTAL_STACK']) assert(TOTAL_STACK === Module['TOTAL_STACK'], 'the stack size can no longer be determined at runtime')
 
-var INITIAL_MEMORY = Module['INITIAL_MEMORY'] || 134217728;
+var INITIAL_MEMORY = Module['INITIAL_MEMORY'] || 536870912;
 if (!Object.getOwnPropertyDescriptor(Module, 'INITIAL_MEMORY')) {
   Object.defineProperty(Module, 'INITIAL_MEMORY', {
     configurable: true,
@@ -1264,7 +1264,7 @@ assert(typeof Int32Array !== 'undefined' && typeof Float64Array !== 'undefined' 
 
 // If memory is defined in wasm, the user can't provide it.
 assert(!Module['wasmMemory'], 'Use of `wasmMemory` detected.  Use -s IMPORTED_MEMORY to define wasmMemory externally');
-assert(INITIAL_MEMORY == 134217728, 'Detected runtime INITIAL_MEMORY setting.  Use -s IMPORTED_MEMORY to define wasmMemory dynamically');
+assert(INITIAL_MEMORY == 536870912, 'Detected runtime INITIAL_MEMORY setting.  Use -s IMPORTED_MEMORY to define wasmMemory dynamically');
 
 // include: runtime_init_table.js
 // In regular non-RELOCATABLE mode the table is exported
@@ -1630,7 +1630,7 @@ function createWasm() {
     // This assertion doesn't hold when emscripten is run in --post-link
     // mode.
     // TODO(sbc): Read INITIAL_MEMORY out of the wasm file in post-link mode.
-    //assert(wasmMemory.buffer.byteLength === 134217728);
+    //assert(wasmMemory.buffer.byteLength === 536870912);
     updateGlobalBufferAndViews(wasmMemory.buffer);
 
     wasmTable = Module['asm']['__indirect_function_table'];
@@ -9229,14 +9229,14 @@ var dynCall_iiiiijj = Module["dynCall_iiiiijj"] = createExportWrapper("dynCall_i
 /** @type {function(...*):?} */
 var dynCall_iiiiiijj = Module["dynCall_iiiiiijj"] = createExportWrapper("dynCall_iiiiiijj");
 
-var _game = Module['_game'] = 143656;
-var _clientGl = Module['_clientGl'] = 144168;
-var _clientAudio = Module['_clientAudio'] = 145376;
-var _inputEvents = Module['_inputEvents'] = 145400;
-var _isPaused = Module['_isPaused'] = 141520;
-var _isInventoryOpen = Module['_isInventoryOpen'] = 141521;
-var _ping = Module['_ping'] = 145432;
-var _lastTickTime = Module['_lastTickTime'] = 145424;
+var _game = Module['_game'] = 143672;
+var _clientGl = Module['_clientGl'] = 144184;
+var _clientAudio = Module['_clientAudio'] = 145408;
+var _inputEvents = Module['_inputEvents'] = 145432;
+var _isPaused = Module['_isPaused'] = 141536;
+var _isInventoryOpen = Module['_isInventoryOpen'] = 141537;
+var _ping = Module['_ping'] = 145464;
+var _lastTickTime = Module['_lastTickTime'] = 145456;
 
 
 

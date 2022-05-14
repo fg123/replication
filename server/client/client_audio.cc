@@ -22,8 +22,8 @@ void ClientAudio::SetupContext() {
 
 void ClientAudio::Tick() {
     if (PlayerObject* p = game.GetLocalPlayer()) {
-        Vector3 player = p->GetPosition();
-        Vector3 look = p->GetLookDirection();
+        Vector3 player = p->GetClientPosition();
+        Vector3 look = p->GetClientLookDirection();
         alListener3f(AL_POSITION, player.x, player.y, player.z);
         ALfloat listenerOri[]= { look.x, look.y, look.z, 0.0, 1.0, 0.0 };
         alListenerfv(AL_ORIENTATION, listenerOri);

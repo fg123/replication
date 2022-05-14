@@ -6,7 +6,7 @@ GrenadeObject::GrenadeObject(Game& game, ObjectID playerId) : ThrownProjectile(g
     collisionExclusion |= (uint64_t) Tag::WEAPON;
     SetModel(game.GetModel("Grenade.obj"));
     GenerateOBBCollidersFromModel(this);
-    game.PlayAudio("GrenadeOut.wav", 1.f, this);
+    game.PlayAudio("GrenadeOut.wav", 1.f, game.GetObject(playerId));
     airFriction = Vector3(0.97);
 }
 
