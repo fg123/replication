@@ -123,6 +123,7 @@ $(CLIENT_DATA): $(DATA_DIRS) $(DATA_FILES)
 		--preload ../data/models@/models \
 		--preload ../data/shaders@/shaders \
 		--preload ../data/sounds@/sounds \
+		--preload ../data/animations@/animations \
 		--preload ../data/scripts@/scripts
 
 $(CLIENT_OUTPUT): $(CLIENT_OBJ)

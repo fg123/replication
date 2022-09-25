@@ -193,8 +193,23 @@ void ClientGL::SetupDrawingLayers() {
     }
 
     if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
-        cameraPosition = localPlayer->GetClientPosition();
         cameraRotation = localPlayer->GetClientLookDirection();
+        if (localPlayer->playerSettings.thirdPerson) {
+            // 100 Units behind player
+            RayCastRequest request;
+            request.startPoint = localPlayer->GetClientPosition();
+            request.direction = -cameraRotation;
+            request.excludeObjects.insert(localPlayer->GetId());
+            RayCastResult result = game.RayCastInWorld(request);
+            cameraPosition = localPlayer->GetClientPosition() - cameraRotation * 5.f;
+            if (result.isHit && glm::distance(result.hitLocation, localPlayer->GetClientPosition()) < 5.f)
+            {
+                cameraPosition = result.hitLocation;
+            }
+        }
+        else {
+            cameraPosition = localPlayer->GetClientPosition();
+        }
 
         for (auto& child : game.GetRelationshipManager().GetChildren(game.localPlayerId)) {
             child->SetTag(Tag::DRAW_FOREGROUND);
@@ -210,7 +225,7 @@ void ClientGL::SetupDrawingLayers() {
         Object* obj = gameObjectPair.second;
         if (PlayerObject* localPlayer = game.GetLocalPlayer()) {
             // Don't draw the local player
-            if (obj == localPlayer) continue;
+            if (!localPlayer->playerSettings.thirdPerson && obj == localPlayer) continue;
         }
         Matrix4 transform = obj->GetTransform();
         bool isForeground = obj->IsTagged(Tag::DRAW_FOREGROUND);

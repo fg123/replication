@@ -32,7 +32,8 @@ struct SkeletalAnimationGroup {
 };
 
 struct SkeletalAnimationState {
-    SkeletalAnimationGroup& group;
+    Skeleton skeleton;
+    SkeletalAnimationGroup group;
     size_t clip;
 
     // This is the *previous* keyFrame we're interpolating from
@@ -40,4 +41,6 @@ struct SkeletalAnimationState {
     Time clipTime;
 
     void TickState(Time deltaTime);
+
+    void ParseBVH(const std::string& path);
 };

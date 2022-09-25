@@ -99,12 +99,14 @@ module.exports = class EscapeMenu {
 
     ApplyPlayerSettings() {
         this.playerSettings['sensitivity'] = parseFloat($("#sensitivityTextbox").val());
+        this.playerSettings['thirdPerson'] = Boolean($("#thirdPersonCheckbox").prop('checked'));
         Cookies.set('playerSettings', this.playerSettings);
         this.clientState.ApplyPlayerSettings(this.playerSettings);
     }
 
     UpdateUIToMatchPlayerSettings() {
         $("#sensitivityTextbox").val(this.playerSettings.sensitivity);
+        $("#thirdPersonCheckbox").val(this.playerSettings.thirdPerson);
     }
 
     DrawInventory() {

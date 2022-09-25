@@ -16,6 +16,7 @@ static const Vector3 RESPAWN_LOCATION = Vector3(-5, 5, -30);
 
 struct PlayerSettings : public Replicable {
     REPLICATED_D(float, sensitivity, "sensitivity", 1.0f);
+    REPLICATED_D(bool, thirdPerson, "thirdPerson", true);
 };
 
 class PlayerObject : public ScriptableObject {

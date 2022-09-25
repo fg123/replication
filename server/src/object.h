@@ -11,6 +11,7 @@
 #include "replicable.h"
 #include "model.h"
 #include "ray-cast.h"
+#include "skeletal-animation.h"
 
 // This must be 32 bit because client side JS only supports 32 bit
 using ObjectID = uint32_t;
@@ -107,8 +108,8 @@ protected:
     REPLICATED(uint64_t, collisionReporting, "cr");
 
     Model* model = nullptr;
-
 public:
+    SkeletalAnimationState animationState;
 
 #ifdef BUILD_CLIENT
     // For Client-Side Interpolation

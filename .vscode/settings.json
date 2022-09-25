@@ -107,7 +107,8 @@
         "csignal": "cpp",
         "*.tcc": "cpp",
         "memory_resource": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "shared_mutex": "cpp"
     },
     "files.exclude": {
         "**/.git": true,

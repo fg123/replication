@@ -55,6 +55,16 @@ public:
             // LOG_DEBUG("Call End " << a.first);
         }
     }
+
+    std::string ToString()
+    {
+        rapidjson::StringBuffer buffer;
+        JSONWriter writer(buffer);
+        writer.StartObject();
+        Serialize(writer);
+        writer.EndObject();
+        return buffer.GetString();
+    }
 };
 
 template<typename T>
@@ -82,6 +92,10 @@ public:
 #define ALWAYS_REPLICATED_D(type, name, repAlias, defaultValue)    \
     type name = defaultValue;                               \
     REPLICATED_STRUCT_IMPL(type, name, repAlias)
+
+#define REPLICATED_F(type, name)  \
+    type name;                            \
+    REPLICATED_IMPL(type, name, #name)
 
 #define REPLICATED(type, name, repAlias)  \
     type name;                            \
