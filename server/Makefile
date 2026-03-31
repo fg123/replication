@@ -73,6 +73,7 @@ WASM_FLAGS =
 WASM_LINKING_FLAGS = \
 	-lopenal \
 	--no-entry \
+	-s EXPORTED_FUNCTIONS=['_malloc','_free'] \
 	-s EXPORTED_RUNTIME_METHODS=['stringToUTF8','lengthBytesUTF8','UTF8ToString'] \
 	-s LLD_REPORT_UNDEFINED \
 	-s ALLOW_MEMORY_GROWTH=1 \

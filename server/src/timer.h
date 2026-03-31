@@ -8,7 +8,7 @@
 #include "perf.h"
 
 // For now otherwise it doesn't pass correctly
-using Time = uint64_t;
+using Time = uint32_t;
 
 struct ScheduledCall {
     std::function<void(Time)> function;

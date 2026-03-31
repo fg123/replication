@@ -1,206 +1,157 @@
 
-  var Module = typeof Module !== 'undefined' ? Module : {};
+  var Module = typeof Module != 'undefined' ? Module : {};
 
-  if (!Module.expectedDataFileDownloads) {
-    Module.expectedDataFileDownloads = 0;
-  }
-
-  Module.expectedDataFileDownloads++;
-  (function() {
-    // When running as a pthread, FS operations are proxied to the main thread, so we don't need to
-    // fetch the .data bundle on the worker
-    if (Module['ENVIRONMENT_IS_PTHREAD']) return;
-    var loadPackage = function(metadata) {
+  if (!Module['expectedDataFileDownloads']) Module['expectedDataFileDownloads'] = 0;
+  Module['expectedDataFileDownloads']++;
+  (() => {
+    // Do not attempt to redownload the virtual filesystem data when in a pthread or a Wasm Worker context.
+    var isPthread = typeof ENVIRONMENT_IS_PTHREAD != 'undefined' && ENVIRONMENT_IS_PTHREAD;
+    var isWasmWorker = typeof ENVIRONMENT_IS_WASM_WORKER != 'undefined' && ENVIRONMENT_IS_WASM_WORKER;
+    if (isPthread || isWasmWorker) return;
+    var isNode = globalThis.process && globalThis.process.versions && globalThis.process.versions.node && globalThis.process.type != 'renderer';
+    async function loadPackage(metadata) {
 
       var PACKAGE_PATH = '';
       if (typeof window === 'object') {
-        PACKAGE_PATH = window['encodeURIComponent'](window.location.pathname.toString().substring(0, window.location.pathname.toString().lastIndexOf('/')) + '/');
+        PACKAGE_PATH = window['encodeURIComponent'](window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) + '/');
       } else if (typeof process === 'undefined' && typeof location !== 'undefined') {
         // web worker
-        PACKAGE_PATH = encodeURIComponent(location.pathname.toString().substring(0, location.pathname.toString().lastIndexOf('/')) + '/');
+        PACKAGE_PATH = encodeURIComponent(location.pathname.substring(0, location.pathname.lastIndexOf('/')) + '/');
       }
       var PACKAGE_NAME = '../client/dist/game_client.data';
       var REMOTE_PACKAGE_BASE = 'game_client.data';
-      if (typeof Module['locateFilePackage'] === 'function' && !Module['locateFile']) {
-        Module['locateFile'] = Module['locateFilePackage'];
-        err('warning: you defined Module.locateFilePackage, that has been renamed to Module.locateFile (using your locateFilePackage for now)');
-      }
       var REMOTE_PACKAGE_NAME = Module['locateFile'] ? Module['locateFile'](REMOTE_PACKAGE_BASE, '') : REMOTE_PACKAGE_BASE;
-
       var REMOTE_PACKAGE_SIZE = metadata['remote_package_size'];
-      var PACKAGE_UUID = metadata['package_uuid'];
 
-      function fetchRemotePackage(packageName, packageSize, callback, errback) {
-        if (typeof process === 'object' && typeof process.versions === 'object' && typeof process.versions.node === 'string') {
-          require('fs').readFile(packageName, function(err, contents) {
-            if (err) {
-              errback(err);
-            } else {
-              callback(contents.buffer);
-            }
-          });
-          return;
+      async function fetchRemotePackage(packageName, packageSize) {
+        if (isNode) {
+          var contents = require('fs').readFileSync(packageName);
+          return new Uint8Array(contents).buffer;
         }
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', packageName, true);
-        xhr.responseType = 'arraybuffer';
-        xhr.onprogress = function(event) {
-          var url = packageName;
-          var size = packageSize;
-          if (event.total) size = event.total;
-          if (event.loaded) {
-            if (!xhr.addedTotal) {
-              xhr.addedTotal = true;
-              if (!Module.dataFileDownloads) Module.dataFileDownloads = {};
-              Module.dataFileDownloads[url] = {
-                loaded: event.loaded,
-                total: size
-              };
-            } else {
-              Module.dataFileDownloads[url].loaded = event.loaded;
-            }
-            var total = 0;
-            var loaded = 0;
-            var num = 0;
-            for (var download in Module.dataFileDownloads) {
-            var data = Module.dataFileDownloads[download];
-              total += data.total;
-              loaded += data.loaded;
-              num++;
-            }
-            total = Math.ceil(total * Module.expectedDataFileDownloads/num);
-            if (Module['setStatus']) Module['setStatus']('Downloading data... (' + loaded + '/' + total + ')');
-          } else if (!Module.dataFileDownloads) {
-            if (Module['setStatus']) Module['setStatus']('Downloading data...');
+        if (!Module['dataFileDownloads']) Module['dataFileDownloads'] = {};
+        try {
+          var response = await fetch(packageName);
+        } catch (e) {
+          throw new Error(`Network Error: ${packageName}`, {e});
+        }
+        if (!response.ok) {
+          throw new Error(`${response.status}: ${response.url}`);
+        }
+
+        const chunks = [];
+        const headers = response.headers;
+        const total = Number(headers.get('Content-Length') || packageSize);
+        let loaded = 0;
+
+        Module['setStatus'] && Module['setStatus']('Downloading data...');
+        const reader = response.body.getReader();
+
+        while (1) {
+          var {done, value} = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          loaded += value.length;
+          Module['dataFileDownloads'][packageName] = {loaded, total};
+
+          let totalLoaded = 0;
+          let totalSize = 0;
+
+          for (const download of Object.values(Module['dataFileDownloads'])) {
+            totalLoaded += download.loaded;
+            totalSize += download.total;
           }
-        };
-        xhr.onerror = function(event) {
-          throw new Error("NetworkError for: " + packageName);
+
+          Module['setStatus'] && Module['setStatus'](`Downloading data... (${totalLoaded}/${totalSize})`);
         }
-        xhr.onload = function(event) {
-          if (xhr.status == 200 || xhr.status == 304 || xhr.status == 206 || (xhr.status == 0 && xhr.response)) { // file URLs can return 0
-            var packageData = xhr.response;
-            callback(packageData);
-          } else {
-            throw new Error(xhr.statusText + " : " + xhr.responseURL);
-          }
-        };
-        xhr.send(null);
-      };
 
-      function handleError(error) {
-        console.error('package error:', error);
-      };
-
-      var fetchedCallback = null;
-      var fetched = Module['getPreloadedPackage'] ? Module['getPreloadedPackage'](REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE) : null;
-
-      if (!fetched) fetchRemotePackage(REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE, function(data) {
-        if (fetchedCallback) {
-          fetchedCallback(data);
-          fetchedCallback = null;
-        } else {
-          fetched = data;
+        const packageData = new Uint8Array(chunks.map((c) => c.length).reduce((a, b) => a + b, 0));
+        let offset = 0;
+        for (const chunk of chunks) {
+          packageData.set(chunk, offset);
+          offset += chunk.length;
         }
-      }, handleError);
+        return packageData.buffer;
+      }
 
-    function runWithFS() {
+      var fetchPromise;
+      var fetched = Module['getPreloadedPackage'] && Module['getPreloadedPackage'](REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE);
+
+      if (!fetched) {
+        // Note that we don't use await here because we want to execute the
+        // the rest of this function immediately.
+        fetchPromise = fetchRemotePackage(REMOTE_PACKAGE_NAME, REMOTE_PACKAGE_SIZE);
+      }
+
+    async function runWithFS(Module) {
 
       function assert(check, msg) {
-        if (!check) throw msg + new Error().stack;
+        if (!check) throw new Error(msg);
       }
+Module['FS_createPath']("/", "animations", true, true);
 Module['FS_createPath']("/", "maps", true, true);
-Module['FS_createPath']("/", "textures", true, true);
-Module['FS_createPath']("/textures", "MetalPlates007_1K-JPG", true, true);
-Module['FS_createPath']("/textures", "WetFloor", true, true);
-Module['FS_createPath']("/textures", "CardboardBox", true, true);
-Module['FS_createPath']("/textures", "Dust2", true, true);
-Module['FS_createPath']("/textures", "MuzzleFlash", true, true);
-Module['FS_createPath']("/textures", "BulletHole", true, true);
-Module['FS_createPath']("/textures", "WoodFloor040_1K-JPG", true, true);
-Module['FS_createPath']("/textures", "Wood026_1K-JPG", true, true);
-Module['FS_createPath']("/textures", "Leaking003_1K-JPG", true, true);
-Module['FS_createPath']("/textures", "Rock029_1K-JPG", true, true);
-Module['FS_createPath']("/textures", "Bricks059_1K-JPG", true, true);
-Module['FS_createPath']("/textures", "Lava004_1K-JPG", true, true);
-Module['FS_createPath']("/textures", "Concrete036_1K-JPG", true, true);
-Module['FS_createPath']("/textures", "Fabric032_1K-JPG", true, true);
-Module['FS_createPath']("/textures", "Marble012_1K-JPG", true, true);
-Module['FS_createPath']("/textures", "WoodenCrate", true, true);
-Module['FS_createPath']("/textures", "Metal038_1K-JPG", true, true);
 Module['FS_createPath']("/", "models", true, true);
+Module['FS_createPath']("/", "scripts", true, true);
 Module['FS_createPath']("/", "shaders", true, true);
 Module['FS_createPath']("/", "sounds", true, true);
 Module['FS_createPath']("/sounds", "Archer", true, true);
-Module['FS_createPath']("/", "animations", true, true);
-Module['FS_createPath']("/", "scripts", true, true);
+Module['FS_createPath']("/", "textures", true, true);
+Module['FS_createPath']("/textures", "Bricks059_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "BulletHole", true, true);
+Module['FS_createPath']("/textures", "CardboardBox", true, true);
+Module['FS_createPath']("/textures", "Concrete036_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "Dust2", true, true);
+Module['FS_createPath']("/textures", "Fabric032_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "Lava004_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "Leaking003_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "Marble012_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "Metal038_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "MetalPlates007_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "MuzzleFlash", true, true);
+Module['FS_createPath']("/textures", "Rock029_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "WetFloor", true, true);
+Module['FS_createPath']("/textures", "Wood026_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "WoodFloor040_1K-JPG", true, true);
+Module['FS_createPath']("/textures", "WoodenCrate", true, true);
 
-      /** @constructor */
-      function DataRequest(start, end, audio) {
-        this.start = start;
-        this.end = end;
-        this.audio = audio;
-      }
-      DataRequest.prototype = {
-        requests: {},
-        open: function(mode, name) {
-          this.name = name;
-          this.requests[name] = this;
-          Module['addRunDependency']('fp ' + this.name);
-        },
-        send: function() {},
-        onload: function() {
-          var byteArray = this.byteArray.subarray(this.start, this.end);
-          this.finish(byteArray);
-        },
-        finish: function(byteArray) {
-          var that = this;
-          // canOwn this data in the filesystem, it is a slide into the heap that will never change
-          Module['FS_createDataFile'](this.name, null, byteArray, true, true, true);
-          Module['removeRunDependency']('fp ' + that.name);
-          this.requests[this.name] = null;
-        }
-      };
+    for (var file of metadata['files']) {
+      var name = file['filename']
+      Module['addRunDependency'](`fp ${name}`);
+    }
 
-      var files = metadata['files'];
-      for (var i = 0; i < files.length; ++i) {
-        new DataRequest(files[i]['start'], files[i]['end'], files[i]['audio'] || 0).open('GET', files[i]['filename']);
-      }
-
-      function processPackageData(arrayBuffer) {
+      async function processPackageData(arrayBuffer) {
         assert(arrayBuffer, 'Loading data file failed.');
-        assert(arrayBuffer instanceof ArrayBuffer, 'bad input to processPackageData');
+        assert(arrayBuffer.constructor.name === ArrayBuffer.name, 'bad input to processPackageData ' + arrayBuffer.constructor.name);
         var byteArray = new Uint8Array(arrayBuffer);
         var curr;
         // Reuse the bytearray from the XHR as the source for file reads.
-          DataRequest.prototype.byteArray = byteArray;
-          var files = metadata['files'];
-          for (var i = 0; i < files.length; ++i) {
-            DataRequest.prototype.requests[files[i].filename].onload();
-          }          Module['removeRunDependency']('datafile_../client/dist/game_client.data');
-
-      };
+          for (var file of metadata['files']) {
+            var name = file['filename'];
+            var data = byteArray.subarray(file['start'], file['end']);
+            // canOwn this data in the filesystem, it is a slice into the heap that will never change
+        Module['FS_createDataFile'](name, null, data, true, true, true);
+        Module['removeRunDependency'](`fp ${name}`);
+          }
+          Module['removeRunDependency']('datafile_../client/dist/game_client.data');
+      }
       Module['addRunDependency']('datafile_../client/dist/game_client.data');
 
-      if (!Module.preloadResults) Module.preloadResults = {};
+      if (!Module['preloadResults']) Module['preloadResults'] = {};
 
-      Module.preloadResults[PACKAGE_NAME] = {fromCache: false};
-      if (fetched) {
-        processPackageData(fetched);
-        fetched = null;
-      } else {
-        fetchedCallback = processPackageData;
+      Module['preloadResults'][PACKAGE_NAME] = {fromCache: false};
+      if (!fetched) {
+        fetched = await fetchPromise;
       }
+      processPackageData(fetched);
 
     }
     if (Module['calledRun']) {
-      runWithFS();
+      runWithFS(Module);
     } else {
       if (!Module['preRun']) Module['preRun'] = [];
-      Module["preRun"].push(runWithFS); // FS is not initialized yet, wait for it
+      Module['preRun'].push(runWithFS); // FS is not initialized yet, wait for it
     }
 
     }
-    loadPackage({"files": [{"filename": "/maps/dust2.json", "start": 0, "end": 4019}, {"filename": "/maps/test.json", "start": 4019, "end": 4674}, {"filename": "/maps/test-range.json", "start": 4674, "end": 7588}, {"filename": "/maps/map1.json", "start": 7588, "end": 39823}, {"filename": "/textures/Mountains.png", "start": 39823, "end": 116641}, {"filename": "/textures/uvmap.jpg", "start": 116641, "end": 1097993}, {"filename": "/textures/SupplyBinCover.png", "start": 1097993, "end": 1104083}, {"filename": "/textures/SolomonFace.jpg", "start": 1104083, "end": 2111895}, {"filename": "/textures/BulletTracer.png", "start": 2111895, "end": 2145662}, {"filename": "/textures/sam_texture.jpg", "start": 2145662, "end": 3110436}, {"filename": "/textures/Skydome.png", "start": 3110436, "end": 4570219}, {"filename": "/textures/Artillery.png", "start": 4570219, "end": 5687446}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Metalness.jpg", "start": 5687446, "end": 5858640}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Displacement.jpg", "start": 5858640, "end": 5995832}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Color.jpg", "start": 5995832, "end": 6369991}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Roughness.jpg", "start": 6369991, "end": 6776884}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Normal.jpg", "start": 6776884, "end": 7484811}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_BaseColor.png", "start": 7484811, "end": 8268831}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_Roughness.png", "start": 8268831, "end": 8537262}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_AO.png", "start": 8537262, "end": 8563754}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_Normal.png", "start": 8563754, "end": 9234313}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_AlbedoTransparency.png", "start": 9234313, "end": 9318529}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_MetallicSmoothness.png", "start": 9318529, "end": 9326669}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_Normal.png", "start": 9326669, "end": 9358037}, {"filename": "/textures/Dust2/de_dust2_material_20.png", "start": 9358037, "end": 9362868}, {"filename": "/textures/Dust2/de_dust2_material_24.png", "start": 9362868, "end": 9366358}, {"filename": "/textures/Dust2/de_dust2_material_28.png", "start": 9366358, "end": 9391691}, {"filename": "/textures/Dust2/de_dust2_material_29.png", "start": 9391691, "end": 9416918}, {"filename": "/textures/Dust2/de_dust2_material_21.png", "start": 9416918, "end": 9421681}, {"filename": "/textures/Dust2/de_dust2_material_3.png", "start": 9421681, "end": 9421784}, {"filename": "/textures/Dust2/de_dust2_material_18.png", "start": 9421784, "end": 9421880}, {"filename": "/textures/Dust2/de_dust2_material_5.png", "start": 9421880, "end": 9485833}, {"filename": "/textures/Dust2/de_dust2_material_9.png", "start": 9485833, "end": 9490848}, {"filename": "/textures/Dust2/de_dust2_material_23.png", "start": 9490848, "end": 9518367}, {"filename": "/textures/Dust2/de_dust2_material_31.png", "start": 9518367, "end": 9523061}, {"filename": "/textures/Dust2/de_dust2_material_14.png", "start": 9523061, "end": 9541482}, {"filename": "/textures/Dust2/de_dust2_material_17.png", "start": 9541482, "end": 9558291}, {"filename": "/textures/Dust2/de_dust2_material_1.png", "start": 9558291, "end": 9589110}, {"filename": "/textures/Dust2/de_dust2_material_32.png", "start": 9589110, "end": 9592132}, {"filename": "/textures/Dust2/de_dust2_material_8.png", "start": 9592132, "end": 9645442}, {"filename": "/textures/Dust2/de_dust2_material_4.png", "start": 9645442, "end": 9675296}, {"filename": "/textures/Dust2/de_dust2_material_33.png", "start": 9675296, "end": 9676091}, {"filename": "/textures/Dust2/de_dust2_material_6.png", "start": 9676091, "end": 9693021}, {"filename": "/textures/Dust2/de_dust2_material_2.png", "start": 9693021, "end": 9698047}, {"filename": "/textures/Dust2/de_dust2_material_7.png", "start": 9698047, "end": 9726920}, {"filename": "/textures/Dust2/de_dust2_material_19.png", "start": 9726920, "end": 9733710}, {"filename": "/textures/Dust2/de_dust2_material_13.png", "start": 9733710, "end": 9753067}, {"filename": "/textures/Dust2/de_dust2_material_16.png", "start": 9753067, "end": 9782887}, {"filename": "/textures/Dust2/de_dust2_material_10.png", "start": 9782887, "end": 9831236}, {"filename": "/textures/Dust2/de_dust2_material_12.png", "start": 9831236, "end": 9848283}, {"filename": "/textures/Dust2/de_dust2_material_15.png", "start": 9848283, "end": 9890158}, {"filename": "/textures/Dust2/de_dust2_material_27.png", "start": 9890158, "end": 9919756}, {"filename": "/textures/Dust2/de_dust2_material_30.png", "start": 9919756, "end": 9946834}, {"filename": "/textures/Dust2/de_dust2_material_22.png", "start": 9946834, "end": 9963833}, {"filename": "/textures/Dust2/de_dust2_material_25.png", "start": 9963833, "end": 10022368}, {"filename": "/textures/Dust2/de_dust2_material_0.png", "start": 10022368, "end": 10026333}, {"filename": "/textures/Dust2/de_dust2_material_26.png", "start": 10026333, "end": 10051337}, {"filename": "/textures/Dust2/de_dust2_material_11.png", "start": 10051337, "end": 10081052}, {"filename": "/textures/MuzzleFlash/muzzle4.png", "start": 10081052, "end": 10104353}, {"filename": "/textures/MuzzleFlash/muzzle5.png", "start": 10104353, "end": 10128549}, {"filename": "/textures/MuzzleFlash/muzzle2.png", "start": 10128549, "end": 10149917}, {"filename": "/textures/MuzzleFlash/muzzle1.png", "start": 10149917, "end": 10175689}, {"filename": "/textures/MuzzleFlash/muzzle3.png", "start": 10175689, "end": 10196138}, {"filename": "/textures/BulletHole/BulletHole.png", "start": 10196138, "end": 10228342}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Roughness.jpg", "start": 10228342, "end": 10602364}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_AmbientOcclusion.jpg", "start": 10602364, "end": 10982085}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Displacement.jpg", "start": 10982085, "end": 11498980}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Normal.jpg", "start": 11498980, "end": 12523469}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Color.jpg", "start": 12523469, "end": 13323550}, {"filename": "/textures/Wood026_1K-JPG/Wood026_1K_Normal.jpg", "start": 13323550, "end": 14558818}, {"filename": "/textures/Wood026_1K-JPG/Wood026_1K_Color.jpg", "start": 14558818, "end": 15544453}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Opacity.jpg", "start": 15544453, "end": 15862931}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Color.jpg", "start": 15862931, "end": 16129189}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Roughness.jpg", "start": 16129189, "end": 16428610}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Normal.jpg", "start": 16428610, "end": 17023967}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Displacement.jpg", "start": 17023967, "end": 17284574}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Normal.jpg", "start": 17284574, "end": 19576958}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Color.jpg", "start": 19576958, "end": 21104419}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Displacement.jpg", "start": 21104419, "end": 21401216}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Roughness.jpg", "start": 21401216, "end": 22066272}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_AmbientOcclusion.jpg", "start": 22066272, "end": 22666401}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Roughness.jpg", "start": 22666401, "end": 23346494}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Color.jpg", "start": 23346494, "end": 24768184}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Normal.jpg", "start": 24768184, "end": 26434739}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Displacement.jpg", "start": 26434739, "end": 26819168}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_AmbientOcclusion.jpg", "start": 26819168, "end": 27419502}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Emission.jpg", "start": 27419502, "end": 28750485}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Roughness.jpg", "start": 28750485, "end": 29321347}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Displacement.jpg", "start": 29321347, "end": 29618183}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Normal.jpg", "start": 29618183, "end": 31314544}, {"filename": "/textures/Lava004_1K-JPG/Water.jpg", "start": 31314544, "end": 32750444}, {"filename": "/textures/Lava004_1K-JPG/LavaGrayscale.jpg", "start": 32750444, "end": 33333306}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Color.jpg", "start": 33333306, "end": 34666737}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Roughness.jpg", "start": 34666737, "end": 35299994}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Normal.jpg", "start": 35299994, "end": 36469534}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Color.jpg", "start": 36469534, "end": 37537007}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Displacement.jpg", "start": 37537007, "end": 38163428}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Color.jpg", "start": 38163428, "end": 39233859}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Roughness.jpg", "start": 39233859, "end": 40054618}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Displacement.jpg", "start": 40054618, "end": 40677362}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Normal.jpg", "start": 40677362, "end": 43026508}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Color.jpg", "start": 43026508, "end": 44119492}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Displacement.jpg", "start": 44119492, "end": 44910052}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Roughness.jpg", "start": 44910052, "end": 45490152}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Normal.jpg", "start": 45490152, "end": 45830001}, {"filename": "/textures/WoodenCrate/Wood_Crate_001_basecolor.jpg", "start": 45830001, "end": 45869812}, {"filename": "/textures/WoodenCrate/Wood_Crate_001_normal.jpg", "start": 45869812, "end": 46130069}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Displacement.jpg", "start": 46130069, "end": 46559283}, {"filename": "/textures/Metal038_1K-JPG/MetalGreen.jpg", "start": 46559283, "end": 47300188}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Color.jpg", "start": 47300188, "end": 48007057}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Normal.jpg", "start": 48007057, "end": 49072599}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Roughness.jpg", "start": 49072599, "end": 49444876}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Metalness.jpg", "start": 49444876, "end": 49574880}, {"filename": "/models/Artillery.obj", "start": 49574880, "end": 51230318}, {"filename": "/models/FlatWorld.obj", "start": 51230318, "end": 51231381}, {"filename": "/models/Heaven.mtl", "start": 51231381, "end": 51232537}, {"filename": "/models/Rifle.mtl", "start": 51232537, "end": 51233022}, {"filename": "/models/BulletTracer.mtl", "start": 51233022, "end": 51233303}, {"filename": "/models/Arrow.obj", "start": 51233303, "end": 51239992}, {"filename": "/models/Pistol.obj", "start": 51239992, "end": 51263878}, {"filename": "/models/Shotgun.mtl", "start": 51263878, "end": 51264551}, {"filename": "/models/SubmachineGun.obj", "start": 51264551, "end": 51300614}, {"filename": "/models/ShootingRange.obj", "start": 51300614, "end": 56424411}, {"filename": "/models/SupplyBin.obj", "start": 56424411, "end": 56436022}, {"filename": "/models/Plane.obj", "start": 56436022, "end": 56436362}, {"filename": "/models/Quad.obj", "start": 56436362, "end": 56436706}, {"filename": "/models/StreetLamp.obj", "start": 56436706, "end": 56476171}, {"filename": "/models/suzanne.obj", "start": 56476171, "end": 56554927}, {"filename": "/models/ShootingRange.mtl", "start": 56554927, "end": 56558652}, {"filename": "/models/Medkit.obj", "start": 56558652, "end": 56572984}, {"filename": "/models/StreetLamp.mtl", "start": 56572984, "end": 56573282}, {"filename": "/models/Cone.obj", "start": 56573282, "end": 56583316}, {"filename": "/models/Icosphere.obj", "start": 56583316, "end": 56698975}, {"filename": "/models/ArtilleryIndicator.mtl", "start": 56698975, "end": 56699227}, {"filename": "/models/ArtilleryIndicator.obj", "start": 56699227, "end": 56745653}, {"filename": "/models/de_dust2.obj", "start": 56745653, "end": 58212976}, {"filename": "/models/ShootingRange2.obj", "start": 58212976, "end": 58218215}, {"filename": "/models/Cylinder.obj", "start": 58218215, "end": 58223866}, {"filename": "/models/FlatWorld.mtl", "start": 58223866, "end": 58224106}, {"filename": "/models/SupplyBinLid.mtl", "start": 58224106, "end": 58224383}, {"filename": "/models/Bullet.mtl", "start": 58224383, "end": 58224624}, {"filename": "/models/SupplyBinLid.obj", "start": 58224624, "end": 58229505}, {"filename": "/models/Rifle.obj", "start": 58229505, "end": 58253233}, {"filename": "/models/Bow.mtl", "start": 58253233, "end": 58253895}, {"filename": "/models/HookThrower.mtl", "start": 58253895, "end": 58254260}, {"filename": "/models/Warehouse.mtl", "start": 58254260, "end": 58257516}, {"filename": "/models/Plane.mtl", "start": 58257516, "end": 58257640}, {"filename": "/models/cube.obj", "start": 58257640, "end": 58258667}, {"filename": "/models/BombCrate.mtl", "start": 58258667, "end": 58259032}, {"filename": "/models/de_dust2.mtl", "start": 58259032, "end": 58267820}, {"filename": "/models/Pistol.mtl", "start": 58267820, "end": 58268366}, {"filename": "/models/Portal.obj", "start": 58268366, "end": 58296664}, {"filename": "/models/Explosion.mtl", "start": 58296664, "end": 58297085}, {"filename": "/models/Lift.mtl", "start": 58297085, "end": 58297324}, {"filename": "/models/BombCrate.obj", "start": 58297324, "end": 58298415}, {"filename": "/models/Ammo.obj", "start": 58298415, "end": 58325955}, {"filename": "/models/HookThrower.obj", "start": 58325955, "end": 58328314}, {"filename": "/models/ShootingRange2.mtl", "start": 58328314, "end": 58328559}, {"filename": "/models/Heaven.obj", "start": 58328559, "end": 58609826}, {"filename": "/models/island.obj", "start": 58609826, "end": 60042400}, {"filename": "/models/NewPlayer2.obj", "start": 60042400, "end": 60095166}, {"filename": "/models/Arrow.mtl", "start": 60095166, "end": 60095830}, {"filename": "/models/Warehouse.obj", "start": 60095830, "end": 60395212}, {"filename": "/models/Explosion.obj", "start": 60395212, "end": 61062850}, {"filename": "/models/NewPlayer.mtl", "start": 61062850, "end": 61063618}, {"filename": "/models/Player.mtl", "start": 61063618, "end": 61063858}, {"filename": "/models/Bow.obj", "start": 61063858, "end": 61077453}, {"filename": "/models/Cone.mtl", "start": 61077453, "end": 61077583}, {"filename": "/models/Shotgun.obj", "start": 61077583, "end": 61107530}, {"filename": "/models/Grenade.obj", "start": 61107530, "end": 61354489}, {"filename": "/models/SpectatorArea.mtl", "start": 61354489, "end": 61354733}, {"filename": "/models/Dust2.mtl", "start": 61354733, "end": 61363741}, {"filename": "/models/Grenade.mtl", "start": 61363741, "end": 61364340}, {"filename": "/models/Ammo.mtl", "start": 61364340, "end": 61365000}, {"filename": "/models/SmokeGrenade.mtl", "start": 61365000, "end": 61365421}, {"filename": "/models/Player.obj", "start": 61365421, "end": 62137544}, {"filename": "/models/Artillery.mtl", "start": 62137544, "end": 62137835}, {"filename": "/models/Lift.obj", "start": 62137835, "end": 62152985}, {"filename": "/models/Medkit.mtl", "start": 62152985, "end": 62153471}, {"filename": "/models/Icosphere.mtl", "start": 62153471, "end": 62153696}, {"filename": "/models/Dust2.obj", "start": 62153696, "end": 68807051}, {"filename": "/models/Cube.mtl", "start": 68807051, "end": 68807280}, {"filename": "/models/Portal.mtl", "start": 68807280, "end": 68807703}, {"filename": "/models/SubmachineGun.mtl", "start": 68807703, "end": 68808645}, {"filename": "/models/PlayerMarkerMinimap.obj", "start": 68808645, "end": 68809049}, {"filename": "/models/NewPlayer2.mtl", "start": 68809049, "end": 68809817}, {"filename": "/models/MachineGun.obj", "start": 68809817, "end": 68959354}, {"filename": "/models/PlayerMarkerMinimap.mtl", "start": 68959354, "end": 68959604}, {"filename": "/models/SpectatorArea.obj", "start": 68959604, "end": 68962010}, {"filename": "/models/Cube.obj", "start": 68962010, "end": 68963037}, {"filename": "/models/Bullet.obj", "start": 68963037, "end": 68991306}, {"filename": "/models/NewPlayer.obj", "start": 68991306, "end": 69043628}, {"filename": "/models/SmokeGrenade.obj", "start": 69043628, "end": 69192728}, {"filename": "/models/SupplyBin.mtl", "start": 69192728, "end": 69193151}, {"filename": "/models/BulletTracer.obj", "start": 69193151, "end": 69202580}, {"filename": "/models/MachineGun.mtl", "start": 69202580, "end": 69203867}, {"filename": "/shaders/MeshLightingRectangleLight.fs", "start": 69203867, "end": 69204773}, {"filename": "/shaders/Debug.fs", "start": 69204773, "end": 69204876}, {"filename": "/shaders/ShadowMap.fs", "start": 69204876, "end": 69204993}, {"filename": "/shaders/BloomHighPass.fs", "start": 69204993, "end": 69205514}, {"filename": "/shaders/ShadowMap.vs", "start": 69205514, "end": 69205728}, {"filename": "/shaders/Mesh.vs", "start": 69205728, "end": 69206968}, {"filename": "/shaders/ToneMapping.fs", "start": 69206968, "end": 69207503}, {"filename": "/shaders/MeshDeferred.fs", "start": 69207503, "end": 69209756}, {"filename": "/shaders/GaussianBlur.fs", "start": 69209756, "end": 69210789}, {"filename": "/shaders/MeshLightingDirectionalLight.fs", "start": 69210789, "end": 69211188}, {"filename": "/shaders/Minimap.fs", "start": 69211188, "end": 69211889}, {"filename": "/shaders/MeshLighting.vs", "start": 69211889, "end": 69212485}, {"filename": "/shaders/Skydome.fs", "start": 69212485, "end": 69213717}, {"filename": "/shaders/Quad.fs", "start": 69213717, "end": 69214331}, {"filename": "/shaders/MeshLighting.fs", "start": 69214331, "end": 69223203}, {"filename": "/shaders/FXAA.fs", "start": 69223203, "end": 69226851}, {"filename": "/shaders/Debug.vs", "start": 69226851, "end": 69227063}, {"filename": "/shaders/Antialias.fs", "start": 69227063, "end": 69227643}, {"filename": "/shaders/Quad.vs", "start": 69227643, "end": 69227866}, {"filename": "/shaders/Mesh.fs", "start": 69227866, "end": 69238248}, {"filename": "/shaders/MeshLightingPointLight.fs", "start": 69238248, "end": 69238765}, {"filename": "/sounds/HookThrow.wav", "start": 69238765, "end": 69266457, "audio": 1}, {"filename": "/sounds/HookReel.wav", "start": 69266457, "end": 69324869, "audio": 1}, {"filename": "/sounds/PortalStart.wav", "start": 69324869, "end": 69397617, "audio": 1}, {"filename": "/sounds/ueh.wav", "start": 69397617, "end": 69432477, "audio": 1}, {"filename": "/sounds/reload.wav", "start": 69432477, "end": 69546185, "audio": 1}, {"filename": "/sounds/bang.wav", "start": 69546185, "end": 69673771, "audio": 1}, {"filename": "/sounds/incoming.wav", "start": 69673771, "end": 69828493, "audio": 1}, {"filename": "/sounds/boom.wav", "start": 69828493, "end": 69900217, "audio": 1}, {"filename": "/sounds/PortalEnd.wav", "start": 69900217, "end": 69971941, "audio": 1}, {"filename": "/sounds/GrenadeOut.wav", "start": 69971941, "end": 70051857, "audio": 1}, {"filename": "/sounds/boom-old1.wav", "start": 70051857, "end": 70123581, "audio": 1}, {"filename": "/sounds/Archer/arrow-pullback.wav", "start": 70123581, "end": 70271153, "audio": 1}, {"filename": "/sounds/Archer/arrow-shoot.wav", "start": 70271153, "end": 70385953, "audio": 1}, {"filename": "/sounds/Archer/arrow-ulti-shoot.wav", "start": 70385953, "end": 70537623, "audio": 1}, {"filename": "/sounds/Archer/arrow-ulti-activate.wav", "start": 70537623, "end": 70861327, "audio": 1}, {"filename": "/sounds/Archer/arrow-jump.wav", "start": 70861327, "end": 71131775, "audio": 1}, {"filename": "/animations/Player.bvh", "start": 71131775, "end": 71164534}, {"filename": "/animations/Player.mtl", "start": 71164534, "end": 71165302}, {"filename": "/animations/Player.obj", "start": 71165302, "end": 71217530}, {"filename": "/scripts/BouncingBall.w", "start": 71217530, "end": 71218176}, {"filename": "/scripts/LootZone.w", "start": 71218176, "end": 71219659}, {"filename": "/scripts/Marine.w", "start": 71219659, "end": 71220015}, {"filename": "/scripts/Dummy.w", "start": 71220015, "end": 71220159}, {"filename": "/scripts/Test.w", "start": 71220159, "end": 71220250}, {"filename": "/scripts/Archer.w", "start": 71220250, "end": 71220589}, {"filename": "/scripts/1-Types.w", "start": 71220589, "end": 71222981}, {"filename": "/scripts/6-Gun.w", "start": 71222981, "end": 71223083}, {"filename": "/scripts/5-Weapon.w", "start": 71223083, "end": 71223489}, {"filename": "/scripts/2-Object.w", "start": 71223489, "end": 71225862}, {"filename": "/scripts/Bombmaker.w", "start": 71225862, "end": 71226198}, {"filename": "/scripts/SmokeExplosion.w", "start": 71226198, "end": 71226999}, {"filename": "/scripts/Hookman.w", "start": 71226999, "end": 71227334}, {"filename": "/scripts/SmokeGrenade.w", "start": 71227334, "end": 71227825}, {"filename": "/scripts/4-Player.w", "start": 71227825, "end": 71228446}, {"filename": "/scripts/3-Math.w", "start": 71228446, "end": 71228532}, {"filename": "/scripts/Explosion.w", "start": 71228532, "end": 71229214}], "remote_package_size": 71229214, "package_uuid": "43ce95c0-17c9-434e-8414-7543de990e47"});
+    loadPackage({"files": [{"filename": "/animations/Player.bvh", "start": 0, "end": 32759}, {"filename": "/animations/Player.mtl", "start": 32759, "end": 33527}, {"filename": "/animations/Player.obj", "start": 33527, "end": 85755}, {"filename": "/maps/dust2.json", "start": 85755, "end": 89774}, {"filename": "/maps/map1.json", "start": 89774, "end": 122009}, {"filename": "/maps/test-range.json", "start": 122009, "end": 124923}, {"filename": "/maps/test.json", "start": 124923, "end": 125578}, {"filename": "/models/Ammo.mtl", "start": 125578, "end": 126238}, {"filename": "/models/Ammo.obj", "start": 126238, "end": 153778}, {"filename": "/models/Arrow.mtl", "start": 153778, "end": 154442}, {"filename": "/models/Arrow.obj", "start": 154442, "end": 161131}, {"filename": "/models/Artillery.mtl", "start": 161131, "end": 161422}, {"filename": "/models/Artillery.obj", "start": 161422, "end": 1816860}, {"filename": "/models/ArtilleryIndicator.mtl", "start": 1816860, "end": 1817112}, {"filename": "/models/ArtilleryIndicator.obj", "start": 1817112, "end": 1863538}, {"filename": "/models/BombCrate.mtl", "start": 1863538, "end": 1863903}, {"filename": "/models/BombCrate.obj", "start": 1863903, "end": 1864994}, {"filename": "/models/Bow.mtl", "start": 1864994, "end": 1865656}, {"filename": "/models/Bow.obj", "start": 1865656, "end": 1879251}, {"filename": "/models/Bullet.mtl", "start": 1879251, "end": 1879492}, {"filename": "/models/Bullet.obj", "start": 1879492, "end": 1907761}, {"filename": "/models/BulletTracer.mtl", "start": 1907761, "end": 1908042}, {"filename": "/models/BulletTracer.obj", "start": 1908042, "end": 1917471}, {"filename": "/models/Cone.mtl", "start": 1917471, "end": 1917601}, {"filename": "/models/Cone.obj", "start": 1917601, "end": 1927635}, {"filename": "/models/Cube.mtl", "start": 1927635, "end": 1927864}, {"filename": "/models/Cube.obj", "start": 1927864, "end": 1928891}, {"filename": "/models/Cylinder.obj", "start": 1928891, "end": 1934542}, {"filename": "/models/Dust2.mtl", "start": 1934542, "end": 1943550}, {"filename": "/models/Dust2.obj", "start": 1943550, "end": 8596905}, {"filename": "/models/Explosion.mtl", "start": 8596905, "end": 8597326}, {"filename": "/models/Explosion.obj", "start": 8597326, "end": 9264964}, {"filename": "/models/FlatWorld.mtl", "start": 9264964, "end": 9265204}, {"filename": "/models/FlatWorld.obj", "start": 9265204, "end": 9266267}, {"filename": "/models/Grenade.mtl", "start": 9266267, "end": 9266866}, {"filename": "/models/Grenade.obj", "start": 9266866, "end": 9513825}, {"filename": "/models/Heaven.mtl", "start": 9513825, "end": 9514981}, {"filename": "/models/Heaven.obj", "start": 9514981, "end": 9796248}, {"filename": "/models/HookThrower.mtl", "start": 9796248, "end": 9796613}, {"filename": "/models/HookThrower.obj", "start": 9796613, "end": 9798972}, {"filename": "/models/Icosphere.mtl", "start": 9798972, "end": 9799197}, {"filename": "/models/Icosphere.obj", "start": 9799197, "end": 9914856}, {"filename": "/models/Lift.mtl", "start": 9914856, "end": 9915095}, {"filename": "/models/Lift.obj", "start": 9915095, "end": 9930245}, {"filename": "/models/MachineGun.mtl", "start": 9930245, "end": 9931532}, {"filename": "/models/MachineGun.obj", "start": 9931532, "end": 10081069}, {"filename": "/models/Medkit.mtl", "start": 10081069, "end": 10081555}, {"filename": "/models/Medkit.obj", "start": 10081555, "end": 10095887}, {"filename": "/models/NewPlayer.mtl", "start": 10095887, "end": 10096655}, {"filename": "/models/NewPlayer.obj", "start": 10096655, "end": 10148977}, {"filename": "/models/NewPlayer2.mtl", "start": 10148977, "end": 10149745}, {"filename": "/models/NewPlayer2.obj", "start": 10149745, "end": 10202511}, {"filename": "/models/Pistol.mtl", "start": 10202511, "end": 10203057}, {"filename": "/models/Pistol.obj", "start": 10203057, "end": 10226943}, {"filename": "/models/Plane.mtl", "start": 10226943, "end": 10227067}, {"filename": "/models/Plane.obj", "start": 10227067, "end": 10227407}, {"filename": "/models/Player.mtl", "start": 10227407, "end": 10227647}, {"filename": "/models/Player.obj", "start": 10227647, "end": 10999770}, {"filename": "/models/PlayerMarkerMinimap.mtl", "start": 10999770, "end": 11000020}, {"filename": "/models/PlayerMarkerMinimap.obj", "start": 11000020, "end": 11000424}, {"filename": "/models/Portal.mtl", "start": 11000424, "end": 11000847}, {"filename": "/models/Portal.obj", "start": 11000847, "end": 11029145}, {"filename": "/models/Quad.obj", "start": 11029145, "end": 11029489}, {"filename": "/models/Rifle.mtl", "start": 11029489, "end": 11029974}, {"filename": "/models/Rifle.obj", "start": 11029974, "end": 11053702}, {"filename": "/models/ShootingRange.mtl", "start": 11053702, "end": 11057427}, {"filename": "/models/ShootingRange.obj", "start": 11057427, "end": 16181224}, {"filename": "/models/ShootingRange2.mtl", "start": 16181224, "end": 16181469}, {"filename": "/models/ShootingRange2.obj", "start": 16181469, "end": 16186708}, {"filename": "/models/Shotgun.mtl", "start": 16186708, "end": 16187381}, {"filename": "/models/Shotgun.obj", "start": 16187381, "end": 16217328}, {"filename": "/models/SmokeGrenade.mtl", "start": 16217328, "end": 16217749}, {"filename": "/models/SmokeGrenade.obj", "start": 16217749, "end": 16366849}, {"filename": "/models/SpectatorArea.mtl", "start": 16366849, "end": 16367093}, {"filename": "/models/SpectatorArea.obj", "start": 16367093, "end": 16369499}, {"filename": "/models/StreetLamp.mtl", "start": 16369499, "end": 16369797}, {"filename": "/models/StreetLamp.obj", "start": 16369797, "end": 16409262}, {"filename": "/models/SubmachineGun.mtl", "start": 16409262, "end": 16410204}, {"filename": "/models/SubmachineGun.obj", "start": 16410204, "end": 16446267}, {"filename": "/models/SupplyBin.mtl", "start": 16446267, "end": 16446690}, {"filename": "/models/SupplyBin.obj", "start": 16446690, "end": 16458301}, {"filename": "/models/SupplyBinLid.mtl", "start": 16458301, "end": 16458578}, {"filename": "/models/SupplyBinLid.obj", "start": 16458578, "end": 16463459}, {"filename": "/models/Warehouse.mtl", "start": 16463459, "end": 16466715}, {"filename": "/models/Warehouse.obj", "start": 16466715, "end": 16766097}, {"filename": "/models/cube.obj", "start": 16766097, "end": 16767124}, {"filename": "/models/de_dust2.mtl", "start": 16767124, "end": 16775912}, {"filename": "/models/de_dust2.obj", "start": 16775912, "end": 18243235}, {"filename": "/models/island.obj", "start": 18243235, "end": 19675809}, {"filename": "/models/suzanne.obj", "start": 19675809, "end": 19754565}, {"filename": "/scripts/1-Types.w", "start": 19754565, "end": 19756957}, {"filename": "/scripts/2-Object.w", "start": 19756957, "end": 19759330}, {"filename": "/scripts/3-Math.w", "start": 19759330, "end": 19759416}, {"filename": "/scripts/4-Player.w", "start": 19759416, "end": 19760037}, {"filename": "/scripts/5-Weapon.w", "start": 19760037, "end": 19760443}, {"filename": "/scripts/6-Gun.w", "start": 19760443, "end": 19760545}, {"filename": "/scripts/Archer.w", "start": 19760545, "end": 19760884}, {"filename": "/scripts/Bombmaker.w", "start": 19760884, "end": 19761220}, {"filename": "/scripts/BouncingBall.w", "start": 19761220, "end": 19761866}, {"filename": "/scripts/Dummy.w", "start": 19761866, "end": 19762010}, {"filename": "/scripts/Explosion.w", "start": 19762010, "end": 19762692}, {"filename": "/scripts/Hookman.w", "start": 19762692, "end": 19763027}, {"filename": "/scripts/LootZone.w", "start": 19763027, "end": 19764510}, {"filename": "/scripts/Marine.w", "start": 19764510, "end": 19764866}, {"filename": "/scripts/SmokeExplosion.w", "start": 19764866, "end": 19765667}, {"filename": "/scripts/SmokeGrenade.w", "start": 19765667, "end": 19766158}, {"filename": "/scripts/Test.w", "start": 19766158, "end": 19766249}, {"filename": "/shaders/Antialias.fs", "start": 19766249, "end": 19766829}, {"filename": "/shaders/BloomHighPass.fs", "start": 19766829, "end": 19767350}, {"filename": "/shaders/Debug.fs", "start": 19767350, "end": 19767453}, {"filename": "/shaders/Debug.vs", "start": 19767453, "end": 19767665}, {"filename": "/shaders/FXAA.fs", "start": 19767665, "end": 19771313}, {"filename": "/shaders/GaussianBlur.fs", "start": 19771313, "end": 19772346}, {"filename": "/shaders/Mesh.fs", "start": 19772346, "end": 19782728}, {"filename": "/shaders/Mesh.vs", "start": 19782728, "end": 19783968}, {"filename": "/shaders/MeshDeferred.fs", "start": 19783968, "end": 19786221}, {"filename": "/shaders/MeshLighting.fs", "start": 19786221, "end": 19795093}, {"filename": "/shaders/MeshLighting.vs", "start": 19795093, "end": 19795689}, {"filename": "/shaders/MeshLightingDirectionalLight.fs", "start": 19795689, "end": 19796088}, {"filename": "/shaders/MeshLightingPointLight.fs", "start": 19796088, "end": 19796605}, {"filename": "/shaders/MeshLightingRectangleLight.fs", "start": 19796605, "end": 19797511}, {"filename": "/shaders/Minimap.fs", "start": 19797511, "end": 19798212}, {"filename": "/shaders/Quad.fs", "start": 19798212, "end": 19798826}, {"filename": "/shaders/Quad.vs", "start": 19798826, "end": 19799049}, {"filename": "/shaders/ShadowMap.fs", "start": 19799049, "end": 19799166}, {"filename": "/shaders/ShadowMap.vs", "start": 19799166, "end": 19799380}, {"filename": "/shaders/Skydome.fs", "start": 19799380, "end": 19800612}, {"filename": "/shaders/ToneMapping.fs", "start": 19800612, "end": 19801147}, {"filename": "/sounds/Archer/arrow-jump.wav", "start": 19801147, "end": 20071595}, {"filename": "/sounds/Archer/arrow-pullback.wav", "start": 20071595, "end": 20219167}, {"filename": "/sounds/Archer/arrow-shoot.wav", "start": 20219167, "end": 20333967}, {"filename": "/sounds/Archer/arrow-ulti-activate.wav", "start": 20333967, "end": 20657671}, {"filename": "/sounds/Archer/arrow-ulti-shoot.wav", "start": 20657671, "end": 20809341}, {"filename": "/sounds/GrenadeOut.wav", "start": 20809341, "end": 20889257}, {"filename": "/sounds/HookReel.wav", "start": 20889257, "end": 20947669}, {"filename": "/sounds/HookThrow.wav", "start": 20947669, "end": 20975361}, {"filename": "/sounds/PortalEnd.wav", "start": 20975361, "end": 21047085}, {"filename": "/sounds/PortalStart.wav", "start": 21047085, "end": 21119833}, {"filename": "/sounds/bang.wav", "start": 21119833, "end": 21247419}, {"filename": "/sounds/boom-old1.wav", "start": 21247419, "end": 21319143}, {"filename": "/sounds/boom.wav", "start": 21319143, "end": 21390867}, {"filename": "/sounds/incoming.wav", "start": 21390867, "end": 21545589}, {"filename": "/sounds/reload.wav", "start": 21545589, "end": 21659297}, {"filename": "/sounds/ueh.wav", "start": 21659297, "end": 21694157}, {"filename": "/textures/Artillery.png", "start": 21694157, "end": 22811384}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_AmbientOcclusion.jpg", "start": 22811384, "end": 23411718}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Color.jpg", "start": 23411718, "end": 24833408}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Displacement.jpg", "start": 24833408, "end": 25217837}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Normal.jpg", "start": 25217837, "end": 26884392}, {"filename": "/textures/Bricks059_1K-JPG/Bricks059_1K_Roughness.jpg", "start": 26884392, "end": 27564485}, {"filename": "/textures/BulletHole/BulletHole.png", "start": 27564485, "end": 27596689}, {"filename": "/textures/BulletTracer.png", "start": 27596689, "end": 27630456}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_AlbedoTransparency.png", "start": 27630456, "end": 27714672}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_MetallicSmoothness.png", "start": 27714672, "end": 27722812}, {"filename": "/textures/CardboardBox/CardboardBox_LP_lambert1_Normal.png", "start": 27722812, "end": 27754180}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Color.jpg", "start": 27754180, "end": 28821653}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Displacement.jpg", "start": 28821653, "end": 29448074}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Normal.jpg", "start": 29448074, "end": 30617614}, {"filename": "/textures/Concrete036_1K-JPG/Concrete036_1K_Roughness.jpg", "start": 30617614, "end": 31250871}, {"filename": "/textures/Dust2/de_dust2_material_0.png", "start": 31250871, "end": 31254836}, {"filename": "/textures/Dust2/de_dust2_material_1.png", "start": 31254836, "end": 31285655}, {"filename": "/textures/Dust2/de_dust2_material_10.png", "start": 31285655, "end": 31334004}, {"filename": "/textures/Dust2/de_dust2_material_11.png", "start": 31334004, "end": 31363719}, {"filename": "/textures/Dust2/de_dust2_material_12.png", "start": 31363719, "end": 31380766}, {"filename": "/textures/Dust2/de_dust2_material_13.png", "start": 31380766, "end": 31400123}, {"filename": "/textures/Dust2/de_dust2_material_14.png", "start": 31400123, "end": 31418544}, {"filename": "/textures/Dust2/de_dust2_material_15.png", "start": 31418544, "end": 31460419}, {"filename": "/textures/Dust2/de_dust2_material_16.png", "start": 31460419, "end": 31490239}, {"filename": "/textures/Dust2/de_dust2_material_17.png", "start": 31490239, "end": 31507048}, {"filename": "/textures/Dust2/de_dust2_material_18.png", "start": 31507048, "end": 31507144}, {"filename": "/textures/Dust2/de_dust2_material_19.png", "start": 31507144, "end": 31513934}, {"filename": "/textures/Dust2/de_dust2_material_2.png", "start": 31513934, "end": 31518960}, {"filename": "/textures/Dust2/de_dust2_material_20.png", "start": 31518960, "end": 31523791}, {"filename": "/textures/Dust2/de_dust2_material_21.png", "start": 31523791, "end": 31528554}, {"filename": "/textures/Dust2/de_dust2_material_22.png", "start": 31528554, "end": 31545553}, {"filename": "/textures/Dust2/de_dust2_material_23.png", "start": 31545553, "end": 31573072}, {"filename": "/textures/Dust2/de_dust2_material_24.png", "start": 31573072, "end": 31576562}, {"filename": "/textures/Dust2/de_dust2_material_25.png", "start": 31576562, "end": 31635097}, {"filename": "/textures/Dust2/de_dust2_material_26.png", "start": 31635097, "end": 31660101}, {"filename": "/textures/Dust2/de_dust2_material_27.png", "start": 31660101, "end": 31689699}, {"filename": "/textures/Dust2/de_dust2_material_28.png", "start": 31689699, "end": 31715032}, {"filename": "/textures/Dust2/de_dust2_material_29.png", "start": 31715032, "end": 31740259}, {"filename": "/textures/Dust2/de_dust2_material_3.png", "start": 31740259, "end": 31740362}, {"filename": "/textures/Dust2/de_dust2_material_30.png", "start": 31740362, "end": 31767440}, {"filename": "/textures/Dust2/de_dust2_material_31.png", "start": 31767440, "end": 31772134}, {"filename": "/textures/Dust2/de_dust2_material_32.png", "start": 31772134, "end": 31775156}, {"filename": "/textures/Dust2/de_dust2_material_33.png", "start": 31775156, "end": 31775951}, {"filename": "/textures/Dust2/de_dust2_material_4.png", "start": 31775951, "end": 31805805}, {"filename": "/textures/Dust2/de_dust2_material_5.png", "start": 31805805, "end": 31869758}, {"filename": "/textures/Dust2/de_dust2_material_6.png", "start": 31869758, "end": 31886688}, {"filename": "/textures/Dust2/de_dust2_material_7.png", "start": 31886688, "end": 31915561}, {"filename": "/textures/Dust2/de_dust2_material_8.png", "start": 31915561, "end": 31968871}, {"filename": "/textures/Dust2/de_dust2_material_9.png", "start": 31968871, "end": 31973886}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Color.jpg", "start": 31973886, "end": 33044317}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Displacement.jpg", "start": 33044317, "end": 33667061}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Normal.jpg", "start": 33667061, "end": 36016207}, {"filename": "/textures/Fabric032_1K-JPG/Fabric032_1K_Roughness.jpg", "start": 36016207, "end": 36836966}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Color.jpg", "start": 36836966, "end": 38170397}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Displacement.jpg", "start": 38170397, "end": 38467233}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Emission.jpg", "start": 38467233, "end": 39798216}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Normal.jpg", "start": 39798216, "end": 41494577}, {"filename": "/textures/Lava004_1K-JPG/Lava004_1K_Roughness.jpg", "start": 41494577, "end": 42065439}, {"filename": "/textures/Lava004_1K-JPG/LavaGrayscale.jpg", "start": 42065439, "end": 42648301}, {"filename": "/textures/Lava004_1K-JPG/Water.jpg", "start": 42648301, "end": 44084201}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Color.jpg", "start": 44084201, "end": 44350459}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Displacement.jpg", "start": 44350459, "end": 44611066}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Normal.jpg", "start": 44611066, "end": 45206423}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Opacity.jpg", "start": 45206423, "end": 45524901}, {"filename": "/textures/Leaking003_1K-JPG/Leaking003_1K_Roughness.jpg", "start": 45524901, "end": 45824322}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Color.jpg", "start": 45824322, "end": 46917306}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Displacement.jpg", "start": 46917306, "end": 47707866}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Normal.jpg", "start": 47707866, "end": 48047715}, {"filename": "/textures/Marble012_1K-JPG/Marble012_1K_Roughness.jpg", "start": 48047715, "end": 48627815}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Color.jpg", "start": 48627815, "end": 49334684}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Displacement.jpg", "start": 49334684, "end": 49763898}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Metalness.jpg", "start": 49763898, "end": 49893902}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Normal.jpg", "start": 49893902, "end": 50959444}, {"filename": "/textures/Metal038_1K-JPG/Metal038_1K_Roughness.jpg", "start": 50959444, "end": 51331721}, {"filename": "/textures/Metal038_1K-JPG/MetalGreen.jpg", "start": 51331721, "end": 52072626}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Color.jpg", "start": 52072626, "end": 52446785}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Displacement.jpg", "start": 52446785, "end": 52583977}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Metalness.jpg", "start": 52583977, "end": 52755171}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Normal.jpg", "start": 52755171, "end": 53463098}, {"filename": "/textures/MetalPlates007_1K-JPG/MetalPlates007_1K_Roughness.jpg", "start": 53463098, "end": 53869991}, {"filename": "/textures/Mountains.png", "start": 53869991, "end": 53946809}, {"filename": "/textures/MuzzleFlash/muzzle1.png", "start": 53946809, "end": 53972581}, {"filename": "/textures/MuzzleFlash/muzzle2.png", "start": 53972581, "end": 53993949}, {"filename": "/textures/MuzzleFlash/muzzle3.png", "start": 53993949, "end": 54014398}, {"filename": "/textures/MuzzleFlash/muzzle4.png", "start": 54014398, "end": 54037699}, {"filename": "/textures/MuzzleFlash/muzzle5.png", "start": 54037699, "end": 54061895}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_AmbientOcclusion.jpg", "start": 54061895, "end": 54662024}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Color.jpg", "start": 54662024, "end": 56189485}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Displacement.jpg", "start": 56189485, "end": 56486282}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Normal.jpg", "start": 56486282, "end": 58778666}, {"filename": "/textures/Rock029_1K-JPG/Rock029_1K_Roughness.jpg", "start": 58778666, "end": 59443722}, {"filename": "/textures/Skydome.png", "start": 59443722, "end": 60903505}, {"filename": "/textures/SolomonFace.jpg", "start": 60903505, "end": 61911317}, {"filename": "/textures/SupplyBinCover.png", "start": 61911317, "end": 61917407}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_AO.png", "start": 61917407, "end": 61943899}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_BaseColor.png", "start": 61943899, "end": 62727919}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_Normal.png", "start": 62727919, "end": 63398478}, {"filename": "/textures/WetFloor/wet_floor_sign_1001_Roughness.png", "start": 63398478, "end": 63666909}, {"filename": "/textures/Wood026_1K-JPG/Wood026_1K_Color.jpg", "start": 63666909, "end": 64652544}, {"filename": "/textures/Wood026_1K-JPG/Wood026_1K_Normal.jpg", "start": 64652544, "end": 65887812}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_AmbientOcclusion.jpg", "start": 65887812, "end": 66267533}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Color.jpg", "start": 66267533, "end": 67067614}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Displacement.jpg", "start": 67067614, "end": 67584509}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Normal.jpg", "start": 67584509, "end": 68608998}, {"filename": "/textures/WoodFloor040_1K-JPG/WoodFloor040_1K_Roughness.jpg", "start": 68608998, "end": 68983020}, {"filename": "/textures/WoodenCrate/Wood_Crate_001_basecolor.jpg", "start": 68983020, "end": 69022831}, {"filename": "/textures/WoodenCrate/Wood_Crate_001_normal.jpg", "start": 69022831, "end": 69283088}, {"filename": "/textures/sam_texture.jpg", "start": 69283088, "end": 70247862}, {"filename": "/textures/uvmap.jpg", "start": 70247862, "end": 71229214}], "remote_package_size": 71229214});
 
   })();

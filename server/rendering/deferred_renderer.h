@@ -53,7 +53,7 @@ struct RenderFrameParameters {
     enum class Projection { ORTHOGRAPHIC, PERSPECTIVE } projection = Projection::PERSPECTIVE;
 
     // For PERSPECTIVE
-    float FOV = glm::radians(55.0f);
+    float FOV = glm::radians(60.0f);
 
     // For ORTHOGRAPHIC
     float orthoSize = 10.0f;

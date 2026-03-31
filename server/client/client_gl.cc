@@ -313,7 +313,7 @@ void ClientGL::Draw(int width, int height) {
     viewMat = glm::lookAt(cameraPosition,
         cameraPosition + cameraRotation, Vector::Up);
 
-    float FOV = glm::radians(55.0f);
+    float FOV = glm::radians(60.0f);
     float viewNear = 0.2f;
     float viewFar = 300.f;
     float aspectRatio = (float) width / (float) height;
@@ -328,7 +328,7 @@ void ClientGL::Draw(int width, int height) {
     params.viewDir = cameraRotation;
     params.ambientFactor = 0.5f;
     params.enableLighting = true;
-    // params.enableShadows = true;
+    params.enableShadows = true;
     params.enableToneMapping = true;
     // params.enableBloom = true;
     // params.bloomThreshold = 2.5f;

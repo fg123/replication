@@ -19,6 +19,7 @@ module.exports = class ClientState {
         this.localPlayerObject = undefined;
         this.game = undefined;
 
+        console.log(this.wasm);
         this.wasmVector3Location = this.wasm._malloc(3 * 4);
 
         this.isPaused = true;
